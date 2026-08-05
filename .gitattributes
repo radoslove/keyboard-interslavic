@@ -1,0 +1,12 @@
+# ⚠ MANDATORY GUARD — .klc files are UTF-16LE + CRLF.
+# Git's text handling rewrites them to UTF-8/LF, after which MSKLC silently refuses
+# to open the file. `-text` disables all conversion.
+#
+# Verify after any clone:  file -b windows/src/KBDMSSTD.klc
+#   must still say: "Unicode text, UTF-16, little-endian"
+*.klc -text
+*.exe binary
+*.dll binary
+
+# AutoHotkey scripts are UTF-8 with BOM; keep the BOM intact.
+*.ahk -text

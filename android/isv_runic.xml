@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Medžuslovjansky — runy (Unexpected Keyboard)
+  Odpowiednik układu Windows runy_5.klc; mapowanie wg docs/runic-table.md.
+
+  Pozycje klawiszy = QWERTY, tak jak w runy_5.
+  Warstwa Shift z Windows = swipe w prawy górny róg (ne).
+
+  ⚠ Klawisz `c` ma na se runę ᚳ (č) — Windows runy_5 NIE MA sposobu na wpisanie č.
+     Android zapełnia tę lukę; patrz docs/runic-table.md „Otwarte kwestie" pkt 1.
+  ⚠ `dž` celowo pominięte — źródła są sprzeczne, nierozstrzygnięte.
+-->
+<keyboard name="Medžuslovjansky (runy)" script="latin">
+  <row>
+    <key key0="ᛩ" nw="1"/>
+    <key key0="ᚡ" nw="2"/>
+    <key key0="ᛖ" ne="ᛠ" nw="3"/>
+    <key key0="ᚱ" nw="4"/>
+    <key key0="ᛏ" nw="5"/>
+    <key key0="ᛇ" nw="6"/>
+    <key key0="ᚢ" nw="7"/>
+    <key key0="ᛁ" nw="8"/>
+    <key key0="ᛟ" nw="9"/>
+    <key key0="ᛈ" nw="0"/>
+  </row>
+  <row>
+    <key key0="ᚨ" nw="loc tab"/>
+    <key key0="ᛋ" ne="ᛯ"/>
+    <key key0="ᛜ"/>
+    <key key0="ᚠ"/>
+    <key key0="ᚷ"/>
+    <key key0="ᚻ"/>
+    <key key0="ᛃ"/>
+    <key key0="ᚲ"/>
+    <key key0="ᛚ" ne="᛬"/>
+  </row>
+  <row>
+    <key width="1.5" role="action" key0="shift" ne="loc capslock"/>
+    <key key0="ᛉ" ne="ᛡ"/>
+    <key key0="x"/>
+    <key key0="ᛣ" se="ᚳ"/>
+    <key key0="ᚹ"/>
+    <key key0="ᛓ"/>
+    <key key0="ᚾ" ne="ᛝ"/>
+    <key key0="ᛗ"/>
+    <key width="1.5" key0="backspace" ne="delete_word"/>
+  </row>
+  <row>
+    <key key0="᛫" nw="."/>
+    <key key0="᛭"/>
+    <key width="4.0" key0="space"/>
+    <key key0="," />
+    <key key0="?" nw="!"/>
+  </row>
+</keyboard>

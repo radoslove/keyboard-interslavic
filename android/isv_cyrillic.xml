@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Меджусловјанскы (кирилица) — Unexpected Keyboard
+  Odpowiednik oficjalnego układu Windows KBDMSKIR (© 2012 Roberto Lombino jr.).
+
+  Warstwa AltGr z Windows = swipe w prawy górny róg (ne).
+  Cyfry = swipe w lewy górny róg (nw) w górnym rzędzie.
+-->
+<keyboard name="Меджусловјанскы (кирилица)" script="cyrillic">
+  <row>
+    <key key0="ч" ne="ъ" nw="1"/>
+    <key key0="ш" ne="э" nw="2"/>
+    <key key0="е" ne="ѣ" nw="3"/>
+    <key key0="р" nw="4"/>
+    <key key0="т" ne="ћ" nw="5"/>
+    <key key0="ы" ne="ў" nw="6"/>
+    <key key0="у" ne="ю" nw="7"/>
+    <key key0="и" ne="і" nw="8"/>
+    <key key0="о" ne="ё" nw="9"/>
+    <key key0="п" nw="0"/>
+    <key key0="њ" ne="љ"/>
+  </row>
+  <row>
+    <key key0="а" ne="я" nw="loc tab"/>
+    <key key0="с" ne="џ"/>
+    <key key0="д" ne="ђ"/>
+    <key key0="ф" ne="ґ"/>
+    <key key0="г" ne="ѓ"/>
+    <key key0="х"/>
+    <key key0="ј" ne="й"/>
+    <key key0="к" ne="ќ"/>
+    <key key0="л"/>
+    <key key0="є" ne="ь"/>
+  </row>
+  <row>
+    <key width="1.5" role="action" key0="shift" ne="loc capslock"/>
+    <key key0="з" ne="ѕ"/>
+    <key key0="ж"/>
+    <key key0="ц"/>
+    <key key0="в"/>
+    <key key0="б"/>
+    <key key0="н"/>
+    <key key0="м"/>
+    <key width="1.5" key0="backspace" ne="delete_word"/>
+  </row>
+</keyboard>

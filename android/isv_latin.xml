@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Medžuslovjansky (latinica) — Unexpected Keyboard
+
+  Wersja STANDARDOWA: tylko cztery diakrytyki alfabetu standardowego (č š ž ě)
+  plus dwuznaki (dž lj nj). Bez alfabetu etymologicznego — te znaki są
+  w układzie Windows (KBDMSLAT) pod AltGr, tutaj celowo pominięte,
+  żeby klawiatura była czysta.
+
+  Diakrytyk = swipe w prawy górny róg (ne).
+  Dwuznak   = swipe w prawy dolny róg (se).
+  Cyfry     = swipe w lewy górny róg (nw) w górnym rzędzie.
+-->
+<keyboard name="Medžuslovjansky" script="latin">
+  <row>
+    <key key0="q" nw="1"/>
+    <key key0="w" nw="2"/>
+    <key key0="e" ne="ě" nw="3"/>
+    <key key0="r" nw="4"/>
+    <key key0="t" nw="5"/>
+    <key key0="y" nw="6"/>
+    <key key0="u" nw="7"/>
+    <key key0="i" nw="8"/>
+    <key key0="o" nw="9"/>
+    <key key0="p" nw="0"/>
+  </row>
+  <row>
+    <key key0="a" nw="loc tab"/>
+    <key key0="s" ne="š"/>
+    <key key0="d" se="dž"/>
+    <key key0="f"/>
+    <key key0="g"/>
+    <key key0="h"/>
+    <key key0="j"/>
+    <key key0="k"/>
+    <key key0="l" se="lj"/>
+  </row>
+  <row>
+    <key width="1.5" role="action" key0="shift" ne="loc capslock"/>
+    <key key0="z" ne="ž"/>
+    <key key0="x"/>
+    <key key0="c" ne="č"/>
+    <key key0="v"/>
+    <key key0="b"/>
+    <key key0="n" se="nj"/>
+    <key key0="m"/>
+    <key width="1.5" key0="backspace" ne="delete_word"/>
+  </row>
+</keyboard>
