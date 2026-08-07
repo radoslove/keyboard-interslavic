@@ -1,25 +1,57 @@
-# Linux
+# Linux (XKB)
 
-Nie ma tu kopii — upstream `medzuslovjansky/keyboards` ma Linuksa **zrobionego i wydanego**,
-jako jedyną platformę. Nie ma sensu tego duplikować.
+This repo ships its **own standard-orthography** Interslavic XKB layout — the
+`isv` symbols file in this folder. Base + Shift are plain US QWERTY (no dead
+keys); **AltGr (Right Alt)** gives `č š ž ě` on C/S/Z/E, plus the punctuation
+`„ " ’ ” – —`. Standard orthography only — no extended/etymological letters —
+matching the Windows, Android and macOS layouts in this repo.
 
-## Skąd wziąć
+## Install — system-wide (needs root)
 
-Release **v0.0.1** (2026-04-21): https://github.com/medzuslovjansky/keyboards/releases
+1. Copy the layout into XKB:
+   ```sh
+   sudo cp isv /usr/share/X11/xkb/symbols/isv
+   ```
+2. Register it so it appears in Settings — add this inside `<layoutList>` in
+   `/usr/share/X11/xkb/rules/evdev.xml`:
+   ```xml
+   <layout>
+     <configItem>
+       <name>isv</name>
+       <shortDescription>isv</shortDescription>
+       <description>Interslavic (standard)</description>
+       <languageList><iso639Id>isv</iso639Id></languageList>
+     </configItem>
+   </layout>
+   ```
+3. Select **“Interslavic (standard)”** in your desktop keyboard settings, or on
+   X11 apply it directly:
+   ```sh
+   setxkbmap isv
+   ```
 
-| Paczka | Dystrybucje |
-|---|---|
-| `isv-keyboard_0.0.1-1_all.deb` | Debian / Ubuntu |
-| `isv-keyboard-0.0.1-1.fc42.noarch.rpm` | Fedora |
+## Install — user-level (no root, X11)
 
-Paczka `.deb` ma podpis `.asc`; klucz publiczny leży w upstreamie w `linux/keys/public.gpg`.
+```sh
+mkdir -p ~/.xkb/symbols
+cp isv ~/.xkb/symbols/isv
+setxkbmap -I"$HOME/.xkb" isv -print | xkbcomp -I"$HOME/.xkb" - "$DISPLAY"
+```
 
-## Co zawiera
+## Quick test
 
-Rozszerzoną łacinkę MS jako layout XKB (`isv`), zgodną z międzynarodowymi układami
-łacińskimi. Instaluje się przez `debian/postinst`, który łata `evdev.xml`.
+Apply with `setxkbmap isv`, then **AltGr+C** → `č`, **AltGr+S** → `š`,
+**AltGr+Z** → `ž`, **AltGr+E** → `ě`. (AltGr = **Right Alt**.)
 
-## Runy
+## The upstream package (alternative)
 
-Upstream nie ma run — na Linuksa nie ma ich jeszcze nigdzie. Do zrobienia z
-`docs/runic-table.md` jako źródła, jeśli kiedyś będzie potrzeba.
+Upstream `medzuslovjansky/keyboards` also ships a Linux `isv` layout
+(release v0.0.1, `.deb` + `.rpm`) — but it uses the **extended** Latin
+orthography. The layout here is the **standard-only** counterpart, consistent
+with the other platforms in this repo. Both use the id `isv`, so use one or the
+other (a user-level install overrides a system one).
+
+## Runes
+
+No runic Linux layout yet — it can be generated from `docs/runic-table.md` if a
+need comes up.

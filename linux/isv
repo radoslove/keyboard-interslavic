@@ -1,0 +1,31 @@
+// Interslavic (medžuslovjansky) — standard-orthography Latin layout for XKB.
+//
+// Base + Shift = plain US QWERTY, no dead keys. The AltGr level (Right Alt)
+// carries the four letters a US/Polish keyboard cannot type, mnemonically
+// AltGr+C/S/Z/E -> č š ž ě, plus the punctuation our MS texts use.
+//
+// Standard orthography ONLY: the extended/etymological letters
+// (ų ė ę ȯ å ŕ ť ď ć đ ľ ń ś ź) are deliberately NOT here — matching the
+// Windows (KBDMSSTD), Android and macOS layouts in this repo.
+//
+// Install: see linux/README.md.  AltGr = Right Alt.
+
+default partial alphanumeric_keys
+xkb_symbols "basic" {
+    include "us(basic)"
+    name[Group1] = "Interslavic (standard)";
+
+    // --- the four standard diacritic letters, on AltGr ---
+    key <AD03> { [          e,          E,     ecaron,     Ecaron ] };  // E -> ě
+    key <AC02> { [          s,          S,     scaron,     Scaron ] };  // S -> š
+    key <AB01> { [          z,          Z,     zcaron,     Zcaron ] };  // Z -> ž
+    key <AB03> { [          c,          C,     ccaron,     Ccaron ] };  // C -> č
+
+    // --- punctuation used in MS texts, on AltGr ---
+    key <AC10> { [  semicolon,      colon, doublelowquotemark,  leftdoublequotemark ] };  // ; -> „ "
+    key <AC11> { [ apostrophe,   quotedbl, rightsinglequotemark, rightdoublequotemark ] };  // ' -> ’ ”
+    key <AE11> { [      minus, underscore,            endash,               emdash ] };  // - -> – —
+
+    // Right Alt acts as AltGr (level-3 shift)
+    include "level3(ralt_switch)"
+};
