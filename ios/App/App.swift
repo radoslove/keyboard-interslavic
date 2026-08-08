@@ -11,9 +11,22 @@ struct InterslavicKeyboardApp: App {
 }
 
 struct SetupView: View {
+    @State private var sample = ""
+    @FocusState private var typing: Bool
+
     var body: some View {
         NavigationStack {
             List {
+                // Test box. The same trick Keyman uses: it separates "the
+                // keyboard is broken" from "the keyboard is not switched on",
+                // which are indistinguishable from the outside.
+                Section("Proba · Try it here") {
+                    TextField("piši tu…", text: $sample, axis: .vertical)
+                        .focused($typing)
+                        .lineLimit(2...4)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                }
                 Section("Vklučenje · Turn it on") {
                     Step(1, "Nastrojenja → Osnovne → Tipkovnica → Tipkovnici",
                          "Settings → General → Keyboard → Keyboards")

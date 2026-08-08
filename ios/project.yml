@@ -28,6 +28,12 @@ targets:
     type: application
     platform: iOS
     sources: [App]
+    settings:
+      base:
+        # iOS requires the extension's id to be a CHILD of the app's id, not a
+        # sibling. XcodeGen's bundleIdPrefix alone produces siblings and the
+        # link step rejects it, so both ids are stated explicitly.
+        PRODUCT_BUNDLE_IDENTIFIER: com.radoslove.interslavic
     info:
       path: App/Info.plist
       properties:
@@ -44,6 +50,9 @@ targets:
     type: app-extension
     platform: iOS
     sources: [Keyboard]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.radoslove.interslavic.keyboard
     info:
       path: Keyboard/Info.plist
       properties:
