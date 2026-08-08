@@ -34,7 +34,7 @@ final class KeyboardViewController: UIInputViewController {
         letterButtons.removeAll()
 
         let rows = showingNumeric ? Layout.numericRows : Layout.letterRows
-        var rowViews: [UIView] = rows.map { characterRow($0) }
+        var rowViews: [UIView] = rows.enumerated().map { characterRow($1, row: $0) }
         rowViews.append(bottomRow())
 
         let stack = UIStackView(arrangedSubviews: rowViews)
@@ -55,7 +55,7 @@ final class KeyboardViewController: UIInputViewController {
         ])
     }
 
-    private func characterRow(_ chars: [Character]) -> UIView {
+    private func characterRow(_ chars: [Character], row: Int) -> UIView {
         let stack = UIStackView()
         stack.axis = .horizontal
         stack.distribution = .fillEqually
@@ -68,11 +68,14 @@ final class KeyboardViewController: UIInputViewController {
         }
         for ch in chars {
             let b = characterKey(ch)
-            letterButtons.append(b)
+            b.tag = row                      // which row a key sits in decides
+            letterButtons.append(b)          // where its popup can go
             stack.addArrangedSubview(b)
         }
         if isLastLetterRow {
-            stack.addArrangedSubview(characterKey("."))
+            let period = characterKey(".")
+            period.tag = row
+            stack.addArrangedSubview(period)
             stack.addArrangedSubview(functionKey("⌫", action: #selector(tapBackspace)))
         }
         return stack
@@ -241,18 +244,25 @@ final class KeyboardViewController: UIInputViewController {
         // letters up there) would be pushed off the top and simply never
         // appear. When there is no room above, drop it below the key instead:
         // still visible, and still not hidden under the finger.
-        let keyFrame = key.convert(key.bounds, to: view)
-        let popupHeight = key.bounds.height * 1.2 + 4
-        let fitsAbove = keyFrame.minY - popupHeight >= 0
+        // Only the TOP row genuinely has nowhere to go. Measuring this in
+        // points was a mistake: row 2 missed the threshold by a fraction and
+        // dropped below too. The row index is exact and cannot drift.
+        let fitsAbove = key.tag > 0
 
         var constraints = [
             label.centerXAnchor.constraint(equalTo: key.centerXAnchor),
             label.widthAnchor.constraint(greaterThanOrEqualTo: key.widthAnchor),
-            label.heightAnchor.constraint(equalTo: key.heightAnchor, multiplier: 1.2),
+            label.heightAnchor.constraint(equalTo: key.heightAnchor, multiplier: 1.15),
         ]
         constraints.append(fitsAbove
             ? label.bottomAnchor.constraint(equalTo: key.topAnchor, constant: -2)
             : label.topAnchor.constraint(equalTo: key.bottomAnchor, constant: 2))
+        if fitsAbove {
+            // Never let it escape the top edge; it would be clipped away.
+            constraints.append(
+                label.topAnchor.constraint(greaterThanOrEqualTo: view.topAnchor,
+                                           constant: 1))
+        }
         NSLayoutConstraint.activate(constraints)
 
         // Keep it on top of the keys it overlaps.
