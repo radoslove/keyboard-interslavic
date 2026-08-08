@@ -18,6 +18,9 @@ final class KeyboardViewController: UIInputViewController {
     private var rowsStack: UIStackView!
     private var letterButtons: [UIButton] = []
     private var popup: UIView?
+    private var popupStrip: UIStackView?
+    private var variantLabels: [UILabel] = []
+    private var selected = 0
 
     // MARK: - Lifecycle
 
@@ -177,13 +180,21 @@ final class KeyboardViewController: UIInputViewController {
         switch g.state {
         case .began:
             showPopup(over: key, variants: variants)
-        case .ended, .cancelled:
-            // Single-variant keys (the four letters) commit on release; the
-            // multi-variant punctuation popup needs a real picker, which is
-            // the next thing to build here.
-            if variants.count == 1 { insert(variants[0]) }
+            selected = 0
+            highlightSelection()
+        case .changed:
+            // Slide the finger along the popup to choose. Anything above or
+            // below the strip still tracks horizontally, so the gesture does
+            // not need to be precise vertically.
+            let x = g.location(in: popupStrip ?? view).x
+            selected = indexOfVariant(atX: x, count: variants.count)
+            highlightSelection()
+        case .ended:
+            if variants.indices.contains(selected) { insert(variants[selected]) }
             dismissPopup()
             if shift == .on { shift = .off; refreshTitles() }
+        case .cancelled, .failed:
+            dismissPopup()
         default:
             break
         }
@@ -224,54 +235,89 @@ final class KeyboardViewController: UIInputViewController {
 
     private func showPopup(over key: UIButton, variants: [Character]) {
         dismissPopup()
-        let label = UILabel()
-        label.text = variants.map(String.init).joined(separator: " ")
-        label.font = .systemFont(ofSize: 26)
-        label.textAlignment = .center
-        label.textColor = .label
-        label.backgroundColor = .systemBackground
-        label.layer.cornerRadius = 6
-        label.layer.masksToBounds = true
-        label.layer.borderWidth = 1
-        label.layer.borderColor = UIColor.separator.cgColor
-        label.translatesAutoresizingMaskIntoConstraints = false
 
-        view.addSubview(label)
+        // One label per variant so a finger slide can pick between them.
+        let strip = UIStackView()
+        strip.axis = .horizontal
+        strip.distribution = .fillEqually
+        strip.spacing = 0
+        strip.backgroundColor = .systemBackground
+        strip.layer.cornerRadius = 6
+        strip.layer.borderWidth = 1
+        strip.layer.borderColor = UIColor.separator.cgColor
+        strip.layer.masksToBounds = true
+        strip.translatesAutoresizingMaskIntoConstraints = false
+
+        variantLabels = variants.map { ch in
+            let l = UILabel()
+            l.text = String(ch)
+            l.font = .systemFont(ofSize: 24)
+            l.textAlignment = .center
+            l.textColor = .label
+            strip.addArrangedSubview(l)
+            return l
+        }
+
+        view.addSubview(strip)
 
         // A keyboard extension is clipped to its own frame - it cannot draw
-        // over the app above it the way the system keyboard does. So the popup
-        // for a TOP ROW key (which is where `e` lives, the only one of the four
-        // letters up there) would be pushed off the top and simply never
-        // appear. When there is no room above, drop it below the key instead:
-        // still visible, and still not hidden under the finger.
-        // Only the TOP row genuinely has nowhere to go. Measuring this in
-        // points was a mistake: row 2 missed the threshold by a fraction and
+        // over the app above it the way the system keyboard does. So a popup
+        // pinned above a TOP ROW key would be laid out off-screen and simply
+        // never appear. Only row 0 has nowhere to go; measuring this in points
+        // was a mistake, because row 1 missed the threshold by a fraction and
         // dropped below too. The row index is exact and cannot drift.
         let fitsAbove = key.tag > 0
 
         var constraints = [
-            label.centerXAnchor.constraint(equalTo: key.centerXAnchor),
-            label.widthAnchor.constraint(greaterThanOrEqualTo: key.widthAnchor),
-            label.heightAnchor.constraint(equalTo: key.heightAnchor, multiplier: 1.15),
+            strip.centerXAnchor.constraint(equalTo: key.centerXAnchor),
+            strip.heightAnchor.constraint(equalTo: key.heightAnchor, multiplier: 1.15),
+            strip.widthAnchor.constraint(greaterThanOrEqualTo: key.widthAnchor),
+            strip.widthAnchor.constraint(
+                equalToConstant: max(CGFloat(variants.count) * 40, 44)),
+            strip.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
+                                           constant: 2),
+            strip.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor,
+                                            constant: -2),
         ]
         constraints.append(fitsAbove
-            ? label.bottomAnchor.constraint(equalTo: key.topAnchor, constant: -2)
-            : label.topAnchor.constraint(equalTo: key.bottomAnchor, constant: 2))
+            ? strip.bottomAnchor.constraint(equalTo: key.topAnchor, constant: -2)
+            : strip.topAnchor.constraint(equalTo: key.bottomAnchor, constant: 2))
         if fitsAbove {
-            // Never let it escape the top edge; it would be clipped away.
             constraints.append(
-                label.topAnchor.constraint(greaterThanOrEqualTo: view.topAnchor,
+                strip.topAnchor.constraint(greaterThanOrEqualTo: view.topAnchor,
                                            constant: 1))
         }
+        // The width constraint is the one to give up if the strip would run off
+        // the edge; centring and the edge margins matter more.
+        constraints[3].priority = .defaultHigh
+        constraints[0].priority = .defaultHigh
         NSLayoutConstraint.activate(constraints)
 
-        // Keep it on top of the keys it overlaps.
-        view.bringSubviewToFront(label)
-        popup = label
+        view.bringSubviewToFront(strip)
+        view.layoutIfNeeded()
+        popupStrip = strip
+        popup = strip
+    }
+
+    private func indexOfVariant(atX x: CGFloat, count: Int) -> Int {
+        guard let strip = popupStrip, count > 0, strip.bounds.width > 0 else { return 0 }
+        let slot = strip.bounds.width / CGFloat(count)
+        return min(count - 1, max(0, Int(x / slot)))
+    }
+
+    private func highlightSelection() {
+        for (i, l) in variantLabels.enumerated() {
+            let on = (i == selected)
+            l.backgroundColor = on ? .systemBlue : .clear
+            l.textColor = on ? .white : .label
+        }
     }
 
     private func dismissPopup() {
         popup?.removeFromSuperview()
         popup = nil
+        popupStrip = nil
+        variantLabels = []
+        selected = 0
     }
 }
