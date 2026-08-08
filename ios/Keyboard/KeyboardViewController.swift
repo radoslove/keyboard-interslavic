@@ -234,12 +234,29 @@ final class KeyboardViewController: UIInputViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
 
         view.addSubview(label)
-        NSLayoutConstraint.activate([
+
+        // A keyboard extension is clipped to its own frame - it cannot draw
+        // over the app above it the way the system keyboard does. So the popup
+        // for a TOP ROW key (which is where `e` lives, the only one of the four
+        // letters up there) would be pushed off the top and simply never
+        // appear. When there is no room above, drop it below the key instead:
+        // still visible, and still not hidden under the finger.
+        let keyFrame = key.convert(key.bounds, to: view)
+        let popupHeight = key.bounds.height * 1.2 + 4
+        let fitsAbove = keyFrame.minY - popupHeight >= 0
+
+        var constraints = [
             label.centerXAnchor.constraint(equalTo: key.centerXAnchor),
-            label.bottomAnchor.constraint(equalTo: key.topAnchor, constant: -2),
             label.widthAnchor.constraint(greaterThanOrEqualTo: key.widthAnchor),
             label.heightAnchor.constraint(equalTo: key.heightAnchor, multiplier: 1.2),
-        ])
+        ]
+        constraints.append(fitsAbove
+            ? label.bottomAnchor.constraint(equalTo: key.topAnchor, constant: -2)
+            : label.topAnchor.constraint(equalTo: key.bottomAnchor, constant: 2))
+        NSLayoutConstraint.activate(constraints)
+
+        // Keep it on top of the keys it overlaps.
+        view.bringSubviewToFront(label)
         popup = label
     }
 
