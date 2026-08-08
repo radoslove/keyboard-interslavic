@@ -46,18 +46,16 @@ keyboard cannot produce:
 `dž` is deliberately **not** a dedicated key — it is `d` + AltGr+`Z`, two ordinary
 keystrokes, and a ligature key would add a failure mode for no gain.
 
-### Extended block — for reading and quoting, not for writing
+### Extended block — REMOVED 2026-08-05
 
-Retained in full so quoting dictionary lemmas and pre-2026-08-05 material stays
-possible. Per HOUSE_STYLE §1 these are **not** written in new text.
+⚠ **This block is no longer on any shipped layout.** It was drafted here for quoting
+dictionary lemmas, then cut on 2026-08-05 when the owner ruled that HOUSE_STYLE §1
+governs the keyboards too: if a letter is not written in new text, it does not get a
+key. Verified against the artefacts — `windows/src/KBDMSSTD.klc` contains exactly
+`Č č Ě ě Š š Ž ž – — ’ “ ” „` and nothing else.
 
-| Key | AltGr | | Key | AltGr | | Key | AltGr |
-|---|---|---|---|---|---|---|---|
-| `A` | å Å | | `I` | ė Ė | | `T` | ť Ť |
-| `Q` | ś Ś | | `O` | ȯ Ȯ | | `V` | ć Ć |
-| `W` | ę Ę | | `D` | ď Ď | | `X` | ź Ź |
-| `R` | ŕ Ŕ | | `F` | đ Đ | | `N` | ń Ń |
-| `U` | ų Ų | | `L` | ľ Ľ | | | |
+The cut letters were `å ś ę ŕ ų ė ȯ ď đ ľ ť ć ź ń`. They are recorded here as history
+only. To quote them, use a dictionary or the Cyrillic layout — not this keyboard.
 
 ### Punctuation
 
@@ -74,9 +72,7 @@ was dropped.
 
 | Cell | Gola | Ours | Why |
 |---|---|---|---|
-| `L` + AltGr | `ĺ` (U+013A, l-acute) | **`ľ` (U+013E, l-caron)** | Interslavic uses the caron; the acute is a different letter |
-| `T` + AltGr | — (absent) | **`ť`** | The extended block must be complete to quote it |
-| `D` + AltGr | — (absent) | **`ď`** | Ditto |
+| `L` + AltGr | `ĺ` (U+013A, l-acute) | *(dropped 2026-08-05)* | Interslavic uses the caron, not the acute — but the whole extended block was then cut |
 | `OEM_3` base | `` ` `` and `~` as **dead keys** | plain `` ` `` and `~` | A base-layer dead key is a defect, not a feature |
 | Number row AltGr | 8 dead diacritic keys | nothing | Composing diacritics is not how this alphabet is typed |
 | Locale | `sl-SI` (00000424) | **`pl-PL` (00000415)** | Appears under Polish, which is already in the language list — no phantom Slovenian |
@@ -89,9 +85,29 @@ Not blockers; flagged for `interslavic-tutor`.
    of defects. If the Cyrillic layout ever gets used, run this same comparison.
 2. **`ĺ` vs `ľ` upstream.** Worth reporting to `medzuslovjansky/keyboards` — if the
    upstream really means `ĺ`, our reading of the alphabet is what needs revisiting.
-3. **Android parity.** The Unexpected Keyboard XML built in the other session was not
-   diffed against this table. They should agree key-for-key; `/keyboard-layout` Step 0
-   applies whenever they are reconciled.
+3. ~~**Android parity.**~~ **RESOLVED 2026-08-08.** `android/isv_latin.xml` was diffed
+   against this table and agrees: `e→ě  s→š  z→ž  c→č`, same mnemonic, standard-only.
+   It additionally carries the digraphs `dž lj nj` on a swipe, which is a convenience,
+   not a conflict. The only gap is punctuation — Android has no `„ ” – —`.
+
+## Platform coverage
+
+Every shipped layout carries the same four letters. Only the *reach* differs, because
+each platform has a different spare modifier — and a phone has none at all.
+
+| Platform | Artefact | Reach |
+|---|---|---|
+| Windows | `windows/src/KBDMSSTD.klc` | AltGr + letter |
+| macOS | `mac/KBDMSSTD.keylayout` | Option + letter |
+| Android | `android/isv_latin.xml` | swipe up-right |
+| iOS / iPadOS | `keyman/isv_latin.kmp` | **longpress** |
+| Linux | upstream | — |
+
+⚠ The iOS package is the odd one out and it is worth knowing why: a touch layout may
+only use the modifier layers `shift/ctrl/alt/ctrlshift/altshift/ctrlalt/ctrlaltshift`.
+`rightalt` is **not** among them, so the longpress keys cannot re-use the AltGr rules.
+They are separate `T_*` keys with their own rules — and both sets are emitted from the
+one table in `build_keyman.py`, which is what keeps them from drifting apart.
 
 ## Build and install
 

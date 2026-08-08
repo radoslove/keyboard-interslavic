@@ -3,9 +3,9 @@
   Medžuslovjansky (latinica) — Unexpected Keyboard
 
   Wersja STANDARDOWA: tylko cztery diakrytyki alfabetu standardowego (č š ž ě)
-  plus dwuznaki (dž lj nj). Bez alfabetu etymologicznego — te znaki są
-  w układzie Windows (KBDMSLAT) pod AltGr, tutaj celowo pominięte,
-  żeby klawiatura była czysta.
+  plus dwuznaki (dž lj nj). Bez alfabetu etymologicznego (HOUSE_STYLE §1) —
+  zgodnie z układem Windows (KBDMSSTD), macOS (.keylayout) i pakietem Keyman,
+  które również wożą wyłącznie te cztery litery.
 
   Diakrytyk = swipe w prawy górny róg (ne).
   Dwuznak   = swipe w prawy dolny róg (se).

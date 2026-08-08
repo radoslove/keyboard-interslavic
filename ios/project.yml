@@ -1,0 +1,69 @@
+# XcodeGen spec. The .xcodeproj is GENERATED, never committed - a pbxproj is
+# unreadable in review and conflicts on every merge. Regenerate with:
+#
+#     cd ios && xcodegen generate
+#
+# Xcode is still required to BUILD; this only removes the need to hand-build
+# the project file.
+
+name: InterslavicKeyboard
+options:
+  bundleIdPrefix: com.radoslove.interslavic
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    MARKETING_VERSION: "0.1"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    # No team set on purpose: signing needs an Apple Developer account, which
+    # is a decision with a price tag attached. Set DEVELOPMENT_TEAM when there
+    # is one.
+    CODE_SIGN_STYLE: Automatic
+
+targets:
+  InterslavicKeyboard:
+    type: application
+    platform: iOS
+    sources: [App]
+    settings:
+      base:
+        # iOS requires the extension's id to be a CHILD of the app's id, not a
+        # sibling. XcodeGen's bundleIdPrefix alone produces siblings and the
+        # link step rejects it, so both ids are stated explicitly.
+        PRODUCT_BUNDLE_IDENTIFIER: com.radoslove.interslavic
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Medžuslovjansky
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+    dependencies:
+      - target: Keyboard
+
+  Keyboard:
+    type: app-extension
+    platform: iOS
+    sources: [Keyboard]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.radoslove.interslavic.keyboard
+    info:
+      path: Keyboard/Info.plist
+      properties:
+        CFBundleDisplayName: Medžuslovjansky
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController
+          NSExtensionAttributes:
+            # The whole point of building our own: this stays false. A keyboard
+            # without full access physically cannot phone home, which is the
+            # claim the Keyman route cannot make on iOS 16+.
+            RequestsOpenAccess: false
+            PrimaryLanguage: isv
+            IsASCIICapable: false

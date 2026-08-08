@@ -5,10 +5,11 @@
 dictionary for it.*
 
 Tu možeš daunlodovati i instalovati tipkovnice (klaviatury) za medžuslovjansky jezyk na
-Windows, Android i Linux. Slovnik za pisanje gestami ima **253 273 slov** — s formami, ne
-samo lematami.
-*Here you can download and install Interslavic keyboards for Windows, Android and Linux.
-The swipe-typing dictionary carries **253 273 words** — inflected forms, not just lemmas.*
+Windows, Android, iPhone/iPad, macOS i Linux. Slovnik za pisanje gestami imaje
+**253 273 slov** — s formami, ne samo lematami.
+*Here you can download and install Interslavic keyboards for Windows, Android,
+iPhone/iPad, macOS and Linux. The swipe-typing dictionary carries **253 273 words** —
+inflected forms, not just lemmas.*
 
 Nikto togo dosej ne napravil.
 *Nobody had built this before.*
@@ -22,7 +23,7 @@ telefona.** Vzimaješ, instaluješ, pišeš.
 *These are files to download — **no registration, no account, no e-mail, no phone
 number.** You take them, install them, and type.*
 
-Pytanja i grěški → **GitHub Issues.** To jest jediny kanal podpory.
+Pytanja i grěšky → **GitHub Issues.** To jest jediny kanal podpory.
 *Questions and bugs → **GitHub Issues.** That is the only support channel.*
 
 ---
@@ -51,7 +52,7 @@ Prěklučanje ukladjev: **Win + Space.**
 Specifične litery medžuslovjanskogo jezyka sut pod **AltGr**:
 *The letters specific to Interslavic sit under **AltGr**:*
 
-| AltGr + | daje / gives |
+| AltGr + | Rezultat / gives |
 |---|---|
 | `c` | **č** |
 | `s` | **š** |
@@ -61,11 +62,12 @@ Specifične litery medžuslovjanskogo jezyka sut pod **AltGr**:
 Digrafy `dž`, `lj`, `nj` pišeš kako dva klavišy (`d`+`ž` …).
 *Digraphs `dž`, `lj`, `nj` are typed as two keys (`d`+`ž` …).*
 
-> Latinica ukladj ima i širši nabor historičnyh znakov pod AltGr; polna karta znakov jest
-> v `docs/` (`ms-latin-table.md`). Za standardno pisanje dostajut četyri litery vyše.
-> *The Latin layout also carries a wider set of historic characters under AltGr; the full
-> character map is in `docs/` (`ms-latin-table.md`). For standard writing, the four letters
-> above are enough.*
+> Ukladj imaje **samo** standardnu ortografiju — četyri litery vyše plus interpunkciju
+> (`„ ” – —`). Litery razšireneho alfabeta ne sut na tipkovnici. Polna karta znakov:
+> `docs/ms-latin-table.md`.
+> *The layout carries **only** standard orthography — the four letters above plus
+> punctuation (`„ ” – —`). The extended alphabet is not on the keyboard. Full character
+> map: `docs/ms-latin-table.md`.*
 
 ---
 
@@ -99,11 +101,68 @@ digits are a swipe to the top-left (`nw`).*
 
 ### 2. Pisanje gestami — HeliBoard + slovnik
 
-Unexpected Keyboard ne ima pisanja gestami. Za to služi
+Unexpected Keyboard ne imaje pisanja gestami. Za to služi
 **[HeliBoard](https://github.com/Helium314/HeliBoard)** so našim slovnikom `.dict` — gl.
 sekciju **Slovnik** niže.
 *Unexpected Keyboard has no swipe typing. For that, use **HeliBoard** with our `.dict`
 dictionary — see the **Dictionary** section below.*
+
+---
+
+## iPhone i iPad
+
+iOS ne dopušča fajlov ukladja — tam tipkovnica jest cěla aplikacija. Zato idemo črěz
+**[Keyman](https://keyman.com/iphone-and-ipad/)** — bezplatna aplikacija iz App Store,
+ktora čita naše pakety.
+*iOS has no layout-file format — a keyboard there is a whole app. So we ship a package
+for **Keyman**, a free App Store app that loads it.*
+
+1. Instaluj **Keyman** iz App Store.
+   *Install **Keyman** from the App Store.*
+2. Otvori paket **`keyman/isv_latin.kmp`** na svojem urędžaju —
+   Safari, e-pošta abo AirDrop. Vybere se „Open in Keyman".
+   *Open **`isv_latin.kmp`** on the device — Safari, e-mail or AirDrop. Choose
+   "Open in Keyman".*
+3. **Nastrojenja → Osnovne → Tipkovnica → Tipkovnici → Dodaj → Keyman.**
+   *Settings → General → Keyboard → Keyboards → Add New Keyboard → Keyman.*
+
+**Litery:** na telefonu ne jest AltGr, zato **drži tipku** — `c` → **č**, `s` → **š**,
+`z` → **ž**, `e` → **ě**. Velike litery: najprvo Shift, potom drži.
+*The letters: there is no AltGr on a phone, so **hold the key** — `c` → **č**,
+`s` → **š**, `z` → **ž**, `e` → **ě**. For capitals, Shift first, then hold.*
+
+⚠ **Na iOS 16 i novšem trěba vklučiti „Allow Full Access"** (Nastrojenja → Ogolne →
+Tipkovnica → Tipkovnici → Keyman), inače sistemna tipkovnica jest prazdna — bez
+klavišev. To jest grěška iOS, ne Keymana; v samoj aplikaciji Keyman vse rabotaje i bez
+togo. Gl. [KB0109](https://help.keyman.com/knowledge-base/kb0109).
+*⚠ **On iOS 16 and later you must turn on "Allow Full Access"** (Settings → General →
+Keyboard → Keyboards → Keyman), otherwise the system keyboard renders blank — no keys
+at all. This is an iOS bug, not a Keyman one; inside the Keyman app itself everything
+works without it. See [KB0109](https://help.keyman.com/knowledge-base/kb0109).*
+
+Toj že paket rabotaje takože na Androidu, Windowsu, macOS i Linuxu črěz Keyman.
+*The same package also works on Android, Windows, macOS and Linux via Keyman.*
+
+Zbudovanje iz izvora / *building from source*:
+
+```sh
+npm install -g @keymanapp/kmc
+python3 build_keyman.py                          # .kmn + touch layout
+kmc build keyman/isv_latin/isv_latin.kpj         # -> keyman/isv_latin/build/
+cp keyman/isv_latin/build/isv_latin.kmp keyman/  # publikovany paket
+```
+
+---
+
+## macOS
+
+`mac/KBDMSSTD.keylayout` — kopiruj do `~/Library/Keyboard Layouts/`, potom
+**Nastrojenja → Tipkovnica → Izvory vhoda → + → Others**.
+*Copy `mac/KBDMSSTD.keylayout` to `~/Library/Keyboard Layouts/`, then
+Settings → Keyboard → Input Sources → + → Others.*
+
+Litery sut pod **Option** (Option+C → č, itd.).
+*The letters sit under **Option** (Option+C → č, and so on).*
 
 ---
 
@@ -116,7 +175,7 @@ Ne dupliciramo — upstream jur izdal gotove pakety. Gl. `linux/README.md`.
 
 ## Slovnik za pisanje gestami · Swipe dictionary
 
-Slovnik `.dict` za **[HeliBoard](https://github.com/Helium314/HeliBoard)** daje na telefonu
+Slovnik `.dict` za **[HeliBoard](https://github.com/Helium314/HeliBoard)** dava na telefonu
 **pisanje gestami po medžuslovjansky** — s podpovědjami i avtokorekturoju, čego Unexpected
 Keyboard ne umě.
 *The `.dict` dictionary for HeliBoard gives you **Interslavic swipe typing** on your phone —
