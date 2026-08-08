@@ -24,7 +24,13 @@
                     "text": "ě",
                     "id": "T_ECARON"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "ě",
+                    "id": "T_ECARON"
+                  }
+                }
               },
               {
                 "id": "K_R",
@@ -72,7 +78,13 @@
                     "text": "š",
                     "id": "T_SCARON"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "š",
+                    "id": "T_SCARON"
+                  }
+                }
               },
               {
                 "id": "K_D",
@@ -126,7 +138,13 @@
                     "text": "ž",
                     "id": "T_ZCARON"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "ž",
+                    "id": "T_ZCARON"
+                  }
+                }
               },
               {
                 "id": "K_X",
@@ -140,7 +158,13 @@
                     "text": "č",
                     "id": "T_CCARON"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "č",
+                    "id": "T_CCARON"
+                  }
+                }
               },
               {
                 "id": "K_V",
@@ -266,7 +290,13 @@
                     "text": "Ě",
                     "id": "T_ECARON_UC"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "Ě",
+                    "id": "T_ECARON_UC"
+                  }
+                }
               },
               {
                 "id": "K_R",
@@ -314,7 +344,13 @@
                     "text": "Š",
                     "id": "T_SCARON_UC"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "Š",
+                    "id": "T_SCARON_UC"
+                  }
+                }
               },
               {
                 "id": "K_D",
@@ -368,7 +404,13 @@
                     "text": "Ž",
                     "id": "T_ZCARON_UC"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "Ž",
+                    "id": "T_ZCARON_UC"
+                  }
+                }
               },
               {
                 "id": "K_X",
@@ -382,7 +424,13 @@
                     "text": "Č",
                     "id": "T_CCARON_UC"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "Č",
+                    "id": "T_CCARON_UC"
+                  }
+                }
               },
               {
                 "id": "K_V",
@@ -692,7 +740,13 @@
                     "text": "ě",
                     "id": "T_ECARON"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "ě",
+                    "id": "T_ECARON"
+                  }
+                }
               },
               {
                 "id": "K_R",
@@ -740,7 +794,13 @@
                     "text": "š",
                     "id": "T_SCARON"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "š",
+                    "id": "T_SCARON"
+                  }
+                }
               },
               {
                 "id": "K_D",
@@ -794,7 +854,13 @@
                     "text": "ž",
                     "id": "T_ZCARON"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "ž",
+                    "id": "T_ZCARON"
+                  }
+                }
               },
               {
                 "id": "K_X",
@@ -808,7 +874,13 @@
                     "text": "č",
                     "id": "T_CCARON"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "č",
+                    "id": "T_CCARON"
+                  }
+                }
               },
               {
                 "id": "K_V",
@@ -934,7 +1006,13 @@
                     "text": "Ě",
                     "id": "T_ECARON_UC"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "Ě",
+                    "id": "T_ECARON_UC"
+                  }
+                }
               },
               {
                 "id": "K_R",
@@ -982,7 +1060,13 @@
                     "text": "Š",
                     "id": "T_SCARON_UC"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "Š",
+                    "id": "T_SCARON_UC"
+                  }
+                }
               },
               {
                 "id": "K_D",
@@ -1036,7 +1120,13 @@
                     "text": "Ž",
                     "id": "T_ZCARON_UC"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "Ž",
+                    "id": "T_ZCARON_UC"
+                  }
+                }
               },
               {
                 "id": "K_X",
@@ -1050,7 +1140,13 @@
                     "text": "Č",
                     "id": "T_CCARON_UC"
                   }
-                ]
+                ],
+                "flick": {
+                  "ne": {
+                    "text": "Č",
+                    "id": "T_CCARON_UC"
+                  }
+                }
               },
               {
                 "id": "K_V",

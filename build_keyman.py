@@ -38,7 +38,7 @@ SRC = os.path.join(HERE, "keyman", "isv_latin", "source")
 
 KEYBOARD_NAME = "Medžuslovjansky (latinica)"
 COPYRIGHT = "© Radoslove"
-KEYBOARD_VERSION = "1.2"
+KEYBOARD_VERSION = "1.3"
 
 # --- the canonical table -------------------------------------------------
 # base key -> (lowercase, uppercase, T_ key stem)
@@ -76,6 +76,10 @@ def build_kmn():
     add("")
     add("store(&NAME) '%s'" % KEYBOARD_NAME)
     add("store(&COPYRIGHT) '%s'" % COPYRIGHT)
+    # Stays at 10.0 even though flicks need Keyman 17+. Raising it would lock
+    # out everyone on an older Keyman for a feature that is purely additive -
+    # they still have longpress, which is what 10.0 supports. The compiler
+    # hints about this on purpose; the hint is the correct outcome here.
     add("store(&VERSION) '10.0'")
     add("store(&KEYBOARDVERSION) '%s'" % KEYBOARD_VERSION)
     add("store(&TARGETS) 'windows macosx linux web iphone ipad "
@@ -141,6 +145,13 @@ def key(char, upper=False, sk_map=None):
     k = {"id": "K_" + char.upper(), "text": char}
     if sk_map and char in sk_map:
         k["sk"] = sk_map[char]
+        # Longpress ALONE proved unreliable on a real iPad: release a hair
+        # early and Keyman reads a plain tap, so you get `s` instead of `š`.
+        # A flick cannot be mistaken for a tap, so the letters get a second,
+        # timing-independent route - and swipe-to-north-east is exactly the
+        # gesture our Android layout already uses for the same four letters.
+        # Longpress stays; this is additive.
+        k["flick"] = {"ne": dict(sk_map[char][0])}
     return k
 
 
