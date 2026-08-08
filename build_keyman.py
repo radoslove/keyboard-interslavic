@@ -38,7 +38,7 @@ SRC = os.path.join(HERE, "keyman", "isv_latin", "source")
 
 KEYBOARD_NAME = "Medžuslovjansky (latinica)"
 COPYRIGHT = "© Radoslove"
-KEYBOARD_VERSION = "1.0"
+KEYBOARD_VERSION = "1.2"
 
 # --- the canonical table -------------------------------------------------
 # base key -> (lowercase, uppercase, T_ key stem)
@@ -98,12 +98,22 @@ def build_kmn():
     add("")
     add("c --- touch: longpress keys. Subkeys cannot reach RALT, so these")
     add("c     touch-only T_ keys carry the same letters explicitly.")
+    add("c")
+    add("c     GOTCHA, paid for on a device twice: a subkey on the SHIFT layer")
+    add("c     fires with the shift modifier held, so a bare '+ [T_X]' rule does")
+    add("c     NOT match there and the key silently emits nothing. The fix is the")
+    add("c     [SHIFT ...] rules below. Do NOT also pin the subkey to")
+    add("c     layer 'default' in the touch layout - that breaks id resolution")
+    add("c     and the subkey falls back to its parent letter (C instead of Č).")
     for _key, lo, up, stem in LETTERS:
         add("+ [T_%s] > '%s'" % (stem, lo))
-        add("+ [T_%s_UC] > '%s'" % (stem + "", up))
+        add("+ [SHIFT T_%s] > '%s'" % (stem, lo))
+        add("+ [T_%s_UC] > '%s'" % (stem, up))
+        add("+ [SHIFT T_%s_UC] > '%s'" % (stem, up))
     add("")
     for stem, ch in TOUCH_PUNCT:
         add("+ [T_%s] > '%s'" % (stem, ch))
+        add("+ [SHIFT T_%s] > '%s'" % (stem, ch))
     add("")
     return "\n".join(L) + "\n"
 

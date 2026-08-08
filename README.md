@@ -131,8 +131,14 @@ for **Keyman**, a free App Store app that loads it.*
 *The letters: there is no AltGr on a phone, so **hold the key** — `c` → **č**,
 `s` → **š**, `z` → **ž**, `e` → **ě**. For capitals, Shift first, then hold.*
 
-⚠ „Full Access" **ne jest potrěbny**. Ne davaj jego.
-*⚠ "Allow Full Access" is **not needed**. Don't grant it.*
+⚠ **Na iOS 16 i novšem trěba vklučiti „Allow Full Access"** (Nastrojenja → Ogolne →
+Tipkovnica → Tipkovnici → Keyman), inače sistemna tipkovnica jest prazdna — bez
+klavišev. To jest grěška iOS, ne Keymana; v samoj aplikaciji Keyman vse rabotaje i bez
+togo. Gl. [KB0109](https://help.keyman.com/knowledge-base/kb0109).
+*⚠ **On iOS 16 and later you must turn on "Allow Full Access"** (Settings → General →
+Keyboard → Keyboards → Keyman), otherwise the system keyboard renders blank — no keys
+at all. This is an iOS bug, not a Keyman one; inside the Keyman app itself everything
+works without it. See [KB0109](https://help.keyman.com/knowledge-base/kb0109).*
 
 Toj že paket rabotaje takože na Androidu, Windowsu, macOS i Linuxu črěz Keyman.
 *The same package also works on Android, Windows, macOS and Linux via Keyman.*
