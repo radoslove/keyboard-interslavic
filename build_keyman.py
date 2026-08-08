@@ -82,6 +82,7 @@ def build_kmn():
         "androidphone androidtablet mobile desktop tablet'")
     add("store(&VISUALKEYBOARD) 'isv_latin.kvks'")
     add("store(&LAYOUTFILE) 'isv_latin.keyman-touch-layout'")
+    add("store(&BITMAP) 'isv_latin.ico'")
     add("")
     add("begin Unicode > use(main)")
     add("")
