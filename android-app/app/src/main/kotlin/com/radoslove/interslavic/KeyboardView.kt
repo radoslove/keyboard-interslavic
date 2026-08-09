@@ -16,6 +16,7 @@ import android.view.ViewConfiguration
 import android.widget.LinearLayout
 import android.widget.TextView
 import kotlin.math.abs
+import kotlin.math.sqrt
 
 /**
  * "It types" milestone (android_PLAN.md M1). Two layers:
@@ -65,6 +66,11 @@ class KeyboardView(
     private var swipeStartKey: Char? = null
     private val swipePath = StringBuilder()
     private var lastSwipeWord = ""
+    private var swipeJustCommitted = false   // true right after a glide, until any other key
+    private val SWIPE_RESAMPLE = 32
+    // Adaptive-ranking weights: how hard one prior use lifts a word.
+    private val USAGE_W_SUGGEST = 8000       // in freq*64 units (max freq term ~16k)
+    private val USAGE_W_SWIPE = 8.0          // in px-equivalent of the shape score
 
     // Visible trail so the user can SEE the glide as it happens.
     private val trailPts = ArrayList<Float>(128)
@@ -248,12 +254,32 @@ class KeyboardView(
     }
 
     private fun commit(s: String) {
-        service.currentInputConnection?.commitText(s, 1)
+        swipeJustCommitted = false
+        val ic = service.currentInputConnection
+        // A terminator ends a word — if it is a real word the user typed by hand,
+        // count it for adaptive ranking (typos, being MISSes, are not counted).
+        if (s.isNotEmpty() && !s[0].isLetter()) {
+            val before = ic?.getTextBeforeCursor(48, 0)?.toString().orEmpty()
+            val w = before.takeLastWhile { it.isLetter() }.lowercase()
+            if (w.length >= 2 && Dictionary.contains(w)) Usage.record(context, w)
+        }
+        ic?.commitText(s, 1)
         refreshSuggestions()
     }
 
     private fun backspace() {
-        service.currentInputConnection?.deleteSurroundingText(1, 0)
+        val ic = service.currentInputConnection ?: return
+        // A backspace immediately after a glide means "that wasn't the word I
+        // wanted" — wipe the WHOLE word in one press so the user can just
+        // re-swipe, instead of tapping backspace letter by letter.
+        if (swipeJustCommitted && lastSwipeWord.isNotEmpty()) {
+            ic.deleteSurroundingText(lastSwipeWord.length + 1, 0)   // word + trailing space
+            swipeJustCommitted = false
+            lastSwipeWord = ""
+            refreshSuggestions()
+            return
+        }
+        ic.deleteSurroundingText(1, 0)
         refreshSuggestions()
     }
 
@@ -301,7 +327,9 @@ class KeyboardView(
             !word.first().isUpperCase() &&
             !Dictionary.contains(lower)
 
-        val preds = Dictionary.suggest(lower, if (canSave) 2 else 3)
+        val preds = Dictionary.suggest(lower, if (canSave) 2 else 3) { w ->
+            Usage.count(context, w) * USAGE_W_SUGGEST
+        }
         for (i in preds.indices) setSlot(i, preds[i], preds[i], save = false)
         if (canSave) setSlot(2, "＋ $lower", lower, save = true)
     }
@@ -346,12 +374,14 @@ class KeyboardView(
         if (currentWord.isNotEmpty()) ic.deleteSurroundingText(currentWord.length, 0)
         ic.commitText("$word ", 1)
         ic.endBatchEdit()
+        Usage.record(context, word)
         currentWord = ""
         clearSlots()
     }
 
     private fun enter() {
         val ic = service.currentInputConnection ?: return
+        swipeJustCommitted = false
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
     }
@@ -412,11 +442,12 @@ class KeyboardView(
             }
             MotionEvent.ACTION_UP -> {
                 val path = swipePath.toString()
+                val pts = ArrayList(trailPts)          // snapshot BEFORE clearing
                 swiping = false
                 swipeStartKey = null
                 trailPts.clear()
                 invalidate()
-                if (path.length >= 2) decodeSwipe(path)
+                if (path.length >= 2) decodeSwipe(path, pts)
             }
             MotionEvent.ACTION_CANCEL -> {
                 swiping = false
@@ -428,13 +459,49 @@ class KeyboardView(
         return true
     }
 
-    private fun decodeSwipe(path: String) {
-        val words = Dictionary.decodeSwipe(path, 3)
+    private fun decodeSwipe(path: String, rawPts: List<Float>) {
+        // Map the ROUTE: resample the finger's trajectory to a fixed number of
+        // evenly-spaced points, and compare it to each candidate word's IDEAL
+        // route (the polyline through its letter centres, resampled the same
+        // way), point-for-point. This shape match — the owner's idea — beats
+        // "which keys were crossed": a detour the finger did not make (možehmo's
+        // swing through `h`) shows up as curve divergence, and short impostors
+        // (možemo -> "mi") have short routes that cannot cover the trajectory.
+        val pointList = ArrayList<FloatArray>(rawPts.size / 2)
+        var i = 0
+        while (i + 1 < rawPts.size) {
+            pointList.add(floatArrayOf(rawPts[i], rawPts[i + 1])); i += 2
+        }
+        val rpTrail = resamplePath(pointList, SWIPE_RESAMPLE) ?: return
+
+        val centers = HashMap<Char, FloatArray>(letterKeyViews.size)
+        for ((ch, v) in letterKeyViews) {
+            val row = v.parent as? android.view.View ?: continue
+            centers[ch] = floatArrayOf(
+                row.left + v.left + v.width / 2f,
+                row.top + v.top + v.height / 2f,
+            )
+        }
+
+        val score: (String) -> Double = fold@{ folded ->
+            val ideal = ArrayList<FloatArray>(folded.length)
+            for (c in folded) ideal.add(centers[c] ?: return@fold Double.NEGATIVE_INFINITY)
+            val idealRp = resamplePath(ideal, SWIPE_RESAMPLE) ?: return@fold Double.NEGATIVE_INFINITY
+            -shapeDist(rpTrail, idealRp)
+        }
+
+        // `path` is the deduped sequence of crossed keys — an upper bound on the
+        // word length (a diagonal glide crosses more keys than the word has).
+        val words = Dictionary.decodeSwipeGeo(path.first(), path.length + 2, 3, score) { w ->
+            Usage.count(context, w) * USAGE_W_SWIPE
+        }
         if (words.isEmpty()) return
         val ic = service.currentInputConnection ?: return
         val best = if (shift) words[0].replaceFirstChar { it.uppercaseChar() } else words[0]
         ic.commitText("$best ", 1)
+        Usage.record(context, best)
         lastSwipeWord = best
+        swipeJustCommitted = true
         currentWord = ""
         // Offer the alternatives so a wrong guess is one tap from fixed.
         clearSlots()
@@ -458,8 +525,72 @@ class KeyboardView(
         val out = if (shift) word.replaceFirstChar { it.uppercaseChar() } else word
         ic.commitText("$out ", 1)
         ic.endBatchEdit()
+        Usage.record(context, out)
         lastSwipeWord = out
+        swipeJustCommitted = true    // still a swipe result — backspace wipes it whole
         clearSlots()
+    }
+
+    /** Downsample the interleaved (x,y) trail to at most [cap] points, keeping the last. */
+    private fun samplePoints(raw: List<Float>, cap: Int): List<FloatArray> {
+        val total = raw.size / 2
+        if (total == 0) return emptyList()
+        val out = ArrayList<FloatArray>(minOf(total, cap) + 1)
+        val step = maxOf(1, total / cap)
+        var i = 0
+        while (i < total) {
+            out.add(floatArrayOf(raw[i * 2], raw[i * 2 + 1])); i += step
+        }
+        val lx = raw[(total - 1) * 2]; val ly = raw[(total - 1) * 2 + 1]
+        if (out.isEmpty() || out.last()[0] != lx || out.last()[1] != ly) {
+            out.add(floatArrayOf(lx, ly))
+        }
+        return out
+    }
+
+    /** Resample a polyline to [n] points evenly spaced by arc length. */
+    private fun resamplePath(pts: List<FloatArray>, n: Int): List<FloatArray>? {
+        if (pts.size < 2) return null
+        val cum = FloatArray(pts.size)
+        for (i in 1 until pts.size) {
+            val dx = pts[i][0] - pts[i - 1][0]; val dy = pts[i][1] - pts[i - 1][1]
+            cum[i] = cum[i - 1] + sqrt(dx * dx + dy * dy)
+        }
+        val total = cum[pts.size - 1]
+        val out = ArrayList<FloatArray>(n)
+        if (total <= 0f) {
+            for (k in 0 until n) out.add(floatArrayOf(pts[0][0], pts[0][1]))
+            return out
+        }
+        val step = total / (n - 1)
+        var j = 0
+        for (k in 0 until n) {
+            val t = k * step
+            while (j < pts.size - 2 && cum[j + 1] < t) j++
+            val seg = cum[j + 1] - cum[j]
+            val f = if (seg <= 0f) 0f else (t - cum[j]) / seg
+            out.add(floatArrayOf(
+                pts[j][0] + (pts[j + 1][0] - pts[j][0]) * f,
+                pts[j][1] + (pts[j + 1][1] - pts[j][1]) * f,
+            ))
+        }
+        return out
+    }
+
+    /** Mean point-for-point distance between two equal-length resampled curves. */
+    private fun shapeDist(a: List<FloatArray>, b: List<FloatArray>): Double {
+        var s = 0.0
+        for (i in a.indices) {
+            val dx = a[i][0] - b[i][0]; val dy = a[i][1] - b[i][1]
+            s += sqrt(dx * dx + dy * dy)
+        }
+        return s / a.size
+    }
+
+    /** Euclidean distance between a key centre and a trail point. */
+    private fun dist2(a: FloatArray, b: FloatArray): Float {
+        val dx = a[0] - b[0]; val dy = a[1] - b[1]
+        return sqrt(dx * dx + dy * dy)
     }
 
     private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()

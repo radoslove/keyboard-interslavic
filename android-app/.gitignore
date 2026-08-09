@@ -1,0 +1,11 @@
+# Android build outputs & caches — never versioned
+build/
+.gradle/
+local.properties
+*.apk
+*.aab
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+*.iml
