@@ -378,7 +378,7 @@ Jedna maszyna, jedno wydanie Keymana, jeden układ bazowy.
    wynik tutaj **nie jest** dowodem na cokolwiek dotyczącego telefonu ani tabletu.
 4. **Wersji 1.5.** Testujesz 1.3. Reguły `RALT` są identyczne (sprawdzone), ale formalnie to
    1.3 — tak zapisz.
-5. **Modelu leksykalnego** (`radoslove.isv.wordlist.model.kmp`, 39 777 form). Predykcja i
+5. **Modelu leksykalnego** (`radoslove.isv-latn.wordlist.model.kmp`, 39 777 form). Predykcja i
    swipe to funkcje mobilne; Keyman na Windowsie ich nie używa.
 6. **Androida.** `adb` po kablu z `hp` jest możliwy, ale to osobny tor i osobne zlecenie.
 7. **macOS i Linuksa.** Deklaracja `macosx`/`linux` w `store(&TARGETS)` zostanie **równie

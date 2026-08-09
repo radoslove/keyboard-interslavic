@@ -13,7 +13,7 @@ Neither catalogue had any Interslavic entry when this was written.
 Two separate upstream repos, two separate PRs:
 
   keymanapp/keyboards       release/i/isv_latin/
-  keymanapp/lexical-models  release/radoslove/radoslove.isv.wordlist/
+  keymanapp/lexical-models  release/radoslove/radoslove.isv-latn.wordlist/
 
 Both take SOURCE only - upstream runs its own build - so `build/` is excluded
 deliberately. Run the normal builds first and make sure they are warning-clean;
@@ -22,7 +22,7 @@ that is an explicit submission requirement.
 USAGE
     python3 build_keyman.py && python3 build_keyman_wordlist.py
     kmc build keyman/isv_latin/isv_latin.kpj
-    kmc build keyman/radoslove.isv.wordlist/radoslove.isv.wordlist.kpj
+    kmc build keyman/radoslove.isv-latn.wordlist/radoslove.isv-latn.wordlist.kpj
     python3 build_upstream.py
 """
 import os
@@ -39,9 +39,9 @@ JOBS = [
         "repo": "keymanapp/keyboards",
     },
     {
-        "src": os.path.join(HERE, "keyman", "radoslove.isv.wordlist"),
+        "src": os.path.join(HERE, "keyman", "radoslove.isv-latn.wordlist"),
         "dst": os.path.join(DEST, "keymanapp-lexical-models", "release",
-                            "radoslove", "radoslove.isv.wordlist"),
+                            "radoslove", "radoslove.isv-latn.wordlist"),
         "repo": "keymanapp/lexical-models",
     },
 ]

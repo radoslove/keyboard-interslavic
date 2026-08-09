@@ -46,16 +46,20 @@ layout. It is not written in new text, and a key for it would only invite mistak
 
 ## Windows
 
-`.exe` installers for three layouts:
+Three layouts, but they do not install the same way — the Latin one is ours and ships
+as scripts, the other two are upstream packages with an installer.
 
-| Layout | Installer |
+| Layout | How to install |
 |---|---|
-| Interslavic **Latin** | `windows/installers/kbdmsstd/` |
-| Interslavic **Cyrillic** | `windows/installers/kbdmskir/` |
+| Interslavic **Latin** (recommended) | `windows/installers/kbdmsstd/` → right-click `install.ps1` → **Run with PowerShell** as administrator |
+| Interslavic **Cyrillic** | `windows/installers/kbdmskir/kbdmskir.exe` |
 | **Runic** | `windows/installers/runy_5/setup.exe` |
 
-Open the layout's folder and run `setup.exe`. One UAC prompt — the layout adds itself to
-your language list. Switch layouts with **Win + Space**.
+The Latin layout registers itself under Polish, so it appears next to your existing
+keyboards rather than adding a phantom language. Switch layouts with **Win + Space**.
+
+To remove it later, `uninstall.ps1` sits in the same folder. ⚠ Removing a layout from
+the Windows language list does **not** uninstall it — use the script.
 
 Punctuation lives on AltGr too: `;` → `„ “`, `'` → `’ ”`, `-` → `– —`.
 
@@ -134,8 +138,8 @@ kmc build keyman/isv_latin/isv_latin.kpj
 cp keyman/isv_latin/build/isv_latin.kmp keyman/
 
 python3 build_keyman_wordlist.py                 # prediction wordlist
-kmc build keyman/radoslove.isv.wordlist/radoslove.isv.wordlist.kpj
-cp keyman/radoslove.isv.wordlist/build/*.model.kmp keyman/
+kmc build keyman/radoslove.isv-latn.wordlist/radoslove.isv-latn.wordlist.kpj
+cp keyman/radoslove.isv-latn.wordlist/build/*.model.kmp keyman/
 ```
 
 ---
@@ -177,7 +181,7 @@ word you actually write (`slovami`), not the lemma (`slovo`). Without forms it r
 
 iOS gives third-party keyboards **no gesture-typing API at all**, so swipe typing is not
 reachable there and the `.dict` above is useless on iOS. What is reachable is prediction:
-install `keyman/radoslove.isv.wordlist.model.kmp` in Keyman and you get word suggestions
+install `keyman/radoslove.isv-latn.wordlist.model.kmp` in Keyman and you get word suggestions
 and autocorrect above the keyboard.
 
 **39,777 forms** rather than the full 253k. The complete list compiles to a 33 MB trie,

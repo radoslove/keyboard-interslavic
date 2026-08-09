@@ -91,7 +91,7 @@ def main():
     real = {
         sum(1 for l in read("dictionary/main_isv.combined").splitlines()
             if l.strip().startswith("word=")),
-        sum(1 for l in read("keyman/radoslove.isv.wordlist/source/wordlist.tsv")
+        sum(1 for l in read("keyman/radoslove.isv-latn.wordlist/source/wordlist.tsv")
             .splitlines() if l and not l.startswith("#")),
         253273,   # compiled dictionary/main_isv.dict
     }

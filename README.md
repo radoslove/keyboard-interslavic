@@ -35,16 +35,19 @@ Pytanja i grěšky → **GitHub Issues.** To jest jediny kanal podpory.
 Instalatory `.exe` za tri ukladji:
 *`.exe` installers for three layouts:*
 
-| Ukladj / Layout | Instalator | Uwaga / Note |
-|---|---|---|
-| Medžuslovjanska **latinica** (Latin) | `windows/…/setup.exe` | standardna ortografija |
-| Medžuslovjanska **cyrilica** (Cyrillic) | `windows/…/setup.exe` | |
-| **Runy** (runic) | `windows/installers/runy_5/setup.exe` | `runy_5` = najnovša versija |
+| Ukladj / Layout | Instalacija |
+|---|---|
+| Medžuslovjanska **latinica** (Latin) | `windows/installers/kbdmsstd/` → `install.ps1` (PowerShell, kako administrator) |
+| Medžuslovjanska **cyrilica** (Cyrillic) | `windows/installers/kbdmskir/kbdmskir.exe` |
+| **Runy** (runic) | `windows/installers/runy_5/setup.exe` |
 
-**Instalacija:** odpri katalog ukladja i odpali **`setup.exe`**. Jedno okno UAC — ukladj se
-sam dopiše do liste jezykov.
-*Installation: open the layout's folder and run **`setup.exe`**. One UAC prompt — the
-layout adds itself to your language list.*
+⚠ Latinica **ne ima** `setup.exe` — instaluje se skriptom. Odinstalovanje:
+`uninstall.ps1` v tom že katalogu.
+*⚠ The Latin layout has **no** `setup.exe` — it installs via a script.
+To remove it, `uninstall.ps1` in the same folder.*
+
+Ukladj se sam dopiše do liste jezykov, pod polsky.
+*The layout adds itself to your language list, under Polish.*
 
 Prěklučanje ukladjev: **Win + Space.**
 *Switch layouts: **Win + Space.***
@@ -162,8 +165,8 @@ kmc build keyman/isv_latin/isv_latin.kpj         # -> keyman/isv_latin/build/
 cp keyman/isv_latin/build/isv_latin.kmp keyman/  # publikovany paket
 
 python3 build_keyman_wordlist.py                 # slovnik za podpovědji
-kmc build keyman/radoslove.isv.wordlist/radoslove.isv.wordlist.kpj
-cp keyman/radoslove.isv.wordlist/build/*.model.kmp keyman/
+kmc build keyman/radoslove.isv-latn.wordlist/radoslove.isv-latn.wordlist.kpj
+cp keyman/radoslove.isv-latn.wordlist/build/*.model.kmp keyman/
 ```
 
 ---
