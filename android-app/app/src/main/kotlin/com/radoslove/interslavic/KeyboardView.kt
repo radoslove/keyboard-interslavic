@@ -3,11 +3,16 @@ package com.radoslove.interslavic
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
+import android.view.MotionEvent
+import android.view.ViewConfiguration
 import android.widget.LinearLayout
 import android.widget.TextView
+import kotlin.math.abs
 
 /**
  * "It types" milestone (android_PLAN.md M1). Two layers:
@@ -16,14 +21,17 @@ import android.widget.TextView
  *  - symbols: digits + common symbols, with the canonical MS punctuation
  *    „ ” – — as direct keys (docs/ms-latin-table.md).
  *
- * Longpress a base letter to reach its accent (c/s/z/e) or digraph (d/l/n);
- * shift controls the case of both the letter and the longpress output.
- * Flick is not here yet — it is the other half of M1 and the next increment.
+ * A base letter reaches its accent (c/s/z/e) or digraph (d/l/n) two ways, per
+ * android_PLAN.md M1: LONGPRESS (hold) *and* FLICK (a quick upward swipe on the
+ * key). Both commit the same thing; the flick is the fast habit that also has
+ * to work on iOS, where it is the only accent gesture the OS allows. Shift
+ * controls the case of the letter and of the accent/digraph.
  *
  * Deliberately a plain View: the headless build gets no Compose / resource
- * surprises, and behaviour is verified on a real device, never assumed.
+ * surprises, and behaviour is verified on a real device, never assumed —
+ * flick thresholds especially have behaved differently on hardware.
  */
-@SuppressLint("ViewConstructor", "SetTextI18n")
+@SuppressLint("ViewConstructor", "SetTextI18n", "ClickableViewAccessibility")
 class KeyboardView(
     context: Context,
     private val service: ImeService,
@@ -31,6 +39,10 @@ class KeyboardView(
 
     private var shift = false
     private var symbols = false
+
+    private val flickHandler = Handler(Looper.getMainLooper())
+    private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
+    private val longPressMs = 300L
 
     init {
         orientation = VERTICAL
@@ -97,12 +109,59 @@ class KeyboardView(
     private fun letterKey(ch: Char): TextView {
         val label = if (shift) ch.uppercaseChar().toString() else ch.toString()
         val tv = baseKey(label, 1f)
-        tv.setOnClickListener {
-            commit(if (shift) ch.uppercaseChar().toString() else ch.toString())
-        }
-        tv.setOnLongClickListener {
+        // Whether this key has an accent/digraph at all (c/s/z/e, d/l/n).
+        val hasAccent = Layout.longPress(ch, false) != null
+        val flickThreshold = dp(22)
+
+        var downX = 0f
+        var downY = 0f
+        var handled = false
+        val longPress = Runnable {
             val out = Layout.longPress(ch, shift)
-            if (out != null) { commit(out); true } else false
+            if (out != null) {
+                commit(out)
+                handled = true
+                tv.isPressed = false
+            }
+        }
+
+        tv.setOnTouchListener { _, e ->
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    downX = e.x; downY = e.y; handled = false
+                    tv.isPressed = true
+                    if (hasAccent) flickHandler.postDelayed(longPress, longPressMs)
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (abs(e.x - downX) > touchSlop || abs(e.y - downY) > touchSlop) {
+                        flickHandler.removeCallbacks(longPress)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    flickHandler.removeCallbacks(longPress)
+                    tv.isPressed = false
+                    if (!handled) {
+                        val dx = e.x - downX
+                        val dy = e.y - downY
+                        // Upward flick (mostly vertical) => the accent/digraph.
+                        val flickUp = hasAccent && dy < -flickThreshold && abs(dy) >= abs(dx)
+                        if (flickUp) {
+                            Layout.longPress(ch, shift)?.let { commit(it) }
+                        } else {
+                            commit(if (shift) ch.uppercaseChar().toString() else ch.toString())
+                        }
+                    }
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    flickHandler.removeCallbacks(longPress)
+                    tv.isPressed = false
+                    true
+                }
+                else -> false
+            }
         }
         return tv
     }

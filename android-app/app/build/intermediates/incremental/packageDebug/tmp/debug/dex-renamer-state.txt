@@ -1,4 +1,4 @@
-#Sun Aug 09 18:33:41 CEST 2026
+#Sun Aug 09 18:58:56 CEST 2026
 base.0=C\:\\Projects\\keyboard-interslavic\\android-app\\app\\build\\intermediates\\dex\\debug\\mergeExtDexDebug\\classes.dex
 base.1=C\:\\Projects\\keyboard-interslavic\\android-app\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\0\\classes.dex
 base.2=C\:\\Projects\\keyboard-interslavic\\android-app\\app\\build\\intermediates\\dex\\debug\\mergeProjectDexDebug\\2\\classes.dex
