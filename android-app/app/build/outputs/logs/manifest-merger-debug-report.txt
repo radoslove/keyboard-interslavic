@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:2:1-24:12
-INJECTED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:2:1-24:12
-INJECTED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:2:1-24:12
-INJECTED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:2:1-24:12
+ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:2:1-34:12
+INJECTED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:2:1-34:12
+INJECTED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:2:1-34:12
+INJECTED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:2:1-34:12
 MERGED from [androidx.core:core:1.13.1] C:\Users\radok\.gradle\caches\transforms-4\8e0a0bff2d388b6446750efdf4a5758f\transformed\core-1.13.1\AndroidManifest.xml:17:1-30:12
 MERGED from [androidx.core:core-ktx:1.13.1] C:\Users\radok\.gradle\caches\transforms-4\ee0481a11330c26fe06a00831ef0481b\transformed\core-ktx-1.13.1\AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.annotation:annotation-experimental:1.4.0] C:\Users\radok\.gradle\caches\transforms-4\b602daaf2448be52ca00da64464dbe99\transformed\annotation-experimental-1.4.0\AndroidManifest.xml:2:1-7:12
@@ -23,8 +23,8 @@ MERGED from [androidx.tracing:tracing:1.0.0] C:\Users\radok\.gradle\caches\trans
 	xmlns:android
 		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:2:11-69
 application
-ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:4:5-22:19
-INJECTED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:4:5-22:19
+ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:4:5-32:19
+INJECTED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:4:5-32:19
 MERGED from [androidx.core:core:1.13.1] C:\Users\radok\.gradle\caches\transforms-4\8e0a0bff2d388b6446750efdf4a5758f\transformed\core-1.13.1\AndroidManifest.xml:28:5-89
 MERGED from [androidx.core:core:1.13.1] C:\Users\radok\.gradle\caches\transforms-4\8e0a0bff2d388b6446750efdf4a5758f\transformed\core-1.13.1\AndroidManifest.xml:28:5-89
 MERGED from [androidx.versionedparcelable:versionedparcelable:1.1.1] C:\Users\radok\.gradle\caches\transforms-4\e76f1b767bbdaf61093fe6fdbd88b122\transformed\versionedparcelable-1.1.1\AndroidManifest.xml:24:5-25:19
@@ -43,28 +43,46 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] C:\Users\radok\.gradle\cach
 		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:6:9-41
 	android:allowBackup
 		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:5:9-35
-service#com.radoslove.interslavic.ImeService
-ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:9:9-20:19
+activity#com.radoslove.interslavic.SetupActivity
+ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:9:9-17:20
 	android:label
 		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:11:13-45
 	android:exported
-		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:13:13-36
+		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:12:13-36
+	android:name
+		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:10:13-42
+intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
+ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:13:13-16:29
+action#android.intent.action.MAIN
+ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:14:17-69
+	android:name
+		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:14:25-66
+category#android.intent.category.LAUNCHER
+ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:15:17-77
+	android:name
+		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:15:27-74
+service#com.radoslove.interslavic.ImeService
+ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:19:9-30:19
+	android:label
+		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:21:13-45
+	android:exported
+		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:23:13-36
 	android:permission
-		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:12:13-70
+		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:22:13-70
 	android:name
-		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:10:13-39
+		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:20:13-39
 intent-filter#action:name:android.view.InputMethod
-ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:14:13-16:29
+ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:24:13-26:29
 action#android.view.InputMethod
-ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:15:17-67
+ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:25:17-67
 	android:name
-		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:15:25-64
+		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:25:25-64
 meta-data#android.view.im
-ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:17:13-19:50
+ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:27:13-29:50
 	android:resource
-		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:19:17-47
+		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:29:17-47
 	android:name
-		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:18:17-47
+		ADDED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml:28:17-47
 uses-sdk
 INJECTED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from C:\Projects\keyboard-interslavic\android-app\app\src\main\AndroidManifest.xml

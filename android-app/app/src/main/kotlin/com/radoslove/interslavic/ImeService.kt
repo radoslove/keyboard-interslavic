@@ -11,6 +11,12 @@ import android.view.inputmethod.InputMethodManager
  */
 class ImeService : InputMethodService() {
 
+    override fun onCreate() {
+        super.onCreate()
+        // Kick off the background load of the prediction model once.
+        Dictionary.ensureLoaded(this)
+    }
+
     override fun onCreateInputView(): View = KeyboardView(this, this)
 
     /**
