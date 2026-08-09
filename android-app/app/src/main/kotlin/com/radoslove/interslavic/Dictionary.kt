@@ -104,6 +104,74 @@ object Dictionary {
     /** Whether the background load has finished. */
     fun isReady(): Boolean = ready
 
+    // ---- Swipe decoding (M4) --------------------------------------------
+
+    /** Fold an accent to its base key: č->c š->s ž->z ě->e (others unchanged). */
+    private fun foldBase(c: Char): Char = when (c) {
+        'č' -> 'c'; 'š' -> 's'; 'ž' -> 'z'; 'ě' -> 'e'
+        else -> c
+    }
+
+    /**
+     * How many letters of [word] can NOT be matched, in order, against the key
+     * [path] — allowing a word letter to be skipped when the finger cut a corner.
+     * 0 = perfect glide, 1 = one letter missed. Used to be forgiving without
+     * accepting random paths (the first/last anchor still gates those out).
+     */
+    private fun orderedMisses(word: String, path: String): Int {
+        var pi = 0
+        var miss = 0
+        for (c in word) {
+            var k = pi
+            while (k < path.length && path[k] != c) k++
+            if (k < path.length) pi = k + 1 else miss++
+        }
+        return miss
+    }
+
+    /**
+     * First working cut of the glide decoder. [path] is the deduped sequence of
+     * base keys the finger crossed (e.g. "slkjuivo"). A candidate word must:
+     *  - start on the same base key as the path (its first letter, folded),
+     *  - end on the same base key,
+     *  - fold to base letters that form an ordered subsequence of the path,
+     *  - be no longer than the path plus a little slack.
+     * Ranked by frequency. Accents/digraphs are matched on their base letters
+     * and the real accented word is returned.
+     *
+     * A full scan of 248k forms with cheap early rejects — fine for one call on
+     * finger-up. The scoring is deliberately simple; this is where accuracy work
+     * (geometry, bigrams) lands next, on-device.
+     */
+    fun decodeSwipe(path: String, n: Int): List<String> {
+        if (!ready || path.length < 2) return emptyList()
+        val first = path.first()
+        val last = path.last()
+        val maxLen = path.length + 3
+        val topWords = arrayOfNulls<String>(n)
+        val topScore = LongArray(n) { Long.MIN_VALUE }
+        for (e in entries) {
+            val w = e.word
+            if (w.length < 2 || w.length > maxLen) continue
+            if (foldBase(w.first()) != first) continue
+            if (foldBase(w.last()) != last) continue
+            val folded = buildString { for (c in w) append(foldBase(c)) }
+            val miss = orderedMisses(folded, path)
+            if (miss > 1) continue                     // forgiving: allow one cut corner
+            // Perfect glides win; a one-miss word can still surface if it is far
+            // more frequent than any perfect match.
+            val score = e.freq.toLong() - miss * 5000L
+            if (score > topScore[n - 1]) {
+                var j = n - 1
+                while (j > 0 && topScore[j - 1] < score) {
+                    topScore[j] = topScore[j - 1]; topWords[j] = topWords[j - 1]; j--
+                }
+                topScore[j] = score; topWords[j] = w
+            }
+        }
+        return topWords.filterNotNull()
+    }
+
     /** Exact membership test (binary search). Used to decide MISS for M3. */
     fun contains(word: String): Boolean {
         if (!ready) return false

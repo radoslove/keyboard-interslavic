@@ -2,7 +2,10 @@ package com.radoslove.interslavic
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
 import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
@@ -53,12 +56,50 @@ class KeyboardView(
     // MISS" chip (true) rather than an ordinary prediction (false).
     private val slotWord = arrayOfNulls<String>(3)
     private val slotIsSave = BooleanArray(3)
+    private val slotIsSwipeAlt = BooleanArray(3)
+
+    // Swipe / glide decoding (M4). letterKeyViews lets us hit-test which key the
+    // finger is over as it crosses the board.
+    private val letterKeyViews = ArrayList<Pair<Char, TextView>>()
+    private var swiping = false
+    private var swipeStartKey: Char? = null
+    private val swipePath = StringBuilder()
+    private var lastSwipeWord = ""
+
+    // Visible trail so the user can SEE the glide as it happens.
+    private val trailPts = ArrayList<Float>(128)
+    private val trailPath = Path()
+    private val trailPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
+        color = 0x904FC3F7.toInt()   // semi-transparent light blue smudge
+    }
 
     init {
         orientation = VERTICAL
         setBackgroundColor(Color.parseColor("#ECEFF1"))
         setPadding(dp(3), dp(6), dp(3), dp(6))
+        setWillNotDraw(false)        // a ViewGroup must be told to draw
+        trailPaint.strokeWidth = dp(9).toFloat()
         render()
+    }
+
+    override fun dispatchDraw(canvas: Canvas) {
+        super.dispatchDraw(canvas)
+        if (swiping && trailPts.size >= 4) {
+            trailPath.reset()
+            trailPath.moveTo(trailPts[0], trailPts[1])
+            var i = 2
+            while (i + 1 < trailPts.size) {
+                trailPath.lineTo(trailPts[i], trailPts[i + 1]); i += 2
+            }
+            canvas.drawPath(trailPath, trailPaint)
+        }
+    }
+
+    private fun addTrailPoint(x: Float, y: Float) {
+        trailPts.add(x); trailPts.add(y)
     }
 
     private fun render() {
@@ -68,6 +109,7 @@ class KeyboardView(
     }
 
     private fun renderLetters() {
+        letterKeyViews.clear()
         Layout.letterRows.forEachIndexed { index, row ->
             val rv = makeRow()
             if (index == 2) {
@@ -174,6 +216,7 @@ class KeyboardView(
                 else -> false
             }
         }
+        letterKeyViews.add(ch to tv)
         return tv
     }
 
@@ -266,6 +309,7 @@ class KeyboardView(
     private fun setSlot(i: Int, display: String, word: String, save: Boolean) {
         slotWord[i] = word
         slotIsSave[i] = save
+        slotIsSwipeAlt[i] = false
         val tv = suggestionViews[i]
         tv.text = display
         tv.setTextColor(if (save) Color.parseColor("#1B5E20") else Color.parseColor("#1C2529"))
@@ -276,6 +320,7 @@ class KeyboardView(
         for (i in suggestionViews.indices) {
             slotWord[i] = null
             slotIsSave[i] = false
+            slotIsSwipeAlt[i] = false
             suggestionViews[i].text = ""
             suggestionViews[i].setBackgroundColor(Color.TRANSPARENT)
         }
@@ -283,13 +328,14 @@ class KeyboardView(
 
     private fun onSlotTap(i: Int) {
         val w = slotWord[i] ?: return
-        if (slotIsSave[i]) {
-            Collector.record(context, w)
-            // brief confirmation, then recompute
-            suggestionViews[i].text = "✓ zapisano"
-            flickHandler.postDelayed({ refreshSuggestions() }, 700)
-        } else {
-            applySuggestion(w)
+        when {
+            slotIsSave[i] -> {
+                Collector.record(context, w)
+                suggestionViews[i].text = "✓ zapisano"
+                flickHandler.postDelayed({ refreshSuggestions() }, 700)
+            }
+            slotIsSwipeAlt[i] -> replaceLastSwipeWord(w)
+            else -> applySuggestion(w)
         }
     }
 
@@ -308,6 +354,112 @@ class KeyboardView(
         val ic = service.currentInputConnection ?: return
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
+    }
+
+    // ---- Swipe / glide (M4) ---------------------------------------------
+
+    /** Which letter key, if any, is under a point in KeyboardView coordinates. */
+    private fun keyAt(x: Float, y: Float): Char? {
+        for ((ch, v) in letterKeyViews) {
+            val row = v.parent as? android.view.View ?: continue
+            val left = row.left + v.left
+            val top = row.top + v.top
+            if (x >= left && x < left + v.width && y >= top && y < top + v.height) return ch
+        }
+        return null
+    }
+
+    /**
+     * Steal the gesture from the child keys the moment the finger crosses from
+     * its start key into a DIFFERENT letter key — that unambiguously separates a
+     * glide from a tap, longpress or (vertical, same-key) flick.
+     */
+    override fun onInterceptTouchEvent(e: MotionEvent): Boolean {
+        if (symbols) return false
+        when (e.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                swipeStartKey = keyAt(e.x, e.y)
+                swiping = false
+                swipePath.setLength(0)
+                trailPts.clear()
+                addTrailPoint(e.x, e.y)
+            }
+            MotionEvent.ACTION_MOVE -> {
+                addTrailPoint(e.x, e.y)
+                val start = swipeStartKey ?: return false
+                val k = keyAt(e.x, e.y)
+                if (k != null && k != start) {
+                    swiping = true
+                    swipePath.append(start).append(k)
+                    invalidate()
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    override fun onTouchEvent(e: MotionEvent): Boolean {
+        if (!swiping) return super.onTouchEvent(e)
+        when (e.actionMasked) {
+            MotionEvent.ACTION_MOVE -> {
+                addTrailPoint(e.x, e.y)
+                val k = keyAt(e.x, e.y)
+                if (k != null && (swipePath.isEmpty() || swipePath.last() != k)) {
+                    swipePath.append(k)
+                }
+                invalidate()
+            }
+            MotionEvent.ACTION_UP -> {
+                val path = swipePath.toString()
+                swiping = false
+                swipeStartKey = null
+                trailPts.clear()
+                invalidate()
+                if (path.length >= 2) decodeSwipe(path)
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                swiping = false
+                swipeStartKey = null
+                trailPts.clear()
+                invalidate()
+            }
+        }
+        return true
+    }
+
+    private fun decodeSwipe(path: String) {
+        val words = Dictionary.decodeSwipe(path, 3)
+        if (words.isEmpty()) return
+        val ic = service.currentInputConnection ?: return
+        val best = if (shift) words[0].replaceFirstChar { it.uppercaseChar() } else words[0]
+        ic.commitText("$best ", 1)
+        lastSwipeWord = best
+        currentWord = ""
+        // Offer the alternatives so a wrong guess is one tap from fixed.
+        clearSlots()
+        for (i in words.indices) {
+            slotWord[i] = words[i]
+            slotIsSwipeAlt[i] = true
+            suggestionViews[i].text = words[i]
+            suggestionViews[i].setTextColor(Color.parseColor("#1C2529"))
+            suggestionViews[i].setBackgroundColor(
+                if (i == 0) Color.parseColor("#DCE3E7") else Color.TRANSPARENT
+            )
+        }
+    }
+
+    /** Replace the word the swipe just committed with a chosen alternative. */
+    private fun replaceLastSwipeWord(word: String) {
+        val ic = service.currentInputConnection ?: return
+        if (lastSwipeWord.isEmpty()) return
+        ic.beginBatchEdit()
+        ic.deleteSurroundingText(lastSwipeWord.length + 1, 0)   // word + trailing space
+        val out = if (shift) word.replaceFirstChar { it.uppercaseChar() } else word
+        ic.commitText("$out ", 1)
+        ic.endBatchEdit()
+        lastSwipeWord = out
+        clearSlots()
     }
 
     private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()

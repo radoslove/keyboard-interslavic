@@ -11,8 +11,8 @@ android {
         applicationId = "com.radoslove.interslavic"
         minSdk = 24
         targetSdk = 34
-        versionCode = 8
-        versionName = "0.8"
+        versionCode = 10
+        versionName = "1.0"
     }
 
     buildTypes {
