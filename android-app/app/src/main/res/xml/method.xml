@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IME metadata. One subtype: Interslavic (isv), a keyboard mode. -->
+<input-method xmlns:android="http://schemas.android.com/apk/res/android">
+    <subtype
+        android:label="@string/subtype_isv"
+        android:languageTag="isv"
+        android:imeSubtypeLocale="isv"
+        android:imeSubtypeMode="keyboard" />
+</input-method>

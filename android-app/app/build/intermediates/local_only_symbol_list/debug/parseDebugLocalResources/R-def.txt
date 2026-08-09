@@ -1,0 +1,6 @@
+R_DEF: Internal format may change without notice
+local
+string app_name
+string ime_name
+string subtype_isv
+xml method
