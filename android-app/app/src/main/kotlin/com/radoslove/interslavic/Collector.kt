@@ -1,7 +1,10 @@
 package com.radoslove.interslavic
 
 import android.content.Context
+import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
+import java.util.UUID
 
 /**
  * The collection loop (android_PLAN.md M3) — the reason this laboratory exists.
@@ -28,8 +31,22 @@ object Collector {
 
     private const val PREFS = "isv_collector"
     private const val KEY_ENABLED = "enabled"
+    private const val KEY_CONTRIB = "contributor"
     private const val QUEUE = "collected.tsv"
     private const val MIN_LEN = 3
+
+    /**
+     * A stable, pseudonymous per-install id — no personal data, just a random
+     * handle so the server can tell two devices proposing the same word apart
+     * (the `people` signal). Generated once, then reused.
+     */
+    fun contributorId(context: Context): String {
+        val p = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        p.getString(KEY_CONTRIB, null)?.let { return it }
+        val id = "kbd-" + UUID.randomUUID().toString().take(8)
+        p.edit().putString(KEY_CONTRIB, id).apply()
+        return id
+    }
 
     private val counts = LinkedHashMap<String, Int>()
     private var loaded = false
@@ -85,6 +102,25 @@ object Collector {
             sb.append("- ").append(w).append(" = seen ").append(n).append("×\n")
         }
         return sb.toString()
+    }
+
+    /**
+     * The queue as a server-ingest batch: a pseudonymous contributor id and the
+     * words with their counts. This is what `ingest_submissions.py` loads into
+     * the `submissions` table (locally now, host/hetz later — same shape).
+     */
+    @Synchronized
+    fun exportBatchJson(context: Context): String {
+        ensureLoaded(context)
+        val words = JSONArray()
+        counts.entries.sortedByDescending { it.value }.forEach { (w, n) ->
+            words.put(JSONObject().put("word", w).put("count", n))
+        }
+        return JSONObject()
+            .put("contributor", contributorId(context))
+            .put("source", "keyboard")
+            .put("words", words)
+            .toString(2)
     }
 
     @Synchronized

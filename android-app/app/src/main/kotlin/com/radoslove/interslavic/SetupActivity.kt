@@ -62,7 +62,11 @@ class SetupActivity : Activity() {
         root.addView(status)
 
         root.addView(Button(this).apply {
-            text = "Eksportuj kolejkę do pliku"
+            text = "Wyślij do bazy (batch JSON)"
+            setOnClickListener { exportBatch() }
+        })
+        root.addView(Button(this).apply {
+            text = "Eksportuj do rewizji (lista)"
             setOnClickListener { exportQueue() }
         })
         root.addView(Button(this).apply {
@@ -92,7 +96,21 @@ class SetupActivity : Activity() {
     private fun refreshStatus() {
         val n = Collector.pendingCount(this)
         val on = if (Collector.isEnabled(this)) "włączone" else "wyłączone"
-        status.text = "Zbieranie: $on · w kolejce: $n słów"
+        status.text = "Zbieranie: $on · w kolejce: $n słów · id: ${Collector.contributorId(this)}"
+    }
+
+    private fun exportBatch() {
+        val json = Collector.exportBatchJson(this)
+        if (Collector.pendingCount(this) == 0) {
+            toast("Kolejka jest pusta")
+            return
+        }
+        val send = Intent(Intent.ACTION_SEND).apply {
+            type = "application/json"
+            putExtra(Intent.EXTRA_SUBJECT, "medžuslovjansky — batch do bazy")
+            putExtra(Intent.EXTRA_TEXT, json)
+        }
+        startActivity(Intent.createChooser(send, "Wyślij batch do bazy"))
     }
 
     private fun exportQueue() {
