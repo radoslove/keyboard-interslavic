@@ -1,5 +1,7 @@
 # Medžuslovjanske tipkovnici · Interslavic Keyboards
 
+*[English version →](README.en.md)*
+
 **Prvy nabor tipkovnic za medžuslovjansky jezyk — i prvy slovnik za pisanje gestami.**
 *The first keyboard set for the Interslavic language — and the first swipe-typing
 dictionary for it.*
@@ -126,14 +128,22 @@ for **Keyman**, a free App Store app that loads it.*
 3. **Nastrojenja → Osnovne → Tipkovnica → Tipkovnici → Dodaj → Keyman.**
    *Settings → General → Keyboard → Keyboards → Add New Keyboard → Keyman.*
 
-**Litery:** na telefonu ne jest AltGr, zato **drži tipku** — `c` → **č**, `s` → **š**,
-`z` → **ž**, `e` → **ě**. Velike litery: najprvo Shift, potom drži.
-*The letters: there is no AltGr on a phone, so **hold the key** — `c` → **č**,
-`s` → **š**, `z` → **ž**, `e` → **ě**. For capitals, Shift first, then hold.*
+**Litery:** na telefonu ne jest AltGr, zato **prěvlečeš palcem v goru** — `c` → **č**,
+`s` → **š**, `z` → **ž**, `e` → **ě**. Vsaky směr v goru rabotaje, ne trěba cěliti.
+Velike litery: najprvo Shift, potom prěvlečeš.
+*The letters: there is no AltGr on a phone, so **swipe up** from the key — `c` → **č**,
+`s` → **š**, `z` → **ž**, `e` → **ě**. Any upward direction works, so you do not have to
+aim. For capitals, Shift first, then swipe.*
 
-⚠ **Na iOS 16 i novšem trěba vklučiti „Allow Full Access"** (Nastrojenja → Ogolne →
-Tipkovnica → Tipkovnici → Keyman), inače sistemna tipkovnica jest prazdna — bez
-klavišev. To jest grěška iOS, ne Keymana; v samoj aplikaciji Keyman vse rabotaje i bez
+Drži tipku — to jest drugy sposob.
+*Holding the key also works, but on iOS it is less reliable — Keyman expects you to slide
+onto the popup before releasing, and the popup sits in a different place for every key.
+Keyman's own EuroLatin keyboard behaves the same way, so this is not specific to our
+layout. Swiping avoids it entirely.*
+
+⚠ **Na iOS 16 i novšem trěba vklučiti „Allow Full Access"** (Nastrojenja → Osnovne →
+Tipkovnica → Tipkovnici → Keyman), inače tipkovnica v drugyh aplikacijah jest prazdna — bez
+klaviš. To jest grěška iOS, ne Keymana; v samoj aplikaciji Keyman vse rabotaje i bez
 togo. Gl. [KB0109](https://help.keyman.com/knowledge-base/kb0109).
 *⚠ **On iOS 16 and later you must turn on "Allow Full Access"** (Settings → General →
 Keyboard → Keyboards → Keyman), otherwise the system keyboard renders blank — no keys
@@ -150,6 +160,10 @@ npm install -g @keymanapp/kmc
 python3 build_keyman.py                          # .kmn + touch layout
 kmc build keyman/isv_latin/isv_latin.kpj         # -> keyman/isv_latin/build/
 cp keyman/isv_latin/build/isv_latin.kmp keyman/  # publikovany paket
+
+python3 build_keyman_wordlist.py                 # slovnik za podpovědji
+kmc build keyman/radoslove.isv.wordlist/radoslove.isv.wordlist.kpj
+cp keyman/radoslove.isv.wordlist/build/*.model.kmp keyman/
 ```
 
 ---
@@ -200,50 +214,44 @@ you actually write (`slovami`), not the lemma (`slovo`). Without forms it rarely
 
 ---
 
-## Vklad — nove slova · Contributing new words
+## Slova, ktorogo ne jest · Missing a word
 
-Ovo jest **dobrovoljno (opt-in)** i děje se **na tvojem telefone.** Standardno ne ide iz
-telefona ničto.
-*This is **opt-in** and happens **on your own device.** By default nothing leaves your
-phone.*
+Medžuslovjansky slovnik ne ima vsego. Ako pišeš slovo i jego ne jest — daj nam znati.
+To jest cěly mehanizm dnes:
+*Interslavic vocabulary is not complete. If you reach for a word and it is not there,
+tell us — that is the entire mechanism today:*
 
-Kogda swipe ne trafja, pišeš slovo palcem i dodavaješ ho do slovnika telefona. Ako
-dozvoliš, taka slova mogut dojti do **občinskogo slovnika** — za vsih.
-*When swipe misses, you type the word by finger and add it to your phone's dictionary. If
-you allow it, such words can reach the **community dictionary** — for everyone.*
+**[GitHub Issues](https://github.com/radoslove/keyboard-interslavic/issues)** — slovo i
+čto jesi hotěl rekti.
+*GitHub Issues — the word and what you meant by it.*
 
-**Kako to jest zaščiteno · How it is protected:**
+Potom slovo ide do reda za pregled i jest prověrjeno v slovniku: **slovnik ho jur ima**, **jest praviljno izvodjenje** ili **faktično ne jest**.
+Ostavše slova idut do lokalnogo sloja pri glavnom slovniku.
+*It then joins a review queue and is checked against the dictionary: already attested, a
+regular derivation, or genuinely absent. What survives is added to a local layer beside
+the main dictionary.*
 
-- **Psevdonim, nikogda ime.** Identifikacija = psevdonim, ktory sam vybereš.
-  *Pseudonym, never a name. Identity = a pseudonym you choose yourself.*
-- **Filtr na telefone.** Imena, cifry, obce litery ne opuščajut telefon — odsějut se prěd
-  vysylanjem. *An on-device filter drops names, digits and foreign letters before anything
-  is sent.*
-- **Vklad jest vratny.** Vytegneš soglasje — tvoja slova vypadajut.
-  *Contribution is withdrawable. Pull your consent and your words drop out.*
-- **Samo zbirno.** Danne se raportujut samo zbirno, nikogda po osobě.
-  *Aggregate only. Data is reported in aggregate, never per person.*
-- **Bez konta, bez e-pošty, bez telefona.** *No account, no e-mail, no phone number.*
+### Rang, ne kanon · Ranking, not canon
 
-**Neobovezno (samo za jezykove badanje):** može dodati **vozrast** (`<20` / `20–34` /
-`35–54` / `55+`) i **rodny jezyk** — orientaciono, za badanje pochodženja slovnika. Ne
-trěba togo davati.
-*Optional (for linguistic research only): you may add an **age bracket** (`<20` / `20–34` /
-`35–54` / `55+`) and your **native language** — indicative only, to study where the
-vocabulary comes from. You are not required to give it.*
+Zbirane slova pokazujut, čego ljudem trěba i čego ne najdut. **Ne stavajut avtomatično
+oficialnym slovnikom.** Kanon ostavaje pri jezykovom avtoritetu občiny. Ova sistema
+**měri i prědlagaje — ne zaměnjaje ho.**
+*Collected words show what people need and cannot find. They do **not** automatically
+become official vocabulary. The canon stays with the community's language authority. This
+system **measures and proposes — it does not replace it.***
 
-### Važno: rang, ne kanon · Important: ranking, not canon
+### Planovano, ne napravjeno · Planned, not built
 
-Zbirane slova dajut **poredok popularnosti** — pokazujut, čego ljudem trěba i čego ne
-najdut. **Ne stavajut avtomatično oficialnym slovnikom.** Kanon ostavaje pri jezykovom
-avtoritetu občiny medžuslovjanskogo jezyka. Ova sistema **měri i prědlagaje — ne zaměnjaje
-ho.**
-*Collected words produce a **popularity ranking** — they show what people need and cannot
-find. They do **not** automatically become official vocabulary. The canon stays with the
-Interslavic community's language authority. This system **measures and proposes — it does
-not replace it.***
+Zbirane slov iz samoj tipkovnice — na urędžaju, dobrovoljno, pod psevdonimom, s filtrom
+na imena i cifry, s pravom vytegnuti soglasje, i samo zbirno. Togo dosej ne jest — i tako tu jest napisano.
+*Collecting words from the keyboard itself — on device, opt-in, pseudonymous, filtering
+out names and digits, withdrawable, aggregate only. None of it exists yet, and this
+section will say so until it does.*
 
----
+⚠ Na iOS to budet v **aplikaciji**, ne v tipkovnici: tipkovnica bez „Full Access" ne
+može ni do seti, ni do občego kontejnera s svojeju aplikacijeju.
+*⚠ On iOS this will live in the **app**, not the keyboard: without "Full Access" a
+keyboard extension can reach neither the network nor a shared container with its own app.*
 
 ## Licencije · Licenses
 

@@ -38,7 +38,7 @@ SRC = os.path.join(HERE, "keyman", "isv_latin", "source")
 
 KEYBOARD_NAME = "Medžuslovjansky (latinica)"
 COPYRIGHT = "© Radoslove"
-KEYBOARD_VERSION = "1.3"
+KEYBOARD_VERSION = "1.5"
 
 # --- the canonical table -------------------------------------------------
 # base key -> (lowercase, uppercase, T_ key stem)
@@ -145,13 +145,21 @@ def key(char, upper=False, sk_map=None):
     k = {"id": "K_" + char.upper(), "text": char}
     if sk_map and char in sk_map:
         k["sk"] = sk_map[char]
-        # Longpress ALONE proved unreliable on a real iPad: release a hair
-        # early and Keyman reads a plain tap, so you get `s` instead of `š`.
-        # A flick cannot be mistaken for a tap, so the letters get a second,
-        # timing-independent route - and swipe-to-north-east is exactly the
-        # gesture our Android layout already uses for the same four letters.
-        # Longpress stays; this is additive.
-        k["flick"] = {"ne": dict(sk_map[char][0])}
+        # Longpress is unreliable here and it is NOT our bug: Keyman's own
+        # EuroLatin keyboard misses just as often on the same iPad. Keyman
+        # wants you to slide onto the popup before releasing, and the popup
+        # lands in a different place for every key (it gets nudged inward near
+        # the screen edges), so the "right" direction differs per key and no
+        # habit ever forms.
+        #
+        # Flicks are entirely ours, so all EIGHT directions map to the letter.
+        # Restricting them was a mistake twice over: `ne` alone worked only
+        # "quite often", and up-and-right still lost every swipe that drifted
+        # low or left. Now any swipe in any direction produces the letter and
+        # precision stops mattering altogether - which makes this keyboard more
+        # reliable than the stock one it is modelled on.
+        DIRECTIONS = ("n", "ne", "e", "se", "s", "sw", "w", "nw")
+        k["flick"] = {d: dict(sk_map[char][0]) for d in DIRECTIONS}
     return k
 
 

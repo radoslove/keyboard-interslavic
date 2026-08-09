@@ -99,3 +99,24 @@ the `hp` install entirely. Owner's call.
 - **A real device is the only truth.** Key sizes, longpress popups and gesture
   thresholds have all behaved differently on hardware than in an emulator here.
   Say "builds" / "runs in emulator" — never "works" — until `a55` confirms it.
+
+## What transfers to iOS, and what does not
+
+This track is also a rehearsal for the iOS app, so it is worth naming which lessons
+survive the move and which do not.
+
+| Transfers | Stays behind |
+|---|---|
+| The layout model from the one canonical table | The code — Kotlin vs Swift |
+| Longpress and flick handling, and their traps | |
+| Prediction-bar design and sizing decisions | |
+| The swipe decoder algorithm | |
+| The consent / collection UX | **Where collection lives** |
+
+That last row is the one worth discovering early. An Android `InputMethodService`
+reaches the network and storage like any app, so collection can live **in the keyboard**.
+On iOS a keyboard extension without "Full Access" can reach neither the network nor a
+shared container with its own app — and that isolation is the iOS app's main selling
+point, so it stays. Collection there has to move into the container app.
+
+Learning that here is cheaper than discovering it halfway through the Swift build.

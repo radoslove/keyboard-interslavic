@@ -18,10 +18,19 @@ settings:
     MARKETING_VERSION: "0.1"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
-    # No team set on purpose: signing needs an Apple Developer account, which
-    # is a decision with a price tag attached. Set DEVELOPMENT_TEAM when there
-    # is one.
     CODE_SIGN_STYLE: Automatic
+    # Read from the environment so it never lands in the repo, and - more
+    # importantly - so it SURVIVES. Picking the team in Xcode's UI writes it
+    # into the .xcodeproj, which is generated and gitignored: the next
+    # `xcodegen generate` silently wipes it and device builds start failing to
+    # sign for no visible reason.
+    #
+    #   export DEVELOPMENT_TEAM=XXXXXXXXXX   (or put it in ~/.zshrc)
+    #   xcodegen generate
+    #
+    # A free Personal Team is enough to run on your own device; the profile
+    # expires after 7 days and you rebuild. $99/year is only for distribution.
+    DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM}
 
 targets:
   InterslavicKeyboard:
