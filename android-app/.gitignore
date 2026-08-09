@@ -9,3 +9,8 @@ captures/
 .externalNativeBuild/
 .cxx/
 *.iml
+
+# Signing secrets — NEVER commit
+keystore.properties
+*.jks
+*.keystore
