@@ -7,7 +7,9 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.Looper
+import android.os.SystemClock
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.KeyEvent
@@ -48,6 +50,10 @@ class KeyboardView(
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     private val longPressMs = 300L
 
+    // Background thread for the swipe decode so the glide never janks.
+    private val decodeThread = HandlerThread("swipe-decode").apply { start() }
+    private val decodeHandler = Handler(decodeThread.looper)
+
     // Prediction bar (M2). The strip is a single persistent view whose three
     // slots are updated on every keystroke; render() only re-parents it.
     private val suggestionViews = ArrayList<TextView>(3)
@@ -64,9 +70,17 @@ class KeyboardView(
     private val letterKeyViews = ArrayList<Pair<Char, TextView>>()
     private var swiping = false
     private var swipeStartKey: Char? = null
+    private var swipeDownX = 0f
+    private var swipeDownY = 0f
     private val swipePath = StringBuilder()
     private var lastSwipeWord = ""
+    private var lastPreviewMs = 0L            // throttle the live in-glide preview
     private var swipeJustCommitted = false   // true right after a glide, until any other key
+    // Smart space: a committed word carries NO trailing space; the space is
+    // inserted BEFORE the next word instead, and punctuation attaches with no
+    // space before it (Gboard-style).
+    private var pendingSpace = false
+    private val ATTACH_PUNCT = ".,!?:;…".toSet()   // glued to the word, no space before
     private val SWIPE_RESAMPLE = 32
     // Adaptive-ranking weights: how hard one prior use lifts a word.
     private val USAGE_W_SUGGEST = 8000       // in freq*64 units (max freq term ~16k)
@@ -255,27 +269,46 @@ class KeyboardView(
 
     private fun commit(s: String) {
         swipeJustCommitted = false
-        val ic = service.currentInputConnection
-        // A terminator ends a word — if it is a real word the user typed by hand,
-        // count it for adaptive ranking (typos, being MISSes, are not counted).
-        if (s.isNotEmpty() && !s[0].isLetter()) {
-            val before = ic?.getTextBeforeCursor(48, 0)?.toString().orEmpty()
+        val ic = service.currentInputConnection ?: return
+        if (s.isEmpty()) return
+        val c0 = s[0]
+
+        // Adaptive ranking: count a hand-typed known word when a terminator lands.
+        if (!c0.isLetter()) {
+            val before = ic.getTextBeforeCursor(48, 0)?.toString().orEmpty()
             val w = before.takeLastWhile { it.isLetter() }.lowercase()
             if (w.length >= 2 && Dictionary.contains(w)) Usage.record(context, w)
         }
-        ic?.commitText(s, 1)
+
+        // Smart space: a word carries no trailing space, so the space is owed to
+        // the NEXT thing typed.
+        if (pendingSpace) {
+            when {
+                c0 == ' ' -> { ic.commitText(" ", 1); pendingSpace = false }   // user's own space, no double
+                c0 in ATTACH_PUNCT -> { ic.commitText(s, 1); pendingSpace = true }  // glue punct, stay armed
+                else -> {
+                    val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
+                    if (prev.isNotEmpty() && !prev[0].isWhitespace()) ic.commitText(" $s", 1)
+                    else ic.commitText(s, 1)   // guard: never a leading/double space
+                    pendingSpace = false
+                }
+            }
+        } else {
+            ic.commitText(s, 1)
+        }
         refreshSuggestions()
     }
 
     private fun backspace() {
         val ic = service.currentInputConnection ?: return
         // A backspace immediately after a glide means "that wasn't the word I
-        // wanted" — wipe the WHOLE word in one press so the user can just
-        // re-swipe, instead of tapping backspace letter by letter.
+        // wanted" — wipe the WHOLE word in one press so the user can re-swipe,
+        // instead of tapping backspace letter by letter.
         if (swipeJustCommitted && lastSwipeWord.isNotEmpty()) {
-            ic.deleteSurroundingText(lastSwipeWord.length + 1, 0)   // word + trailing space
+            ic.deleteSurroundingText(lastSwipeWord.length, 0)   // no trailing space in smart-space model
             swipeJustCommitted = false
             lastSwipeWord = ""
+            pendingSpace = false
             refreshSuggestions()
             return
         }
@@ -372,16 +405,18 @@ class KeyboardView(
         val ic = service.currentInputConnection ?: return
         ic.beginBatchEdit()
         if (currentWord.isNotEmpty()) ic.deleteSurroundingText(currentWord.length, 0)
-        ic.commitText("$word ", 1)
+        ic.commitText(word, 1)          // smart space: no trailing space
         ic.endBatchEdit()
         Usage.record(context, word)
         currentWord = ""
+        pendingSpace = true             // space is owed to whatever comes next
         clearSlots()
     }
 
     private fun enter() {
         val ic = service.currentInputConnection ?: return
         swipeJustCommitted = false
+        pendingSpace = false
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
     }
@@ -400,15 +435,22 @@ class KeyboardView(
     }
 
     /**
-     * Steal the gesture from the child keys the moment the finger crosses from
-     * its start key into a DIFFERENT letter key — that unambiguously separates a
-     * glide from a tap, longpress or (vertical, same-key) flick.
+     * Trigger the glide on DISTANCE, not on "entered another key". The old
+     * key-crossing test lost short/fast swipes whose sampled points landed in a
+     * key margin or the same key; a plain move past the touch-slop is far more
+     * reliable. We only yield to a short UPWARD move on an accent key, so the
+     * flick (up = diacritic) still works — everything else beyond slop is a glide.
      */
     override fun onInterceptTouchEvent(e: MotionEvent): Boolean {
         if (symbols) return false
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
-                swipeStartKey = keyAt(e.x, e.y)
+                // Fall back to the NEAREST key when the press lands in a margin or
+                // just off a key (common on edge keys like `a`); without this the
+                // whole glide was dead because the start key was null.
+                swipeStartKey = keyAt(e.x, e.y) ?: nearestCenterKey(e.x, e.y, computeCenters())
+                swipeDownX = e.x
+                swipeDownY = e.y
                 swiping = false
                 swipePath.setLength(0)
                 trailPts.clear()
@@ -417,13 +459,23 @@ class KeyboardView(
             MotionEvent.ACTION_MOVE -> {
                 addTrailPoint(e.x, e.y)
                 val start = swipeStartKey ?: return false
-                val k = keyAt(e.x, e.y)
-                if (k != null && k != start) {
-                    swiping = true
-                    swipePath.append(start).append(k)
-                    invalidate()
-                    return true
-                }
+                val dx = e.x - swipeDownX
+                val dy = e.y - swipeDownY
+                val dist = sqrt(dx * dx + dy * dy)
+                val kNow = keyAt(e.x, e.y)
+                val crossed = kNow != null && kNow != start
+                // Eager: fire on enough movement OR the moment another key is
+                // entered — whichever comes first.
+                if (dist < touchSlop && !crossed) return false
+                val hasAccent = Layout.longPress(start, false) != null
+                val isUpFlick = hasAccent && dy < 0 && abs(dy) >= abs(dx) && dist < dp(48)
+                if (isUpFlick) return false                   // let the child's flick handler take it
+                swiping = true
+                swipePath.setLength(0)
+                swipePath.append(start)
+                if (crossed) swipePath.append(kNow!!)
+                invalidate()
+                return true
             }
         }
         return false
@@ -439,15 +491,21 @@ class KeyboardView(
                     swipePath.append(k)
                 }
                 invalidate()
+                // Live preview: show the word forming so far, throttled so the
+                // per-move decode never janks the glide.
+                val now = SystemClock.uptimeMillis()
+                if (now - lastPreviewMs > 80 && trailPts.size >= 8) {
+                    lastPreviewMs = now
+                    previewSwipe(ArrayList(trailPts))
+                }
             }
             MotionEvent.ACTION_UP -> {
-                val path = swipePath.toString()
                 val pts = ArrayList(trailPts)          // snapshot BEFORE clearing
                 swiping = false
                 swipeStartKey = null
                 trailPts.clear()
                 invalidate()
-                if (path.length >= 2) decodeSwipe(path, pts)
+                if (pts.size >= 6) decodeSwipe(pts)    // >= 3 points = a real glide
             }
             MotionEvent.ACTION_CANCEL -> {
                 swiping = false
@@ -459,21 +517,16 @@ class KeyboardView(
         return true
     }
 
-    private fun decodeSwipe(path: String, rawPts: List<Float>) {
-        // Map the ROUTE: resample the finger's trajectory to a fixed number of
-        // evenly-spaced points, and compare it to each candidate word's IDEAL
-        // route (the polyline through its letter centres, resampled the same
-        // way), point-for-point. This shape match — the owner's idea — beats
-        // "which keys were crossed": a detour the finger did not make (možehmo's
-        // swing through `h`) shows up as curve divergence, and short impostors
-        // (možemo -> "mi") have short routes that cannot cover the trajectory.
-        val pointList = ArrayList<FloatArray>(rawPts.size / 2)
-        var i = 0
-        while (i + 1 < rawPts.size) {
-            pointList.add(floatArrayOf(rawPts[i], rawPts[i + 1])); i += 2
-        }
-        val rpTrail = resamplePath(pointList, SWIPE_RESAMPLE) ?: return
-
+    /**
+     * The route-shape decode, returning the top candidates WITHOUT committing —
+     * shared by the live preview (during the glide) and the final commit (on
+     * lift). Resample the finger trajectory and compare it, point-for-point, to
+     * each candidate word's ideal route; first key + length cap come from the
+     * whole trail so fast swipes are not truncated.
+     */
+    /** Key centres in KeyboardView coordinates. Built on the UI thread, then
+     *  handed to the (possibly background) decode so no View is touched off-UI. */
+    private fun computeCenters(): HashMap<Char, FloatArray> {
         val centers = HashMap<Char, FloatArray>(letterKeyViews.size)
         for ((ch, v) in letterKeyViews) {
             val row = v.parent as? android.view.View ?: continue
@@ -482,6 +535,16 @@ class KeyboardView(
                 row.top + v.top + v.height / 2f,
             )
         }
+        return centers
+    }
+
+    private fun decodeCandidates(rawPts: List<Float>, centers: Map<Char, FloatArray>): List<String> {
+        val pointList = ArrayList<FloatArray>(rawPts.size / 2)
+        var i = 0
+        while (i + 1 < rawPts.size) {
+            pointList.add(floatArrayOf(rawPts[i], rawPts[i + 1])); i += 2
+        }
+        val rpTrail = resamplePath(pointList, SWIPE_RESAMPLE) ?: return emptyList()
 
         val score: (String) -> Double = fold@{ folded ->
             val ideal = ArrayList<FloatArray>(folded.length)
@@ -490,18 +553,55 @@ class KeyboardView(
             -shapeDist(rpTrail, idealRp)
         }
 
-        // `path` is the deduped sequence of crossed keys — an upper bound on the
-        // word length (a diagonal glide crosses more keys than the word has).
-        val words = Dictionary.decodeSwipeGeo(path.first(), path.length + 2, 3, score) { w ->
+        val ks = keyPathFromTrail(pointList, centers)
+        val firstKey = ks.firstOrNull() ?: swipeStartKey ?: return emptyList()
+        return Dictionary.decodeSwipeGeo(firstKey, ks.size + 2, 3, score) { w ->
             Usage.count(context, w) * USAGE_W_SWIPE
         }
-        if (words.isEmpty()) return
+    }
+
+    /**
+     * Live preview during the glide, OFF the UI thread. Decoding the whole
+     * first-letter bucket every 80 ms was blocking the main thread and made long
+     * words stutter; now the heavy decode runs on [decodeThread] and only the
+     * strip update is posted back to the UI. Stale requests are dropped so only
+     * the newest trail is ever decoded. View geometry is read here (UI thread)
+     * and snapshotted, so the background decode touches no View.
+     */
+    private fun previewSwipe(rawPts: List<Float>) {
+        val centers = computeCenters()
+        decodeHandler.removeCallbacksAndMessages(null)   // drop stale previews
+        decodeHandler.post {
+            val words = decodeCandidates(rawPts, centers)
+            post { if (swiping) showPreview(words) }      // ignore if the glide already ended
+        }
+    }
+
+    private fun showPreview(words: List<String>) {
+        for (i in suggestionViews.indices) {
+            val w = words.getOrNull(i)
+            suggestionViews[i].text = w.orEmpty()
+            suggestionViews[i].setTextColor(Color.parseColor("#1C2529"))
+            suggestionViews[i].setBackgroundColor(
+                if (i == 0 && w != null) Color.parseColor("#DCE3E7") else Color.TRANSPARENT
+            )
+        }
+    }
+
+    private fun decodeSwipe(rawPts: List<Float>) {
+        val words = decodeCandidates(rawPts, computeCenters())
+        if (words.isEmpty()) { clearSlots(); return }
         val ic = service.currentInputConnection ?: return
         val best = if (shift) words[0].replaceFirstChar { it.uppercaseChar() } else words[0]
-        ic.commitText("$best ", 1)
+        // Smart space: a glide is a fresh word, so put the space BEFORE it (unless
+        // at field start or already after a space), and none after it.
+        val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
+        val lead = if (pendingSpace || (prev.isNotEmpty() && !prev[0].isWhitespace())) " " else ""
+        ic.commitText("$lead$best", 1)
         Usage.record(context, best)
         lastSwipeWord = best
         swipeJustCommitted = true
+        pendingSpace = true
         currentWord = ""
         // Offer the alternatives so a wrong guess is one tap from fixed.
         clearSlots()
@@ -521,13 +621,14 @@ class KeyboardView(
         val ic = service.currentInputConnection ?: return
         if (lastSwipeWord.isEmpty()) return
         ic.beginBatchEdit()
-        ic.deleteSurroundingText(lastSwipeWord.length + 1, 0)   // word + trailing space
+        ic.deleteSurroundingText(lastSwipeWord.length, 0)   // no trailing space in smart-space model
         val out = if (shift) word.replaceFirstChar { it.uppercaseChar() } else word
-        ic.commitText("$out ", 1)
+        ic.commitText(out, 1)          // any leading space before the old word stays
         ic.endBatchEdit()
         Usage.record(context, out)
         lastSwipeWord = out
         swipeJustCommitted = true    // still a swipe result — backspace wipes it whole
+        pendingSpace = true
         clearSlots()
     }
 
@@ -585,6 +686,32 @@ class KeyboardView(
             s += sqrt(dx * dx + dy * dy)
         }
         return s / a.size
+    }
+
+    /** Nearest key whose centre is closest to a point. */
+    private fun nearestCenterKey(x: Float, y: Float, centers: Map<Char, FloatArray>): Char? {
+        var best = Float.MAX_VALUE
+        var bk: Char? = null
+        for ((ch, c) in centers) {
+            val dx = x - c[0]; val dy = y - c[1]
+            val d = dx * dx + dy * dy
+            if (d < best) { best = d; bk = ch }
+        }
+        return bk
+    }
+
+    /** Deduped sequence of nearest keys along the trail — robust to fast swipes. */
+    private fun keyPathFromTrail(pts: List<FloatArray>, centers: Map<Char, FloatArray>): List<Char> {
+        if (pts.isEmpty()) return emptyList()
+        val step = maxOf(1, pts.size / 24)
+        val seq = ArrayList<Char>()
+        var i = 0
+        while (i < pts.size) {
+            val k = nearestCenterKey(pts[i][0], pts[i][1], centers)
+            if (k != null && (seq.isEmpty() || seq.last() != k)) seq.add(k)
+            i += step
+        }
+        return seq
     }
 
     /** Euclidean distance between a key centre and a trail point. */
