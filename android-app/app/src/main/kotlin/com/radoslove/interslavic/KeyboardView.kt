@@ -6,7 +6,9 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import android.media.AudioManager
 import android.os.Handler
+import android.view.HapticFeedbackConstants
 import android.os.HandlerThread
 import android.os.Looper
 import android.os.SystemClock
@@ -74,7 +76,9 @@ class KeyboardView(
     private var swipeDownY = 0f
     private val swipePath = StringBuilder()
     private var lastSwipeWord = ""
+    private var lastSwipeCandidates: List<String> = emptyList()
     private var lastPreviewMs = 0L            // throttle the live in-glide preview
+    private var backspaceInterval = 200L      // backspace-hold repeat, accelerates
     private var swipeJustCommitted = false   // true right after a glide, until any other key
     // Smart space: a committed word carries NO trailing space; the space is
     // inserted BEFORE the next word instead, and punctuation attaches with no
@@ -82,6 +86,7 @@ class KeyboardView(
     private var pendingSpace = false
     private val ATTACH_PUNCT = ".,!?:;…".toSet()   // glued to the word, no space before
     private val SWIPE_RESAMPLE = 32
+    private val DWELL_N = 40
     // Adaptive-ranking weights: how hard one prior use lifts a word.
     private val USAGE_W_SUGGEST = 8000       // in freq*64 units (max freq term ~16k)
     private val USAGE_W_SWIPE = 8.0          // in px-equivalent of the shape score
@@ -116,10 +121,66 @@ class KeyboardView(
             }
             canvas.drawPath(trailPath, trailPaint)
         }
+        previewText?.let { t ->
+            val w = maxOf(previewKeyW * 1.3f, dp(46).toFloat())
+            val h = dp(54).toFloat()
+            val left = previewCx - w / 2f
+            val right = previewCx + w / 2f
+            var bottom = previewKeyTop - dp(4)
+            var top = bottom - h
+            if (top < 0f) { top = 0f; bottom = h }          // keep it on-screen for the top row
+            val r = dp(8).toFloat()
+            canvas.drawRoundRect(left, top, right, bottom, r, r, previewBg)
+            canvas.drawRoundRect(left, top, right, bottom, r, r, previewBorder)
+            previewTxt.textSize = dp(28).toFloat()
+            val fm = previewTxt.fontMetrics
+            canvas.drawText(t, previewCx, (top + bottom) / 2f - (fm.ascent + fm.descent) / 2f, previewTxt)
+        }
     }
 
     private fun addTrailPoint(x: Float, y: Float) {
         trailPts.add(x); trailPts.add(y)
+    }
+
+    // Key-press preview bubble (shows the pressed letter enlarged above the key).
+    private var previewText: String? = null
+    private var previewCx = 0f
+    private var previewKeyTop = 0f
+    private var previewKeyW = 0f
+    private val previewBg = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE; style = Paint.Style.FILL
+    }
+    private val previewBorder = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#90A4AE"); style = Paint.Style.STROKE; strokeWidth = 2f
+    }
+    private val previewTxt = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#1C2529"); textAlign = Paint.Align.CENTER
+    }
+
+    private fun showKeyPreview(tv: TextView) {
+        val row = tv.parent as? android.view.View ?: return
+        previewText = tv.text?.toString()
+        previewCx = row.left + tv.left + tv.width / 2f
+        previewKeyTop = (row.top + tv.top).toFloat()
+        previewKeyW = tv.width.toFloat()
+        invalidate()
+    }
+
+    private fun hideKeyPreview() {
+        if (previewText != null) { previewText = null; invalidate() }
+    }
+
+    /** Opt-in click sound + haptic (no permission needed — system feedback). */
+    private fun feedback() {
+        val on = context.getSharedPreferences("isv_collector", Context.MODE_PRIVATE)
+            .getBoolean("feedback", false)
+        if (!on) return
+        performHapticFeedback(
+            HapticFeedbackConstants.KEYBOARD_TAP,
+            HapticFeedbackConstants.FLAG_IGNORE_VIEW_SETTING,
+        )
+        (context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager)
+            ?.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD)
     }
 
     private fun render() {
@@ -139,7 +200,7 @@ class KeyboardView(
             }
             row.forEach { ch -> rv.addView(letterKey(ch)) }
             if (index == 2) {
-                rv.addView(functionKey("⌫", 1.5f) { backspace() })
+                rv.addView(backspaceKey())
             }
             addView(rv)
         }
@@ -158,7 +219,7 @@ class KeyboardView(
             val rv = makeRow()
             row.forEach { ch -> rv.addView(symbolKey(ch)) }
             if (index == 2) {
-                rv.addView(functionKey("⌫", 1.5f) { backspace() })
+                rv.addView(backspaceKey())
             }
             addView(rv)
         }
@@ -203,18 +264,21 @@ class KeyboardView(
                 MotionEvent.ACTION_DOWN -> {
                     downX = e.x; downY = e.y; handled = false
                     tv.isPressed = true
+                    showKeyPreview(tv)
                     if (hasAccent) flickHandler.postDelayed(longPress, longPressMs)
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
                     if (abs(e.x - downX) > touchSlop || abs(e.y - downY) > touchSlop) {
                         flickHandler.removeCallbacks(longPress)
+                        hideKeyPreview()          // becoming a flick/glide, not a tap
                     }
                     true
                 }
                 MotionEvent.ACTION_UP -> {
                     flickHandler.removeCallbacks(longPress)
                     tv.isPressed = false
+                    hideKeyPreview()
                     if (!handled) {
                         val dx = e.x - downX
                         val dy = e.y - downY
@@ -231,6 +295,7 @@ class KeyboardView(
                 MotionEvent.ACTION_CANCEL -> {
                     flickHandler.removeCallbacks(longPress)
                     tv.isPressed = false
+                    hideKeyPreview()
                     true
                 }
                 else -> false
@@ -252,6 +317,38 @@ class KeyboardView(
         return tv
     }
 
+    /** Backspace with press-and-hold: one tap deletes normally; holding deletes
+     *  word by word, a little faster the longer you hold (never whole lines). */
+    private fun backspaceKey(): TextView {
+        val tv = baseKey("⌫", 1.5f)
+        val repeat = object : Runnable {
+            override fun run() {
+                deleteWordBackward()
+                feedback()
+                backspaceInterval = maxOf(55L, backspaceInterval - 18L)
+                flickHandler.postDelayed(this, backspaceInterval)
+            }
+        }
+        tv.setOnTouchListener { _, e ->
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    tv.isPressed = true
+                    backspace()                       // immediate single delete
+                    backspaceInterval = 200L
+                    flickHandler.postDelayed(repeat, 450L)   // then word-by-word after a hold
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    tv.isPressed = false
+                    flickHandler.removeCallbacks(repeat)
+                    true
+                }
+                else -> false
+            }
+        }
+        return tv
+    }
+
     private fun baseKey(text: String, weight: Float): TextView {
         val tv = TextView(context)
         tv.text = text
@@ -269,6 +366,7 @@ class KeyboardView(
 
     private fun commit(s: String) {
         swipeJustCommitted = false
+        feedback()
         val ic = service.currentInputConnection ?: return
         if (s.isEmpty()) return
         val c0 = s[0]
@@ -277,7 +375,10 @@ class KeyboardView(
         if (!c0.isLetter()) {
             val before = ic.getTextBeforeCursor(48, 0)?.toString().orEmpty()
             val w = before.takeLastWhile { it.isLetter() }.lowercase()
-            if (w.length >= 2 && Dictionary.contains(w)) Usage.record(context, w)
+            if (w.length >= 2 && Dictionary.contains(w)) {
+                Usage.record(context, w)
+                Popularity.record(context, w)
+            }
         }
 
         // Smart space: a word carries no trailing space, so the space is owed to
@@ -300,6 +401,7 @@ class KeyboardView(
     }
 
     private fun backspace() {
+        feedback()
         val ic = service.currentInputConnection ?: return
         // A backspace immediately after a glide means "that wasn't the word I
         // wanted" — wipe the WHOLE word in one press so the user can re-swipe,
@@ -309,10 +411,26 @@ class KeyboardView(
             swipeJustCommitted = false
             lastSwipeWord = ""
             pendingSpace = false
-            refreshSuggestions()
+            // Deleting a wrong glide? Offer the other candidates so you can pick
+            // one instead of swiping again.
+            if (lastSwipeCandidates.size > 1) showSwipeAlts(lastSwipeCandidates, highlight = -1)
+            else refreshSuggestions()
             return
         }
         ic.deleteSurroundingText(1, 0)
+        refreshSuggestions()
+    }
+
+    /** Delete the whitespace + the word before the cursor (for backspace-hold). */
+    private fun deleteWordBackward() {
+        val ic = service.currentInputConnection ?: return
+        val before = ic.getTextBeforeCursor(80, 0)?.toString().orEmpty()
+        if (before.isEmpty()) return
+        var i = before.length
+        while (i > 0 && before[i - 1].isWhitespace()) i--
+        while (i > 0 && !before[i - 1].isWhitespace()) i--
+        val del = before.length - i
+        ic.deleteSurroundingText(if (del > 0) del else 1, 0)
         refreshSuggestions()
     }
 
@@ -408,12 +526,14 @@ class KeyboardView(
         ic.commitText(word, 1)          // smart space: no trailing space
         ic.endBatchEdit()
         Usage.record(context, word)
+        Popularity.record(context, word)
         currentWord = ""
         pendingSpace = true             // space is owed to whatever comes next
         clearSlots()
     }
 
     private fun enter() {
+        feedback()
         val ic = service.currentInputConnection ?: return
         swipeJustCommitted = false
         pendingSpace = false
@@ -471,6 +591,7 @@ class KeyboardView(
                 val isUpFlick = hasAccent && dy < 0 && abs(dy) >= abs(dx) && dist < dp(48)
                 if (isUpFlick) return false                   // let the child's flick handler take it
                 swiping = true
+                hideKeyPreview()
                 swipePath.setLength(0)
                 swipePath.append(start)
                 if (crossed) swipePath.append(kNow!!)
@@ -544,12 +665,15 @@ class KeyboardView(
         while (i + 1 < rawPts.size) {
             pointList.add(floatArrayOf(rawPts[i], rawPts[i + 1])); i += 2
         }
-        val rpTrail = resamplePath(pointList, SWIPE_RESAMPLE) ?: return emptyList()
+        // Index-resample keeps the finger's DWELL: the trail is time-sampled, so
+        // a letter the finger paused on gets more points. Compared against each
+        // word's ideal route (given equal dwell at every letter), the pause
+        // disambiguates colinear letters a plain shape-match cannot.
+        val rpTrail = indexResample(pointList, DWELL_N) ?: return emptyList()
 
         val score: (String) -> Double = fold@{ folded ->
-            val ideal = ArrayList<FloatArray>(folded.length)
-            for (c in folded) ideal.add(centers[c] ?: return@fold Double.NEGATIVE_INFINITY)
-            val idealRp = resamplePath(ideal, SWIPE_RESAMPLE) ?: return@fold Double.NEGATIVE_INFINITY
+            val ideal = idealWithDwell(folded, centers) ?: return@fold Double.NEGATIVE_INFINITY
+            val idealRp = indexResample(ideal, DWELL_N) ?: return@fold Double.NEGATIVE_INFINITY
             -shapeDist(rpTrail, idealRp)
         }
 
@@ -589,7 +713,17 @@ class KeyboardView(
     }
 
     private fun decodeSwipe(rawPts: List<Float>) {
-        val words = decodeCandidates(rawPts, computeCenters())
+        // Decode OFF the UI thread so lifting the finger never freezes the
+        // keyboard (the dwell decode is heavier); the commit is posted back.
+        val centers = computeCenters()
+        decodeHandler.removeCallbacksAndMessages(null)   // drop any pending preview
+        decodeHandler.post {
+            val words = decodeCandidates(rawPts, centers)
+            post { commitSwipeResult(words) }
+        }
+    }
+
+    private fun commitSwipeResult(words: List<String>) {
         if (words.isEmpty()) { clearSlots(); return }
         val ic = service.currentInputConnection ?: return
         val best = if (shift) words[0].replaceFirstChar { it.uppercaseChar() } else words[0]
@@ -599,11 +733,17 @@ class KeyboardView(
         val lead = if (pendingSpace || (prev.isNotEmpty() && !prev[0].isWhitespace())) " " else ""
         ic.commitText("$lead$best", 1)
         Usage.record(context, best)
+        Popularity.record(context, best)
         lastSwipeWord = best
+        lastSwipeCandidates = words
         swipeJustCommitted = true
         pendingSpace = true
         currentWord = ""
-        // Offer the alternatives so a wrong guess is one tap from fixed.
+        showSwipeAlts(words, highlight = 0)   // a wrong guess is one tap from fixed
+    }
+
+    /** Put the swipe candidates in the strip as tappable alternatives. */
+    private fun showSwipeAlts(words: List<String>, highlight: Int) {
         clearSlots()
         for (i in words.indices) {
             slotWord[i] = words[i]
@@ -611,21 +751,27 @@ class KeyboardView(
             suggestionViews[i].text = words[i]
             suggestionViews[i].setTextColor(Color.parseColor("#1C2529"))
             suggestionViews[i].setBackgroundColor(
-                if (i == 0) Color.parseColor("#DCE3E7") else Color.TRANSPARENT
+                if (i == highlight) Color.parseColor("#DCE3E7") else Color.TRANSPARENT
             )
         }
     }
 
-    /** Replace the word the swipe just committed with a chosen alternative. */
+    /** Replace the word the swipe just committed with a chosen alternative. If
+     *  nothing is currently committed (e.g. after a whole-word backspace), just
+     *  insert the chosen word fresh. */
     private fun replaceLastSwipeWord(word: String) {
         val ic = service.currentInputConnection ?: return
-        if (lastSwipeWord.isEmpty()) return
         ic.beginBatchEdit()
-        ic.deleteSurroundingText(lastSwipeWord.length, 0)   // no trailing space in smart-space model
+        if (lastSwipeWord.isNotEmpty()) {
+            ic.deleteSurroundingText(lastSwipeWord.length, 0)   // smart-space: no trailing space
+        }
         val out = if (shift) word.replaceFirstChar { it.uppercaseChar() } else word
-        ic.commitText(out, 1)          // any leading space before the old word stays
+        val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
+        val lead = if (lastSwipeWord.isEmpty() && prev.isNotEmpty() && !prev[0].isWhitespace()) " " else ""
+        ic.commitText("$lead$out", 1)  // any leading space before the old word stays
         ic.endBatchEdit()
         Usage.record(context, out)
+        Popularity.record(context, out)
         lastSwipeWord = out
         swipeJustCommitted = true    // still a swipe result — backspace wipes it whole
         pendingSpace = true
@@ -676,6 +822,41 @@ class KeyboardView(
             ))
         }
         return out
+    }
+
+    /** Resample by INDEX (time), keeping dense regions dense — preserves dwell. */
+    private fun indexResample(pts: List<FloatArray>, n: Int): List<FloatArray>? {
+        if (pts.size < 2) return null
+        val out = ArrayList<FloatArray>(n)
+        val step = (pts.size - 1).toFloat() / (n - 1)
+        for (i in 0 until n) {
+            val idx = Math.round(i * step).coerceIn(0, pts.size - 1)
+            out.add(pts[idx])
+        }
+        return out
+    }
+
+    /** A word's ideal route with equal dwell (repeated points) at each letter. */
+    private fun idealWithDwell(
+        folded: String,
+        centers: Map<Char, FloatArray>,
+        dwell: Int = 6,
+        perSeg: Int = 9,
+    ): List<FloatArray>? {
+        val seq = ArrayList<FloatArray>(folded.length)
+        for (c in folded) seq.add(centers[c] ?: return null)
+        if (seq.size < 2) return null
+        val pts = ArrayList<FloatArray>(seq.size * (dwell + perSeg))
+        for (i in 0 until seq.size - 1) {
+            val a = seq[i]; val b = seq[i + 1]
+            repeat(dwell) { pts.add(a) }
+            for (k in 0 until perSeg) {
+                val t = k.toFloat() / perSeg
+                pts.add(floatArrayOf(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t))
+            }
+        }
+        repeat(dwell) { pts.add(seq.last()) }
+        return pts
     }
 
     /** Mean point-for-point distance between two equal-length resampled curves. */

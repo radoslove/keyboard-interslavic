@@ -58,6 +58,40 @@ class SetupActivity : Activity() {
         }
         root.addView(sw)
 
+        root.addView(header("Ranking popularności (opcjonalne)"))
+        root.addView(body(
+            "Gdy włączone, słowa które POTWIERDZASZ podczas zwykłego pisania — " +
+            "swipe, wybór z paska, dokończone znane słowo — są liczone LOKALNIE, " +
+            "żeby zasilić ranking najpopularniejszych słów międzysłowiańskich. " +
+            "Pseudonimowo (id urządzenia poniżej), zero danych osobowych. Nic nie " +
+            "jest wysyłane automatycznie — trafia do bazy dopiero przy Twoim " +
+            "eksporcie. Domyślnie wyłączone."
+        ))
+        val swPop = Switch(this).apply {
+            text = "Wkład do rankingu popularności"
+            textSize = 17f
+            isChecked = Popularity.isEnabled(this@SetupActivity)
+            setOnCheckedChangeListener { _, on ->
+                Popularity.setEnabled(this@SetupActivity, on)
+                refreshStatus()
+            }
+        }
+        root.addView(swPop)
+
+        root.addView(header("Dźwięk i wibracja (opcjonalne)"))
+        root.addView(body(
+            "Krótki dźwięk i wibracja przy każdym klawiszu. Domyślnie wyłączone."
+        ))
+        val prefs = getSharedPreferences("isv_collector", MODE_PRIVATE)
+        root.addView(Switch(this).apply {
+            text = "Dźwięk i wibracja klawiszy"
+            textSize = 17f
+            isChecked = prefs.getBoolean("feedback", false)
+            setOnCheckedChangeListener { _, on ->
+                prefs.edit().putBoolean("feedback", on).apply()
+            }
+        })
+
         status = body("")
         root.addView(status)
 
@@ -96,15 +130,17 @@ class SetupActivity : Activity() {
     private fun refreshStatus() {
         val n = Collector.pendingCount(this)
         val on = if (Collector.isEnabled(this)) "włączone" else "wyłączone"
-        status.text = "Zbieranie: $on · w kolejce: $n słów · id: ${Collector.contributorId(this)}"
+        val pop = if (Popularity.isEnabled(this)) "on (${Popularity.pendingCount(this)})" else "off"
+        status.text = "Nowe słowa: $on · w kolejce: $n · ranking: $pop · " +
+            "id: ${Collector.contributorId(this)}"
     }
 
     private fun exportBatch() {
-        val json = Collector.exportBatchJson(this)
-        if (Collector.pendingCount(this) == 0) {
+        if (Collector.pendingCount(this) == 0 && Popularity.pendingCount(this) == 0) {
             toast("Kolejka jest pusta")
             return
         }
+        val json = Collector.exportBatchJson(this)
         val send = Intent(Intent.ACTION_SEND).apply {
             type = "application/json"
             putExtra(Intent.EXTRA_SUBJECT, "medžuslovjansky — batch do bazy")

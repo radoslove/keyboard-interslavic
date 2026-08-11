@@ -210,11 +210,76 @@ def decode(path, buckets, n=3, freq_w=1.5, end_tol=1.4 * KEY_W):
 
 
 # ---- run ---------------------------------------------------------------------
+# The GATE: words a healthy decoder must keep returning in top-3 on a clean
+# synthetic glide. A regression here fails the build.
+MUST_HIT_TOP3 = ["slovo", "možemo", "sejčas", "člověk", "dělati", "pisati", "život"]
+# WATCH: known-hard cases (short words / same-shape families) the dwell/context
+# work targets. Reported, but they do NOT fail the gate yet.
+WATCH_TOP3 = ["kako", "izdělati"]
+MIN_TOP1 = 0.50
+MIN_TOP3 = 0.65
+
+
+def run_test(words, buckets):
+    """Automated regression gate. Exits non-zero on failure (CI-friendly)."""
+    by = {w: fr for w, fr in words}
+    ok = True
+
+    print("== gate words (must be in top-3) ==")
+    for tg in MUST_HIT_TOP3:
+        if tg not in by:
+            print(f"  SKIP  {tg!r} (not in wordlist)"); continue
+        path = synth_path(tg)
+        top = decode(path, buckets, 3) if path else []
+        in3 = tg in top
+        status = "OK  " if (top and top[0] == tg) else ("top3" if in3 else "FAIL")
+        if not in3:
+            ok = False
+        print(f"  {status} {tg!r:14} -> {top}")
+
+    print("== watch (known-hard, not gated) ==")
+    for tg in WATCH_TOP3:
+        if tg not in by:
+            continue
+        path = synth_path(tg)
+        top = decode(path, buckets, 3) if path else []
+        status = "OK  " if (top and top[0] == tg) else ("top3" if tg in top else "miss")
+        print(f"  {status} {tg!r:14} -> {top}")
+
+    random.seed(7)
+    pool = [w for w, fr in words if 3 <= len(fold_word(w)) <= 9]
+    sample = list(dict.fromkeys(sorted(pool, key=lambda w: -by[w])[:80] +
+                                random.sample(pool, 80)))
+    t1 = t3 = tot = 0
+    for tg in sample:
+        path = synth_path(tg)
+        if not path:
+            continue
+        top = decode(path, buckets, 3)
+        tot += 1
+        if top and top[0] == tg:
+            t1 += 1
+        if tg in top:
+            t3 += 1
+    a1, a3 = t1 / tot, t3 / tot
+    print(f"\n== accuracy on {tot} words ==")
+    print(f"  top-1 {a1:.0%} (min {MIN_TOP1:.0%})   top-3 {a3:.0%} (min {MIN_TOP3:.0%})")
+    if a1 < MIN_TOP1 or a3 < MIN_TOP3:
+        ok = False
+
+    print("\nRESULT:", "PASS" if ok else "FAIL")
+    sys.exit(0 if ok else 1)
+
+
 def main():
     words = load_words()
     by_word = {w: fr for w, fr in words}
     buckets = build_buckets(words)
     print(f"loaded {len(words)} forms")
+
+    if len(sys.argv) > 1 and sys.argv[1] == "test":
+        run_test(words, buckets)
+        return
 
     if len(sys.argv) > 1:
         for target in sys.argv[1:]:

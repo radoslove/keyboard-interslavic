@@ -114,3 +114,19 @@ the `hp` install entirely. Owner's call.
   follow-up when wanted.
 - **Context / n-gram ranking.** No bigram corpus exists yet; adaptive usage is
   the achievable stand-in. Real bigram context needs a harvested MS corpus.
+
+- **Dictionary / translator (deferred, owner 2026-08-10).** Two very different
+  scopes: (1) OFFLINE word-gloss ISV↔PL/EN on the medzuslove data (words already
+  carry en/pl glosses; `lookup.py` does both directions) — achievable, fits the
+  no-network/no-account ethos, but a raw gloss, not fluent MT; (2) a real fluent
+  translator — no NN model exists for ISV at quality (Google Translate has no
+  Interslavic; no parallel corpus to train), so it means an ONLINE LLM/API =
+  INTERNET permission + account + cost, which breaks the app's model. ⚠ Dictionary
+  DATA licensing (interslavic-dictionary project / the community authority) must
+  be cleared BEFORE bundling or exporting it; "słownik dla chętnych" (user fetches
+  the dictionary file themselves) sidesteps bundling. Correctness of glosses is
+  the `interslavic-tutor` lane. A separate product from the keyboard.
+- **Deliberate delete capability.** Principle: nothing is auto-deleted, but a
+  conscious delete must be possible — local "Wyczyść kolejkę" already clears the
+  user's own queue; canonical-DB deletion is moderation (server/admin, vojak's
+  lane), never automatic.
