@@ -21,8 +21,8 @@ android {
         applicationId = "com.radoslove.interslavic"
         minSdk = 24
         targetSdk = 34
-        versionCode = 29
-        versionName = "2.9"
+        versionCode = 31
+        versionName = "3.1"
     }
 
     signingConfigs {

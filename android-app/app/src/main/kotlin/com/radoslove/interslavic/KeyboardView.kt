@@ -45,7 +45,10 @@ class KeyboardView(
     private val service: ImeService,
 ) : LinearLayout(context) {
 
-    private var shift = false
+    private var shift = false          // uppercase active now (one-shot OR locked)
+    private var capsLocked = false     // caps-lock: stays until turned off
+    private var lastShiftTapMs = 0L    // double-tap-to-lock window
+    private val doubleTapMs = 300L
     private var symbols = false
 
     private val flickHandler = Handler(Looper.getMainLooper())
@@ -189,13 +192,44 @@ class KeyboardView(
         if (symbols) renderSymbols() else renderLetters()
     }
 
+    /**
+     * Shift key state machine — standard soft-keyboard behaviour:
+     *  - OFF  → tap → ONE-SHOT (next letter is capital, then auto-reverts)
+     *  - ONE-SHOT → quick 2nd tap → CAPS-LOCK (stays until turned off)
+     *  - ONE-SHOT → slow 2nd tap → OFF
+     *  - CAPS-LOCK → tap → OFF
+     * `shift` stays the single "is uppercase active now" flag every key reads;
+     * `capsLocked` only decides whether it survives typing a letter.
+     */
+    private fun onShiftTap() {
+        val now = SystemClock.uptimeMillis()
+        when {
+            capsLocked -> { capsLocked = false; shift = false }
+            shift && now - lastShiftTapMs <= doubleTapMs -> { capsLocked = true; shift = true }
+            shift -> shift = false
+            else -> shift = true
+        }
+        lastShiftTapMs = now
+        render()
+    }
+
+    /** A one-shot capital is consumed by the character it capitalised; caps-lock
+     *  and plain lowercase are left untouched. Called after every committed glyph. */
+    private fun consumeOneShotShift() {
+        if (shift && !capsLocked) { shift = false; render() }
+    }
+
     private fun renderLetters() {
         letterKeyViews.clear()
         Layout.letterRows.forEachIndexed { index, row ->
             val rv = makeRow()
             if (index == 2) {
-                val sk = functionKey("⇧", 1.5f) { shift = !shift; render() }
-                if (shift) sk.setBackgroundColor(Color.parseColor("#B0BEC5"))
+                val glyph = if (capsLocked) "⇪" else "⇧"
+                val sk = functionKey(glyph, 1.5f) { onShiftTap() }
+                when {
+                    capsLocked -> sk.setBackgroundColor(Color.parseColor("#78909C"))  // locked: stronger
+                    shift -> sk.setBackgroundColor(Color.parseColor("#B0BEC5"))         // one-shot: light
+                }
                 rv.addView(sk)
             }
             row.forEach { ch -> rv.addView(letterKey(ch)) }
@@ -398,6 +432,7 @@ class KeyboardView(
             ic.commitText(s, 1)
         }
         refreshSuggestions()
+        consumeOneShotShift()          // a tapped capital lasts exactly one letter
     }
 
     private fun backspace() {
@@ -510,7 +545,7 @@ class KeyboardView(
         when {
             slotIsSave[i] -> {
                 Collector.record(context, w)
-                suggestionViews[i].text = "✓ zapisano"
+                suggestionViews[i].text = "✓"          // language-neutral: no PL/MS wording needed
                 flickHandler.postDelayed({ refreshSuggestions() }, 700)
             }
             slotIsSwipeAlt[i] -> replaceLastSwipeWord(w)
@@ -740,6 +775,7 @@ class KeyboardView(
         pendingSpace = true
         currentWord = ""
         showSwipeAlts(words, highlight = 0)   // a wrong guess is one tap from fixed
+        consumeOneShotShift()                 // one-shot capital ends with this word too
     }
 
     /** Put the swipe candidates in the strip as tappable alternatives. */
