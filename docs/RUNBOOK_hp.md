@@ -23,10 +23,17 @@ Ten dokument zawiera wyłącznie to, **czego nie masz skąd wiedzieć**, bo pows
 `keyman/isv_latin.kmp` deklaruje w `store(&TARGETS)`:
 
 ```
-windows macosx linux web iphone ipad androidphone androidtablet mobile desktop tablet
+any
 ```
 
-…a kompilator raportuje `platformSupport` dla wszystkich. **Testowany był wyłącznie iPad.**
+…czyli **wszystkie platformy** — i kompilator raportuje `platformSupport` dla wszystkich.
+**Testowany był wyłącznie iPad.**
+
+> Do 2026-08-11 stała tu ręcznie wypisana lista
+> (`windows macosx linux web iphone ipad androidphone androidtablet mobile desktop tablet`).
+> Na recenzji katalogu (`keymanapp/keyboards#4092`) zamieniona na `any` — to jest
+> udokumentowana wartość „kompiluj na wszystko" i domyślna dla kompilatora.
+> **Luka się przez to nie zmniejszyła, tylko nazywa się krócej.**
 
 Windowsowa połowa tego, co poszło do publicznego katalogu Keymana
 (`keymanapp/keyboards#4092`, otwarte, czeka na opiekunów) **nigdy nie stanęła na Windowsie**.

@@ -7,14 +7,17 @@ keyboard there is a full app. Keyman is the way around that - it is a free App S
 app that loads .kmp keyboard packages, so we ship a package instead of an app.
 The same .kmp also installs on Android, Windows, macOS and Linux.
 
-Two artefacts come out of the one table below:
+Three artefacts come out of the one table below:
 
   * isv_latin.kmn                  - the rules. RALT (AltGr) mirrors the Windows
                                      layout key-for-key, so desktop behaviour is
                                      identical to windows/src/KBDMSSTD.klc.
-  * isv_latin.keyman-touch-layout  - the phone/tablet layout. There is no AltGr on
+  * isv_latin.keyman-touch-layout  - the phone layout. There is no AltGr on
                                      a touchscreen, so the same letters sit on
                                      LONGPRESS of their base letter (hold c -> c).
+  * isv_latin.kvks                 - the on-screen keyboard. Desktop users who
+                                     cannot see AltGr legends on their physical
+                                     keycaps read this instead.
 
 Standard orthography ONLY (HOUSE_STYLE.md §1), matching the Windows .klc and the
 macOS .keylayout: c-caron, s-caron, z-caron, e-caron plus the punctuation our MS
@@ -25,6 +28,25 @@ layout are only shift/ctrl/alt/ctrlshift/altshift/ctrlalt/ctrlaltshift; `rightal
 is not one of them. So the longpress keys are touch-only T_* keys with their own
 rules, NOT a re-use of the RALT rules. Both sets are emitted from LETTERS below,
 which is what keeps desktop and touch in agreement.
+
+CATALOGUE REVIEW - keymanapp/keyboards#4092, LornaSIL, 2026-08-10. Four changes
+came out of that review and all four are encoded here rather than hand-patched
+into the generated files:
+
+  1. The .kvks was an empty stub, so the On-Screen Keyboard showed nothing. It
+     is now generated in full: the underlying US layout on default/shift (the
+     "Fill from layout" step) plus our RALT/SHIFT+RALT cells, with the
+     `displayunderlying` and `usealtgr` flags set (the "Auto-fill underlying
+     layout" checkbox). An OSK user now sees which key to press.
+  2. &TARGETS is 'any' rather than the hand-listed platform soup. 'any' is the
+     documented value for "compile for all platforms" and is what the compiler
+     defaults to; enumerating them added nothing and could only drift.
+  3. The touch layout emits the `phone` form ONLY. It used to emit an identical
+     `tablet` form as well; two byte-identical copies is maintenance debt, and
+     the phone form is used on tablets when no tablet form is present.
+  4. Online help lives in source/help/isv_latin.php - required for `release`.
+     It is hand-maintained prose (like welcome.htm and readme.htm) and guarded
+     against drift by check_docs.py, not generated here.
 
 USAGE
     python3 build_keyman.py
@@ -66,6 +88,34 @@ TOUCH_PUNCT = [
     ("EMDASH", "—"),
 ]
 
+# The underlying physical layout, for the on-screen keyboard: (vkey, base, shift).
+# This keyboard overrides NOTHING on the base or shift layers - every rule it has
+# is on RALT - so the OSK's default/shift layers are simply US, unmodified. That
+# is the point of the reviewer's "Fill from layout": without it the OSK is blank
+# and a user has no way to see that č is AltGr+C.
+BASE_LAYOUT = [
+    ("K_BKQUOTE", "`", "~"),
+    ("K_1", "1", "!"), ("K_2", "2", "@"), ("K_3", "3", "#"),
+    ("K_4", "4", "$"), ("K_5", "5", "%"), ("K_6", "6", "^"),
+    ("K_7", "7", "&"), ("K_8", "8", "*"), ("K_9", "9", "("),
+    ("K_0", "0", ")"),
+    ("K_HYPHEN", "-", "_"), ("K_EQUAL", "=", "+"),
+    ("K_Q", "q", "Q"), ("K_W", "w", "W"), ("K_E", "e", "E"),
+    ("K_R", "r", "R"), ("K_T", "t", "T"), ("K_Y", "y", "Y"),
+    ("K_U", "u", "U"), ("K_I", "i", "I"), ("K_O", "o", "O"),
+    ("K_P", "p", "P"),
+    ("K_LBRKT", "[", "{"), ("K_RBRKT", "]", "}"), ("K_BKSLASH", "\\", "|"),
+    ("K_A", "a", "A"), ("K_S", "s", "S"), ("K_D", "d", "D"),
+    ("K_F", "f", "F"), ("K_G", "g", "G"), ("K_H", "h", "H"),
+    ("K_J", "j", "J"), ("K_K", "k", "K"), ("K_L", "l", "L"),
+    ("K_COLON", ";", ":"), ("K_QUOTE", "'", "\""),
+    ("K_Z", "z", "Z"), ("K_X", "x", "X"), ("K_C", "c", "C"),
+    ("K_V", "v", "V"), ("K_B", "b", "B"), ("K_N", "n", "N"),
+    ("K_M", "m", "M"),
+    ("K_COMMA", ",", "<"), ("K_PERIOD", ".", ">"), ("K_SLASH", "/", "?"),
+    ("K_SPACE", "", ""),
+]
+
 
 # --- .kmn ----------------------------------------------------------------
 def build_kmn():
@@ -82,8 +132,10 @@ def build_kmn():
     # hints about this on purpose; the hint is the correct outcome here.
     add("store(&VERSION) '10.0'")
     add("store(&KEYBOARDVERSION) '%s'" % KEYBOARD_VERSION)
-    add("store(&TARGETS) 'windows macosx linux web iphone ipad "
-        "androidphone androidtablet mobile desktop tablet'")
+    # 'any' == compile for all platforms, and is the compiler's own default.
+    # The previous hand-written list enumerated every platform individually,
+    # which says exactly the same thing in a form that can rot.
+    add("store(&TARGETS) 'any'")
     add("store(&VISUALKEYBOARD) 'isv_latin.kvks'")
     add("store(&LAYOUTFILE) 'isv_latin.keyman-touch-layout'")
     add("store(&BITMAP) 'isv_latin.ico'")
@@ -120,6 +172,58 @@ def build_kmn():
         add("+ [T_%s] > '%s'" % (stem, ch))
         add("+ [SHIFT T_%s] > '%s'" % (stem, ch))
     add("")
+    return "\n".join(L) + "\n"
+
+
+# --- .kvks (on-screen keyboard) ------------------------------------------
+# Shift-state codes in a .kvks layer are NOT the touch-layout names: they are
+# "" (base), "S" (shift), "RA" (right alt) and "SRA" (shift + right alt).
+# Verified against real catalogue keyboards (release/e/enga, e/east_syriac_qwerty)
+# rather than guessed - the touch-layout vocabulary does not carry over.
+def build_kvks():
+    def esc(s):
+        return (s.replace("&", "&amp;").replace("<", "&lt;")
+                 .replace(">", "&gt;"))
+
+    def layer(shift, pairs):
+        out = ['    <layer shift="%s">' % shift]
+        for vkey, text in pairs:
+            out.append("      <key vkey=\"%s\">%s</key>" % (vkey, esc(text)))
+        out.append("    </layer>")
+        return out
+
+    base = [(vk, lo) for vk, lo, _up in BASE_LAYOUT]
+    shift = [(vk, up) for vk, _lo, up in BASE_LAYOUT]
+
+    # RALT layers carry only what this keyboard actually maps there.
+    ralt, sralt = [], []
+    for vkey, lo, up, _stem in LETTERS:
+        ralt.append((vkey, lo))
+        sralt.append((vkey, up))
+    for vkey, lo, up in PUNCT:
+        ralt.append((vkey, lo))
+        sralt.append((vkey, up))
+
+    L = ['<?xml version="1.0" encoding="utf-8"?>',
+         "<visualkeyboard>",
+         "  <header>",
+         "    <version>10.0</version>",
+         "    <kbdname>isv_latin</kbdname>",
+         "    <flags>",
+         # "Auto-fill underlying layout" - show the physical keycaps under the
+         # Keyman legends, so the OSK is readable on any national layout.
+         "      <displayunderlying/>",
+         # This keyboard's entire payload is on AltGr; without this the OSK
+         # gives the user no way to reach the RA/SRA layers at all.
+         "      <usealtgr/>",
+         "    </flags>",
+         "  </header>",
+         '  <encoding name="unicode" fontname="Tahoma" fontsize="-12">']
+    L += layer("", base)
+    L += layer("S", shift)
+    L += layer("RA", ralt)
+    L += layer("SRA", sralt)
+    L += ["  </encoding>", "</visualkeyboard>"]
     return "\n".join(L) + "\n"
 
 
@@ -240,9 +344,14 @@ def build_touch_layout():
               letter_layer("shift", True),
               numeric_layer()]
     form = {"font": "Tahoma", "layer": layers}
-    # iPad reports as tablet; without this form Keyman falls back to the phone
-    # layout scaled up. Same rows - the point is that the popups exist there too.
-    return {"phone": form, "tablet": json.loads(json.dumps(form))}
+    # PHONE ONLY, on catalogue review (#4092). There used to be a `tablet` form
+    # too, byte-identical to this one - it was added on the theory that an iPad
+    # needs its own form, but an identical second copy buys nothing and has to
+    # be kept in step by hand forever. Keyman uses the phone form on tablets
+    # when no tablet form is supplied, which is the same layout either way.
+    # NOTE: the on-device iPad pass was done WITH the tablet form present, so
+    # the phone-only build has not itself been confirmed on hardware.
+    return {"phone": form}
 
 
 def main():
@@ -258,6 +367,11 @@ def main():
         json.dump(build_touch_layout(), f, ensure_ascii=False, indent=2)
         f.write("\n")
     print("wrote %s" % tl_path)
+
+    kvks_path = os.path.join(SRC, "isv_latin.kvks")
+    with open(kvks_path, "w", encoding="utf-8") as f:
+        f.write(build_kvks())
+    print("wrote %s" % kvks_path)
 
 
 if __name__ == "__main__":
