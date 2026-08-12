@@ -112,13 +112,19 @@ object Collector {
     @Synchronized
     fun exportBatchJson(context: Context): String {
         ensureLoaded(context)
+        // Two DISTINCT signals, kept apart by `source` so the DB never conflates
+        // them (nothing is merged or deleted): MISS proposals need review, usage
+        // counts are the popularity ranking.
         val words = JSONArray()
         counts.entries.sortedByDescending { it.value }.forEach { (w, n) ->
-            words.put(JSONObject().put("word", w).put("count", n))
+            words.put(JSONObject().put("word", w).put("count", n).put("source", "keyboard-new"))
+        }
+        Popularity.snapshot(context).entries.sortedByDescending { it.value }.forEach { (w, n) ->
+            words.put(JSONObject().put("word", w).put("count", n).put("source", "keyboard-usage"))
         }
         return JSONObject()
             .put("contributor", contributorId(context))
-            .put("source", "keyboard")
+            .put("source", "keyboard")          // batch-level fallback
             .put("words", words)
             .toString(2)
     }

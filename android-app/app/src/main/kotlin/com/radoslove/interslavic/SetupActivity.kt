@@ -33,22 +33,34 @@ class SetupActivity : Activity() {
             setBackgroundColor(Color.parseColor("#FAFAFA"))
         }
 
+        // MS-first + EN gloss (interslavic-tutor ruling, DB-verified :30020).
         root.addView(header("Medžuslovjansky"))
+        root.addView(gloss("Interslavic"))
         root.addView(body(
-            "Klawiatura międzysłowiańska. Litery ze standardu (č š ž ě) na " +
-            "long-press i machnięciu w górę; pasek podpowiedzi ze słownika."
+            "Medžuslovjanska klaviatura. Standardne bukvy (č š ž ě) na dolgom " +
+            "pritisku i mahu nagoru; pas prědloženj iz slovnika."
+        ))
+        root.addView(gloss(
+            "Interslavic keyboard. Standard letters (č š ž ě) on long-press and " +
+            "an upward flick; a suggestion bar from the dictionary."
         ))
 
-        root.addView(header("Zbieranie nowych słów (opcjonalne)"))
+        root.addView(header("Sbiranje novyh slov (opcionalno)"))
+        root.addView(gloss("Collecting new words (optional)"))
         root.addView(body(
-            "Gdy włączone, klawiatura zapisuje LOKALNIE słowa, których nie ma w " +
-            "słowniku, żeby później trafiły do rewizji (nie są poprawiane " +
-            "automatycznie). Nic nie jest wysyłane — eksport to plik, który " +
-            "przekazujesz sam. Domyślnie wyłączone."
+            "Kogda je vključeno, klaviatura lokalno zapisyvaje slova, ktoryh ně v " +
+            "slovniku, da by pozdněje šli do revizije (nikoli ně avtomatično " +
+            "popravjena). Ničto se ne posyla — izvoz je fajl, ktory sam prědaješ " +
+            "dalje. Standardno vyključeno."
+        ))
+        root.addView(gloss(
+            "When on, the keyboard saves words NOT in the dictionary LOCALLY, to " +
+            "later go to review (never auto-corrected). Nothing is sent — the " +
+            "export is a file you pass on yourself. Off by default."
         ))
 
         val sw = Switch(this).apply {
-            text = "Zbieraj nowe słowa"
+            text = "Sbiraj nove slova (Collect new words)"
             textSize = 17f
             isChecked = Collector.isEnabled(this@SetupActivity)
             setOnCheckedChangeListener { _, on ->
@@ -58,19 +70,65 @@ class SetupActivity : Activity() {
         }
         root.addView(sw)
 
+        root.addView(header("Poredok popularnosti (opcionalno)"))
+        root.addView(gloss("Popularity ranking (optional)"))
+        root.addView(body(
+            "Kogda je vključeno, slova, ktora potvrdiš pri pisanju — svaipom, " +
+            "izborom iz pasa, dovršenjem znanego slova — sut lokalno čislena za " +
+            "spisok najpopularnějših medžuslovjanskih slov. Psevdonimno " +
+            "(identifikator ustrojstva niže), bez ličnyh danyh. Ničto ne odhodi " +
+            "avtomatično — do bazy dojde tolko pri tvojem izvozu. Standardno " +
+            "vyključeno."
+        ))
+        root.addView(gloss(
+            "When on, words you CONFIRM while typing — swipe, picking from the " +
+            "bar, finishing a known word — are counted LOCALLY to feed a ranking " +
+            "of the most popular Interslavic words. Pseudonymously (device id " +
+            "below), no personal data. Nothing leaves automatically — it reaches " +
+            "the database only on your export. Off by default."
+        ))
+        val swPop = Switch(this).apply {
+            text = "Vklad do poredka popularnosti (Contribute to the popularity ranking)"
+            textSize = 17f
+            isChecked = Popularity.isEnabled(this@SetupActivity)
+            setOnCheckedChangeListener { _, on ->
+                Popularity.setEnabled(this@SetupActivity, on)
+                refreshStatus()
+            }
+        }
+        root.addView(swPop)
+
+        root.addView(header("Zvuk i vibracija (opcionalno)"))
+        root.addView(gloss("Sound and vibration (optional)"))
+        root.addView(body(
+            "Kratky zvuk i vibracija pri každoj klaviši. Standardno vyključeno."
+        ))
+        root.addView(gloss(
+            "A short sound and vibration on each key. Off by default."
+        ))
+        val prefs = getSharedPreferences("isv_collector", MODE_PRIVATE)
+        root.addView(Switch(this).apply {
+            text = "Zvuk i vibracija klaviš (Key sound and vibration)"
+            textSize = 17f
+            isChecked = prefs.getBoolean("feedback", false)
+            setOnCheckedChangeListener { _, on ->
+                prefs.edit().putBoolean("feedback", on).apply()
+            }
+        })
+
         status = body("")
         root.addView(status)
 
         root.addView(Button(this).apply {
-            text = "Wyślij do bazy (batch JSON)"
+            text = "Pošli do bazy (grupa JSON) — Send to the database (JSON batch)"
             setOnClickListener { exportBatch() }
         })
         root.addView(Button(this).apply {
-            text = "Eksportuj do rewizji (lista)"
+            text = "Izvezi do revizije (spisok) — Export for review (list)"
             setOnClickListener { exportQueue() }
         })
         root.addView(Button(this).apply {
-            text = "Wyczyść kolejkę"
+            text = "Očisti red (Clear the queue)"
             setOnClickListener {
                 Collector.clear(this@SetupActivity)
                 refreshStatus()
@@ -96,15 +154,17 @@ class SetupActivity : Activity() {
     private fun refreshStatus() {
         val n = Collector.pendingCount(this)
         val on = if (Collector.isEnabled(this)) "włączone" else "wyłączone"
-        status.text = "Zbieranie: $on · w kolejce: $n słów · id: ${Collector.contributorId(this)}"
+        val pop = if (Popularity.isEnabled(this)) "on (${Popularity.pendingCount(this)})" else "off"
+        status.text = "Nowe słowa: $on · w kolejce: $n · ranking: $pop · " +
+            "id: ${Collector.contributorId(this)}"
     }
 
     private fun exportBatch() {
-        val json = Collector.exportBatchJson(this)
-        if (Collector.pendingCount(this) == 0) {
+        if (Collector.pendingCount(this) == 0 && Popularity.pendingCount(this) == 0) {
             toast("Kolejka jest pusta")
             return
         }
+        val json = Collector.exportBatchJson(this)
         val send = Intent(Intent.ACTION_SEND).apply {
             type = "application/json"
             putExtra(Intent.EXTRA_SUBJECT, "medžuslovjansky — batch do bazy")
@@ -140,6 +200,15 @@ class SetupActivity : Activity() {
         textSize = 15f
         setTextColor(Color.parseColor("#37474F"))
         setPadding(0, 4, 0, 8)
+    }
+
+    /** EN gloss under an MS header/paragraph — smaller and lighter, so MS reads
+     *  as primary and English as the aid (MS-first + EN gloss). */
+    private fun gloss(t: String) = TextView(this).apply {
+        text = t
+        textSize = 13f
+        setTextColor(Color.parseColor("#78909C"))
+        setPadding(0, 0, 0, 10)
     }
 
     private fun toast(t: String) = Toast.makeText(this, t, Toast.LENGTH_SHORT).show()

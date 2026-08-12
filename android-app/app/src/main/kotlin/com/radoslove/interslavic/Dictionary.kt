@@ -69,28 +69,33 @@ object Dictionary {
      * Up to [n] words that start with [prefix] (lowercased by the caller),
      * highest frequency first. Empty while the model is still loading.
      */
-    fun suggest(prefix: String, n: Int): List<String> {
+    fun suggest(prefix: String, n: Int, boost: (String) -> Int = { 0 }): List<String> {
         if (!ready || prefix.isEmpty()) return emptyList()
         val arr = entries
-        var lo = lowerBound(arr, prefix)
-        // Collect top-n by frequency over the prefix range, capped so a very
-        // short prefix (thousands of hits) stays snappy.
+        val lo = lowerBound(arr, prefix)
+        // Rank by a composite: frequency dominates, but a whole inflected
+        // paradigm shares ONE frequency (the lemma's), so ties are common —
+        // and breaking them alphabetically buried the everyday form (možemo)
+        // under an aorist (možehmo). Prefer the SHORTER form on a tie; the
+        // common present-tense forms are shorter than the aorist/imperfect
+        // ones. (64 > any word length, so frequency still wins outright.)
         val topWords = arrayOfNulls<String>(n)
-        val topFreq = IntArray(n) { -1 }
+        val topScore = IntArray(n) { Int.MIN_VALUE }
         var scanned = 0
         var i = lo
         while (i < arr.size && scanned < 6000) {
             val e = arr[i]
             if (!e.word.startsWith(prefix)) break
-            // insert e into the tiny top-n by frequency
-            if (e.freq > topFreq[n - 1]) {
+            // + adaptive usage: words the user actually uses climb the ranking.
+            val score = e.freq * 64 - e.word.length + boost(e.word)
+            if (score > topScore[n - 1]) {
                 var j = n - 1
-                while (j > 0 && topFreq[j - 1] < e.freq) {
-                    topFreq[j] = topFreq[j - 1]
+                while (j > 0 && topScore[j - 1] < score) {
+                    topScore[j] = topScore[j - 1]
                     topWords[j] = topWords[j - 1]
                     j--
                 }
-                topFreq[j] = e.freq
+                topScore[j] = score
                 topWords[j] = e.word
             }
             i++
@@ -113,60 +118,47 @@ object Dictionary {
     }
 
     /**
-     * How many letters of [word] can NOT be matched, in order, against the key
-     * [path] — allowing a word letter to be skipped when the finger cut a corner.
-     * 0 = perfect glide, 1 = one letter missed. Used to be forgiving without
-     * accepting random paths (the first/last anchor still gates those out).
-     */
-    private fun orderedMisses(word: String, path: String): Int {
-        var pi = 0
-        var miss = 0
-        for (c in word) {
-            var k = pi
-            while (k < path.length && path[k] != c) k++
-            if (k < path.length) pi = k + 1 else miss++
-        }
-        return miss
-    }
-
-    /**
-     * First working cut of the glide decoder. [path] is the deduped sequence of
-     * base keys the finger crossed (e.g. "slkjuivo"). A candidate word must:
-     *  - start on the same base key as the path (its first letter, folded),
-     *  - end on the same base key,
-     *  - fold to base letters that form an ordered subsequence of the path,
-     *  - be no longer than the path plus a little slack.
-     * Ranked by frequency. Accents/digraphs are matched on their base letters
-     * and the real accented word is returned.
+     * Geometry glide decoder. The caller (KeyboardView, which has the key
+     * positions) passes a [score] function that, for a folded candidate word,
+     * returns how well its letters lie along the finger's actual path — higher
+     * is better, Double.NEGATIVE_INFINITY means "a letter never came near the
+     * path, reject". This replaces the brittle ordered-key-crossing model:
+     * on a long diagonal the finger crosses keys OUT of the word's letter order,
+     * so order can't be trusted — distance-to-path can.
      *
-     * A full scan of 248k forms with cheap early rejects — fine for one call on
-     * finger-up. The scoring is deliberately simple; this is where accuracy work
-     * (geometry, bigrams) lands next, on-device.
+     * We still anchor the FIRST letter to the path's start key (a swipe begins
+     * deliberately on its first letter) to keep the candidate set small, then
+     * let geometry judge the rest. Frequency is only a tiebreak between words
+     * that fit the path about equally well. Accents/digraphs match on their base
+     * letters; the real accented word is returned.
      */
-    fun decodeSwipe(path: String, n: Int): List<String> {
-        if (!ready || path.length < 2) return emptyList()
-        val first = path.first()
-        val last = path.last()
-        val maxLen = path.length + 3
+    fun decodeSwipeGeo(
+        firstKey: Char,
+        maxLen: Int,
+        n: Int,
+        score: (String) -> Double,
+        boost: (String) -> Double = { 0.0 },
+    ): List<String> {
+        if (!ready) return emptyList()
         val topWords = arrayOfNulls<String>(n)
-        val topScore = LongArray(n) { Long.MIN_VALUE }
+        val topScore = DoubleArray(n) { Double.NEGATIVE_INFINITY }
         for (e in entries) {
             val w = e.word
             if (w.length < 2 || w.length > maxLen) continue
-            if (foldBase(w.first()) != first) continue
-            if (foldBase(w.last()) != last) continue
+            if (foldBase(w.first()) != firstKey) continue
             val folded = buildString { for (c in w) append(foldBase(c)) }
-            val miss = orderedMisses(folded, path)
-            if (miss > 1) continue                     // forgiving: allow one cut corner
-            // Perfect glides win; a one-miss word can still surface if it is far
-            // more frequent than any perfect match.
-            val score = e.freq.toLong() - miss * 5000L
-            if (score > topScore[n - 1]) {
+            val geo = score(folded)
+            if (geo == Double.NEGATIVE_INFINITY) continue
+            // geo is negative px (0 = letters sit exactly on the path); a small
+            // frequency nudge breaks ties, and adaptive usage nudges harder so a
+            // word you keep swiping wins the near-ties geometry cannot resolve.
+            val s = geo + Math.log((e.freq + 1).toDouble()) * 2.5 + boost(w)
+            if (s > topScore[n - 1]) {
                 var j = n - 1
-                while (j > 0 && topScore[j - 1] < score) {
+                while (j > 0 && topScore[j - 1] < s) {
                     topScore[j] = topScore[j - 1]; topWords[j] = topWords[j - 1]; j--
                 }
-                topScore[j] = score; topWords[j] = w
+                topScore[j] = s; topWords[j] = w
             }
         }
         return topWords.filterNotNull()
