@@ -17,6 +17,29 @@ SourceCode: https://github.com/radoslove/keyboard-interslavic
 IssueTracker: https://github.com/radoslove/keyboard-interslavic/issues
 
 AutoName: Medžuslovjansky
+Summary: Interslavic keyboard — offline, private, with swipe typing
+
+Description: |-
+    A native keyboard (input method) for '''Interslavic''' — the zonal auxiliary
+    Slavic language, medžuslovjansky.
+
+    Standard orthography only (č š ž ě): the four diacritic letters are on a
+    long-press of their base key (hold c → č, s → š, z → ž, e → ě), and the
+    digraphs dž lj nj on d l n. A prediction bar and glide (swipe) typing come
+    from a built-in Interslavic dictionary.
+
+    Privacy:
+
+    * Nothing leaves your phone. No account, no e-mail, no phone number, no sign-up.
+    * The keyboard needs no "Full Access" to type.
+    * Word collection and the popularity ranking are optional, opt-in, on-device
+      only, OFF by default, and never send anything automatically — any export is
+      a file you hand on yourself.
+
+    Free and open source. No trackers, no ads, no proprietary libraries — the
+    swipe engine is our own, not Google's gesture blob.
+
+    Interslavic itself belongs to no one; this is a free tool to help spread it.
 
 RepoType: git
 Repo: https://github.com/radoslove/keyboard-interslavic.git
