@@ -194,6 +194,7 @@ Vse pod **MIT.**
 - Ukladji `kbdmslat` (latinica) i `kbdmskir` (cyrilica) izvorno iz projekta
   [medzuslovjansky/keyboards](https://github.com/medzuslovjansky/keyboards). Avtorske prava
   pri avtorah: **Adam Gola, Roberto Lombino jr.**
-- Ostatok — runy, android ukladji, `docs/`, slovnik — vlastno, MIT.
+- Ostatok koda — runy, android ukladji, `docs/` — vlastno, MIT.
+- **Slovnik (dane):** samo formy + čestoty (bez značenj/prěkladov) — vlastničstva nad leksikalnymi danymi ne tvrdimo. Podrobno: [`keyman/radoslove.isv.wordlist/LICENSE.md`](keyman/radoslove.isv.wordlist/LICENSE.md).
 
 Polny tekst: [`LICENSE`](LICENSE).

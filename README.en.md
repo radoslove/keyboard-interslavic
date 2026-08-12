@@ -155,9 +155,10 @@ Collected words produce a **popularity ranking** — they show what people need 
 
 ## Licenses
 
-Everything under **MIT.**
+Code and layouts under **MIT.**
 
 - The `kbdmslat` (Latin) and `kbdmskir` (Cyrillic) layouts originate from [medzuslovjansky/keyboards](https://github.com/medzuslovjansky/keyboards). Copyright with the authors: **Adam Gola, Roberto Lombino jr.**
-- The rest — runic layouts, Android layouts, `docs/`, the dictionary — original, MIT.
+- The rest of the **code** — runic layouts, Android layouts, `docs/`, generators, apps — original, MIT.
+- **Dictionary data:** the wordlist is word forms + corpus frequencies only (no definitions or translations), machine-generated from a lemma list compiled from various Interslavic lexical resources. **No ownership of, or license over, the underlying lexical data is claimed** — it is included solely to support this free, non-commercial tool for the Interslavic language.
 
 Full text: [`LICENSE`](LICENSE).

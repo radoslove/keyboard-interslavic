@@ -1,0 +1,35 @@
+# F-Droid metadata recipe — DRAFT (staging copy).
+# Destination: fdroiddata repo → metadata/com.radoslove.interslavic.yml
+# This is NOT submitted. It waits on: (1) purchased-source terms check,
+# (2) merge android-app -> main + a `v3.1` tag (the `commit:` below), (3) owner
+# opening the merge request. See SUBMIT.md in this folder.
+#
+# ⚠ The subdir/gradle block below is a first draft — the Gradle project root is
+# `android-app/` (not the repo root), so the build config must be validated
+# against F-Droid's buildserver (fdroid build) before the MR is trusted.
+
+Categories:
+  - System
+  - Writing
+License: MIT
+AuthorName: Radoslove
+SourceCode: https://github.com/radoslove/keyboard-interslavic
+IssueTracker: https://github.com/radoslove/keyboard-interslavic/issues
+
+AutoName: Medžuslovjansky
+
+RepoType: git
+Repo: https://github.com/radoslove/keyboard-interslavic.git
+
+Builds:
+  - versionName: '3.1'
+    versionCode: 31
+    commit: v3.1
+    subdir: android-app/app
+    gradle:
+      - yes
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: '3.1'
+CurrentVersionCode: 31
