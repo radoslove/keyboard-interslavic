@@ -25,6 +25,13 @@ android {
         versionName = "3.1"
     }
 
+    // F-Droid reproducible builds reject the AGP "Dependency metadata"
+    // signing block. Strip it so the published APK matches F-Droid's build.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
     signingConfigs {
         if (keystorePropsFile.exists()) {
             create("release") {
