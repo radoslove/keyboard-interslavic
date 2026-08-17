@@ -18,7 +18,7 @@
   </Info>
   <Files>
     <File>
-      <Name>..\build\radoslove.isv.wordlist.model.js</Name>
+      <Name>..\build\radoslove.isv-latn.wordlist.model.js</Name>
     </File>
     <File>
       <Name>welcome.htm</Name>
@@ -34,7 +34,7 @@
   <LexicalModels>
     <LexicalModel>
       <Name>Medžuslovjansky slovnik</Name>
-      <ID>radoslove.isv.wordlist</ID>
+      <ID>radoslove.isv-latn.wordlist</ID>
             <Languages>
         <Language ID="isv-Latn">Interslavic</Language>
       </Languages>

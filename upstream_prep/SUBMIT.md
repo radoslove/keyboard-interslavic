@@ -49,12 +49,12 @@ a language code and not a vendor prefix like `sil` or `nrc`. Compare
 
 ## 2 · Lexical model → `keymanapp/lexical-models`
 
-Copy `keymanapp-lexical-models/release/radoslove/radoslove.isv.wordlist/` into
+Copy `keymanapp-lexical-models/release/radoslove/radoslove.isv-latn.wordlist/` into
 a fork at the same path.
 
 - [ ] Fork `keymanapp/lexical-models`
-- [ ] Copy the folder to `release/radoslove/radoslove.isv.wordlist/`
-- [ ] `kmc build .../radoslove.isv.wordlist.kpj` — must be warning-clean
+- [ ] Copy the folder to `release/radoslove/radoslove.isv-latn.wordlist/`
+- [ ] `kmc build .../radoslove.isv-latn.wordlist.kpj` — must be warning-clean
 - [ ] PR
 
 The id already follows their `<author>.<lang>.<name>` convention, so no rename

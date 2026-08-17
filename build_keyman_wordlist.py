@@ -20,14 +20,14 @@ numbers.
 
 USAGE
     python3 build_keyman_wordlist.py
-    kmc build keyman/radoslove.isv.wordlist/radoslove.isv.wordlist.kpj
+    kmc build keyman/radoslove.isv-latn.wordlist/radoslove.isv-latn.wordlist.kpj
 """
 import os
 import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "keyman", "radoslove.isv.wordlist", "source",
+OUT = os.path.join(HERE, "keyman", "radoslove.isv-latn.wordlist", "source",
                    "wordlist.tsv")
 
 # The wordlist lives in the repo so the model can be rebuilt without the vault;

@@ -130,3 +130,119 @@ the `hp` install entirely. Owner's call.
   conscious delete must be possible — local "Wyczyść kolejkę" already clears the
   user's own queue; canonical-DB deletion is moderation (server/admin, vojak's
   lane), never automatic.
+
+## What transfers to iOS, and what does not
+
+*(added from `mc`, 2026-08-09)*
+
+This track is also a rehearsal for the iOS app, so it is worth naming which lessons
+survive the move and which do not.
+
+| Transfers | Stays behind |
+|---|---|
+| The layout model from the one canonical table | The code — Kotlin vs Swift |
+| Longpress and flick handling, and their traps | |
+| Prediction-bar design and sizing decisions | |
+| The swipe decoder algorithm | |
+| The consent / collection UX | **Where collection lives** |
+
+That last row is the one worth discovering early. An Android `InputMethodService`
+reaches the network and storage like any app, so collection can live **in the keyboard**.
+On iOS a keyboard extension without "Full Access" can reach neither the network nor a
+shared container with its own app — and that isolation is the iOS app's main selling
+point, so it stays. Collection there has to move into the container app.
+
+Learning that here is cheaper than discovering it halfway through the Swift build.
+
+---
+
+# Appendix — the `mc` draft, kept for its framing
+
+Written on `mc` on 2026-08-09, before it was known how far this track had already
+progressed on `hp`. The milestones above supersede it — the code follows them, not this.
+Kept because the framing is still the argument for why the track exists at all, and
+because nothing here gets deleted, only versioned.
+
+# Android keyboard app — the laboratory
+
+**This is not a product.** Android already has a good Interslavic keyboard: Unexpected
+Keyboard with our XML layout, plus HeliBoard with our `.dict` for swipe. Anything we write
+from scratch will be worse than that for months.
+
+It is a **laboratory for the iOS app**, and it earns its place because three things can be
+learned here that iOS cannot teach — cheaply, and in minutes per iteration instead of days.
+
+## Why Android is the right place to learn
+
+**No gatekeeper.** No $99/year, no review, no signing ceremony. Build an APK, install it.
+
+**No cable.** The APK gets served over HTTP from `mc` — the same trick that put the Keyman
+package on the iPad today — and installed by tapping a link. Contrast iOS, where a device
+cannot receive a self-built app at all without a one-time USB pairing. That difference is
+the whole reason this track can move while the iOS one waits for an adapter.
+
+**No "Full Access" equivalent.** An Android `InputMethodService` reaches the network and
+storage like any app. So the word-collection loop can live **in the keyboard itself** —
+precisely what iOS forbids. Building it here tells us what the interaction should feel
+like before we have to fit it into an iOS app's narrower shape.
+
+## What transfers to iOS, and what does not
+
+| Transfers | Stays behind |
+|---|---|
+| Layout model from the one character table | The code — Kotlin vs Swift |
+| Longpress + flick handling, and their traps | |
+| Prediction-bar design and sizing decisions | |
+| The swipe decoder algorithm | |
+| Consent/collection UX | **Where collection lives**: keyboard on Android, app on iOS |
+
+That last row is the single most valuable thing to discover early. On iOS a keyboard
+extension without Full Access can reach neither the network nor a shared container with
+its own app, so collection has to move into the container app. Learning that in a
+prototype beats discovering it halfway through the Swift build.
+
+## Toolchain (on `mc`, installed 2026-08-09)
+
+```sh
+brew install openjdk@21                 # NOT the default openjdk — see below
+brew install --cask android-commandlinetools
+sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+```
+
+⚠ **JDK 26 is too new.** Homebrew's default `openjdk` is 26; Android Gradle Plugin
+supports 17–21. Use `openjdk@21` and set `JAVA_HOME` to it, or the first Gradle run fails
+with an unhelpful toolchain error.
+
+⚠ **`adb` over Tailscale did not connect** to `a55` — wireless debugging is off on the
+phone, and Android 11+ additionally wants a pairing code. Not worth fixing to *test*: the
+HTTP-install path needs no adb at all. Enable it later only for `logcat` during debugging.
+
+## Milestones
+
+**M1 — it types.** `InputMethodService`, the four letters on longpress *and* flick, shift,
+backspace, space, return, numeric layer. Same character table as every other platform.
+Done when it survives a day of real use next to Unexpected Keyboard.
+
+**M2 — prediction bar.** Fed by the same wordlist. Android has no keyboard memory cap, so
+this is where we find out how large a model is actually *useful* before iOS forces a
+budget on us.
+
+**M3 — collection loop.** The reason this laboratory exists. Opt-in, on-device filter for
+names and digits, pseudonymous, withdrawable, aggregate. Feeds the queue that
+`review_lexicon.py` already reads — the review half is built and now runs anywhere.
+
+**M4 — swipe.** Gesture path scored against a trie. The only feature Keyman cannot give on
+either platform. Weeks, not days; do not start before M2.
+
+## What we deliberately will not do
+
+Compete with Unexpected Keyboard or HeliBoard, ship to Play Store, or maintain this as a
+supported product. If it turns out better than the existing pair, that is a surprise to
+re-evaluate then — not a goal.
+
+## Open questions
+
+- Which layout does the prediction bar assume when the user is mid-word in a language the
+  model does not cover? (Interslavic speakers routinely mix in their own language.)
+- Does the collection loop need a server at all, or is "export a file and attach it to a
+  GitHub issue" enough for the first hundred users?

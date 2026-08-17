@@ -132,6 +132,11 @@ final class KeyboardViewController: UIInputViewController {
         let b = styledKey(title(for: ch))
         b.accessibilityIdentifier = String(ch)
         b.addTarget(self, action: #selector(tapCharacter(_:)), for: .touchUpInside)
+        // Without this a key looks dead while you press it, and a keyboard that
+        // does not visibly answer a touch reads as broken even when it works.
+        b.addTarget(self, action: #selector(keyDown(_:)), for: .touchDown)
+        b.addTarget(self, action: #selector(keyUp(_:)),
+                    for: [.touchUpInside, .touchUpOutside, .touchCancel])
         if Layout.variants(for: ch, uppercase: false) != nil {
             let hold = UILongPressGestureRecognizer(target: self,
                                                     action: #selector(holdKey(_:)))
@@ -144,8 +149,26 @@ final class KeyboardViewController: UIInputViewController {
     private func functionKey(_ title: String, action: Selector) -> UIButton {
         let b = styledKey(title)
         b.backgroundColor = .tertiarySystemFill
+        b.tintColorDidChange()
         b.addTarget(self, action: action, for: .touchUpInside)
+        b.addTarget(self, action: #selector(keyDown(_:)), for: .touchDown)
+        b.addTarget(self, action: #selector(keyUp(_:)),
+                    for: [.touchUpInside, .touchUpOutside, .touchCancel])
         return b
+    }
+
+    @objc private func keyDown(_ sender: UIButton) {
+        sender.backgroundColor = .systemGray3
+        // Keyboard extensions may not play key clicks without full access, but
+        // haptics are allowed and carry the same "it registered" signal.
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
+
+    @objc private func keyUp(_ sender: UIButton) {
+        let isFunction = sender.accessibilityIdentifier == nil
+        UIView.animate(withDuration: 0.08) {
+            sender.backgroundColor = isFunction ? .tertiarySystemFill : .systemBackground
+        }
     }
 
     private var shiftTitle: String {
@@ -221,6 +244,34 @@ final class KeyboardViewController: UIInputViewController {
 
     private func insert(_ ch: Character) {
         textDocumentProxy.insertText(String(ch))
+        rearmShiftIfSentenceStart()
+    }
+
+    /// Shift used to arm once at load and never again, so everything after the
+    /// first word was lowercase forever. Re-arm at the start of a sentence -
+    /// but never while Caps Lock is deliberately on.
+    private func rearmShiftIfSentenceStart() {
+        guard shift != .locked else { return }
+        let before = textDocumentProxy.documentContextBeforeInput ?? ""
+        let trimmed = before.trimmingCharacters(in: .whitespaces)
+        let atStart = trimmed.isEmpty
+        let afterStop = trimmed.last.map { ".!?".contains($0) } ?? false
+        // Only act on a real transition, or every keystroke rebuilds the view.
+        let wanted: ShiftState = (atStart || (afterStop && before.hasSuffix(" ")))
+            ? .on : .off
+        if wanted != shift {
+            shift = wanted
+            refreshTitles()
+            rowsStack?.arrangedSubviews.forEach { row in
+                (row as? UIStackView)?.arrangedSubviews.forEach { v in
+                    if let b = v as? UIButton, b.accessibilityIdentifier == nil,
+                       b.title(for: .normal)?.contains("⇧") == true
+                        || b.title(for: .normal)?.contains("⬆") == true {
+                        b.setTitle(shiftTitle, for: .normal)
+                    }
+                }
+            }
+        }
     }
 
     private func refreshTitles() {

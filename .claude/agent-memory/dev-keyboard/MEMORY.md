@@ -1,0 +1,1 @@
+- [Docs: parity over audit](feedback_docs_parity_over_audit.md) — README work wants MS/EN parity and polish, not forensic verification of every sentence
