@@ -60,7 +60,7 @@ SRC = os.path.join(HERE, "keyman", "isv_latin", "source")
 
 KEYBOARD_NAME = "Medžuslovjansky (latinica)"
 COPYRIGHT = "© Radoslove"
-KEYBOARD_VERSION = "1.5"
+KEYBOARD_VERSION = "1.6"
 
 # --- the canonical table -------------------------------------------------
 # base key -> (lowercase, uppercase, T_ key stem)
