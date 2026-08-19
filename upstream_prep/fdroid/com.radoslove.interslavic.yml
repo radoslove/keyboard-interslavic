@@ -52,6 +52,13 @@ Builds:
     gradle:
       - yes
 
+# Reproducible builds ONLY — leave commented for a plain "F-Droid signs it" build.
+# If you later publish your own signed APKs and want F-Droid to verify-and-match
+# them, add a `Binaries:` URL above and uncomment the line below. The value is the
+# PUBLIC SHA256 fingerprint of the medzuslovjansky signing cert (safe to commit —
+# it is not the private key):
+# AllowedAPKSigningKeys: 5fa81cd2fd62cbdd3580076b941c1711b4ddc625609b5c80ec7c135a56e3b98a
+
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: '3.1'
