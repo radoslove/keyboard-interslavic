@@ -7,8 +7,10 @@ import UIKit
 ///
 /// Not implemented yet, in rough order of how much they are missed:
 ///   - numeric layer switching is wired but the layer is minimal
-///   - no prediction bar (that is where the wordlist would go)
-///   - no haptics, no key-press sound
+///   - no key-press sound (a keyboard without full access may not play one)
+///
+/// Swiping lives in `SwipeInput` / `SwipeDecoder`; this class only lends it the
+/// key geometry and puts the chosen word into the document.
 final class KeyboardViewController: UIInputViewController {
 
     private enum ShiftState { case off, on, locked }
@@ -22,12 +24,22 @@ final class KeyboardViewController: UIInputViewController {
     private var variantLabels: [UILabel] = []
     private var selected = 0
 
+    private var swipeInput: SwipeInput!
+    private var suggestionBar: UIStackView!
+    private var suggestionButtons: [UIButton] = []
+    /// What the last swipe put in, so tapping another suggestion knows how much
+    /// to take back out.
+    private var lastSwipedWord: String?
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = UIColor.secondarySystemBackground
+        buildSuggestionBar()
         buildKeyboard()
+        swipeInput = SwipeInput(host: self)
+        swipeInput.attach()
     }
 
     // MARK: - Building
@@ -51,10 +63,11 @@ final class KeyboardViewController: UIInputViewController {
         NSLayoutConstraint.activate([
             stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 3),
             stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -3),
-            stack.topAnchor.constraint(equalTo: view.topAnchor, constant: 6),
+            stack.topAnchor.constraint(equalTo: suggestionBar.bottomAnchor, constant: 4),
             stack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor,
                                           constant: -4),
-            view.heightAnchor.constraint(greaterThanOrEqualToConstant: 216),
+            view.heightAnchor.constraint(
+                greaterThanOrEqualToConstant: 216 + Self.suggestionBarHeight),
         ])
     }
 
@@ -239,6 +252,7 @@ final class KeyboardViewController: UIInputViewController {
 
     @objc private func tapLayer() {
         showingNumeric.toggle()
+        showSuggestions([])
         buildKeyboard()
     }
 
@@ -370,5 +384,131 @@ final class KeyboardViewController: UIInputViewController {
         popupStrip = nil
         variantLabels = []
         selected = 0
+    }
+}
+
+// MARK: - Suggestions and swiping
+
+extension KeyboardViewController: SwipeHost {
+
+    static let suggestionBarHeight: CGFloat = 38
+
+    /// The bar sits INSIDE our own frame, above the keys, and the extension is
+    /// made taller to hold it. That is the difference between this and the
+    /// longpress popup: a keyboard extension may grow downward into its own
+    /// height, it may not draw upward over the host app.
+    fileprivate func buildSuggestionBar() {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.distribution = .fillEqually
+        stack.spacing = 1
+        stack.translatesAutoresizingMaskIntoConstraints = false
+
+        suggestionButtons = (0..<3).map { _ in
+            let b = UIButton(type: .system)
+            b.titleLabel?.font = .systemFont(ofSize: 17)
+            b.titleLabel?.adjustsFontSizeToFitWidth = true
+            b.titleLabel?.minimumScaleFactor = 0.7
+            b.setTitleColor(.label, for: .normal)
+            b.addTarget(self, action: #selector(tapSuggestion(_:)), for: .touchUpInside)
+            stack.addArrangedSubview(b)
+            return b
+        }
+
+        view.addSubview(stack)
+        suggestionBar = stack
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 3),
+            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -3),
+            stack.topAnchor.constraint(equalTo: view.topAnchor, constant: 2),
+            stack.heightAnchor.constraint(equalToConstant: Self.suggestionBarHeight),
+        ])
+    }
+
+    fileprivate func showSuggestions(_ words: [String]) {
+        for (i, b) in suggestionButtons.enumerated() {
+            let word = i < words.count ? words[i] : nil
+            b.setTitle(word, for: .normal)
+            b.isEnabled = word != nil
+            // The first one is what actually went in; marking it says which of
+            // the alternatives is currently in the text.
+            b.setTitleColor(i == 0 ? .label : .secondaryLabel, for: .normal)
+            b.titleLabel?.font = .systemFont(ofSize: 17, weight: i == 0 ? .semibold : .regular)
+        }
+    }
+
+    @objc fileprivate func tapSuggestion(_ sender: UIButton) {
+        guard let word = sender.title(for: .normal), !word.isEmpty else { return }
+        replaceLastSwipedWord(with: word)
+        // The tapped word becomes the committed one, so the bar re-marks it.
+        var words = suggestionButtons.compactMap { $0.title(for: .normal) }
+        if let at = words.firstIndex(of: word) {
+            words.remove(at: at)
+            words.insert(word, at: 0)
+        }
+        showSuggestions(words)
+    }
+
+    /// Puts a decoded word in, spacing it from whatever came before.
+    fileprivate func commitSwipe(_ word: String) {
+        let cased = isUppercase ? word.prefix(1).uppercased() + word.dropFirst() : word
+        let before = textDocumentProxy.documentContextBeforeInput ?? ""
+        if let last = before.last, !last.isWhitespace {
+            textDocumentProxy.insertText(" ")
+        }
+        // The trailing space is what makes swiping continuous - without it the
+        // next gesture would run into the previous word.
+        textDocumentProxy.insertText(cased + " ")
+        lastSwipedWord = cased
+        if shift == .on { shift = .off; refreshTitles() }
+    }
+
+    fileprivate func replaceLastSwipedWord(with word: String) {
+        guard let previous = lastSwipedWord else { return }
+        // One extra for the space `commitSwipe` added.
+        for _ in 0..<(previous.count + 1) { textDocumentProxy.deleteBackward() }
+        let cased = previous.first?.isUppercase == true
+            ? word.prefix(1).uppercased() + word.dropFirst()
+            : word
+        textDocumentProxy.insertText(cased + " ")
+        lastSwipedWord = cased
+    }
+
+    // MARK: SwipeHost
+
+    var swipeSurface: UIView { view }
+
+    var swipeCanBegin: Bool {
+        // No letters to cross on the numeric layer, and the longpress popup
+        // owns the finger while it is up.
+        !showingNumeric && popup == nil
+    }
+
+    var swipeKeyCentres: ([CGPoint], CGFloat) {
+        var centres = [CGPoint](repeating: .zero, count: 26)
+        var width: CGFloat = 0
+        guard !showingNumeric else { return (centres, 0) }
+
+        for b in letterButtons {
+            guard let id = b.accessibilityIdentifier,
+                  let ch = id.lowercased().first,
+                  let ascii = ch.asciiValue,
+                  ascii >= 97, ascii <= 122
+            else { continue }
+            let centre = b.superview?.convert(b.center, to: view) ?? b.center
+            centres[Int(ascii) - 97] = centre
+            width = max(width, b.bounds.width)
+        }
+        return (centres, width)
+    }
+
+    func swipeDidFinish(candidates: [String]) {
+        guard let best = candidates.first else {
+            showSuggestions([])
+            return
+        }
+        commitSwipe(best)
+        showSuggestions(candidates)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 }
