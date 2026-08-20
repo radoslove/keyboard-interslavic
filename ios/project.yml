@@ -37,6 +37,11 @@ targets:
     type: application
     platform: iOS
     sources: [App]
+    # Without this XcodeGen emits NO schemes at all, Xcode autocreates one for
+    # the EXTENSION instead, and Run then asks which host app to launch it in -
+    # which looks like a signing problem and is not one. Paid for 2026-08-20.
+    scheme:
+      testTargets: []
     settings:
       base:
         # iOS requires the extension's id to be a CHILD of the app's id, not a
