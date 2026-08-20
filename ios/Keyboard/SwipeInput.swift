@@ -1,4 +1,15 @@
 import UIKit
+import os
+
+/// Device-side diagnostics. A keyboard extension cannot be attached to a
+/// debugger the way an app can, so when it misbehaves on real hardware the
+/// system log is the only witness.
+///
+/// Read it in Console.app with the device selected in the sidebar. NOT with
+/// `idevicesyslog`: that relays the old syslog, which does not carry unified
+/// logging below error level, so these notices are invisible there and their
+/// absence proves nothing about whether the code ran.
+let swipeLog = Logger(subsystem: "com.radoslove.interslavic", category: "isv-swipe")
 
 /// What the keyboard has to provide for swiping to work.
 protocol SwipeHost: AnyObject {
@@ -103,6 +114,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
 
     func attach() {
         guard let host else { return }
+        swipeLog.notice("isv-swipe: attach")
         host.swipeSurface.addGestureRecognizer(recognizer)
         host.swipeSurface.layer.addSublayer(trail)
         loadDictionary()
@@ -113,8 +125,12 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         // happens while the user is looking at the keyboard.
         queue.async { [weak self] in
             guard let url = Bundle.main.url(forResource: "isv_swipe",
-                                            withExtension: "bin") else { return }
+                                            withExtension: "bin") else {
+                swipeLog.error("isv-swipe: isv_swipe.bin NOT in bundle")
+                return
+            }
             let dict = SwipeDictionary(url: url)
+            swipeLog.notice("isv-swipe: dictionary \(dict?.count ?? -1, privacy: .public) forms")
             DispatchQueue.main.async { self?.dictionary = dict }
         }
     }
@@ -140,6 +156,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
 
         switch g.state {
         case .began:
+            swipeLog.notice("isv-swipe: gesture began")
             // Rebuilding the key rows puts their layers above ours, so the
             // trail is re-raised at the start of every gesture rather than
             // once at setup.
@@ -159,15 +176,23 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     }
 
     private func decode(_ path: [CGPoint]) {
-        guard let host, let dictionary else { return }
+        guard let host else { return }
+        guard let dictionary else {
+            swipeLog.error("isv-swipe: gesture ended but dictionary is nil")
+            return
+        }
         let (centres, keyWidth) = host.swipeKeyCentres
-        guard keyWidth > 0 else { return }
+        guard keyWidth > 0 else {
+            swipeLog.error("isv-swipe: keyWidth 0 - no letter keys measured")
+            return
+        }
 
         queue.async { [weak self] in
             let decoder = SwipeDecoder(dictionary: dictionary,
                                        keyCentres: centres,
                                        keyWidth: keyWidth)
             let words = decoder.decode(path: path).map(\.word)
+            swipeLog.notice("isv-swipe: \(path.count, privacy: .public) points -> \(words.joined(separator: " "), privacy: .public)")
             DispatchQueue.main.async { self?.host?.swipeDidFinish(candidates: words) }
         }
     }

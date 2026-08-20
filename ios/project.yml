@@ -79,5 +79,24 @@ targets:
             # without full access physically cannot phone home, which is the
             # claim the Keyman route cannot make on iOS 16+.
             RequestsOpenAccess: false
-            PrimaryLanguage: isv
+            # `mul` (multiple languages), NOT `isv`, however correct that
+            # code is elsewhere. The language identity lives in the layout and
+            # the wordlist; this key is only a hint to the picker.
+            PrimaryLanguage: mul
             IsASCIICapable: false
+            # All FOUR of these attributes must be present. Ours had three,
+            # and the failure mode is silent in every direction: the build
+            # succeeds, the install succeeds, the device logs a healthy
+            # `PluginKit app extension Placeholder`, SpringBoard even finds the
+            # keyboard-service extension point - and Add New Keyboard simply
+            # never lists it. Hours went into hunting a caching problem that
+            # did not exist, including a pointless device reboot.
+            #
+            # The fix that ended it was checking this file against a keyboard
+            # KNOWN to work on the same iPad - Keyman is open source, and
+            # ios/keyman/Keyman/SWKeyboard/Info.plist differed in exactly two
+            # places: this key, and `isv` where Keyman has `mul`. BOTH were
+            # changed in one build and the keyboard appeared, so which of the
+            # two was decisive is NOT established - do not read this comment as
+            # saying `isv` alone was fatal. Paid for 2026-08-20.
+            PrefersRightToLeft: false

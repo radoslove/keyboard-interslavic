@@ -40,6 +40,7 @@ final class KeyboardViewController: UIInputViewController {
         buildKeyboard()
         swipeInput = SwipeInput(host: self)
         swipeInput.attach()
+        swipeLog.notice("isv-swipe: keyboard loaded, swipe build")
     }
 
     // MARK: - Building
