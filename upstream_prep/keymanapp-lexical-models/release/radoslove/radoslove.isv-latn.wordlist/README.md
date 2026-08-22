@@ -35,4 +35,8 @@ Links
 
 Copyright
 ---------
-See [LICENSE.md](LICENSE.md)
+Model source and packaging: MIT (see [LICENSE.md](LICENSE.md)). The bundled
+wordlist is word **forms + corpus frequencies only** (no definitions or
+translations), machine-generated from a lemma list compiled from various
+Interslavic lexical resources — **no ownership of the underlying
+lexical data is claimed.** See LICENSE.md for the full scope note.
