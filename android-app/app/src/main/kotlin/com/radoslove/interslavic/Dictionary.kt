@@ -126,14 +126,19 @@ object Dictionary {
      * on a long diagonal the finger crosses keys OUT of the word's letter order,
      * so order can't be trusted — distance-to-path can.
      *
-     * We still anchor the FIRST letter to the path's start key (a swipe begins
-     * deliberately on its first letter) to keep the candidate set small, then
-     * let geometry judge the rest. Frequency is only a tiebreak between words
+     * We still anchor the FIRST letter to the start of the path to keep the
+     * candidate set small, but to the few keys NEAREST that start rather than
+     * to one. Anchoring to a single key silently excluded the right word:
+     * `p` sits directly above `l`, so a glide for `pisati` begun a few pixels
+     * low anchored on `l` and only `l...` words were ever scored - `pisati`
+     * did not lose to `ležati`, it never entered the race. Geometry still
+     * decides between the survivors. Frequency is only a tiebreak between words
      * that fit the path about equally well. Accents/digraphs match on their base
      * letters; the real accented word is returned.
      */
     fun decodeSwipeGeo(
-        firstKey: Char,
+        firstKeys: Set<Char>,
+        lastKeys: Set<Char>,
         maxLen: Int,
         n: Int,
         score: (String) -> Double,
@@ -145,7 +150,10 @@ object Dictionary {
         for (e in entries) {
             val w = e.word
             if (w.length < 2 || w.length > maxLen) continue
-            if (foldBase(w.first()) != firstKey) continue
+            if (foldBase(w.first()) !in firstKeys) continue
+            // Cheap gate before the costly geometry: a glide ends ON its last
+            // letter, so a word ending elsewhere cannot be what was drawn.
+            if (lastKeys.isNotEmpty() && foldBase(w.last()) !in lastKeys) continue
             val folded = buildString { for (c in w) append(foldBase(c)) }
             val geo = score(folded)
             if (geo == Double.NEGATIVE_INFINITY) continue

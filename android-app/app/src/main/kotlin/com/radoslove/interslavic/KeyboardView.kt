@@ -17,6 +17,7 @@ import android.view.Gravity
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.ViewConfiguration
+import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
 import kotlin.math.abs
@@ -62,13 +63,18 @@ class KeyboardView(
     // Prediction bar (M2). The strip is a single persistent view whose three
     // slots are updated on every keystroke; render() only re-parents it.
     private val suggestionViews = ArrayList<TextView>(3)
-    private val suggestionStrip: LinearLayout by lazy { buildSuggestionStrip() }
+    private val suggestionStrip: android.view.View by lazy { buildSuggestionStrip() }
     private var currentWord = ""
     // Per-slot state: the word to act on, and whether the slot is a "save this
     // MISS" chip (true) rather than an ordinary prediction (false).
-    private val slotWord = arrayOfNulls<String>(3)
-    private val slotIsSave = BooleanArray(3)
-    private val slotIsSwipeAlt = BooleanArray(3)
+    /** Chips in the suggestion strip. ONE number governs the views and every
+     *  array that describes them - when these drifted apart (6 views, 3-slot
+     *  arrays) the keyboard threw out of bounds on every refresh, which the
+     *  system shows as the keyboard switching itself off after each word. */
+    private val SLOTS = 6
+    private val slotWord = arrayOfNulls<String>(SLOTS)
+    private val slotIsSave = BooleanArray(SLOTS)
+    private val slotIsSwipeAlt = BooleanArray(SLOTS)
 
     // Swipe / glide decoding (M4). letterKeyViews lets us hit-test which key the
     // finger is over as it crosses the board.
@@ -86,9 +92,32 @@ class KeyboardView(
     // Smart space: a committed word carries NO trailing space; the space is
     // inserted BEFORE the next word instead, and punctuation attaches with no
     // space before it (Gboard-style).
+    /** Whether the glide just committed was capitalised. Shift is one-shot and
+     *  is spent the moment the word lands, so by the time an alternative is
+     *  picked from the strip it is long gone - and the replacement came out
+     *  lowercase even though the user had deliberately pressed shift. */
+    private var lastSwipeCapitalized = false
     private var pendingSpace = false
-    private val ATTACH_PUNCT = ".,!?:;…".toSet()   // glued to the word, no space before
+    // Glued to the word, no space before it. Apostrophes and CLOSING quotes
+    // belong here too: without them smart space read `'` as the start of a new
+    // word and pushed a space in front of it.
+    private val ATTACH_PUNCT = ".,!?:;\u2026'\u2019\u201D\")]".toSet()
+
+    /** Smart space (default) owes the space to the NEXT thing typed, so
+     *  punctuation lands tight against the word. Classic mode instead puts the
+     *  space in immediately after a committed word, which is what people who
+     *  learned to type on a desktop expect - and what someone editing in the
+     *  middle of a sentence finds less surprising.
+     *
+     *  Read per use rather than cached: SharedPreferences keeps its values in
+     *  memory after the first load, and a stale cache would leave the keyboard
+     *  behaving one way while the setting screen says the other. */
+    private val smartSpace: Boolean
+        get() = context.getSharedPreferences("isv_collector", Context.MODE_PRIVATE)
+            .getBoolean("smart_space", true)
     private val SWIPE_RESAMPLE = 32
+    private val SWIPE_CANDIDATES = SLOTS   // the strip scrolls, so every candidate is reachable
+    private val ANCHOR_KEYS = 3       // start-key candidates; 1 hid `pisati` behind `ležati`
     private val DWELL_N = 28          // measured: same 99% accuracy as 40, ~35% cheaper
     // Adaptive-ranking weights: how hard one prior use lifts a word.
     private val USAGE_W_SUGGEST = 8000       // in freq*64 units (max freq term ~16k)
@@ -355,11 +384,18 @@ class KeyboardView(
      *  word by word, a little faster the longer you hold (never whole lines). */
     private fun backspaceKey(): TextView {
         val tv = baseKey("⌫", 1.5f)
+        // The view's own long-press machinery competes with ours for the same
+        // hold and buys nothing here.
+        tv.isLongClickable = false
         val repeat = object : Runnable {
             override fun run() {
                 deleteWordBackward()
                 feedback()
-                backspaceInterval = maxOf(55L, backspaceInterval - 18L)
+                // Speeds up, but nowhere near as far as it used to (55 ms was
+                // roughly eight words a second - a held thumb wiped a whole
+                // message before the eye caught up). A floor of 130 ms stays
+                // fast while leaving time to let go.
+                backspaceInterval = maxOf(130L, backspaceInterval - 20L)
                 flickHandler.postDelayed(this, backspaceInterval)
             }
         }
@@ -367,13 +403,25 @@ class KeyboardView(
             when (e.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     tv.isPressed = true
-                    backspace()                       // immediate single delete
-                    backspaceInterval = 200L
-                    flickHandler.postDelayed(repeat, 450L)   // then word-by-word after a hold
+                    // A finger resting on a key is never perfectly still, and
+                    // this view watches the whole keyboard for glides - so the
+                    // parent used to steal the gesture the moment the thumb
+                    // twitched, cancelling the repeat before it ever fired.
+                    // That is why holding backspace appeared to do nothing.
+                    (tv.parent as? android.view.ViewGroup)
+                        ?.requestDisallowInterceptTouchEvent(true)
+                    backspace()                       // a tap is still one character
+                    backspaceInterval = 260L
+                    flickHandler.postDelayed(repeat, 500L)   // then whole words; 350 ms fired on ordinary taps
                     true
                 }
+                // Consume movement too, so a twitch cannot hand the gesture
+                // upward mid-hold.
+                MotionEvent.ACTION_MOVE -> true
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                     tv.isPressed = false
+                    (tv.parent as? android.view.ViewGroup)
+                        ?.requestDisallowInterceptTouchEvent(false)
                     flickHandler.removeCallbacks(repeat)
                     true
                 }
@@ -442,14 +490,29 @@ class KeyboardView(
         // wanted" — wipe the WHOLE word in one press so the user can re-swipe,
         // instead of tapping backspace letter by letter.
         if (swipeJustCommitted && lastSwipeWord.isNotEmpty()) {
-            ic.deleteSurroundingText(lastSwipeWord.length, 0)   // no trailing space in smart-space model
+            // Classic mode put a space after the word; wipe that with it.
+            ic.deleteSurroundingText(lastSwipeWord.length + if (smartSpace) 0 else 1, 0)
+            // Deleting it whole is a verdict on the guess, so take back the
+            // count the commit just added - otherwise being wrong trains the
+            // ranking exactly as hard as being right.
+            Usage.unrecord(context, lastSwipeWord)
+            Popularity.unrecord(context, lastSwipeWord)
+            val rejected = lastSwipeWord
             swipeJustCommitted = false
             lastSwipeWord = ""
             pendingSpace = false
-            // Deleting a wrong glide? Offer the other candidates so you can pick
-            // one instead of swiping again.
-            if (lastSwipeCandidates.size > 1) showSwipeAlts(lastSwipeCandidates, highlight = -1)
-            else refreshSuggestions()
+            // Deleting a wrong glide? Offer the OTHER candidates first - a
+            // finger drifts, and the word actually wanted is often fourth or
+            // fifth, so the front slots should hold words not yet seen.
+            //
+            // But the rejected one goes to the BACK rather than away: a
+            // backspace is often reflex, pressed before the eye has read what
+            // landed, and a guess that was right must stay one tap away.
+            lastSwipeCandidates =
+                lastSwipeCandidates.filter { it != rejected } + listOf(rejected)
+            if (lastSwipeCandidates.isNotEmpty()) {
+                showSwipeAlts(lastSwipeCandidates, highlight = -1)
+            } else refreshSuggestions()
             return
         }
         ic.deleteSurroundingText(1, 0)
@@ -457,13 +520,27 @@ class KeyboardView(
     }
 
     /** Delete the whitespace + the word before the cursor (for backspace-hold). */
+    /**
+     * Delete one unit backwards: a run of letters, or a run of punctuation -
+     * never both at once.
+     *
+     * Stopping only at whitespace was wrong in exactly the case smart space
+     * creates: punctuation glues to the word, so `napisati"` is one
+     * whitespace-delimited token and removing the quote took the whole word
+     * with it. Letters and marks are separate units, so a stray quote can be
+     * taken back without losing the word in front of it.
+     */
     private fun deleteWordBackward() {
         val ic = service.currentInputConnection ?: return
         val before = ic.getTextBeforeCursor(80, 0)?.toString().orEmpty()
         if (before.isEmpty()) return
         var i = before.length
         while (i > 0 && before[i - 1].isWhitespace()) i--
-        while (i > 0 && !before[i - 1].isWhitespace()) i--
+        if (i > 0) {
+            val lettersFirst = before[i - 1].isLetterOrDigit()
+            while (i > 0 && !before[i - 1].isWhitespace() &&
+                   before[i - 1].isLetterOrDigit() == lettersFirst) i--
+        }
         val del = before.length - i
         ic.deleteSurroundingText(if (del > 0) del else 1, 0)
         refreshSuggestions()
@@ -471,17 +548,29 @@ class KeyboardView(
 
     // ---- Prediction bar (M2) --------------------------------------------
 
-    private fun buildSuggestionStrip(): LinearLayout {
+    /**
+     * The strip scrolls. The decoder returns more candidates than fit on a
+     * phone, and the one actually wanted is often not in the first three when
+     * the finger drifted - so the extras have to be reachable rather than
+     * merely computed.
+     *
+     * Wrapped in a HorizontalScrollView and, crucially, the scroll view claims
+     * the gesture on touch: this view watches the WHOLE keyboard for glides, so
+     * dragging across the strip was being read as the start of a swipe. That is
+     * the same trap that made holding backspace appear dead.
+     */
+    private fun buildSuggestionStrip(): android.view.View {
         val strip = LinearLayout(context)
         strip.orientation = HORIZONTAL
-        strip.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, dp(42))
         strip.setBackgroundColor(Color.parseColor("#E0E4E7"))
-        repeat(3) { i ->
+        repeat(SLOTS) { i ->
             val tv = TextView(context)
             tv.gravity = Gravity.CENTER
             tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
             tv.setTextColor(Color.parseColor("#1C2529"))
-            val lp = LayoutParams(0, LayoutParams.MATCH_PARENT, 1f)
+            // Fixed width, not weight: weights collapse inside a scroll view,
+            // and a stable width keeps the chips from jumping as words change.
+            val lp = LayoutParams(dp(112), LayoutParams.MATCH_PARENT)
             lp.setMargins(dp(1), dp(1), dp(1), dp(1))
             tv.layoutParams = lp
             tv.isClickable = true
@@ -489,7 +578,19 @@ class KeyboardView(
             suggestionViews.add(tv)
             strip.addView(tv)
         }
-        return strip
+        val scroller = HorizontalScrollView(context)
+        scroller.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, dp(42))
+        scroller.isHorizontalScrollBarEnabled = false
+        scroller.setBackgroundColor(Color.parseColor("#E0E4E7"))
+        scroller.addView(strip)
+        scroller.setOnTouchListener { v, e ->
+            if (e.actionMasked == MotionEvent.ACTION_DOWN) {
+                (v.parent as? android.view.ViewGroup)
+                    ?.requestDisallowInterceptTouchEvent(true)
+            }
+            false        // let the scroll view and the chips do their own work
+        }
+        return scroller
     }
 
     /**
@@ -516,8 +617,17 @@ class KeyboardView(
         val preds = Dictionary.suggest(lower, if (canSave) 2 else 3) { w ->
             Usage.count(context, w) * USAGE_W_SUGGEST
         }
-        for (i in preds.indices) setSlot(i, preds[i], preds[i], save = false)
-        if (canSave) setSlot(2, "＋ $lower", lower, save = true)
+        // Follow the case of what is ALREADY typed. The dictionary is lowercase,
+        // so a word begun with a deliberate capital was offered back in lower
+        // case and the capital was lost on the tap - shift is one-shot and long
+        // spent by then, which is why reading it here would not help either.
+        // What the user typed is the reliable signal, and it survives.
+        val capital = word.first().isUpperCase()
+        for (i in preds.indices) {
+            val w = if (capital) preds[i].replaceFirstChar { it.uppercaseChar() } else preds[i]
+            setSlot(i, w, w, save = false)
+        }
+        if (canSave) setSlot(SLOTS - 1, "＋ $lower", lower, save = true)
     }
 
     private fun setSlot(i: Int, display: String, word: String, save: Boolean) {
@@ -557,13 +667,23 @@ class KeyboardView(
     private fun applySuggestion(word: String) {
         val ic = service.currentInputConnection ?: return
         ic.beginBatchEdit()
-        if (currentWord.isNotEmpty()) ic.deleteSurroundingText(currentWord.length, 0)
-        ic.commitText(word, 1)          // smart space: no trailing space
+        // Replacing a half-typed word leaves whatever preceded it, spacing and
+        // all. Inserting a FRESH word does not - and this was the one commit
+        // path that forgot it, so a tapped suggestion glued itself to the
+        // previous word (`možemožemo`). Smart space owes the space backwards,
+        // so it has to be paid here exactly as `commit()` and the glide do.
+        val replacing = currentWord.isNotEmpty()
+        if (replacing) ic.deleteSurroundingText(currentWord.length, 0)
+        val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
+        val lead = if (!replacing && (pendingSpace ||
+                (prev.isNotEmpty() && !prev[0].isWhitespace()))) " " else ""
+        ic.commitText(if (smartSpace) "$lead$word" else "$lead$word ", 1)
         ic.endBatchEdit()
         Usage.record(context, word)
         Popularity.record(context, word)
         currentWord = ""
-        pendingSpace = true             // space is owed to whatever comes next
+        // Smart space owes it forward; classic already wrote it.
+        pendingSpace = smartSpace
         clearSlots()
     }
 
@@ -713,8 +833,20 @@ class KeyboardView(
         }
 
         val ks = keyPathFromTrail(pointList, centers)
-        val firstKey = ks.firstOrNull() ?: swipeStartKey ?: return emptyList()
-        return Dictionary.decodeSwipeGeo(firstKey, ks.size + 2, 3, score) { w ->
+        val starts = nearestKeys(pointList.first(), centers, ANCHOR_KEYS)
+            .ifEmpty { listOfNotNull(ks.firstOrNull() ?: swipeStartKey) }
+            .toSet()
+        if (starts.isEmpty()) return emptyList()
+        // More candidates than the strip can show: the extras are the pool a
+        // rejected guess falls back on, so a second try offers NEW words rather
+        // than the same three with the wrong one still on top.
+        // Anchor the LAST letter as well. Three start keys tripled the number of
+        // words reaching the expensive shape comparison, which is what made
+        // recognition drag; requiring the final letter to sit near where the
+        // finger stopped throws out the overwhelming majority for the price of
+        // one character lookup.
+        val ends = nearestKeys(pointList.last(), centers, ANCHOR_KEYS).toSet()
+        return Dictionary.decodeSwipeGeo(starts, ends, ks.size + 2, SWIPE_CANDIDATES, score) { w ->
             Usage.count(context, w) * USAGE_W_SWIPE
         }
     }
@@ -761,18 +893,19 @@ class KeyboardView(
     private fun commitSwipeResult(words: List<String>) {
         if (words.isEmpty()) { clearSlots(); return }
         val ic = service.currentInputConnection ?: return
+        lastSwipeCapitalized = shift
         val best = if (shift) words[0].replaceFirstChar { it.uppercaseChar() } else words[0]
         // Smart space: a glide is a fresh word, so put the space BEFORE it (unless
         // at field start or already after a space), and none after it.
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (pendingSpace || (prev.isNotEmpty() && !prev[0].isWhitespace())) " " else ""
-        ic.commitText("$lead$best", 1)
+        ic.commitText(if (smartSpace) "$lead$best" else "$lead$best ", 1)
         Usage.record(context, best)
         Popularity.record(context, best)
         lastSwipeWord = best
         lastSwipeCandidates = words
         swipeJustCommitted = true
-        pendingSpace = true
+        pendingSpace = smartSpace
         currentWord = ""
         showSwipeAlts(words, highlight = 0)   // a wrong guess is one tap from fixed
         consumeOneShotShift()                 // one-shot capital ends with this word too
@@ -781,10 +914,16 @@ class KeyboardView(
     /** Put the swipe candidates in the strip as tappable alternatives. */
     private fun showSwipeAlts(words: List<String>, highlight: Int) {
         clearSlots()
-        for (i in words.indices) {
-            slotWord[i] = words[i]
+        // The decoder now returns more words than there are slots.
+        // Show them cased the way they will actually be inserted - a strip of
+        // lowercase words after a deliberate shift is a lie about the outcome.
+        val shown = words.take(suggestionViews.size).map {
+            if (lastSwipeCapitalized) it.replaceFirstChar { c -> c.uppercaseChar() } else it
+        }
+        for (i in shown.indices) {
+            slotWord[i] = shown[i]
             slotIsSwipeAlt[i] = true
-            suggestionViews[i].text = words[i]
+            suggestionViews[i].text = shown[i]
             suggestionViews[i].setTextColor(Color.parseColor("#1C2529"))
             suggestionViews[i].setBackgroundColor(
                 if (i == highlight) Color.parseColor("#DCE3E7") else Color.TRANSPARENT
@@ -799,18 +938,26 @@ class KeyboardView(
         val ic = service.currentInputConnection ?: return
         ic.beginBatchEdit()
         if (lastSwipeWord.isNotEmpty()) {
-            ic.deleteSurroundingText(lastSwipeWord.length, 0)   // smart-space: no trailing space
+            // Choosing another word means the committed one was wrong.
+            Usage.unrecord(context, lastSwipeWord)
+            Popularity.unrecord(context, lastSwipeWord)
+            // Classic mode wrote a trailing space with the word, so take it too.
+            ic.deleteSurroundingText(lastSwipeWord.length + if (smartSpace) 0 else 1, 0)
         }
-        val out = if (shift) word.replaceFirstChar { it.uppercaseChar() } else word
+        // Honour the shift that produced the ORIGINAL word, not the (already
+        // spent) shift state now.
+        val out = if (shift || lastSwipeCapitalized) {
+            word.replaceFirstChar { it.uppercaseChar() }
+        } else word
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (lastSwipeWord.isEmpty() && prev.isNotEmpty() && !prev[0].isWhitespace()) " " else ""
-        ic.commitText("$lead$out", 1)  // any leading space before the old word stays
+        ic.commitText(if (smartSpace) "$lead$out" else "$lead$out ", 1)  // leading space before the old word stays
         ic.endBatchEdit()
         Usage.record(context, out)
         Popularity.record(context, out)
         lastSwipeWord = out
         swipeJustCommitted = true    // still a swipe result — backspace wipes it whole
-        pendingSpace = true
+        pendingSpace = smartSpace
         clearSlots()
     }
 
@@ -929,6 +1076,29 @@ class KeyboardView(
             i += step
         }
         return seq
+    }
+
+    /**
+     * The keys a glide could plausibly have STARTED on. A finger aiming at a
+     * key lands within about a key of its centre, and the neighbour above or
+     * below is often closer than the intended key itself - so the first letter
+     * gets several candidates, not one.
+     */
+    private fun nearestKeys(
+        p: FloatArray,
+        centers: Map<Char, FloatArray>,
+        limit: Int,
+    ): List<Char> {
+        if (centers.isEmpty()) return emptyList()
+        // A key's own width, taken from the live layout rather than assumed.
+        val w = letterKeyViews.firstOrNull()?.second?.width?.toFloat() ?: return emptyList()
+        val reach = w * 1.3f
+        return centers.entries
+            .map { it.key to dist2(p, it.value) }
+            .filter { it.second <= reach }
+            .sortedBy { it.second }
+            .take(limit)
+            .map { it.first }
     }
 
     /** Euclidean distance between a key centre and a trail point. */

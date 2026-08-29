@@ -116,6 +116,27 @@ class SetupActivity : Activity() {
             }
         })
 
+        root.addView(header("Razstup medžu slovami"))
+        root.addView(gloss("Spacing between words"))
+        root.addView(body(
+            "Standardno razstup jest dodavany PRED slědujuće slovo, tako že " +
+            "interpunkcija drži se slova bez razstupa. Iz-ključi, ako hoćeš " +
+            "stary sposob: razstup naide srazu po slovu."
+        ))
+        root.addView(gloss(
+            "By default the space is added BEFORE the next word, so punctuation " +
+            "stays tight against the word. Turn this off for the classic way: " +
+            "the space follows the word immediately."
+        ))
+        root.addView(Switch(this).apply {
+            text = "Umny razstup (Smart space)"
+            textSize = 17f
+            isChecked = prefs.getBoolean("smart_space", true)
+            setOnCheckedChangeListener { _, on ->
+                prefs.edit().putBoolean("smart_space", on).apply()
+            }
+        })
+
         status = body("")
         root.addView(status)
 

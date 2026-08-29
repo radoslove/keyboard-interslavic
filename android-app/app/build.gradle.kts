@@ -50,6 +50,15 @@ android {
                 signingConfig = signingConfigs.getByName("release")
             }
         }
+        debug {
+            // Android refuses to replace an installed app when the signature
+            // differs, so a debug build could not land on a phone that already
+            // had the released (release-key) version - it just says
+            // "App not installed" with no reason given. A separate application
+            // id lets both live side by side: the published keyboard keeps
+            // working while a test build is being tried next to it.
+            applicationIdSuffix = ".debug"
+        }
     }
 
     compileOptions {

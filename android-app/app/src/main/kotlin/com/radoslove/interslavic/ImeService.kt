@@ -13,6 +13,7 @@ class ImeService : InputMethodService() {
 
     override fun onCreate() {
         super.onCreate()
+        CrashReporter.install(this)   // test builds only; see the class doc
         // Kick off the background load of the prediction model once.
         Dictionary.ensureLoaded(this)
     }

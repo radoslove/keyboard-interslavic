@@ -31,6 +31,25 @@ object Usage {
         persist(context)
     }
 
+    /**
+     * Take back a count recorded a moment ago, because the user rejected the
+     * word — deleted it whole, or replaced it with an alternative.
+     *
+     * Without this the adaptive ranking learns the WRONG lesson: a bad glide
+     * result was recorded on commit, so every time the user corrected it the
+     * mistake gained as much weight as the correction and came back stronger.
+     * `možehmo` beating `možemo` was this loop, not the geometry alone.
+     */
+    @Synchronized
+    fun unrecord(context: Context, word: String) {
+        val w = word.lowercase()
+        if (w.isEmpty()) return
+        ensureLoaded(context)
+        val n = (counts[w] ?: 0) - 1
+        if (n > 0) counts[w] = n else counts.remove(w)
+        persist(context)
+    }
+
     @Synchronized
     fun count(context: Context, word: String): Int {
         ensureLoaded(context)

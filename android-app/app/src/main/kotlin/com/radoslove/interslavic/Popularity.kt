@@ -49,6 +49,23 @@ object Popularity {
         persist(context)
     }
 
+    /**
+     * Undo a count when the user rejects the word. The popularity ranking is
+     * meant to say which forms people actually WRITE - a glide result deleted
+     * or replaced a second later was never written, and letting it stand would
+     * quietly poison the data we intend to share.
+     */
+    @Synchronized
+    fun unrecord(context: Context, word: String) {
+        if (!isEnabled(context)) return
+        val w = word.lowercase()
+        if (w.isEmpty()) return
+        ensureLoaded(context)
+        val n = (counts[w] ?: 0) - 1
+        if (n > 0) counts[w] = n else counts.remove(w)
+        persist(context)
+    }
+
     /** A copy of the accumulated counts, for the batch export. */
     @Synchronized
     fun snapshot(context: Context): Map<String, Int> {

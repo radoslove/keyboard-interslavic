@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Debug builds only. The released keyboard has NO network permission at all,
+     and that is a load-bearing claim: a keyboard that cannot reach the network
+     cannot leak what you type, whatever its code says. This file adds INTERNET
+     to test builds so a crash can report itself - it never reaches release. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+</manifest>

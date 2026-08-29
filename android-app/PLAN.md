@@ -102,6 +102,32 @@ the `hp` install entirely. Owner's call.
 
 ## Future options (deferred — not built yet)
 
+- **Polish-speaker "did you mean" for words that do not exist.** When a glide is
+  retried several times and nothing fits, the cause is often not geometry: the
+  word being aimed at is not Interslavic at all, but a Polish form the writer
+  assumes. Observed live 2026-08-29, three times in one session: `tolko` →
+  **`toliko`**, `mogem` → **`možem`**, and `možemo` losing to `možehmo` because
+  the shipped frequencies are flat inside a paradigm.
+
+  The keyboard cannot emit a word absent from the wordlist, so today those
+  attempts simply fail with no explanation. The proposal: after repeated
+  failures on the same path — or immediately, once the user has declared
+  themselves a Polish speaker in the setup screen — offer the standard form
+  with a one-line note saying why.
+
+  Data already exists: `medzuslove/web/server.py` carries a curated
+  `POLISH_BRIDGE` deck of exactly these contrasts, each checked against the
+  lexicon and annotated in Polish (`jak` is an animal, use `kako`; `město` is a
+  place, a city is `grad`). That deck is the seed; a folding rule (drop a
+  vowel, add `-i-`, `g`→`ž`) can widen it.
+
+  Later, context: a preceding word narrows the candidate set, which is the same
+  mechanism that would fix `možemo`/`možehmo` without touching geometry. That
+  needs a bigram corpus, which `medzupisanje` is beginning to collect.
+
+  Owner request 2026-08-29, deliberately deferred — the value depends on having
+  real usage data first, and collecting it has only just started.
+
 - **Space-behaviour toggle in the setup screen.** Smart-space (space goes
   BEFORE the next word; punctuation glues to the word) is the default and stays
   the default. Add a user switch to choose classic trailing-space instead,
