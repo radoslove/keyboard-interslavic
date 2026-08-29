@@ -72,6 +72,43 @@ Score a gesture path against a trie of the wordlist. The expensive one —
 **weeks, not an afternoon** — and the single feature no layout XML or Keyman
 package can deliver. Only start after M1–M3 are solid on a device.
 
+#### M4a — velocity minima (2026-08-29, awaiting device verdict)
+
+The finger decelerates into the letters the writer means and cruises past the
+ones it merely crosses, so a **minimum of the speed curve** is a vote for
+"a letter is here". `KeyboardView.velocityPivots` reads them out; the trail now
+carries a timestamp per sample, which is what makes a speed curve possible at
+all. A candidate word is then charged for two disagreements the shape distance
+cannot see: a **letter with no pause near it** (this is what separates `možemo`
+from `možehmo` — the detour through `h` is close enough to the path that shape
+barely notices) and a **pause the word cannot explain**.
+
+Each minimum carries a *confidence* — how deep it is against the surrounding
+speed. That is the safety valve: a fast flat swiper's minima are shallow, the
+term fades to nothing, and they lose nothing. Measured, this matters: without
+the confidence weight a no-dwell glide LOST 3 points of top-1.
+
+⚠ **Second change, same decision.** Dwell used to be smuggled into the shape
+comparison by resampling the trail on index (time) instead of arc length. It was
+costing far more than it bought — the trail's dwell is wildly uneven while the
+ideal route's was uniform by construction, so the curves drifted out of step.
+Same synthetic glides, same paths per mode, `tools/swipe_eval.py ab`:
+
+| shape model | + velocity minima | top-1 | top-3 |
+|---|---|---|---|
+| index resample + dwell ideal (what shipped) | no | 22% | 32% |
+| index resample + dwell ideal | yes | 26% | 38% |
+| arc length | no | 74% | 89% |
+| **arc length** | **yes** | **78%** | **91%** |
+
+`indexResample` and `idealWithDwell` are gone; `resamplePath` was already in the
+file, unused, from before the dwell experiment.
+
+⚠ These are SYNTHETIC glides — the harness generates them with a speed profile,
+so the pivot gain is an upper bound and the arc-vs-dwell verdict is a harness
+verdict. **A real device is the only truth** (see the traps below). Verify on
+`a55` before believing any of it.
+
 ## Who does what
 
 **Me (dev-keyboard):** author every source file from the canonical table; keep

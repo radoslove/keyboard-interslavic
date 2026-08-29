@@ -118,13 +118,25 @@ class KeyboardView(
     private val SWIPE_RESAMPLE = 32
     private val SWIPE_CANDIDATES = SLOTS   // the strip scrolls, so every candidate is reachable
     private val ANCHOR_KEYS = 3       // start-key candidates; 1 hid `pisati` behind `ležati`
-    private val DWELL_N = 28          // measured: same 99% accuracy as 40, ~35% cheaper
+    // Velocity minima (see velocityPivots). Tuned in tools/swipe_eval.py against
+    // synthetic glides at three dwell profiles, so no single style of swiper
+    // sets them.
+    private val V_SMOOTH = 5          // moving-average width over the speed curve
+    private val V_RADIUS = 3          // a minimum must be the slowest sample within +/- this
+    private val V_REL = 0.80f         // ...and slower than this share of the local mean
+    private val V_MIN_SEP = 4         // samples; closer minima collapse into the slower one
+    private val PIVOT_CAP = 1.6f      // in key widths - one bad pivot must not swamp the score
+    private val W_LETTER = 0.55       // weight: every letter wants a pivot near it
+    private val W_PIVOT = 0.30        // weight: every pivot wants a letter near it
     // Adaptive-ranking weights: how hard one prior use lifts a word.
     private val USAGE_W_SUGGEST = 8000       // in freq*64 units (max freq term ~16k)
     private val USAGE_W_SWIPE = 8.0          // in px-equivalent of the shape score
 
-    // Visible trail so the user can SEE the glide as it happens.
-    private val trailPts = ArrayList<Float>(128)
+    // Visible trail so the user can SEE the glide as it happens. Flat triples
+    // (x, y, t) - the timestamp is what makes velocityPivots possible, and the
+    // trail is the only place the raw gesture exists.
+    private val trailPts = ArrayList<Float>(192)
+    private var swipeT0 = 0L
     private val trailPath = Path()
     private val trailPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -144,12 +156,12 @@ class KeyboardView(
 
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
-        if (swiping && trailPts.size >= 4) {
+        if (swiping && trailPts.size >= 6) {
             trailPath.reset()
             trailPath.moveTo(trailPts[0], trailPts[1])
-            var i = 2
-            while (i + 1 < trailPts.size) {
-                trailPath.lineTo(trailPts[i], trailPts[i + 1]); i += 2
+            var i = 3
+            while (i + 2 < trailPts.size) {
+                trailPath.lineTo(trailPts[i], trailPts[i + 1]); i += 3
             }
             canvas.drawPath(trailPath, trailPaint)
         }
@@ -170,8 +182,8 @@ class KeyboardView(
         }
     }
 
-    private fun addTrailPoint(x: Float, y: Float) {
-        trailPts.add(x); trailPts.add(y)
+    private fun addTrailPoint(x: Float, y: Float, tMs: Float) {
+        trailPts.add(x); trailPts.add(y); trailPts.add(tMs)
     }
 
     // Key-press preview bubble (shows the pressed letter enlarged above the key).
@@ -729,10 +741,11 @@ class KeyboardView(
                 swiping = false
                 swipePath.setLength(0)
                 trailPts.clear()
-                addTrailPoint(e.x, e.y)
+                swipeT0 = e.eventTime
+                addTrailPoint(e.x, e.y, 0f)
             }
             MotionEvent.ACTION_MOVE -> {
-                addTrailPoint(e.x, e.y)
+                addTrailPoint(e.x, e.y, (e.eventTime - swipeT0).toFloat())
                 val start = swipeStartKey ?: return false
                 val dx = e.x - swipeDownX
                 val dy = e.y - swipeDownY
@@ -761,7 +774,7 @@ class KeyboardView(
         if (!swiping) return super.onTouchEvent(e)
         when (e.actionMasked) {
             MotionEvent.ACTION_MOVE -> {
-                addTrailPoint(e.x, e.y)
+                addTrailPoint(e.x, e.y, (e.eventTime - swipeT0).toFloat())
                 val k = keyAt(e.x, e.y)
                 if (k != null && (swipePath.isEmpty() || swipePath.last() != k)) {
                     swipePath.append(k)
@@ -770,7 +783,7 @@ class KeyboardView(
                 // Live preview: show the word forming so far, throttled so the
                 // per-move decode never janks the glide.
                 val now = SystemClock.uptimeMillis()
-                if (now - lastPreviewMs > 80 && trailPts.size >= 8) {
+                if (now - lastPreviewMs > 80 && trailPts.size >= 12) {
                     lastPreviewMs = now
                     previewSwipe(ArrayList(trailPts))
                 }
@@ -781,7 +794,7 @@ class KeyboardView(
                 swipeStartKey = null
                 trailPts.clear()
                 invalidate()
-                if (pts.size >= 6) decodeSwipe(pts)    // >= 3 points = a real glide
+                if (pts.size >= 9) decodeSwipe(pts)    // >= 3 points = a real glide
             }
             MotionEvent.ACTION_CANCEL -> {
                 swiping = false
@@ -815,21 +828,28 @@ class KeyboardView(
     }
 
     private fun decodeCandidates(rawPts: List<Float>, centers: Map<Char, FloatArray>): List<String> {
-        val pointList = ArrayList<FloatArray>(rawPts.size / 2)
+        val pointList = ArrayList<FloatArray>(rawPts.size / 3)
         var i = 0
-        while (i + 1 < rawPts.size) {
-            pointList.add(floatArrayOf(rawPts[i], rawPts[i + 1])); i += 2
+        while (i + 2 < rawPts.size) {
+            pointList.add(floatArrayOf(rawPts[i], rawPts[i + 1], rawPts[i + 2])); i += 3
         }
-        // Index-resample keeps the finger's DWELL: the trail is time-sampled, so
-        // a letter the finger paused on gets more points. Compared against each
-        // word's ideal route (given equal dwell at every letter), the pause
-        // disambiguates colinear letters a plain shape-match cannot.
-        val rpTrail = indexResample(pointList, DWELL_N) ?: return emptyList()
+        // Shape is compared on ARC LENGTH - even spacing in distance, so the
+        // comparison says only "did the finger go this way".
+        //
+        // Dwell used to be smuggled into that comparison by resampling the trail
+        // on INDEX (time) instead, so a letter the finger lingered on
+        // contributed more points. It cost more than it bought: the trail's dwell
+        // is wildly uneven while the ideal route's was uniform by construction,
+        // so the two curves drifted out of step and the shape distance became
+        // noise. Dwell is now read explicitly, once, as velocity minima.
+        val rpTrail = resamplePath(pointList, SWIPE_RESAMPLE) ?: return emptyList()
+        val pivots = velocityPivots(pointList)
+        val cap = keyWidth(centers) * PIVOT_CAP
 
         val score: (String) -> Double = fold@{ folded ->
-            val ideal = idealWithDwell(folded, centers) ?: return@fold Double.NEGATIVE_INFINITY
-            val idealRp = indexResample(ideal, DWELL_N) ?: return@fold Double.NEGATIVE_INFINITY
-            -shapeDist(rpTrail, idealRp)
+            val ideal = idealRoute(folded, centers) ?: return@fold Double.NEGATIVE_INFINITY
+            val idealRp = resamplePath(ideal, SWIPE_RESAMPLE) ?: return@fold Double.NEGATIVE_INFINITY
+            -shapeDist(rpTrail, idealRp) - pivotPenalty(pivots, folded, centers, cap)
         }
 
         val ks = keyPathFromTrail(pointList, centers)
@@ -1007,39 +1027,153 @@ class KeyboardView(
         return out
     }
 
-    /** Resample by INDEX (time), keeping dense regions dense — preserves dwell. */
-    private fun indexResample(pts: List<FloatArray>, n: Int): List<FloatArray>? {
-        if (pts.size < 2) return null
-        val out = ArrayList<FloatArray>(n)
-        val step = (pts.size - 1).toFloat() / (n - 1)
-        for (i in 0 until n) {
-            val idx = Math.round(i * step).coerceIn(0, pts.size - 1)
-            out.add(pts[idx])
+    /** A word's ideal route: the polyline through its letter centres. */
+    private fun idealRoute(folded: String, centers: Map<Char, FloatArray>): List<FloatArray>? {
+        val seq = ArrayList<FloatArray>(folded.length)
+        for (c in folded) seq.add(centers[c] ?: return null)
+        return if (seq.size < 2) null else seq
+    }
+
+    /** One key width, taken from the snapshotted centres so no View is read. */
+    private fun keyWidth(centers: Map<Char, FloatArray>): Float {
+        val q = centers['q']; val w = centers['w']
+        return if (q != null && w != null) abs(w[0] - q[0]) else dp(36).toFloat()
+    }
+
+    /**
+     * Where the finger slowed enough to mean something, and how far to trust it.
+     * Returns (x, y, confidence) triples.
+     *
+     * A glide decelerates into the letters the writer means and cruises past the
+     * ones it merely crosses, so a minimum of the speed curve is a vote for
+     * "a letter is here". This is the same dwell signal the index-resample used
+     * to smear across the whole comparison, read out properly instead: a few
+     * points that say WHERE the finger hesitated, rather than a sampling density
+     * that only says "somewhere around here was slow".
+     *
+     * [conf] is how DEEP the minimum is relative to the surrounding speed - 1 for
+     * a dead stop, 0 for a dimple in an otherwise constant glide. It is the
+     * safety valve. Someone who swipes fast and flat produces shallow minima,
+     * their confidence collapses, and [pivotPenalty] fades out rather than
+     * inventing structure that was never in the gesture. Measured: without the
+     * confidence weight a no-dwell swiper LOST three points of top-1; with it,
+     * the term is a wash there and still worth four to eight points for everyone
+     * who does slow down.
+     *
+     * First and last sample always count at full confidence - a glide starts and
+     * ends at rest, and those two are the anchors the decoder already trusts.
+     */
+    private fun velocityPivots(pts: List<FloatArray>): List<FloatArray> {
+        val n = pts.size
+        if (n < 2) return emptyList()
+        val first = floatArrayOf(pts[0][0], pts[0][1], 1f)
+        val last = floatArrayOf(pts[n - 1][0], pts[n - 1][1], 1f)
+        if (n < 5) return listOf(first, last)
+
+        // Speed per sample. Raw touch deltas are far too noisy to take a minimum
+        // of directly, so smooth first - a single jittery sample would otherwise
+        // read as a pause.
+        val raw = FloatArray(n)
+        for (i in 1 until n) {
+            var dt = pts[i][2] - pts[i - 1][2]
+            if (dt <= 0f) dt = 8f              // a batched/duplicate timestamp
+            val dx = pts[i][0] - pts[i - 1][0]; val dy = pts[i][1] - pts[i - 1][1]
+            raw[i] = sqrt(dx * dx + dy * dy) / dt
         }
+        raw[0] = raw[1]
+        val v = FloatArray(n)
+        val half = V_SMOOTH / 2
+        for (i in 0 until n) {
+            val lo = maxOf(0, i - half); val hi = minOf(n, i + half + 1)
+            var acc = 0f
+            for (j in lo until hi) acc += raw[j]
+            v[i] = acc / (hi - lo)
+        }
+
+        val idx = ArrayList<Int>()
+        val conf = ArrayList<Float>()
+        for (i in 1 until n - 1) {
+            val lo = maxOf(0, i - V_RADIUS); val hi = minOf(n, i + V_RADIUS + 1)
+            var isMin = true
+            for (j in lo until hi) if (v[j] < v[i]) { isMin = false; break }
+            if (!isMin) continue
+            val wlo = maxOf(0, i - V_SMOOTH * 2); val whi = minOf(n, i + V_SMOOTH * 2 + 1)
+            var acc = 0f
+            for (j in wlo until whi) acc += v[j]
+            val local = acc / (whi - wlo)
+            if (local <= 0f || v[i] > V_REL * local) continue
+            val c = (1f - v[i] / local).coerceIn(0f, 1f)
+            // A flat slow stretch fires a cluster of near-equal minima; they all
+            // mean ONE letter, so keep the slowest of each run.
+            if (idx.isNotEmpty() && i - idx.last() < V_MIN_SEP) {
+                if (v[i] < v[idx.last()]) { idx[idx.size - 1] = i; conf[conf.size - 1] = c }
+            } else {
+                idx.add(i); conf.add(c)
+            }
+        }
+
+        val out = ArrayList<FloatArray>(idx.size + 2)
+        out.add(first)
+        for (k in idx.indices) out.add(floatArrayOf(pts[idx[k]][0], pts[idx[k]][1], conf[k]))
+        out.add(last)
         return out
     }
 
-    /** A word's ideal route with equal dwell (repeated points) at each letter. */
-    private fun idealWithDwell(
+    /**
+     * How badly a candidate word and the finger's pauses disagree, in px.
+     *
+     * Two directions, both capped so a single outlier cannot swamp the score:
+     *
+     *  - every LETTER wants a pivot near it. This is what separates `možemo`
+     *    from `možehmo`: the detour through `h` lies close enough to the path
+     *    that the shape distance barely notices it, but nothing in the finger's
+     *    speed ever suggested a letter there.
+     *  - every PIVOT wants a letter. A pause the word cannot explain is evidence
+     *    against the word.
+     *
+     * Both are weighted by confidence, and the whole term is scaled by the mean
+     * confidence, so a gesture with no real minima contributes nothing.
+     */
+    private fun pivotPenalty(
+        pivots: List<FloatArray>,
         folded: String,
         centers: Map<Char, FloatArray>,
-        dwell: Int = 3,
-        perSeg: Int = 5,
-    ): List<FloatArray>? {
-        val seq = ArrayList<FloatArray>(folded.length)
-        for (c in folded) seq.add(centers[c] ?: return null)
-        if (seq.size < 2) return null
-        val pts = ArrayList<FloatArray>(seq.size * (dwell + perSeg))
-        for (i in 0 until seq.size - 1) {
-            val a = seq[i]; val b = seq[i + 1]
-            repeat(dwell) { pts.add(a) }
-            for (k in 0 until perSeg) {
-                val t = k.toFloat() / perSeg
-                pts.add(floatArrayOf(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t))
+        cap: Float,
+    ): Double {
+        if (pivots.isEmpty()) return 0.0
+        var confSum = 0f
+        for (p in pivots) confSum += p[2]
+        if (confSum <= 0f) return 0.0
+
+        var letterPen = 0.0
+        var letters = 0
+        for (c in folded) {
+            val cc = centers[c] ?: continue
+            var best = Float.MAX_VALUE
+            for (p in pivots) {
+                val dx = cc[0] - p[0]; val dy = cc[1] - p[1]
+                val d = sqrt(dx * dx + dy * dy)
+                if (d < best) best = d
             }
+            letterPen += minOf(best, cap).toDouble()
+            letters++
         }
-        repeat(dwell) { pts.add(seq.last()) }
-        return pts
+        if (letters == 0) return 0.0
+
+        var pivotPen = 0.0
+        for (p in pivots) {
+            var best = Float.MAX_VALUE
+            for (c in folded) {
+                val cc = centers[c] ?: continue
+                val dx = cc[0] - p[0]; val dy = cc[1] - p[1]
+                val d = sqrt(dx * dx + dy * dy)
+                if (d < best) best = d
+            }
+            if (best < Float.MAX_VALUE) pivotPen += p[2] * minOf(best, cap)
+        }
+
+        val trust = minOf(1.0, (confSum / pivots.size).toDouble())
+        return trust * (W_LETTER * (letterPen / letters) + W_PIVOT * (pivotPen / confSum))
     }
 
     /** Mean point-for-point distance between two equal-length resampled curves. */
