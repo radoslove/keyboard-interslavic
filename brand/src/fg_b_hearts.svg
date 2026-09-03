@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="432" height="432" viewBox="0 0 432 432">
+  <!-- Adaptive-icon FOREGROUND for variant B (transparent background; background = ic_launcher_background navy dark).
+       Safe zone = central 264 px circle. Hearts scaled so the clover stays inside it. -->
+  <defs>
+    <path id="h" d="M0,-24 C-44,-70 -104,-22 -58,26 L0,86 L58,26 C104,-22 44,-70 0,-24 Z"/>
+  </defs>
+  <g transform="translate(216 216) scale(0.86)">
+    <use href="#h" transform="rotate(180) translate(0 -86)" fill="#3A66D9"/>
+    <use href="#h" transform="rotate(270) translate(0 -86)" fill="#F5C400"/>
+    <use href="#h" transform="rotate(0)   translate(0 -86)" fill="#D5262C"/>
+    <use href="#h" transform="rotate(90)  translate(0 -86)" fill="#FFFFFF"/>
+  </g>
+</svg>

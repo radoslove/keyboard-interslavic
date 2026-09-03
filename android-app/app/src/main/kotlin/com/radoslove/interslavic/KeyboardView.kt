@@ -81,6 +81,20 @@ class KeyboardView(
     private val letterKeyViews = ArrayList<Pair<Char, TextView>>()
     private var swiping = false
     private var swipeStartKey: Char? = null
+    /** Shift as it stood when the GESTURE BEGAN.
+     *
+     *  A one-shot capital belongs to the moment the finger went down, not to the
+     *  moment the word is finally decoded. Reading `shift` at commit time is the
+     *  same mistake the typed-prediction path already documents ("shift is
+     *  one-shot and long spent by then") - and a glide cannot use that path's
+     *  remedy, because there is no typed prefix whose case could be read back.
+     *  So the answer is captured up front and carried through the gesture. */
+    private var swipeShift = false
+    /** Caps-lock as it stood when the gesture began - same reasoning as
+     *  [swipeShift]. Without it a locked keyboard still produced `Velmi`
+     *  instead of `VELMI`, because the glide only ever touched the first
+     *  character. */
+    private var swipeCaps = false
     private var swipeDownX = 0f
     private var swipeDownY = 0f
     private val swipePath = StringBuilder()
@@ -97,6 +111,7 @@ class KeyboardView(
      *  picked from the strip it is long gone - and the replacement came out
      *  lowercase even though the user had deliberately pressed shift. */
     private var lastSwipeCapitalized = false
+    private var lastSwipeLocked = false
     private var pendingSpace = false
     // Glued to the word, no space before it. Apostrophes and CLOSING quotes
     // belong here too: without them smart space read `'` as the start of a new
@@ -234,20 +249,23 @@ class KeyboardView(
     }
 
     /**
-     * Shift key state machine — standard soft-keyboard behaviour:
-     *  - OFF  → tap → ONE-SHOT (next letter is capital, then auto-reverts)
-     *  - ONE-SHOT → quick 2nd tap → CAPS-LOCK (stays until turned off)
-     *  - ONE-SHOT → slow 2nd tap → OFF
-     *  - CAPS-LOCK → tap → OFF
+     * Shift key state machine — three presses, no stopwatch:
+     *  - OFF → press → ONE-SHOT (next word/letter gets a capital, then reverts)
+     *  - ONE-SHOT → press → CAPS-LOCK (everything upper until turned off)
+     *  - CAPS-LOCK → press → OFF
+     *
+     * The lock used to need a QUICK second tap (<300 ms). That made the third
+     * state unreachable by anyone pressing at a normal pace: a calm second press
+     * fell through to "shift -> off", so caps-lock looked broken rather than
+     * strict. Timing is not a thing to guess at on a key with three meanings.
      * `shift` stays the single "is uppercase active now" flag every key reads;
-     * `capsLocked` only decides whether it survives typing a letter.
+     * `capsLocked` only decides whether it survives typing.
      */
     private fun onShiftTap() {
         val now = SystemClock.uptimeMillis()
         when {
             capsLocked -> { capsLocked = false; shift = false }
-            shift && now - lastShiftTapMs <= doubleTapMs -> { capsLocked = true; shift = true }
-            shift -> shift = false
+            shift -> capsLocked = true      // stays true; shift is already on
             else -> shift = true
         }
         lastShiftTapMs = now
@@ -735,6 +753,8 @@ class KeyboardView(
                 // Fall back to the NEAREST key when the press lands in a margin or
                 // just off a key (common on edge keys like `a`); without this the
                 // whole glide was dead because the start key was null.
+                swipeShift = shift
+                swipeCaps = capsLocked
                 swipeStartKey = keyAt(e.x, e.y) ?: nearestCenterKey(e.x, e.y, computeCenters())
                 swipeDownX = e.x
                 swipeDownY = e.y
@@ -890,7 +910,11 @@ class KeyboardView(
 
     private fun showPreview(words: List<String>) {
         for (i in suggestionViews.indices) {
-            val w = words.getOrNull(i)
+            // Cased the way it will actually be inserted. Showing the decoder's
+            // raw lowercase here is a lie about the outcome, and it is the half
+            // of the bug the user sees first - the strip contradicts the shift
+            // they just pressed, mid-gesture, before anything is committed.
+            val w = words.getOrNull(i)?.let { caseSwipe(it, swipeShift, swipeCaps) }
             suggestionViews[i].text = w.orEmpty()
             suggestionViews[i].setTextColor(Color.parseColor("#1C2529"))
             suggestionViews[i].setBackgroundColor(
@@ -910,11 +934,22 @@ class KeyboardView(
         }
     }
 
+    /** The one place that decides how a glided word is cased. Every surface the
+     *  user sees - the strip during the gesture, the committed word, the list of
+     *  alternatives, the replacement - has to answer this identically, or the
+     *  keyboard contradicts itself in front of the user. */
+    private fun caseSwipe(word: String, cap: Boolean, lock: Boolean): String = when {
+        lock -> word.uppercase()
+        cap -> word.replaceFirstChar { it.uppercaseChar() }
+        else -> word
+    }
+
     private fun commitSwipeResult(words: List<String>) {
         if (words.isEmpty()) { clearSlots(); return }
         val ic = service.currentInputConnection ?: return
-        lastSwipeCapitalized = shift
-        val best = if (shift) words[0].replaceFirstChar { it.uppercaseChar() } else words[0]
+        lastSwipeCapitalized = swipeShift
+        lastSwipeLocked = swipeCaps
+        val best = caseSwipe(words[0], swipeShift, swipeCaps)
         // Smart space: a glide is a fresh word, so put the space BEFORE it (unless
         // at field start or already after a space), and none after it.
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
@@ -938,7 +973,7 @@ class KeyboardView(
         // Show them cased the way they will actually be inserted - a strip of
         // lowercase words after a deliberate shift is a lie about the outcome.
         val shown = words.take(suggestionViews.size).map {
-            if (lastSwipeCapitalized) it.replaceFirstChar { c -> c.uppercaseChar() } else it
+            caseSwipe(it, lastSwipeCapitalized, lastSwipeLocked)
         }
         for (i in shown.indices) {
             slotWord[i] = shown[i]
@@ -966,9 +1001,7 @@ class KeyboardView(
         }
         // Honour the shift that produced the ORIGINAL word, not the (already
         // spent) shift state now.
-        val out = if (shift || lastSwipeCapitalized) {
-            word.replaceFirstChar { it.uppercaseChar() }
-        } else word
+        val out = caseSwipe(word, shift || lastSwipeCapitalized, capsLocked || lastSwipeLocked)
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (lastSwipeWord.isEmpty() && prev.isNotEmpty() && !prev[0].isWhitespace()) " " else ""
         ic.commitText(if (smartSpace) "$lead$out" else "$lead$out ", 1)  // leading space before the old word stays

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Google Play feature graphic, 1024x500.
+       Canvas is a 1024x1024 square because Quick Look (qlmanage) scales non-square SVGs to the longest side;
+       the artwork is a 1024x500 band centred vertically (y 262..762) and render.sh crops it out with sips.
+       Keep text inside the central 80%: Play crops edges on some surfaces. -->
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1A3FA8"/>
+      <stop offset="1" stop-color="#0B1F5C"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="#12328C"/>
+  <g transform="translate(0 262)">
+    <rect width="1024" height="500" fill="url(#g)"/>
+    <!-- hearts clover (variant B, owner's pick) -->
+    <defs>
+      <path id="h" d="M0,-24 C-44,-70 -104,-22 -58,26 L0,86 L58,26 C104,-22 44,-70 0,-24 Z"/>
+    </defs>
+    <g transform="translate(220 250) scale(1.05)">
+      <use href="#h" transform="rotate(180) translate(0 -86)" fill="#3A66D9"/>
+      <use href="#h" transform="rotate(270) translate(0 -86)" fill="#F5C400"/>
+      <use href="#h" transform="rotate(0)   translate(0 -86)" fill="#D5262C"/>
+      <use href="#h" transform="rotate(90)  translate(0 -86)" fill="#FFFFFF"/>
+    </g>
+    <!-- text -->
+    <text x="410" y="205" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="62" fill="#FFFFFF">Medžuslovjansky</text>
+    <text x="412" y="260" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="600" font-size="36" fill="#F5C400">Interslavic keyboard</text>
+    <text x="412" y="314" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="500" font-size="27" fill="#FFFFFF" fill-opacity="0.9">č š ž ě  ·  swipe  ·  offline  ·  open source</text>
+    <text x="412" y="376" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="500" font-size="22" fill="#FFFFFF" fill-opacity="0.6">by Radoslove</text>
+  </g>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Variant A: the caron as the hero. White c, yellow háček on Interslavic navy. -->
+  <rect width="512" height="512" fill="#12328C"/>
+  <text x="256" y="418" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="400" fill="#FFFFFF" text-anchor="middle">c</text>
+  <path d="M176 78 L256 158 L336 78" fill="none" stroke="#F5C400" stroke-width="46" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Variant C: a keycap. Says "keyboard" at a glance; the č says which one. -->
+  <rect width="512" height="512" fill="#12328C"/>
+  <rect x="84" y="100" width="344" height="344" rx="64" fill="#0B1F5C"/>
+  <rect x="84" y="76" width="344" height="344" rx="64" fill="#FFFFFF"/>
+  <text x="256" y="382" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="300" fill="#12328C" text-anchor="middle">c</text>
+  <path d="M198 132 L256 190 L314 132" fill="none" stroke="#D5262C" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

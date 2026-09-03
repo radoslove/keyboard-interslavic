@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Variant B: four hearts in the Interslavic flag colours, tips meeting at the centre. Flat, no outlines. -->
+  <defs>
+    <path id="h" d="M0,-24 C-44,-70 -104,-22 -58,26 L0,86 L58,26 C104,-22 44,-70 0,-24 Z"/>
+  </defs>
+  <rect width="512" height="512" fill="#0B1F5C"/>
+  <g transform="translate(256 256) scale(1.25)">
+    <use href="#h" transform="rotate(180) translate(0 -86)" fill="#3A66D9"/>
+    <use href="#h" transform="rotate(270) translate(0 -86)" fill="#F5C400"/>
+    <use href="#h" transform="rotate(0)   translate(0 -86)" fill="#D5262C"/>
+    <use href="#h" transform="rotate(90)  translate(0 -86)" fill="#FFFFFF"/>
+  </g>
+</svg>

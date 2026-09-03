@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="432" height="432" viewBox="0 0 432 432">
+  <!-- Adaptive-icon FOREGROUND for variant C (transparent background, background colour comes from ic_launcher_background).
+       Android safe zone = central circle of 66/108 of the canvas (here 264 px of 432). Everything important stays inside it. -->
+  <rect x="100" y="112" width="232" height="232" rx="44" fill="#0B1F5C"/>
+  <rect x="100" y="96" width="232" height="232" rx="44" fill="#FFFFFF"/>
+  <text x="216" y="302" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="202" fill="#12328C" text-anchor="middle">c</text>
+  <path d="M177 134 L216 173 L255 134" fill="none" stroke="#D5262C" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

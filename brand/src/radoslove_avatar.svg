@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Publisher mark: Radoslove. White R on navy, one red heart tucked into the leg. Use as GitHub / Codeberg / store avatar. -->
+  <defs>
+    <path id="h" d="M0,-24 C-44,-70 -104,-22 -58,26 L0,86 L58,26 C104,-22 44,-70 0,-24 Z"/>
+  </defs>
+  <rect width="512" height="512" fill="#12328C"/>
+  <text x="236" y="400" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="400" fill="#FFFFFF" text-anchor="middle">R</text>
+  <use href="#h" transform="translate(392 356) scale(0.62)" fill="#D5262C"/>
+</svg>
