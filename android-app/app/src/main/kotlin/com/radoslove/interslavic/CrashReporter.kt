@@ -24,7 +24,9 @@ import java.net.URL
  */
 object CrashReporter {
 
-    private const val SINK = "http://ubu:30025/api/crash"
+    // `ubu` is a server in a flat and was offline when this was needed; a crash
+    // report that lands nowhere is the same as no crash reporter at all.
+    private const val SINK = "http://100.91.132.98:30025/api/crash"
 
     fun install(context: Context) {
         if (!context.packageName.endsWith(".debug")) return

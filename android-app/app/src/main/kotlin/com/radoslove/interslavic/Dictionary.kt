@@ -141,12 +141,21 @@ object Dictionary {
         lastKeys: Set<Char>,
         maxLen: Int,
         n: Int,
-        score: (String) -> Double,
+        coarse: (String) -> Double,
+        fine: (String) -> Double,
         boost: (String) -> Double = { 0.0 },
     ): List<String> {
         if (!ready) return emptyList()
-        val topWords = arrayOfNulls<String>(n)
-        val topScore = DoubleArray(n) { Double.NEGATIVE_INFINITY }
+
+        // PASS 1 - cheap. Every word that survives the letter gates gets a
+        // low-resolution shape comparison. This is where the volume is: a glide
+        // for `pisati` crosses fifteen keys, so the length gate admits words up
+        // to seventeen letters and roughly sixteen THOUSAND candidates reach
+        // scoring. Running the full comparison on all of them took ~0.5 s - and
+        // it runs again every 80 ms while the finger is still moving, which is
+        // exactly the lag felt on a slower phone.
+        val kept = arrayOfNulls<String>(SHORTLIST)
+        val keptScore = DoubleArray(SHORTLIST) { Double.NEGATIVE_INFINITY }
         for (e in entries) {
             val w = e.word
             if (w.length < 2 || w.length > maxLen) continue
@@ -155,12 +164,33 @@ object Dictionary {
             // letter, so a word ending elsewhere cannot be what was drawn.
             if (lastKeys.isNotEmpty() && foldBase(w.last()) !in lastKeys) continue
             val folded = buildString { for (c in w) append(foldBase(c)) }
-            val geo = score(folded)
+            val geo = coarse(folded)
+            if (geo == Double.NEGATIVE_INFINITY) continue
+            val s = geo + Math.log((e.freq + 1).toDouble()) * FREQ_W
+            if (s > keptScore[SHORTLIST - 1]) {
+                var j = SHORTLIST - 1
+                while (j > 0 && keptScore[j - 1] < s) {
+                    keptScore[j] = keptScore[j - 1]; kept[j] = kept[j - 1]; j--
+                }
+                keptScore[j] = s; kept[j] = w
+            }
+        }
+
+        // PASS 2 - the real comparison, on the shortlist only. Measured on
+        // synthetic glides: identical top-1 and top-3 against scoring everything,
+        // and about eight times faster.
+        val topWords = arrayOfNulls<String>(n)
+        val topScore = DoubleArray(n) { Double.NEGATIVE_INFINITY }
+        for (w in kept) {
+            if (w == null) continue
+            val folded = buildString { for (c in w) append(foldBase(c)) }
+            val geo = fine(folded)
             if (geo == Double.NEGATIVE_INFINITY) continue
             // geo is negative px (0 = letters sit exactly on the path); a small
             // frequency nudge breaks ties, and adaptive usage nudges harder so a
             // word you keep swiping wins the near-ties geometry cannot resolve.
-            val s = geo + Math.log((e.freq + 1).toDouble()) * 2.5 + boost(w)
+            val freq = freqOf(w)
+            val s = geo + Math.log((freq + 1).toDouble()) * FREQ_W + boost(w)
             if (s > topScore[n - 1]) {
                 var j = n - 1
                 while (j > 0 && topScore[j - 1] < s) {
@@ -170,6 +200,22 @@ object Dictionary {
             }
         }
         return topWords.filterNotNull()
+    }
+
+    /** How many words survive pass 1. Measured: 100, 200 and 400 all score the
+     *  same, so this sits in the middle rather than at the edge of what works. */
+    private const val SHORTLIST = 200
+
+    /** How hard a word's own frequency pulls. Measured on synthetic glides:
+     *  3.5 is the peak - a sloppy gesture gains two points of top-1 over 2.5,
+     *  a tidy one is unchanged, and past 3.5 it starts costing. This is the
+     *  "round towards the word people actually use" knob. */
+    private const val FREQ_W = 3.5
+
+    private fun freqOf(word: String): Int {
+        val arr = entries
+        val i = lowerBound(arr, word)
+        return if (i < arr.size && arr[i].word == word) arr[i].freq else 0
     }
 
     /** Exact membership test (binary search). Used to decide MISS for M3. */

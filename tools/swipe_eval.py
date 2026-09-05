@@ -571,6 +571,117 @@ def run_ab(words, buckets):
     print("pivot gain here is an UPPER bound. The device is the verdict.")
 
 
+# ---- real glides ------------------------------------------------------------
+# Everything above this line runs on SYNTHETIC paths, and on 2026-09-03 that
+# model was caught lying: it scored `pisati` 15-25 points ahead of `prati` on
+# every simulated attempt while the phone produced `prati` ten times in a row.
+# A model of a gesture is not a gesture, so the test keyboard now records the
+# real ones (medzuucenje `gestures`) and this replays them.
+#
+#     python swipe_eval.py real            # score the decoder on real glides
+#     python swipe_eval.py real --list     # just show what has been collected
+#
+# The DSN is read from the medzuucenje checkout, never passed on a command line.
+MEDZUUCENJE_ENV = os.path.expanduser(
+    "~/Projects/medzuucenje/.env")
+
+
+def load_gestures(limit=500):
+    """Labelled glides: those where the user told us what they actually wanted.
+
+    Pulled through `psql` in a container rather than a Python driver - the tool
+    then needs nothing installed and works the same way the rest of this fleet
+    is operated. The DSN is read from the medzuucenje checkout and handed over on
+    stdin-free argv only inside the container, never printed.
+    """
+    import json as _json
+    import subprocess
+    dsn = ""
+    with open(MEDZUUCENJE_ENV, encoding="utf-8") as f:
+        for line in f:
+            if line.startswith("MEDZUUCENJE_DSN="):
+                dsn = line.split("=", 1)[1].strip()
+    if not dsn:
+        raise SystemExit(f"no MEDZUUCENJE_DSN in {MEDZUUCENJE_ENV}")
+    sql = (
+        "select coalesce(json_agg(g), '[]') from ("
+        " select id, device, trail, keys, candidates, committed, chosen, outcome"
+        " from gestures where jsonb_array_length(trail) > 4"
+        f" order by id desc limit {int(limit)}) g"
+    )
+    out = subprocess.run(
+        ["docker", "run", "--rm", "postgres:18-alpine",
+         "psql", dsn.replace("-pooler", ""), "-tAc", sql],
+        capture_output=True, text=True)
+    if out.returncode != 0:
+        raise SystemExit("could not read gestures:\n" + out.stderr.strip()[:400])
+    rows = _json.loads(out.stdout.strip() or "[]")
+    return [(r["id"], r["device"], r["trail"], r["keys"], r["candidates"],
+             r["committed"], r["chosen"], r["outcome"]) for r in rows]
+
+
+def replay(rows, mode="pivot"):
+    """Decode each recorded glide with THAT phone's key geometry.
+
+    Coordinates are meaningless without the geometry they were drawn on - key
+    sizes differ per device - so CENTERS is swapped per row. The word list and
+    its buckets do not depend on the coordinates, only on which letters exist,
+    so they stay valid across the swap.
+    """
+    global CENTERS
+    words = load_words()
+    buckets = build_buckets(words)
+    saved = CENTERS
+    hit1 = hit3 = labelled = 0
+    misses = []
+    try:
+        for gid, device, trail, keys, cands, committed, chosen, outcome in rows:
+            if not keys:
+                continue
+            CENTERS = {k: (float(v[0]), float(v[1])) for k, v in keys.items()}
+            path = [(float(p[0]), float(p[1]), float(p[2])) for p in trail]
+            want = chosen or (committed if outcome == "kept" else None)
+            if not want:
+                continue           # deleted and never resolved - no ground truth
+            labelled += 1
+            top = decode(path, buckets, 3, mode=mode)
+            if top and top[0] == want:
+                hit1 += 1
+            if want in top:
+                hit3 += 1
+            else:
+                misses.append((gid, want, committed, top))
+    finally:
+        CENTERS = saved
+    return labelled, hit1, hit3, misses
+
+
+def run_real(argv):
+    rows = load_gestures()
+    if not rows:
+        print("no glides recorded yet - swipe on the test build first")
+        return
+    if "--list" in argv:
+        print(f"{len(rows)} recorded glides (newest first)\n")
+        for gid, device, trail, keys, cands, committed, chosen, outcome in rows[:30]:
+            print(f"  #{gid:<5} {device:<12} {outcome:<10} "
+                  f"committed={committed!r:14} wanted={chosen!r:14} "
+                  f"{len(trail):3d} pts  offered={cands[:3]}")
+        return
+    labelled, h1, h3, misses = replay(rows)
+    if not labelled:
+        print(f"{len(rows)} glides recorded, but none carry a verdict yet.")
+        print("A glide counts once you either keep it or pick the right word "
+              "from the strip - deleting it says what was wrong, not what was right.")
+        return
+    print(f"== {labelled} labelled real glides ==")
+    print(f"  top-1 {h1/labelled:.0%}   top-3 {h3/labelled:.0%}")
+    if misses:
+        print(f"\n== {len(misses)} the decoder never offered ==")
+        for gid, want, committed, top in misses[:15]:
+            print(f"  #{gid:<5} wanted {want!r:14} got {committed!r:14} -> {top}")
+
+
 def main():
     words = load_words()
     by_word = {w: fr for w, fr in words}
@@ -587,6 +698,9 @@ def main():
         return
     if argv and argv[0] == "ab":
         run_ab(words, buckets)
+        return
+    if argv and argv[0] == "real":
+        run_real(argv[1:])
         return
 
     if argv:

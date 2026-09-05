@@ -100,6 +100,21 @@ class KeyboardView(
     private val swipePath = StringBuilder()
     private var lastSwipeWord = ""
     private var lastSwipeCandidates: List<String> = emptyList()
+    /**
+     * Words this user has just deleted after a glide, and how many times.
+     *
+     * Swiping the same shape ten times and getting the same wrong word ten times
+     * is the keyboard refusing to take a hint. A backspace straight after a
+     * glide is an explicit "not that one", so the word steps DOWN for the next
+     * few attempts - repeatedly, if it keeps coming back.
+     *
+     * It is demoted, never banned: the guess may have been right and the
+     * backspace a reflex, so it must stay reachable in the strip. That is why
+     * this is a score penalty and not a filter.
+     */
+    private val rejectedStrikes = LinkedHashMap<String, Int>()
+    private val REJECT_W = 12.0        // px-equivalent, per strike
+    private val REJECT_MEMORY = 16     // words remembered, oldest dropped
     private var lastPreviewMs = 0L            // throttle the live in-glide preview
     private var backspaceInterval = 200L      // backspace-hold repeat, accelerates
     private var swipeJustCommitted = false   // true right after a glide, until any other key
@@ -131,6 +146,9 @@ class KeyboardView(
         get() = context.getSharedPreferences("isv_collector", Context.MODE_PRIVATE)
             .getBoolean("smart_space", true)
     private val SWIPE_RESAMPLE = 32
+    // Resolution of the cheap first pass. Eight points is enough to throw out
+    // the thousands of words whose route goes nowhere near the finger.
+    private val COARSE_RESAMPLE = 8
     private val SWIPE_CANDIDATES = SLOTS   // the strip scrolls, so every candidate is reachable
     private val ANCHOR_KEYS = 3       // start-key candidates; 1 hid `pisati` behind `ležati`
     // Velocity minima (see velocityPivots). Tuned in tools/swipe_eval.py against
@@ -419,13 +437,15 @@ class KeyboardView(
         tv.isLongClickable = false
         val repeat = object : Runnable {
             override fun run() {
-                deleteWordBackward()
+                // deleteWordBackward decides whether it is safe to carry on: it
+                // refuses to cross a line break, and stops the repeat there.
+                val more = deleteWordBackward()
                 feedback()
-                // Speeds up, but nowhere near as far as it used to (55 ms was
-                // roughly eight words a second - a held thumb wiped a whole
-                // message before the eye caught up). A floor of 130 ms stays
-                // fast while leaving time to let go.
-                backspaceInterval = maxOf(130L, backspaceInterval - 20L)
+                if (!more) return
+                // Deleting whole WORDS at the old floor of 130 ms was about eight
+                // words a second - far past the point where a thumb can react to
+                // what it sees. Slower ramp, higher floor.
+                backspaceInterval = maxOf(200L, backspaceInterval - 15L)
                 flickHandler.postDelayed(this, backspaceInterval)
             }
         }
@@ -513,9 +533,48 @@ class KeyboardView(
         consumeOneShotShift()          // a tapped capital lasts exactly one letter
     }
 
+    /**
+     * True when the editor currently holds a SELECTION.
+     *
+     * This has to be asked before every delete, because `deleteSurroundingText`
+     * does not do what its name suggests when text is selected: it removes
+     * characters AROUND the selection and leaves the selection itself in place.
+     * So selecting a paragraph and pressing backspace ate the text next to it
+     * while the selected block stayed - and holding backspace chewed backwards
+     * through the rest of the document. Losing the user's writing is the worst
+     * thing a keyboard can do, so every delete path checks this first.
+     */
+    private var selStart = 0
+    private var selEnd = 0
+
+    /** Called by the service whenever the editor reports cursor/selection. */
+    fun onSelectionChanged(start: Int, end: Int) { selStart = start; selEnd = end }
+
+    private fun hasSelection(): Boolean {
+        if (selEnd != selStart) return true
+        // Belt and braces: some editors report the span, some answer this, and
+        // the ones that do neither are why the first attempt at this failed.
+        val ic = service.currentInputConnection ?: return false
+        return !ic.getSelectedText(0).isNullOrEmpty()
+    }
+
+    /** Replace the selection with nothing - the correct way to delete one. */
+    private fun deleteSelection() {
+        val ic = service.currentInputConnection ?: return
+        ic.commitText("", 1)
+        swipeJustCommitted = false
+        lastSwipeWord = ""
+        currentWord = ""
+        pendingSpace = false
+        refreshSuggestions()
+    }
+
     private fun backspace() {
         feedback()
         val ic = service.currentInputConnection ?: return
+        // A selection means "delete THIS", and nothing else - not the word
+        // before it, and certainly not the glide committed earlier.
+        if (hasSelection()) { deleteSelection(); return }
         // A backspace immediately after a glide means "that wasn't the word I
         // wanted" — wipe the WHOLE word in one press so the user can re-swipe,
         // instead of tapping backspace letter by letter.
@@ -528,6 +587,11 @@ class KeyboardView(
             Usage.unrecord(context, lastSwipeWord)
             Popularity.unrecord(context, lastSwipeWord)
             val rejected = lastSwipeWord
+            GestureLog.resolve("deleted", null)
+            rejectedStrikes[rejected] = (rejectedStrikes[rejected] ?: 0) + 1
+            while (rejectedStrikes.size > REJECT_MEMORY) {
+                rejectedStrikes.remove(rejectedStrikes.keys.first())
+            }
             swipeJustCommitted = false
             lastSwipeWord = ""
             pendingSpace = false
@@ -560,20 +624,42 @@ class KeyboardView(
      * with it. Letters and marks are separate units, so a stray quote can be
      * taken back without losing the word in front of it.
      */
-    private fun deleteWordBackward() {
-        val ic = service.currentInputConnection ?: return
-        val before = ic.getTextBeforeCursor(80, 0)?.toString().orEmpty()
-        if (before.isEmpty()) return
+    private fun deleteWordBackward(): Boolean {
+        val ic = service.currentInputConnection ?: return false
+        // Held backspace over a selection was the dangerous one: each repeat
+        // deleted another word BEFORE the untouched selection, walking backwards
+        // through the text the user meant to keep.
+        if (hasSelection()) { deleteSelection(); return false }
+        val before = ic.getTextBeforeCursor(400, 0)?.toString().orEmpty()
+        if (before.isEmpty()) return false
+
+        // A HELD backspace never crosses a line break. Speed is not really the
+        // problem - the problem is that a fast repeat walked out of the line
+        // being edited and into finished paragraphs above it, and a greeting
+        // typed ten minutes ago vanished. The line is a natural place to make
+        // the thumb stop and look; crossing it has to be a deliberate new press.
+        val floor = before.lastIndexOf('\n') + 1
+
         var i = before.length
-        while (i > 0 && before[i - 1].isWhitespace()) i--
-        if (i > 0) {
+        while (i > floor && before[i - 1].isWhitespace()) i--
+        if (i > floor) {
             val lettersFirst = before[i - 1].isLetterOrDigit()
-            while (i > 0 && !before[i - 1].isWhitespace() &&
+            while (i > floor && !before[i - 1].isWhitespace() &&
                    before[i - 1].isLetterOrDigit() == lettersFirst) i--
         }
         val del = before.length - i
-        ic.deleteSurroundingText(if (del > 0) del else 1, 0)
-        refreshSuggestions()
+        if (del > 0) {
+            ic.deleteSurroundingText(del, 0)
+            refreshSuggestions()
+            // Nothing left on this line? Stop rather than roll into the one above.
+            return i > floor
+        }
+        // Cursor sits right after the line break: take the break itself, and stop.
+        if (floor > 0) {
+            ic.deleteSurroundingText(1, 0)
+            refreshSuggestions()
+        }
+        return false
     }
 
     // ---- Prediction bar (M2) --------------------------------------------
@@ -863,10 +949,18 @@ class KeyboardView(
         // so the two curves drifted out of step and the shape distance became
         // noise. Dwell is now read explicitly, once, as velocity minima.
         val rpTrail = resamplePath(pointList, SWIPE_RESAMPLE) ?: return emptyList()
+        val rpCoarse = resamplePath(pointList, COARSE_RESAMPLE) ?: return emptyList()
         val pivots = velocityPivots(pointList)
         val cap = keyWidth(centers) * PIVOT_CAP
 
-        val score: (String) -> Double = fold@{ folded ->
+        // Cheap: shape only, eight points, no pivots. Decides who gets looked at.
+        val coarse: (String) -> Double = fold@{ folded ->
+            val ideal = idealRoute(folded, centers) ?: return@fold Double.NEGATIVE_INFINITY
+            val idealRp = resamplePath(ideal, COARSE_RESAMPLE) ?: return@fold Double.NEGATIVE_INFINITY
+            -shapeDist(rpCoarse, idealRp)
+        }
+        // Full resolution plus the velocity-minima term, on the shortlist only.
+        val fine: (String) -> Double = fold@{ folded ->
             val ideal = idealRoute(folded, centers) ?: return@fold Double.NEGATIVE_INFINITY
             val idealRp = resamplePath(ideal, SWIPE_RESAMPLE) ?: return@fold Double.NEGATIVE_INFINITY
             -shapeDist(rpTrail, idealRp) - pivotPenalty(pivots, folded, centers, cap)
@@ -886,8 +980,8 @@ class KeyboardView(
         // finger stopped throws out the overwhelming majority for the price of
         // one character lookup.
         val ends = nearestKeys(pointList.last(), centers, ANCHOR_KEYS).toSet()
-        return Dictionary.decodeSwipeGeo(starts, ends, ks.size + 2, SWIPE_CANDIDATES, score) { w ->
-            Usage.count(context, w) * USAGE_W_SWIPE
+        return Dictionary.decodeSwipeGeo(starts, ends, ks.size + 2, SWIPE_CANDIDATES, coarse, fine) { w ->
+            Usage.count(context, w) * USAGE_W_SWIPE - (rejectedStrikes[w] ?: 0) * REJECT_W
         }
     }
 
@@ -930,7 +1024,7 @@ class KeyboardView(
         decodeHandler.removeCallbacksAndMessages(null)   // drop any pending preview
         decodeHandler.post {
             val words = decodeCandidates(rawPts, centers)
-            post { commitSwipeResult(words) }
+            post { commitSwipeResult(words, rawPts, centers) }
         }
     }
 
@@ -944,7 +1038,11 @@ class KeyboardView(
         else -> word
     }
 
-    private fun commitSwipeResult(words: List<String>) {
+    private fun commitSwipeResult(
+        words: List<String>,
+        rawPts: List<Float> = emptyList(),
+        centers: Map<Char, FloatArray> = emptyMap(),
+    ) {
         if (words.isEmpty()) { clearSlots(); return }
         val ic = service.currentInputConnection ?: return
         lastSwipeCapitalized = swipeShift
@@ -963,6 +1061,7 @@ class KeyboardView(
         pendingSpace = smartSpace
         currentWord = ""
         showSwipeAlts(words, highlight = 0)   // a wrong guess is one tap from fixed
+        GestureLog.committed(rawPts, centers, words, best)
         consumeOneShotShift()                 // one-shot capital ends with this word too
     }
 
@@ -990,9 +1089,16 @@ class KeyboardView(
      *  nothing is currently committed (e.g. after a whole-word backspace), just
      *  insert the chosen word fresh. */
     private fun replaceLastSwipeWord(word: String) {
+        // Picking it deliberately overrides every earlier rejection of it.
+        rejectedStrikes.remove(word)
+        // This is the label the harness cannot invent: what was actually wanted.
+        GestureLog.resolve("corrected", word)
         val ic = service.currentInputConnection ?: return
         ic.beginBatchEdit()
-        if (lastSwipeWord.isNotEmpty()) {
+        // With a selection live, deleting "the word we just committed" would cut
+        // characters next to the selection instead. Let the insertion simply
+        // replace the selection.
+        if (lastSwipeWord.isNotEmpty() && !hasSelection()) {
             // Choosing another word means the committed one was wrong.
             Usage.unrecord(context, lastSwipeWord)
             Popularity.unrecord(context, lastSwipeWord)
