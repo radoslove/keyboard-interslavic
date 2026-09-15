@@ -75,6 +75,7 @@ class KeyboardView(
     private val slotWord = arrayOfNulls<String>(SLOTS)
     private val slotIsSave = BooleanArray(SLOTS)
     private val slotIsSwipeAlt = BooleanArray(SLOTS)
+    private val slotIsUndo = BooleanArray(SLOTS)
 
     // Swipe / glide decoding (M4). letterKeyViews lets us hit-test which key the
     // finger is over as it crosses the board.
@@ -118,6 +119,35 @@ class KeyboardView(
     private var lastPreviewMs = 0L            // throttle the live in-glide preview
     private var backspaceInterval = 200L      // backspace-hold repeat, accelerates
     private var swipeJustCommitted = false   // true right after a glide, until any other key
+    /**
+     * When the glide that armed [swipeJustCommitted] landed.
+     *
+     * A backspace straight after a glide means "that wasn't the word I wanted"
+     * and wipes the whole word - but only for a moment. Once the eye has read
+     * the word and the thumb has come back to fix an ENDING (`pišem` ->
+     * `pišeš`), the same press must delete one letter, because in Interslavic
+     * a nearly-right guess is the common case, not the edge case: the stem is
+     * right and only the inflection is off. So the whole-word wipe lives
+     * inside a short window after the commit, and on the FIRST press only -
+     * the deliberate way to take a whole word is holding backspace.
+     */
+    private var swipeCommitAtMs = 0L
+    private val SWIPE_WIPE_WINDOW_MS = 1200L
+
+    /**
+     * One-shot undo for a whole-word delete (glide-reject or held backspace).
+     *
+     * Deleting a whole word in one press is only safe if it is one press back.
+     * [undoText] is the EXACT run of characters removed - word plus whatever
+     * whitespace went with it - so putting it back is a verbatim restore
+     * rather than a re-guess at the spacing. No stack: one action, offered as
+     * the first chip, gone at the next key.
+     */
+    private var undoText = ""
+    private var undoWord = ""
+    private var undoArmed = false         // a WHOLE-WORD delete happened in this run
+    private var undoMore = false          // the run holds more than one word
+    private var undoRestoreRank = false   // the delete also un-counted the word
     // Smart space: a committed word carries NO trailing space; the space is
     // inserted BEFORE the next word instead, and punctuation attaches with no
     // space before it (Gboard-style).
@@ -498,6 +528,7 @@ class KeyboardView(
 
     private fun commit(s: String) {
         swipeJustCommitted = false
+        clearUndo()          // one-shot: the undo chip dies on the next key
         feedback()
         val ic = service.currentInputConnection ?: return
         if (s.isEmpty()) return
@@ -515,20 +546,25 @@ class KeyboardView(
 
         // Smart space: a word carries no trailing space, so the space is owed to
         // the NEXT thing typed.
+        var inserted = s.length
         if (pendingSpace) {
             when {
-                c0 == ' ' -> { ic.commitText(" ", 1); pendingSpace = false }   // user's own space, no double
+                c0 == ' ' -> { ic.commitText(" ", 1); inserted = 1; pendingSpace = false }   // user's own space, no double
                 c0 in ATTACH_PUNCT -> { ic.commitText(s, 1); pendingSpace = true }  // glue punct, stay armed
                 else -> {
                     val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
-                    if (prev.isNotEmpty() && !prev[0].isWhitespace()) ic.commitText(" $s", 1)
-                    else ic.commitText(s, 1)   // guard: never a leading/double space
+                    if (prev.isNotEmpty() && !prev[0].isWhitespace()) {
+                        ic.commitText(" $s", 1); inserted = s.length + 1
+                    } else {
+                        ic.commitText(s, 1)    // guard: never a leading/double space
+                    }
                     pendingSpace = false
                 }
             }
         } else {
             ic.commitText(s, 1)
         }
+        afterSelfEdit(inserted)
         refreshSuggestions()
         consumeOneShotShift()          // a tapped capital lasts exactly one letter
     }
@@ -547,8 +583,127 @@ class KeyboardView(
     private var selStart = 0
     private var selEnd = 0
 
+    /**
+     * Cursor positions OUR OWN edits produced, newest last.
+     *
+     * The editor reports every caret change and nothing in that report says who
+     * caused it. Predicting where our own edit leaves the cursor is what
+     * separates "the keyboard just typed" from "the user tapped somewhere
+     * else" - and only the second may cancel an owed space or a just-glided
+     * word. A RING rather than one value because the reports are asynchronous:
+     * swiping a second word before the first word's report arrives would
+     * otherwise read that late report as a user jump and cancel smart space
+     * mid-sentence.
+     */
+    private val expectedCursors = ArrayDeque<Int>()
+
+    /** Record where our own edit left the cursor. [delta] = inserted - deleted. */
+    private fun afterSelfEdit(delta: Int) = afterSelfEditTo(maxOf(0, selEnd + delta))
+
+    private fun afterSelfEditTo(at: Int) {
+        selStart = at
+        selEnd = at
+        expectedCursors.addLast(at)
+        while (expectedCursors.size > 4) expectedCursors.removeFirst()
+    }
+
     /** Called by the service whenever the editor reports cursor/selection. */
-    fun onSelectionChanged(start: Int, end: Int) { selStart = start; selEnd = end }
+    fun onSelectionChanged(start: Int, end: Int) {
+        // Anything but a position one of our own edits produced means the user
+        // moved the caret - tapped into an older word, dragged a handle,
+        // selected something. A space owed to the next word and a glide that
+        // backspace may still wipe whole both belong to the place they were
+        // created; carried anywhere else they fire in the wrong place, which is
+        // exactly how a space appeared "out of nowhere" in the middle of a
+        // sentence that had been edited.
+        val ours = start == end && expectedCursors.contains(start)
+        selStart = start
+        selEnd = end
+        if (ours) {
+            // Retire the predictions this report overtook, so a position the
+            // cursor merely PASSED THROUGH a moment ago cannot later be mistaken
+            // for our own work when the user taps back into the same word. The
+            // matched one stays: editors sometimes report the same edit twice.
+            while (expectedCursors.size > 1 && expectedCursors.first() != start) {
+                expectedCursors.removeFirst()
+            }
+        }
+        if (!ours) {
+            val hadUndo = canUndo()
+            pendingSpace = false
+            swipeJustCommitted = false
+            lastSwipeWord = ""
+            clearUndo()
+            expectedCursors.clear()
+            expectedCursors.addLast(start)   // resync: judge the next edit from here
+            // The undo chip offers to put text back WHERE IT WAS; once the
+            // caret has moved it would put it somewhere else, so it goes.
+            if (hadUndo) refreshSuggestions()
+        }
+    }
+
+    /**
+     * Add what a delete just removed to the undo buffer.
+     *
+     * Deletes run backwards, so the newest characters go in FRONT of the ones
+     * taken before them and the buffer is always the contiguous run this delete
+     * gesture has eaten, in reading order. Every single-character delete feeds
+     * it too, even though only a WHOLE-WORD delete ([arm]) offers the chip -
+     * because holding backspace begins with one plain character and then eats
+     * the rest of the word, so a buffer that started only at the word delete
+     * would put `napisat` back where `napisati` had been.
+     */
+    private fun pushUndo(removed: String, arm: Boolean, restoreRank: Boolean = false) {
+        if (removed.isEmpty()) return
+        undoText = removed + undoText
+        if (arm) undoArmed = true
+        if (restoreRank) undoRestoreRank = true
+        val trimmed = undoText.trim()
+        undoWord = trimmed.takeLastWhile { it.isLetter() }
+        undoMore = trimmed.any { it.isWhitespace() }
+        if (undoWord.isEmpty()) undoArmed = false   // a stray mark is not a word
+    }
+
+    private fun clearUndo() {
+        undoText = ""
+        undoWord = ""
+        undoArmed = false
+        undoMore = false
+        undoRestoreRank = false
+    }
+
+    /** Is there something to offer as the `↶` chip? */
+    private fun canUndo(): Boolean = undoArmed && undoWord.isNotEmpty()
+
+    /** Put back exactly what the last whole-word delete removed. */
+    private fun undoLastDelete() {
+        val ic = service.currentInputConnection ?: return
+        if (!canUndo()) return
+        val text = undoText
+        val word = undoWord
+        val restoreRank = undoRestoreRank
+        clearUndo()
+        feedback()
+        ic.commitText(text, 1)
+        afterSelfEdit(text.length)
+        if (restoreRank) {
+            // The delete un-counted the word and demoted it. Taking the delete
+            // back has to take that verdict back too, or an undo still teaches
+            // the ranking that the word was wrong.
+            Usage.record(context, word)
+            Popularity.record(context, word)
+            rejectedStrikes.remove(word)
+        }
+        // It is a committed word again, exactly as it was before the delete.
+        lastSwipeWord = word
+        swipeJustCommitted = true
+        swipeCommitAtMs = SystemClock.uptimeMillis()
+        // Smart space owes the space forward only if the restored run does not
+        // already end in one (classic mode, and held-backspace, take it along).
+        pendingSpace = smartSpace && !text.last().isWhitespace()
+        currentWord = ""
+        clearSlots()
+    }
 
     private fun hasSelection(): Boolean {
         if (selEnd != selStart) return true
@@ -561,11 +716,14 @@ class KeyboardView(
     /** Replace the selection with nothing - the correct way to delete one. */
     private fun deleteSelection() {
         val ic = service.currentInputConnection ?: return
+        val at = selStart
         ic.commitText("", 1)
+        afterSelfEditTo(at)
         swipeJustCommitted = false
         lastSwipeWord = ""
         currentWord = ""
         pendingSpace = false
+        clearUndo()
         refreshSuggestions()
     }
 
@@ -578,9 +736,24 @@ class KeyboardView(
         // A backspace immediately after a glide means "that wasn't the word I
         // wanted" — wipe the WHOLE word in one press so the user can re-swipe,
         // instead of tapping backspace letter by letter.
-        if (swipeJustCommitted && lastSwipeWord.isNotEmpty()) {
+        //
+        // IMMEDIATELY is the whole point, and it used to be missing: the flag
+        // survived until some other key was pressed, so coming back to a word
+        // minutes later to fix its ENDING emptied the field instead. The wipe
+        // now only answers a press inside [SWIPE_WIPE_WINDOW_MS] of the commit,
+        // and only the first one - after that backspace deletes one letter,
+        // which is what fixing an inflection needs. Taking a whole word
+        // deliberately is still one gesture away: hold backspace.
+        val wipeWindowOpen =
+            SystemClock.uptimeMillis() - swipeCommitAtMs <= SWIPE_WIPE_WINDOW_MS
+        if (swipeJustCommitted && lastSwipeWord.isNotEmpty() && wipeWindowOpen) {
             // Classic mode put a space after the word; wipe that with it.
-            ic.deleteSurroundingText(lastSwipeWord.length + if (smartSpace) 0 else 1, 0)
+            val n = lastSwipeWord.length + if (smartSpace) 0 else 1
+            // Read it before it is gone: undo restores the exact characters.
+            val removed = ic.getTextBeforeCursor(n, 0)?.toString().orEmpty()
+            ic.deleteSurroundingText(n, 0)
+            afterSelfEdit(-n)
+            pushUndo(removed, arm = true, restoreRank = true)
             // Deleting it whole is a verdict on the guess, so take back the
             // count the commit just added - otherwise being wrong trains the
             // ranking exactly as hard as being right.
@@ -609,7 +782,18 @@ class KeyboardView(
             } else refreshSuggestions()
             return
         }
+        // An ordinary one-character delete. It also closes the swipe state: an
+        // owed space belongs to the word as it was committed, and once a letter
+        // has been taken off the end it would be paid in the wrong place.
+        swipeJustCommitted = false
+        lastSwipeWord = ""
+        pendingSpace = false
+        // Feed the undo buffer without arming the chip: a single character is
+        // not "I deleted too much", but it IS part of the run a held backspace
+        // is about to finish eating.
+        pushUndo(ic.getTextBeforeCursor(1, 0)?.toString().orEmpty(), arm = false)
         ic.deleteSurroundingText(1, 0)
+        afterSelfEdit(-1)
         refreshSuggestions()
     }
 
@@ -650,13 +834,23 @@ class KeyboardView(
         val del = before.length - i
         if (del > 0) {
             ic.deleteSurroundingText(del, 0)
+            afterSelfEdit(-del)
+            // A whole word going in one press is only safe while it is one
+            // press back — offer it as the first chip. pushUndo disarms runs
+            // with no letters in them (a stray quote is not a word to restore).
+            pushUndo(before.substring(i), arm = true)
+            swipeJustCommitted = false
+            lastSwipeWord = ""
+            pendingSpace = false
             refreshSuggestions()
             // Nothing left on this line? Stop rather than roll into the one above.
             return i > floor
         }
         // Cursor sits right after the line break: take the break itself, and stop.
         if (floor > 0) {
+            clearUndo()
             ic.deleteSurroundingText(1, 0)
+            afterSelfEdit(-1)
             refreshSuggestions()
         }
         return false
@@ -721,6 +915,9 @@ class KeyboardView(
         val word = before.takeLastWhile { it.isLetter() }
         currentWord = word
         clearSlots()
+        // The undo chip takes the front slot: a word that has just vanished is
+        // more urgent than a prediction for a word not yet finished.
+        val first = if (canUndo()) { setUndoSlot(0); 1 } else 0
         if (word.isEmpty()) return
 
         val lower = word.lowercase()
@@ -741,15 +938,30 @@ class KeyboardView(
         val capital = word.first().isUpperCase()
         for (i in preds.indices) {
             val w = if (capital) preds[i].replaceFirstChar { it.uppercaseChar() } else preds[i]
-            setSlot(i, w, w, save = false)
+            setSlot(first + i, w, w, save = false)
         }
         if (canSave) setSlot(SLOTS - 1, "＋ $lower", lower, save = true)
+    }
+
+    /** The "put it back" chip: `↶ word`, amber, always the leftmost slot. */
+    private fun setUndoSlot(i: Int) {
+        slotWord[i] = undoWord
+        slotIsSave[i] = false
+        slotIsSwipeAlt[i] = false
+        slotIsUndo[i] = true
+        val tv = suggestionViews[i]
+        // The ellipsis is not decoration: a held backspace can have eaten more
+        // than the word named here, and the chip puts ALL of it back.
+        tv.text = if (undoMore) "↶ $undoWord …" else "↶ $undoWord"
+        tv.setTextColor(Color.parseColor("#4E342E"))
+        tv.setBackgroundColor(Color.parseColor("#FFE0B2"))
     }
 
     private fun setSlot(i: Int, display: String, word: String, save: Boolean) {
         slotWord[i] = word
         slotIsSave[i] = save
         slotIsSwipeAlt[i] = false
+        slotIsUndo[i] = false
         val tv = suggestionViews[i]
         tv.text = display
         tv.setTextColor(if (save) Color.parseColor("#1B5E20") else Color.parseColor("#1C2529"))
@@ -761,6 +973,7 @@ class KeyboardView(
             slotWord[i] = null
             slotIsSave[i] = false
             slotIsSwipeAlt[i] = false
+            slotIsUndo[i] = false
             suggestionViews[i].text = ""
             suggestionViews[i].setBackgroundColor(Color.TRANSPARENT)
         }
@@ -769,6 +982,7 @@ class KeyboardView(
     private fun onSlotTap(i: Int) {
         val w = slotWord[i] ?: return
         when {
+            slotIsUndo[i] -> undoLastDelete()
             slotIsSave[i] -> {
                 Collector.record(context, w)
                 suggestionViews[i].text = "✓"          // language-neutral: no PL/MS wording needed
@@ -793,8 +1007,11 @@ class KeyboardView(
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (!replacing && (pendingSpace ||
                 (prev.isNotEmpty() && !prev[0].isWhitespace()))) " " else ""
-        ic.commitText(if (smartSpace) "$lead$word" else "$lead$word ", 1)
+        val out = if (smartSpace) "$lead$word" else "$lead$word "
+        ic.commitText(out, 1)
         ic.endBatchEdit()
+        afterSelfEdit(out.length - if (replacing) currentWord.length else 0)
+        clearUndo()
         Usage.record(context, word)
         Popularity.record(context, word)
         currentWord = ""
@@ -808,6 +1025,12 @@ class KeyboardView(
         val ic = service.currentInputConnection ?: return
         swipeJustCommitted = false
         pendingSpace = false
+        lastSwipeWord = ""
+        clearUndo()
+        // What Enter does is the editor's business — a newline, or sending the
+        // message. Either way the position it leaves is not ours to predict, so
+        // let the next report resync rather than guess and be wrong.
+        expectedCursors.clear()
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER))
         ic.sendKeyEvent(KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER))
     }
@@ -1052,12 +1275,16 @@ class KeyboardView(
         // at field start or already after a space), and none after it.
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (pendingSpace || (prev.isNotEmpty() && !prev[0].isWhitespace())) " " else ""
-        ic.commitText(if (smartSpace) "$lead$best" else "$lead$best ", 1)
+        val written = if (smartSpace) "$lead$best" else "$lead$best "
+        ic.commitText(written, 1)
+        afterSelfEdit(written.length)
+        clearUndo()
         Usage.record(context, best)
         Popularity.record(context, best)
         lastSwipeWord = best
         lastSwipeCandidates = words
         swipeJustCommitted = true
+        swipeCommitAtMs = SystemClock.uptimeMillis()
         pendingSpace = smartSpace
         currentWord = ""
         showSwipeAlts(words, highlight = 0)   // a wrong guess is one tap from fixed
@@ -1071,15 +1298,18 @@ class KeyboardView(
         // The decoder now returns more words than there are slots.
         // Show them cased the way they will actually be inserted - a strip of
         // lowercase words after a deliberate shift is a lie about the outcome.
-        val shown = words.take(suggestionViews.size).map {
+        // After a rejected glide the strip carries both offers at once: put the
+        // word back untouched (leftmost), or take one of the other candidates.
+        val off = if (canUndo()) { setUndoSlot(0); 1 } else 0
+        val shown = words.take(suggestionViews.size - off).map {
             caseSwipe(it, lastSwipeCapitalized, lastSwipeLocked)
         }
         for (i in shown.indices) {
-            slotWord[i] = shown[i]
-            slotIsSwipeAlt[i] = true
-            suggestionViews[i].text = shown[i]
-            suggestionViews[i].setTextColor(Color.parseColor("#1C2529"))
-            suggestionViews[i].setBackgroundColor(
+            slotWord[i + off] = shown[i]
+            slotIsSwipeAlt[i + off] = true
+            suggestionViews[i + off].text = shown[i]
+            suggestionViews[i + off].setTextColor(Color.parseColor("#1C2529"))
+            suggestionViews[i + off].setBackgroundColor(
                 if (i == highlight) Color.parseColor("#DCE3E7") else Color.TRANSPARENT
             )
         }
@@ -1098,24 +1328,30 @@ class KeyboardView(
         // With a selection live, deleting "the word we just committed" would cut
         // characters next to the selection instead. Let the insertion simply
         // replace the selection.
+        var removed = 0
         if (lastSwipeWord.isNotEmpty() && !hasSelection()) {
             // Choosing another word means the committed one was wrong.
             Usage.unrecord(context, lastSwipeWord)
             Popularity.unrecord(context, lastSwipeWord)
             // Classic mode wrote a trailing space with the word, so take it too.
-            ic.deleteSurroundingText(lastSwipeWord.length + if (smartSpace) 0 else 1, 0)
+            removed = lastSwipeWord.length + if (smartSpace) 0 else 1
+            ic.deleteSurroundingText(removed, 0)
         }
         // Honour the shift that produced the ORIGINAL word, not the (already
         // spent) shift state now.
         val out = caseSwipe(word, shift || lastSwipeCapitalized, capsLocked || lastSwipeLocked)
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (lastSwipeWord.isEmpty() && prev.isNotEmpty() && !prev[0].isWhitespace()) " " else ""
-        ic.commitText(if (smartSpace) "$lead$out" else "$lead$out ", 1)  // leading space before the old word stays
+        val written = if (smartSpace) "$lead$out" else "$lead$out "
+        ic.commitText(written, 1)   // leading space before the old word stays
         ic.endBatchEdit()
+        afterSelfEdit(written.length - removed)
+        clearUndo()
         Usage.record(context, out)
         Popularity.record(context, out)
         lastSwipeWord = out
         swipeJustCommitted = true    // still a swipe result — backspace wipes it whole
+        swipeCommitAtMs = SystemClock.uptimeMillis()
         pendingSpace = smartSpace
         clearSlots()
     }

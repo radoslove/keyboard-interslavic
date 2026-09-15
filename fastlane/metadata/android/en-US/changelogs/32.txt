@@ -1,0 +1,10 @@
+Fixes for editing a swiped word.
+
+- Backspace after a glide wipes the whole word only in the first moment after
+  it lands. Later presses delete one letter, so an ending can be fixed
+  (pisem -> pises) without losing the word. Holding backspace still takes
+  whole words.
+- No more space appearing out of nowhere: moving the cursor cancels the space
+  a committed word owed to the next one.
+- Undo: after a whole-word delete, tap the first chip to put it back exactly.
+- New launcher icon.
