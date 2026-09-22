@@ -31,7 +31,7 @@ enum Layout {
 
     static let numericRows: [[Character]] = [
         Array("1234567890"),
-        Array("@#$%&*()"),
+        Array("@#$%&*()_"),
         Array("-/:;'\"?!"),
     ]
 

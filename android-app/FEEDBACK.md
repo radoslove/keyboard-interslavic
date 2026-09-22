@@ -41,3 +41,100 @@ Today the keyboard offers nothing for moving text around; copying a whole messag
 - Bonus that costs nothing: long-press **space** + drag = move the cursor (HeliBoard/Gboard convention), which is half of "copying" in practice.
 
 Done criteria: from an empty field, swipe three words, open panel, Select all → Copy → Paste twice → field holds the sentence three times; cursor arrows move one char per tap; clipboard chip re-inserts the last copied text.
+
+## 2026-09-21 · Galaxy A55, v3.2 — first day on the second device
+
+⚠ Device note: the **A26 is out** — its network stack no longer joins home WiFi,
+the garage WiFi or an iPhone hotspot. The A55 is the Android test device from now
+on. v3.2 was installed on it over the tailnet/LAN from `hp`.
+
+**Verdict:** "pisze się coraz lepiej." Real Interslavic typed on it:
+*kako se pisati sejčas? ne zle, jednako tu jest nadal trohu do popravy;)*
+
+### 5. Long-press on `.` does nothing — NOT A BUG, by design
+
+Reported as a surprise; it is the intended behaviour. `Layout.longPress()` returns
+a value only for the four accented letters (`c s z e`) and the three digraphs
+(`d l n`). The period has no popup, because `? ! : ; „ ” – — ’` are **direct keys**
+on the `?123` layer (`symbolRows` row 3) — one tap, no picker.
+
+That is the opposite of the Keyman layout, where the same punctuation hides under
+a long-press on `.` and is invisible to a new user — which is exactly what
+`keyman/FEEDBACK_ios.md` v1.7 sets out to fix. **The Android design is the one to
+copy to iOS, not the other way round.**
+
+No code change. Worth a line in the user guide instead: on `?123`, the third row
+is the punctuation row.
+
+### 6. A short glide `se` decodes as `sssr`  🔴 ranking bug
+
+Swiping `s`→`e` put **`sssr`** in the field, offering `sssr` · `sssre` · `se`.
+
+**Not junk data:** `sssr` is СССР and is a legitimate dictionary entry. The problem
+is ranking. Measured from `main_isv.combined` and `Dictionary.decodeSwipeGeo`:
+
+| word | f | frequency bonus = `ln(f+1) × FREQ_W(3.5)` |
+|---|---|---|
+| `se` | 205 | **18.65** |
+| `sssr` | 26 | 11.54 |
+| `sssre` | 26 | 11.54 |
+
+So `se` starts **+7.11 ahead** and still lost, meaning its *geometry* score was
+worse by more than that.
+
+**Mechanism (hypothesis, testable offline):** a two-letter word has a two-point
+ideal route, which cannot absorb a finger that lingers on the first key. `sssr`
+has three consecutive `s` — a perfect sponge for exactly that dwell — and its
+final `r` sits next to `e`. So a hesitant start on a short word is read as a
+repeated letter. The shorter the word, the less shape information there is to
+overrule it, and `se` is as short as words get.
+
+**Where to fix:** `tools/swipe_eval.py` mirrors the shipped decoder, so this needs
+no device round-trip. Candidate directions, in order of how principled they are:
+
+1. **Require a velocity minimum for a repeated letter.** The machinery already
+   exists (`velocityPivots`, `V_RADIUS`, `V_MIN_SEP`). A letter may only repeat
+   where the finger genuinely dwelled, not merely where it passed slowly.
+2. **Treat very short targets as a special case** — with almost no shape
+   information, frequency should dominate harder for 2–3 letter candidates.
+3. Raising `FREQ_W` is NOT the answer: 3.5 is the measured peak and the comment
+   records that past it the score starts costing.
+
+**Done criteria:** in the harness, a synthetic glide `s`→`e` with a slow start
+returns `se` at top-1; and the existing top-1/top-3 numbers over the sample do not
+regress. Only then to a device.
+
+**Not a release blocker** — v3.2 is in daily use and the owner's verdict is that it
+keeps getting better. This belongs in v3.3 next to the edit panel (§4).
+
+## 2026-09-23 · A26, v3.3 potwierdzona na urządzeniu
+
+Owner: „jest `_` w końcu". Drugi rząd warstwy `?123` ma 11 klawiszy i kończy się na
+`_`, tuż obok `-`. Zamyka §3 z 2026-09-22. Pisane na niej po MS:
+„_ a sejčas jest normalno ili..?"
+
+⚠ Do zapamiętania, bo kosztowało godziny: na telefonie były zainstalowane **trzy**
+klawiatury o mylących nazwach — nasza (`Medžuslovjansky`), nasz build debug
+(`Medžuslovjansky (test)`, osobne `applicationId` przez `applicationIdSuffix=".debug"`,
+więc NIE aktualizuje się razem z release) oraz obca `Interslavic QWERTY (latinica)`.
+Dwa kolejne „nie działa" były w rzeczywistości pisaniem na cudzej klawiaturze.
+**Znak rozpoznawczy naszej: `🌐` w dolnym rzędzie, brak klawisza emoji i zębatki.**
+
+### 7. Trzy rodzaje myślnika to o dwa za dużo
+
+Owner, przy tej samej okazji: „tych `-` nie potrzebne aż trzy rodzaje, oprócz `_`".
+
+Dziś na `?123` są trzy: **`-`** (dywiz, rząd 2) oraz **en dash** i **em dash**
+(rząd 3, obok cudzysłowów). Pochodzą z kanonicznej tabeli znaków MS
+(`docs/ms-latin-table.md`), gdzie siedzą na AltGr na desktopie — więc na telefon
+wjechały „bo były", a nie dlatego, że ktoś ich tam potrzebuje.
+
+**Do rozważenia w v3.4:** zostawić `-` jako klawisz, a obie dłuższe kreski przenieść
+pod long-press dywizu — tak robi większość klawiatur. Zwalnia to dwa miejsca w rzędzie 3.
+
+⚠ To nie jest przestawienie napisu: **warstwa symboli nie ma dziś long-pressu w ogóle**
+(`KeyboardView.kt:1059`, `if (symbols) return false`). Trzeba go tam najpierw włączyć —
+co przy okazji odblokowuje każde późniejsze zagęszczanie tej warstwy.
+
+⚠ Zmiana dotyka kanonu znaków → przed wykonaniem sprawdzić w `docs/ms-latin-table.md`,
+czy obie dłuższe kreski mają zostać osiągalne bezpośrednio (cytowanie w MS ich używa).

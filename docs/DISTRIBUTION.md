@@ -52,7 +52,67 @@ Keyman catalogue entries (both live): <https://keyman.com/keyboards/isv_latin>
 | | |
 |---|---|
 | MR | <https://gitlab.com/fdroid/fdroiddata/-/merge_requests/45568> — open since 2026-08-12, no maintainer action yet |
-| Action | Ping politely in the MR after ~4 weeks (→ ~2026-09-10) if still untouched; make sure `v3.1` tag + commit in the recipe still match `main` |
+| Action | ⚠ Bump the recipe to the version we actually publish BEFORE merge — see below |
+
+**Maintainer verdict, `linsui`, 2026-09-22** (read in a browser — the notes API
+returns 401 even on this public MR, and the GitLab notification mail goes to the
+`radoslove` account, not to the mailbox we can search):
+
+> This MR is mostly ready. We'll test it later. If everything works well we'll
+> merge it. Meantime if you release a new version please update this MR.
+> Currently we have lots of MRs waiting for test so it may take a long time.
+
+and, separately:
+
+> Unprotect your branch.
+
+✅ He also ticked **Enable Reproducible Builds** on the checklist himself.
+
+Three things follow:
+
+1. 🔴 **Unprotect `master` on the `radoslove/fdroiddata` fork** — Settings →
+   Repository → Protected branches. While it is protected, maintainers cannot
+   push fixes to the MR branch, which is why he asked. Owner's account, owner's
+   click.
+2. **Publishing a new version means updating this MR** — he asked for it
+   explicitly, which settles the question below: bump the recipe rather than
+   letting it merge at 3.1.
+3. ⏳ **F-Droid is NOT the fast channel.** "It may take a long time" is their own
+   estimate, with a queue of MRs waiting for test. Anyone who needs the keyboard
+   soon — an external tester, say — gets the APK from GitHub Releases. F-Droid is
+   the durable channel, not the quick one.
+
+Earlier rounds, for the record: `linsui` asked on 2026-08-13 for a full commit
+hash instead of a tag/branch, `Binaries` + `AllowedAPKSigningKeys`, fastlane
+metadata, and *"please keep your signing key safe with backup"* — all done, the
+last one on 2026-09-17. On 2026-08-20: "Change the category".
+
+**The recipe, read back from the MR diff on 2026-09-22** (the notes API is 401 even
+though the MR is public, so the comments have to be read in a browser):
+
+```yaml
+Binaries: .../releases/download/v%v/app-release.apk
+Builds:
+  - versionName: '3.1'   versionCode: 31   commit: c7833ff74843dfcad21c3550ce6f74a6a6d542ab
+    subdir: android-app/app   gradle: [yes]   scandelete: [windows]
+AllowedAPKSigningKeys: 5fa81cd2fd62cbdd3580076b941c1711b4ddc625609b5c80ec7c135a56e3b98a
+AutoUpdateMode: Version    UpdateCheckMode: Tags
+CurrentVersion: '3.1'      CurrentVersionCode: 31
+```
+
+Three consequences, all binding on how we publish:
+
+1. ⚠ **`Binaries` builds its URL from `v%v`.** The git tag must be exactly `vX.Y`
+   and the release asset must be named exactly **`app-release.apk`**. Any other
+   asset name (`isv-keyboard-3.3.apk`, say) is a 404 to F-Droid. v3.1 already
+   follows this, so the pattern is proven — do not "improve" the filename.
+2. `UpdateCheckMode: Tags` + `AutoUpdateMode: Version` means that **once merged,
+   F-Droid picks up later releases from the tags by itself.** No new MR per
+   version.
+3. The recipe still pins **3.1** (August). Merging as-is would make the first
+   F-Droid build the one WITHOUT any of the editing fixes. Bump `versionName`,
+   `versionCode`, `commit`, `CurrentVersion` and `CurrentVersionCode` to whatever
+   we publish, so the first build users get is the good one.
 
 ### 4. Windows — native layout as a real, signed installer  🟢 (later)
 

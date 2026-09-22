@@ -1,0 +1,5 @@
+The underscore.
+
+- `_` is now a key of its own on the ?123 layer, at the end of the second row
+  next to `-`. It had been missing from every layout, with no way to reach it:
+  the symbol layer has no long-press.

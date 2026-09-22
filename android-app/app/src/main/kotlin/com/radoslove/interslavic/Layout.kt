@@ -41,10 +41,16 @@ object Layout {
      * `docs/ms-latin-table.md` are reachable without a popup picker. `?` and the
      * rest of the common punctuation live here too; on the letter layer only
      * `.` and `,` are exposed directly.
+     *
+     * `_` sits at the END of row 2, next to `-`: they are one key on a
+     * physical keyboard, and putting it last leaves every other key where
+     * the fingers already expect it. That row is therefore 11 keys wide
+     * against the other rows' 10 - deliberate; row 3 would have cost more,
+     * since it also carries the 1.5-weight backspace.
      */
     val symbolRows: List<String> = listOf(
         "1234567890",
-        "@#\$%&*()/-",
+        "@#\$%&*()/-_",
         "„”–—’:;!?",
     )
 
