@@ -6,6 +6,29 @@
 goes through a link a stranger would trust: an app store, the publisher's own
 site, or our GitHub. Goal: the easiest possible install on ANY device.
 
+## 🔴 GitHub Releases NIE jest kanałem dla ludzi (owner 2026-09-23)
+
+**Zasada:** nikogo nie odsyłamy po plik na GitHuba. Owner, wprost i po raz drugi:
+„z githuba nie będziemy nikomu kazać ściągać". Pierwsze sformułowanie tej reguły jest
+z 2026-09-03: *„NIE przesyłać plików mailem — tylko linki do normalnego pobrania"*,
+a cel projektu brzmi **„instalacja jak najłatwiej na KAŻDYM urządzeniu"**.
+
+**Czym więc jest wydanie na GitHubie:** infrastrukturą. Przepis F-Droida ciągnie z niego
+binarkę (`Binaries: …/v%v/app-release.apk`) i porównuje z własnym buildem. Wydanie musi
+istnieć i mieć właściwą nazwę pliku — **ale to nie znaczy, że wysyłamy tam użytkownika.**
+
+**Kanały dla ludzi**, w kolejności gotowości:
+1. **F-Droid** — docelowy, `linsui` 22.09: „mostly ready", ale „may take a long time".
+2. **Google Play** — konto założone 2026-09-03, zamknięty test wymaga ≥12 testerów × 14 dni.
+3. **IzzyOnDroid** — pomost „0 zł, dni", wciąż niezrobiony.
+4. **Keyman** (iOS + reszta platform) — ⚠ wersja 1.6 w katalogu ma błąd 11 klawiszy,
+   czeka na 1.7.
+
+⚠ Owner o obecnych drogach: „te keymanowo androidowe są lipne jakieś". Czyli dopóki
+któryś z powyższych kanałów nie jest realnie gotowy, **nie promujemy instalacji w ogóle** —
+owner sam zapisuje się na kurs i tam będzie promował, gdy będzie czym.
+
+
 ## Where we stand
 
 | Platform | Trusted route today | Gap |
