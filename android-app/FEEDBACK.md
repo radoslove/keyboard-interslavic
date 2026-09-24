@@ -107,34 +107,66 @@ regress. Only then to a device.
 **Not a release blocker** — v3.2 is in daily use and the owner's verdict is that it
 keeps getting better. This belongs in v3.3 next to the edit panel (§4).
 
-## 2026-09-23 · A26, v3.3 potwierdzona na urządzeniu
+## 2026-09-23 · A26, v3.3 — confirmed on the device
 
-Owner: „jest `_` w końcu". Drugi rząd warstwy `?123` ma 11 klawiszy i kończy się na
-`_`, tuż obok `-`. Zamyka §3 z 2026-09-22. Pisane na niej po MS:
-„_ a sejčas jest normalno ili..?"
+Owner: "there it is, `_` at last." Row 2 of the `?123` layer now has 11 keys and ends with
+`_`, right next to `-`. That closes §3 above. Typed on it in Interslavic straight away:
+*"_ a sejčas jest normalno ili..?"*
 
-⚠ Do zapamiętania, bo kosztowało godziny: na telefonie były zainstalowane **trzy**
-klawiatury o mylących nazwach — nasza (`Medžuslovjansky`), nasz build debug
-(`Medžuslovjansky (test)`, osobne `applicationId` przez `applicationIdSuffix=".debug"`,
-więc NIE aktualizuje się razem z release) oraz obca `Interslavic QWERTY (latinica)`.
-Dwa kolejne „nie działa" były w rzeczywistości pisaniem na cudzej klawiaturze.
-**Znak rozpoznawczy naszej: `🌐` w dolnym rzędzie, brak klawisza emoji i zębatki.**
+⚠ Worth writing down, because it cost hours: the phone had **three** keyboards installed with
+confusingly similar names — ours (`Medžuslovjansky`), our own debug build
+(`Medžuslovjansky (test)`, a separate `applicationId` via `applicationIdSuffix=".debug"`, so
+it does **not** update together with the release) and a third-party `Interslavic QWERTY
+(latinica)`. Two consecutive "it doesn't work" reports turned out to be typing on someone
+else's keyboard. **Ours is the one with `🌐` on the bottom row and no emoji or gear key.**
 
-### 7. Trzy rodzaje myślnika to o dwa za dużo
+### 7. Three kinds of dash is two too many
 
-Owner, przy tej samej okazji: „tych `-` nie potrzebne aż trzy rodzaje, oprócz `_`".
+Owner, same session: "we don't need three sorts of `-`, besides `_`."
 
-Dziś na `?123` są trzy: **`-`** (dywiz, rząd 2) oraz **en dash** i **em dash**
-(rząd 3, obok cudzysłowów). Pochodzą z kanonicznej tabeli znaków MS
-(`docs/ms-latin-table.md`), gdzie siedzą na AltGr na desktopie — więc na telefon
-wjechały „bo były", a nie dlatego, że ktoś ich tam potrzebuje.
+The `?123` layer currently carries three: **`-`** (hyphen, row 2) plus an **en dash** and an
+**em dash** (row 3, next to the quotes). They come from the canonical character table
+(`docs/ms-latin-table.md`), where they sit on AltGr on the desktop — so they reached the
+phone because they existed, not because anyone needs them there.
 
-**Do rozważenia w v3.4:** zostawić `-` jako klawisz, a obie dłuższe kreski przenieść
-pod long-press dywizu — tak robi większość klawiatur. Zwalnia to dwa miejsca w rzędzie 3.
+**For v3.4:** keep `-` as a key and move both longer dashes onto a long-press of the hyphen,
+which is what most keyboards do. That frees two slots in row 3.
 
-⚠ To nie jest przestawienie napisu: **warstwa symboli nie ma dziś long-pressu w ogóle**
-(`KeyboardView.kt:1059`, `if (symbols) return false`). Trzeba go tam najpierw włączyć —
-co przy okazji odblokowuje każde późniejsze zagęszczanie tej warstwy.
+⚠ This is not a matter of editing a string: **the symbol layer has no long-press at all**
+(`KeyboardView.kt:1059`, `if (symbols) return false`). It has to be enabled there first —
+which also unblocks any later densification of that layer.
 
-⚠ Zmiana dotyka kanonu znaków → przed wykonaniem sprawdzić w `docs/ms-latin-table.md`,
-czy obie dłuższe kreski mają zostać osiągalne bezpośrednio (cytowanie w MS ich używa).
+⚠ The change touches the canonical character set, so check `docs/ms-latin-table.md` first:
+quoting in Interslavic uses both dashes, so decide deliberately whether they stay directly
+reachable.
+
+### 8. A space still jumps in when typing after a glide  🔴 §2 was only half fixed
+
+Owner, 2026-09-23, writing a real letter in Interslavic on v3.3: "those spaces still keep
+jumping in, badly." So §2 from 2026-09-08 is **not closed**, even though the 3.3 release
+notes claim it is.
+
+**Cause, read off the execution path rather than guessed at:**
+
+| Line | What happens |
+|---|---|
+| `KeyboardView.kt:1286-1288` | after a glide: `swipeJustCommitted = true`, `swipeCommitAtMs` stored, **`pendingSpace = smartSpace`** |
+| `KeyboardView.kt:530` | `commit()` sets **`swipeJustCommitted = false`** — "until any other key" |
+| `KeyboardView.kt:550-562` | but `pendingSpace` stays armed, so **a space is paid out before the typed character** |
+| `KeyboardView.kt:749` | for contrast: backspace **does** consult `swipeJustCommitted && wipeWindowOpen` |
+
+So the §1 fix gave the time window authority over **deleting** but not over **typing**. Glide
+a word, add a letter, and instead of extending the word you get `pišem š`. That is the same
+use case as §1 — fixing the ending of an inflected word — with a letter instead of backspace
+as the input. In an inflected language that is the everyday case, not the edge one.
+
+**Fix (symmetric to §1):** inside `commit()`, while `swipeJustCommitted` is still true **and**
+`wipeWindowOpen` **and** the incoming character is a **letter**, the owed space is not paid
+out, because the user is extending the word rather than starting a new one. A space,
+punctuation or a new gesture still confirm the word boundary and pay it out as before.
+
+**Done criteria:**
+- Glide `pišem`, immediately tap `š` → `pišemš` (one word), not `pišem š`.
+- Glide `pišem`, wait past the window, tap a letter → the space appears (new word), unchanged.
+- Glide two words in a row → the space between them behaves as before.
+- Glide `pišem`, tap `,` → `pišem,` with no space before the comma, unchanged.

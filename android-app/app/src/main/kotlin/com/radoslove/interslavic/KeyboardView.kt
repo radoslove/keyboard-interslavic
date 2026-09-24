@@ -527,6 +527,15 @@ class KeyboardView(
     }
 
     private fun commit(s: String) {
+        // A letter typed inside the post-glide window EXTENDS the word that was
+        // just glided - the very case the backspace path below already handles.
+        // Smart space must not fire there, or `pisem` + `s` lands as `pisem s`
+        // instead of `pisems`, which in an inflected language is the common case,
+        // not the edge one. Read it BEFORE swipeJustCommitted is cleared.
+        val extendingGlide = swipeJustCommitted && s.isNotEmpty() && s[0].isLetter() &&
+            SystemClock.uptimeMillis() - swipeCommitAtMs <= SWIPE_WIPE_WINDOW_MS
+        if (extendingGlide) pendingSpace = false
+
         swipeJustCommitted = false
         clearUndo()          // one-shot: the undo chip dies on the next key
         feedback()

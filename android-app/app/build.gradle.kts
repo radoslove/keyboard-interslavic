@@ -21,8 +21,8 @@ android {
         applicationId = "com.radoslove.interslavic"
         minSdk = 24
         targetSdk = 34
-        versionCode = 33
-        versionName = "3.3"
+        versionCode = 34
+        versionName = "3.4"
     }
 
     // F-Droid reproducible builds reject the AGP "Dependency metadata"

@@ -1,0 +1,5 @@
+Typing right after a glide no longer inserts a space.
+
+- Adding a letter to a word you just swiped now extends it instead of
+  starting a new one, so an ending can be fixed by typing rather than
+  only by backspace.
