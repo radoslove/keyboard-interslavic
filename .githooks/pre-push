@@ -1,0 +1,13 @@
+#!/bin/sh
+# The maintainer pushes. Block agent pushes at Git's push boundary,
+# including pushes invoked indirectly through another script.
+# Human terminals without agent session markers retain normal Git behavior.
+
+if [ -n "${CODEX_THREAD_ID:-}${CODEX_SESSION_ID:-}${CODEX_SANDBOX:-}${CLAUDECODE:-}${CLAUDE_CODE_ENTRYPOINT:-}" ]; then
+    printf '%s\n' 'Push blocked: the repository owner pushes changes manually.' \
+        'Leave the changes local. Do not disable this hook, clear agent markers,' \
+        'or use another command, process, or API to publish them.' >&2
+    exit 1
+fi
+
+exit 0
