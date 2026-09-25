@@ -1,16 +1,15 @@
 # Interslavic (latinica) — canonical keyboard character table
 
-*Resolved 2026-08-05 on `galax`. Governs `windows/src/KBDMSSTD.klc`.
-Orthography rules live in `C:\Projects\vault_002\Projects\INTERSLOVE\HOUSE_STYLE.md` —
-this file is mechanics only and does not rule on which forms are correct.*
+*Governs `windows/src/KBDMSSTD.klc`. This table describes the layout's
+standard-orthography character set and key mappings.*
 
 ## Sources compared
 
 | Source | What it is | Status |
 |---|---|---|
-| `Projects\INTERSLOVE\kbdmslat\KBDMSLAT.klc` | (c) 2013 Adam Gola / Roberto Lombino jr. — the upstream `medzuslovjansky/keyboards` layout | **installed and working on `galax`**, but defective (below) |
-| `Projects\INTERSLOVE\kbdmskir\KBDMSKIR.klc` | same authors, Cyrillic | untouched, out of scope here |
-| `HOUSE_STYLE.md` §1 | which letters we actually write | authority for the priority order |
+| Upstream `KBDMSLAT.klc` | (c) 2013 Adam Gola / Roberto Lombino jr. — `medzuslovjansky/keyboards` Latin layout | scan-code skeleton; differences below |
+| Upstream `KBDMSKIR.klc` | same authors, Cyrillic | untouched, out of scope here |
+| Standard-orthography character set below | letters available on this layout | priority order |
 
 **Rule applied — the last working artefact wins.** The Gola layout is a decision made
 in code and installed on a real machine, so its scan-code / virtual-key skeleton is
@@ -49,9 +48,8 @@ keystrokes, and a ligature key would add a failure mode for no gain.
 ### Extended block — REMOVED 2026-08-05
 
 ⚠ **This block is no longer on any shipped layout.** It was drafted here for quoting
-dictionary lemmas, then cut on 2026-08-05 when the owner ruled that HOUSE_STYLE §1
-governs the keyboards too: if a letter is not written in new text, it does not get a
-key. Verified against the artefacts — `windows/src/KBDMSSTD.klc` contains exactly
+dictionary lemmas, then removed from this standard-orthography layout.
+Verified against the artefacts — `windows/src/KBDMSSTD.klc` contains exactly
 `Č č Ě ě Š š Ž ž – — ’ “ ” „` and nothing else.
 
 The cut letters were `å ś ę ŕ ų ė ȯ ď đ ľ ť ć ź ń`. They are recorded here as history
@@ -79,7 +77,7 @@ was dropped.
 
 ## Open questions
 
-Not blockers; flagged for `interslavic-tutor`.
+Questions for a separate linguistic/layout review.
 
 1. **Cyrillic layout not reviewed.** `KBDMSKIR.klc` was not audited for the same class
    of defects. If the Cyrillic layout ever gets used, run this same comparison.
@@ -112,9 +110,9 @@ one table in `build_keyman.py`, which is what keeps them from drifting apart.
 ## Build and install
 
 ```powershell
-# on `galax` — open in MSKLC, then Project > Build DLL and Setup Package
+# From the repository root: open in MSKLC, then Project > Build DLL and Setup Package
 & "C:\Program Files (x86)\Microsoft Keyboard Layout Creator 1.4\MSKLC.exe" `
-    "C:\Projects\vault_002\Projects\INTERSLOVE\keyboards\windows\src\KBDMSSTD.klc"
+    "$PWD\windows\src\KBDMSSTD.klc"
 ```
 
 Verify afterwards — never assume the installer worked:

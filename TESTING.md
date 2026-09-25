@@ -47,7 +47,7 @@ layout.
 
 ---
 
-## macOS — KBDMSSTD.keylayout *(when the Mac arrives)*
+## macOS — KBDMSSTD.keylayout
 
 1. Copy `mac/KBDMSSTD.keylayout` → `~/Library/Keyboard Layouts/`
 2. System Settings → Keyboard → Input Sources → **+** → **“Medzuslovjansky (standard)”**

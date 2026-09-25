@@ -98,9 +98,9 @@ Do rozstrzygnięcia z `interslavic-tutor` — do tego czasu Android trzyma się 
 
 ---
 
-## Źródła
+## Sources
 
-- `windows/src/runy_5.klc` — układ rozstrzygający
-- `windows/src/runy_3.txt` — notatka robocza z wariantami
-- `C:\Projects\remote_vault\lang\Runes.md` — pierwotna tablica MS→runa
+- `windows/runy_5.klc` — authoritative layout
+- `windows/runy_3.txt` — variant notes
+- Historical MS-to-rune table — comparison material, not included in this repository
 - Unicode Runic block: U+16A0–U+16FF

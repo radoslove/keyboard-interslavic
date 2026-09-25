@@ -24,7 +24,7 @@ render $SRC/feature_graphic.svg  1024 $OUT feature_graphic_1024x500.png
 sips -c 500 1024 $OUT/feature_graphic_1024x500.png >/dev/null   # square canvas -> centre band 1024x500
 render $SRC/radoslove_avatar.svg 512  $OUT radoslove_avatar_512.png
 
-# --- Android launcher icons (variant chosen via ICON=a|b|c; default b = owner's pick 2026-09-03) ---
+# --- Android launcher icons (variant chosen via ICON=a|b|c; default b) ---
 ICON=${ICON:-b}
 case $ICON in
   a) FULL=$SRC/icon_a_caron.svg;  FG=$SRC/fg_a_caron.svg ;;

@@ -1,311 +1,74 @@
-# Android app — native Interslavic keyboard (IME)
+# Android keyboard — development guide
 
-*For educational purposes.* Sibling track to `ios/`. Where the iOS extension
-exists because iOS has no layout-file format, the Android **layout** already
-ships as `android/isv_latin.xml` for Unexpected Keyboard / HeliBoard. This app
-is the **standalone IME** — our own `InputMethodService`, no host keyboard
-required, one install, and eventually the prediction bar + swipe that a layout
-XML alone cannot carry.
+The native Android IME provides Interslavic typing, suggestions and glide input.
+Its character set follows [the canonical table](../docs/ms-latin-table.md).
+The project uses Java 21, Android platform 34 and build-tools 34.0.0.
 
-## Source of truth — do not re-decide the character set here
+## Components
 
-Standard orthography only (HOUSE_STYLE §1). This app restates, never extends:
-
-| Reach | Keys | From |
-|---|---|---|
-| Base QWERTY | `q…m` | `android/isv_latin.xml` |
-| Four diacritics (longpress) | `c→č  s→š  z→ž  e→ě` | `docs/ms-latin-table.md`, `ios/Keyboard/Layout.swift` |
-| Three digraphs (longpress) | `d→dž  l→lj  n→nj` | `android/isv_latin.xml` |
-| Punctuation | `„ " – —` | `docs/ms-latin-table.md` |
-
-**No extended letters** (`ų ė ę ȯ å ŕ ť ď ľ đ …` are BANNED). If the canonical
-table ever changes, `Layout.kt` here is one more place that changes with it —
-same warning as the iOS `Layout.swift`.
-
-Naming mirrors iOS: `applicationId = com.radoslove.interslavic`, display name
-**Medžuslovjansky**, IME subtype language `isv`.
-
-## Milestones
-
-Each milestone ends in an artifact verifiable by a command exit code or a
-**real device** (`a55` on the tailnet) — never an emulator verdict alone.
-
-### M0 — toolchain + skeleton that installs
-Empty `InputMethodService` that appears in *Settings → Languages → Keyboards*
-and can be enabled. Proves the build + sideload loop works.
-**Verify:** `./gradlew assembleDebug` exit 0; APK served over HTTP, installed
-on `a55` from the browser; the keyboard appears in the enable list.
-**Files:**
-- `settings.gradle.kts`, `build.gradle.kts` (root), `gradle.properties`
-- `gradle/wrapper/*` + `gradlew` (`gradle wrapper --gradle-version 8.x`, needs gradle once)
-- `app/build.gradle.kts` (AGP 8.x, `minSdk 24`, `compileSdk 34`, Kotlin)
-- `app/src/main/AndroidManifest.xml` — declares the IME service
-- `app/src/main/res/xml/method.xml` — IME metadata, subtype `isv`
-- `app/src/main/kotlin/com/radoslove/interslavic/ImeService.kt` — stub
-- `app/src/main/res/values/strings.xml`
-
-### M1 — keyboard that types the standard ISV letters  ← **start here once toolchain is in**
-The real deliverable: a working alphabetic keyboard.
-- 3 letter rows + shift + backspace + space + return + globe(switch)
-- longpress `c s z e` → `č š ž ě`; longpress `d l n` → `dž lj nj`
-- shift produces the uppercase forms (`Č Š Ž Ě`)
-**Verify on `a55`:** type a full ISV sentence containing all four diacritics
-and one digraph; confirm the letters commit (screenshot). The uppercase-longpress
-trap bit us twice on iOS — verify caps forms explicitly.
-**Files added:** `Layout.kt` (the table above), `KeyboardView` (Compose or a
-custom `View`), `res/layout/`, longpress popup handling.
-
-### M2 — numeric/symbol layer + punctuation popups
-Numeric layer (`1…0`, symbols) and the `„ " – —` popups on `.`/`-`, mirroring
-`ios/Keyboard/Layout.swift` `numericRows` / `periodAccents` / `hyphenAccents`.
-**Verify on `a55`:** each popup commits the intended glyph.
-
-### M3 — prediction bar
-Wire suggestions to the lexical model. Assets already exist:
-`dictionary/main_isv.combined` (5.2 MB, 39.8k forms) and `main_isv.dict`
-(1.14 MB, AOSP-compiled). **Watch the memory budget** — the same cap that forced
-the Keyman model from 33 MB down to 5 MB applies to an IME process.
-**Verify on `a55`:** typing a known stem surfaces correct completions.
-
-### M4 — swipe / glide typing
-Score a gesture path against a trie of the wordlist. The expensive one —
-**weeks, not an afternoon** — and the single feature no layout XML or Keyman
-package can deliver. Only start after M1–M3 are solid on a device.
-
-#### M4a — velocity minima (2026-08-29, awaiting device verdict)
-
-The finger decelerates into the letters the writer means and cruises past the
-ones it merely crosses, so a **minimum of the speed curve** is a vote for
-"a letter is here". `KeyboardView.velocityPivots` reads them out; the trail now
-carries a timestamp per sample, which is what makes a speed curve possible at
-all. A candidate word is then charged for two disagreements the shape distance
-cannot see: a **letter with no pause near it** (this is what separates `možemo`
-from `možehmo` — the detour through `h` is close enough to the path that shape
-barely notices) and a **pause the word cannot explain**.
-
-Each minimum carries a *confidence* — how deep it is against the surrounding
-speed. That is the safety valve: a fast flat swiper's minima are shallow, the
-term fades to nothing, and they lose nothing. Measured, this matters: without
-the confidence weight a no-dwell glide LOST 3 points of top-1.
-
-⚠ **Second change, same decision.** Dwell used to be smuggled into the shape
-comparison by resampling the trail on index (time) instead of arc length. It was
-costing far more than it bought — the trail's dwell is wildly uneven while the
-ideal route's was uniform by construction, so the curves drifted out of step.
-Same synthetic glides, same paths per mode, `tools/swipe_eval.py ab`:
-
-| shape model | + velocity minima | top-1 | top-3 |
-|---|---|---|---|
-| index resample + dwell ideal (what shipped) | no | 22% | 32% |
-| index resample + dwell ideal | yes | 26% | 38% |
-| arc length | no | 74% | 89% |
-| **arc length** | **yes** | **78%** | **91%** |
-
-`indexResample` and `idealWithDwell` are gone; `resamplePath` was already in the
-file, unused, from before the dwell experiment.
-
-⚠ These are SYNTHETIC glides — the harness generates them with a speed profile,
-so the pivot gain is an upper bound and the arc-vs-dwell verdict is a harness
-verdict. **A real device is the only truth** (see the traps below). Verify on
-`a55` before believing any of it.
-
-## Who does what
-
-**Me (dev-keyboard):** author every source file from the canonical table; keep
-parity with iOS/Windows/macOS/Keyman; once a toolchain is present, run
-`./gradlew assembleDebug`, report the exit code, stand up the HTTP server for the
-APK, and drive device verification on `a55`.
-
-**Owner:** (1) decide the **build machine** — `mc` already has the Android SDK
-(cheapest path), or provision `hp`; (2) if `hp`, accept the JDK 21 + Android
-cmdline-tools install; (3) enable the keyboard in Settings on `a55` and eyeball
-each device check; (4) merge — feature branches only, merges are yours.
-
-## Toolchain status (this session, on `hp`)
-
-`hp` has **none of it**: no `java`/`javac`, no `gradle`, no Android SDK
-(`ANDROID_HOME` empty), no `adb`. M0 cannot build here until a JDK + SDK land.
-`mc` is documented as carrying the Android SDK — running this track there skips
-the `hp` install entirely. Owner's call.
-
-## Traps carried in from prior sessions
-
-- **JDK 21**, not 26 — AGP 8.x does not accept JDK 26.
-- **Install via HTTP + manual "Install From File"** on `a55`; don't fight `adb`
-  (Android needs no cable — serve the APK, tap the link).
-- **A real device is the only truth.** Key sizes, longpress popups and gesture
-  thresholds have all behaved differently on hardware than in an emulator here.
-  Say "builds" / "runs in emulator" — never "works" — until `a55` confirms it.
-
-## Future options (deferred — not built yet)
-
-- **Polish-speaker "did you mean" for words that do not exist.** When a glide is
-  retried several times and nothing fits, the cause is often not geometry: the
-  word being aimed at is not Interslavic at all, but a Polish form the writer
-  assumes. Observed live 2026-08-29, three times in one session: `tolko` →
-  **`toliko`**, `mogem` → **`možem`**, and `možemo` losing to `možehmo` because
-  the shipped frequencies are flat inside a paradigm.
-
-  The keyboard cannot emit a word absent from the wordlist, so today those
-  attempts simply fail with no explanation. The proposal: after repeated
-  failures on the same path — or immediately, once the user has declared
-  themselves a Polish speaker in the setup screen — offer the standard form
-  with a one-line note saying why.
-
-  Data already exists: `medzuslove/web/server.py` carries a curated
-  `POLISH_BRIDGE` deck of exactly these contrasts, each checked against the
-  lexicon and annotated in Polish (`jak` is an animal, use `kako`; `město` is a
-  place, a city is `grad`). That deck is the seed; a folding rule (drop a
-  vowel, add `-i-`, `g`→`ž`) can widen it.
-
-  Later, context: a preceding word narrows the candidate set, which is the same
-  mechanism that would fix `možemo`/`možehmo` without touching geometry. That
-  needs a bigram corpus, which `medzupisanje` is beginning to collect.
-
-  Owner request 2026-08-29, deliberately deferred — the value depends on having
-  real usage data first, and collecting it has only just started.
-
-- **Space-behaviour toggle in the setup screen.** Smart-space (space goes
-  BEFORE the next word; punctuation glues to the word) is the default and stays
-  the default. Add a user switch to choose classic trailing-space instead,
-  placed on the same setup screen as the "Zbieraj nowe słowa" toggle. Owner
-  wants this later; smart-space-as-default is fine for now. (Owner note via
-  coordinator, 2026-08-10.)
-- **Usage counts visible in the database.** The adaptive-ranking `usage.tsv`
-  is on-device only; syncing counts into medzuslove (a `usage` table, reusing
-  the M3 export/ingest path) so they are "visible in the base" is a small
-  follow-up when wanted.
-- **Context / n-gram ranking.** No bigram corpus exists yet; adaptive usage is
-  the achievable stand-in. Real bigram context needs a harvested MS corpus.
-
-- **Dictionary / translator (deferred, owner 2026-08-10).** Two very different
-  scopes: (1) OFFLINE word-gloss ISV↔PL/EN on the medzuslove data (words already
-  carry en/pl glosses; `lookup.py` does both directions) — achievable, fits the
-  no-network/no-account ethos, but a raw gloss, not fluent MT; (2) a real fluent
-  translator — no NN model exists for ISV at quality (Google Translate has no
-  Interslavic; no parallel corpus to train), so it means an ONLINE LLM/API =
-  INTERNET permission + account + cost, which breaks the app's model. ⚠ Dictionary
-  DATA licensing (interslavic-dictionary project / the community authority) must
-  be cleared BEFORE bundling or exporting it; "słownik dla chętnych" (user fetches
-  the dictionary file themselves) sidesteps bundling. Correctness of glosses is
-  the `interslavic-tutor` lane. A separate product from the keyboard.
-- **Deliberate delete capability.** Principle: nothing is auto-deleted, but a
-  conscious delete must be possible — local "Wyczyść kolejkę" already clears the
-  user's own queue; canonical-DB deletion is moderation (server/admin, vojak's
-  lane), never automatic.
-
-## What transfers to iOS, and what does not
-
-*(added from `mc`, 2026-08-09)*
-
-This track is also a rehearsal for the iOS app, so it is worth naming which lessons
-survive the move and which do not.
-
-| Transfers | Stays behind |
+| Source | Responsibility |
 |---|---|
-| The layout model from the one canonical table | The code — Kotlin vs Swift |
-| Longpress and flick handling, and their traps | |
-| Prediction-bar design and sizing decisions | |
-| The swipe decoder algorithm | |
-| The consent / collection UX | **Where collection lives** |
+| `ImeService.kt` | Android input-method lifecycle and editor integration |
+| `KeyboardView.kt` | Touch handling, drawing, suggestions and editing state |
+| `Layout.kt` | Letter and symbol layouts |
+| `Dictionary.kt` | Completion and gesture decoding |
+| `Usage.kt`, `Popularity.kt` | Local usage and word-ranking support |
+| `CrashReporter.kt`, `GestureLog.kt` | Optional debug diagnostics |
 
-That last row is the one worth discovering early. An Android `InputMethodService`
-reaches the network and storage like any app, so collection can live **in the keyboard**.
-On iOS a keyboard extension without "Full Access" can reach neither the network nor a
-shared container with its own app — and that isolation is the iOS app's main selling
-point, so it stays. Collection there has to move into the container app.
+Check behavior on a real device; a successful compilation or simulated gesture
+is not evidence that a touch interaction works correctly on hardware.
 
-Learning that here is cheaper than discovering it halfway through the Swift build.
+## Build
 
----
+From `android-app/`:
 
-# Appendix — the `mc` draft, kept for its framing
-
-Written on `mc` on 2026-08-09, before it was known how far this track had already
-progressed on `hp`. The milestones above supersede it — the code follows them, not this.
-Kept because the framing is still the argument for why the track exists at all, and
-because nothing here gets deleted, only versioned.
-
-# Android keyboard app — the laboratory
-
-**This is not a product.** Android already has a good Interslavic keyboard: Unexpected
-Keyboard with our XML layout, plus HeliBoard with our `.dict` for swipe. Anything we write
-from scratch will be worse than that for months.
-
-It is a **laboratory for the iOS app**, and it earns its place because three things can be
-learned here that iOS cannot teach — cheaply, and in minutes per iteration instead of days.
-
-## Why Android is the right place to learn
-
-**No gatekeeper.** No $99/year, no review, no signing ceremony. Build an APK, install it.
-
-**No cable.** The APK gets served over HTTP from `mc` — the same trick that put the Keyman
-package on the iPad today — and installed by tapping a link. Contrast iOS, where a device
-cannot receive a self-built app at all without a one-time USB pairing. That difference is
-the whole reason this track can move while the iOS one waits for an adapter.
-
-**No "Full Access" equivalent.** An Android `InputMethodService` reaches the network and
-storage like any app. So the word-collection loop can live **in the keyboard itself** —
-precisely what iOS forbids. Building it here tells us what the interaction should feel
-like before we have to fit it into an iOS app's narrower shape.
-
-## What transfers to iOS, and what does not
-
-| Transfers | Stays behind |
-|---|---|
-| Layout model from the one character table | The code — Kotlin vs Swift |
-| Longpress + flick handling, and their traps | |
-| Prediction-bar design and sizing decisions | |
-| The swipe decoder algorithm | |
-| Consent/collection UX | **Where collection lives**: keyboard on Android, app on iOS |
-
-That last row is the single most valuable thing to discover early. On iOS a keyboard
-extension without Full Access can reach neither the network nor a shared container with
-its own app, so collection has to move into the container app. Learning that in a
-prototype beats discovering it halfway through the Swift build.
-
-## Toolchain (on `mc`, installed 2026-08-09)
-
-```sh
-brew install openjdk@21                 # NOT the default openjdk — see below
-brew install --cask android-commandlinetools
-sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+```bash
+./gradlew --no-daemon assembleDebug assembleRelease
 ```
 
-⚠ **JDK 26 is too new.** Homebrew's default `openjdk` is 26; Android Gradle Plugin
-supports 17–21. Use `openjdk@21` and set `JAVA_HOME` to it, or the first Gradle run fails
-with an unhelpful toolchain error.
+Debug builds have the `.debug` application ID suffix and can coexist with a
+release installation. Select the intended keyboard before testing. Release
+signing is optional local configuration; without it the release APK is unsigned.
+See [the recovery procedure](../docs/DRILL_keystore_restore.md) for separate signing.
 
-⚠ **`adb` over Tailscale did not connect** to `a55` — wireless debugging is off on the
-phone, and Android 11+ additionally wants a pairing code. Not worth fixing to *test*: the
-HTTP-install path needs no adb at all. Enable it later only for `logcat` during debugging.
+## Optional debug diagnostics
 
-## Milestones
+Fresh clones have **no diagnostics destination**. To enable debug reporting,
+create the ignored `android-app/diagnostics.local.properties` file:
 
-**M1 — it types.** `InputMethodService`, the four letters on longpress *and* flick, shift,
-backspace, space, return, numeric layer. Same character table as every other platform.
-Done when it survives a day of real use next to Unexpected Keyboard.
+```properties
+crashReportUrl=https://diagnostics.example.invalid/api/crash
+gestureReportUrls=https://diagnostics.example.invalid/api/gesture
+```
 
-**M2 — prediction bar.** Fed by the same wordlist. Android has no keyboard memory cap, so
-this is where we find out how large a model is actually *useful* before iOS forces a
-budget on us.
+Replace the example URLs with a service you control. Multiple gesture endpoints
+can be comma-separated. Debug gesture reports contain paths, candidates and
+committed/corrected words; use synthetic test input. Crash reports contain stack
+traces. Keep destinations and collected data out of this repository.
 
-**M3 — collection loop.** The reason this laboratory exists. Opt-in, on-device filter for
-names and digits, pseudonymous, withdrawable, aggregate. Feeds the queue that
-`review_lexicon.py` already reads — the review half is built and now runs anywhere.
+Only the debug build reads these destinations into `BuildConfig`. Release values
+are empty, and the release manifest has no Internet permission. An absent or
+empty local configuration disables the corresponding debug reporting path.
 
-**M4 — swipe.** Gesture path scored against a trie. The only feature Keyman cannot give on
-either platform. Weeks, not days; do not start before M2.
+## Verification areas
 
-## What we deliberately will not do
+- Tap and long-press input for `č š ž ě`, uppercase variants and digraphs.
+- Symbol layout output, including underscore and punctuation.
+- Suggestion selection, cursor movement and app/field switching.
+- Glide completion, correction of word endings, backspace and undo.
+- Password fields, RTL system settings and backup behavior.
+- Physical-device comparison for any change to gesture scoring.
 
-Compete with Unexpected Keyboard or HeliBoard, ship to Play Store, or maintain this as a
-supported product. If it turns out better than the existing pair, that is a surprise to
-re-evaluate then — not a goal.
+[FEEDBACK.md](FEEDBACK.md) records technical reproduction cases and open issues.
+[DICTIONARY_DATA.md](DICTIONARY_DATA.md) separates code licensing from lexical data;
+specific data sources and redistribution terms still need to be documented.
 
-## Open questions
+## Future work
 
-- Which layout does the prediction bar assume when the user is mid-word in a language the
-  model does not cover? (Interslavic speakers routinely mix in their own language.)
-- Does the collection loop need a server at all, or is "export a file and attach it to a
-  GitHub issue" enough for the first hundred users?
+An editing panel, cursor controls and punctuation discoverability are possible
+improvements. Evaluate short-glide ranking using both the offline evaluator and
+real device traces. Avoid changing the canonical character set while adjusting
+where a character is reached.
+
+The layout data, ranking approach and test cases can inform other platforms.
+Android `InputConnection` integration and lifecycle code remain platform-specific.

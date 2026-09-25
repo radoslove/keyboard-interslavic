@@ -1,6 +1,24 @@
-﻿Thumbs.db
+Thumbs.db
 .DS_Store
 *.tmp
 __pycache__/
 
 dist/
+
+# Local agent state and private working notes
+/.claude/
+/.codex/
+/.agents/
+/AGENTS.md
+/.private/
+/docs/MC_TODO_*.md
+/docs/RUNBOOK_*.md
+/docs/fdroid_MR*_comment_*.md
+
+# Local configuration and signing material
+*.local.properties
+*.jks
+*.keystore
+*.tar.gpg
+keystore.properties
+*.password.txt

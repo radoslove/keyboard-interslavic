@@ -1,7 +1,7 @@
 # Brand kit — Radoslove · Medžuslovjansky keyboard
 
 *Status 2026-09-03: v1, rendered from `brand/src/*.svg` by `brand/render.sh` into `brand/out/`.
-**Owner's pick: variant B (hearts)** — it is the app icon, the launcher icon and the mark on the feature graphic. A and C stay in `src/` as alternates.*
+**Default: variant B (hearts)** — it is the app icon, the launcher icon and the mark on the feature graphic. A and C stay in `src/` as alternates.*
 
 ## Two marks, one family
 
@@ -45,7 +45,7 @@ Helvetica Neue Bold (macOS system font, rendered by Quick Look). Fallback order 
 |---|---|---|
 | App icon | 512×512 PNG, ≤1 MB, no alpha needed | `out/icon_<pick>_512.png` |
 | Feature graphic | 1024×500 PNG/JPG | `out/feature_graphic_1024x500.png` |
-| Phone screenshots | 2–8, 16:9 or 9:16, 320–3840 px | **owner: 3–4 screenshots on the phone** (keyboard open in a chat app: long-press č, swipe trail, prediction bar, settings) |
+| Phone screenshots | 2–8, 16:9 or 9:16, 320–3840 px | Capture the keyboard with synthetic sample text: long-press č, swipe trail, prediction bar, settings |
 | Short description | ≤80 chars | `fastlane/metadata/android/en-US/short_description.txt` |
 | Full description | ≤4000 chars | `fastlane/metadata/android/en-US/full_description.txt` |
 | Privacy policy URL | public URL | `https://github.com/radoslove/keyboard-interslavic/blob/main/PRIVACY.md` |

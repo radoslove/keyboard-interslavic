@@ -3,8 +3,8 @@
 build_klc.py — generate our own Interslavic Windows layout (KBDMSSTD.klc).
 
 WHY NOT JUST USE THE UPSTREAM ONE
-`Projects/INTERSLOVE/kbdmslat/KBDMSLAT.klc` ((c) 2013 Adam Gola, medzuslovjansky
-keyboards) is installed and works, but has defects we care about:
+The upstream KBDMSLAT.klc ((c) 2013 Adam Gola, medzuslovjansky/keyboards)
+provides the scan-code skeleton, with the following differences:
 
   1. EIGHT DEAD KEYS, and two of them sit on the BASE layer: OEM_3 makes plain
      backtick and tilde dead. Typing ` or ~ in a shell or in code then needs a
@@ -24,10 +24,9 @@ are rewritten.
 DESIGN
   * Base + Shift stay plain ASCII, US-style. NO dead keys anywhere.
   * AltGr carries the letters, mnemonically (č under C, š under S, ž under Z, ě under E).
-  * Standard-orthography letters ONLY (HOUSE_STYLE.md §1): č š ž ě on AltGr, plus the
+  * Standard-orthography letters ONLY (docs/ms-latin-table.md): č š ž ě on AltGr, plus the
     punctuation our texts use. The extended block (ų ė ę ȯ å ŕ ť ď ć đ ľ ń ś ź) is NOT
-    included — those letters are withdrawn from MS everywhere, keyboard included
-    (owner order 2026-08-05). ě is NOT extended and stays.
+    included in this layout. ě is NOT extended and stays.
   * Retargeted to pl-PL, so the layout appears as an input method under Polish —
     no phantom Slovenian entry in the language list.
 
@@ -38,10 +37,11 @@ USAGE
 ⚠ .klc files are UTF-16LE + CRLF. See .gitattributes — git must not touch them.
 """
 import io
-import os
 import re
+import argparse
+from pathlib import Path
 
-SRC = r"C:\Projects\vault_002\Projects\INTERSLOVE\kbdmslat\KBDMSLAT.klc"
+HERE = Path(__file__).resolve().parent
 
 KBD_NAME = "KBDMSSTD"                      # max 8 chars, must match the filename
 DISPLAY = "Medzuslovjansky (standard)"     # MSKLC is happier with ASCII here
@@ -52,10 +52,7 @@ LANGNAME = "Polish (Poland)"
 # AltGr layer: VK -> (lowercase, uppercase). Anything not listed gets nothing.
 ALTGR = {
     # --- standard alphabet ONLY: the four letters a Polish keyboard cannot type ---
-    # The extended block (ų ė ę ȯ å ŕ ť ď ć đ ľ ń ś ź) was removed 2026-08-05 on owner
-    # order: HOUSE_STYLE.md §1 withdraws extended letters from MS everywhere, so they
-    # are not on the keyboard either. (ě is NOT extended — it stays.) Matches the
-    # standard-only Android layout.
+    # Match docs/ms-latin-table.md and the standard-only Android layout.
     "E": ("ě", "Ě"),
     "C": ("č", "Č"),
     "S": ("š", "Š"),
@@ -75,7 +72,14 @@ def cp(ch):
 
 
 def main():
-    lines = io.open(SRC, encoding="utf-16").read().splitlines()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source', type=Path,
+                        default=HERE / 'windows/src/KBDMSSTD.klc',
+                        help='Existing UTF-16 KLC scan-code skeleton')
+    parser.add_argument('--output', type=Path,
+                        default=HERE / 'windows/src/KBDMSSTD.klc')
+    args = parser.parse_args()
+    lines = args.source.read_text(encoding="utf-16").splitlines()
 
     out = []
     in_layout = False
@@ -91,7 +95,7 @@ def main():
             out.append('COPYRIGHT\t"(c) 2026 Radoslove"')
             continue
         if line.startswith("COMPANY\t"):
-            out.append('COMPANY\t"vault_002"')
+            out.append('COMPANY\t"Radoslove"')
             continue
         if line.startswith("LOCALENAME\t"):
             out.append(f'LOCALENAME\t"{LOCALENAME}"')
@@ -170,9 +174,8 @@ def main():
             skipping = False
         cleaned.append(line)
 
-    dst_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "windows", "src")
-    os.makedirs(dst_dir, exist_ok=True)
-    dst = os.path.join(dst_dir, KBD_NAME + ".klc")
+    dst = args.output
+    dst.parent.mkdir(parents=True, exist_ok=True)
 
     # UTF-16LE + CRLF — MSKLC refuses anything else
     with io.open(dst, "w", encoding="utf-16", newline="\r\n") as f:

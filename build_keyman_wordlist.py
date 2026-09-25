@@ -30,13 +30,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "keyman", "radoslove.isv-latn.wordlist", "source",
                    "wordlist.tsv")
 
-# The wordlist lives in the repo so the model can be rebuilt without the vault;
-# the vault copy is the fallback for a fresh checkout that predates that.
-SOURCES = [
-    os.path.join(HERE, "dictionary", "main_isv.combined"),
-    "/Users/radoslawkaczmarczyk/Projects/vault_002/Projects/INTERSLOVE/"
-    "keyboards/upstream_prep/helium314/wordlists/main_isv.combined",
-]
+# Use the repository wordlist unless an external input is explicitly selected.
+SOURCES = [os.environ.get("ISV_WORDLIST") or
+           os.path.join(HERE, "dictionary", "main_isv.combined")]
 
 LINE = re.compile(r"\s*word=(\S+?),f=(\d+)")
 
@@ -58,7 +54,7 @@ MIN_FREQ = 100
 
 # The corpus behind f barely knows the words this project is ABOUT
 # (`medžuslovjansky` and `slovjansky` sit at f=26, `tipkovnica` at 99), so a
-# plain floor drops precisely the vocabulary the owner types most. These stay in
+# plain floor drops vocabulary central to this keyboard. These forms stay in
 # regardless of frequency; it costs a few hundred forms.
 KEEP_PREFIXES = ("medžuslovjan", "slovjansk", "tipkovnic", "klaviatur",
                  "slovnik", "jezyk")
