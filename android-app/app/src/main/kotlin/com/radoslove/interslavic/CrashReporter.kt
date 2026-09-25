@@ -7,7 +7,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /**
- * Sends an uncaught exception to medzuucenje so it can be read on a laptop.
+ * Sends an uncaught exception to an explicitly configured debug destination.
  *
  * An IME cannot be attached to a debugger, and with developer mode off there is
  * no adb either - so a crash shows only as "the keyboard switched itself off"
@@ -24,12 +24,10 @@ import java.net.URL
  */
 object CrashReporter {
 
-    // `ubu` is a server in a flat and was offline when this was needed; a crash
-    // report that lands nowhere is the same as no crash reporter at all.
-    private const val SINK = "http://100.91.132.98:30025/api/crash"
+    private const val SINK = BuildConfig.CRASH_REPORT_URL
 
     fun install(context: Context) {
-        if (!context.packageName.endsWith(".debug")) return
+        if (!context.packageName.endsWith(".debug") || SINK.isBlank()) return
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, error ->
             try {
@@ -51,7 +49,7 @@ object CrashReporter {
 
     private fun post(app: String, trace: String) {
         // Synchronous and short: the process is about to die, so there is no
-        // later. Two seconds is enough on a tailnet and short enough not to
+        // later. Keep the timeout short enough not to
         // hang the death of the app if the sink is unreachable.
         val payload = """{"app":${quote(app)},"trace":${quote(trace)}}"""
         val cx = (URL(SINK).openConnection() as HttpURLConnection).apply {

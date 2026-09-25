@@ -13,9 +13,22 @@ val keystoreProps = Properties().apply {
     if (keystorePropsFile.exists()) keystorePropsFile.inputStream().use { load(it) }
 }
 
+// Debug destinations are machine-specific and must never enter source control.
+val diagnosticsFile = rootProject.file("diagnostics.local.properties")
+val diagnosticsProps = Properties().apply {
+    if (diagnosticsFile.exists()) diagnosticsFile.inputStream().use { load(it) }
+}
+fun javaString(value: String): String = "\"" + value
+    .replace("\\", "\\\\").replace("\"", "\\\"")
+    .replace("\r", "\\r").replace("\n", "\\n") + "\""
+
 android {
     namespace = "com.radoslove.interslavic"
     compileSdk = 34
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId = "com.radoslove.interslavic"
@@ -23,6 +36,8 @@ android {
         targetSdk = 34
         versionCode = 34
         versionName = "3.4"
+        buildConfigField("String", "CRASH_REPORT_URL", "\"\"")
+        buildConfigField("String", "GESTURE_REPORT_URLS", "\"\"")
     }
 
     // F-Droid reproducible builds reject the AGP "Dependency metadata"
@@ -58,6 +73,10 @@ android {
             // id lets both live side by side: the published keyboard keeps
             // working while a test build is being tried next to it.
             applicationIdSuffix = ".debug"
+            buildConfigField("String", "CRASH_REPORT_URL",
+                javaString(diagnosticsProps.getProperty("crashReportUrl", "")))
+            buildConfigField("String", "GESTURE_REPORT_URLS",
+                javaString(diagnosticsProps.getProperty("gestureReportUrls", "")))
         }
     }
 

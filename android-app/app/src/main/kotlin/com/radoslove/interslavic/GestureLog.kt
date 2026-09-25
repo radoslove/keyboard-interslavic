@@ -6,7 +6,7 @@ import java.net.URL
 
 /**
  * Records real glides — the path, what the decoder offered, and what the user
- * turned out to want — and sends them to medzuucenje.
+ * turned out to want — and sends them to configured debug destinations.
  *
  * ## Why this exists
  *
@@ -37,17 +37,9 @@ import java.net.URL
  */
 object GestureLog {
 
-    /** Sinks, tried in order until one answers.
-     *
-     *  `ubu` used to be first here and went offline mid-session, taking the log
-     *  with it - a server in a flat is not a thing telemetry can depend on. A
-     *  sample lost because a machine was asleep has to be reproduced by hand, so
-     *  the datacentre box leads and the laptop stands in. Both are tailnet
-     *  addresses; nothing here leaves the fleet. */
-    private val SINKS = listOf(
-        "http://100.91.132.98:30025/api/gesture",   // hetz - a datacentre box, always on
-        "http://100.79.220.17:30025/api/gesture",   // mc - stands in while the laptop is awake
-    )
+    /** Explicitly configured debug destinations, tried in order. */
+    private val SINKS = BuildConfig.GESTURE_REPORT_URLS.split(',')
+        .map { it.trim() }.filter { it.isNotEmpty() }
 
     private var enabled = false
     private var device = ""
@@ -63,7 +55,7 @@ object GestureLog {
     private var pending: Pending? = null
 
     fun install(context: Context) {
-        enabled = context.packageName.endsWith(".debug")
+        enabled = context.packageName.endsWith(".debug") && SINKS.isNotEmpty()
         device = android.os.Build.MODEL ?: ""
     }
 
