@@ -1,5 +1,14 @@
 # ĆWICZENIE: odtworzenie klucza podpisującego na obcej maszynie
 
+**Aktualizacja 2026-09-25:** na `mc` odtworzono klucz z backupu na `hetz`,
+potwierdzono certyfikat i podpisano lokalny APK 3.4. Wynik i aktualna procedura:
+[`MC_TODO_2026-09-23.md`](MC_TODO_2026-09-23.md). Backup zawiera również hasła JKS
+w `keystore.properties`; nowy `tools/sign_apk_from_backup.py` wykorzystuje je
+w pamięci. Odtworzony keystore pozostaje na `mc` (oprócz `hp`), z prawami `0600`.
+Nie opublikowano APK. FileVault na `mc` pozostaje wyłączony i wymaga osobnego
+dokończenia. Instrukcje i obserwacje niżej są historyczne; dla `mc` pierwszeństwo
+ma raport z 25.09.
+
 *Dowieść, że backup klucza `medzuslovjansky` działa **bez udziału `hp`**.
 Instrukcje per maszyna: `len` (Ubuntu), `com` (Windows), `galax` (⚠ patrz ostrzeżenie).
 Stan 17.09.2026: wszystkie trzy offline — odpalić, gdy któraś wstanie.*

@@ -1,5 +1,34 @@
 # Szkic komentarza do MR F-Droida !45568
 
+## Odłożone przez ownera — 2026-09-24
+
+Aktualizacja 25.09: klucz został już odtworzony na `mc` z backupu `hetz`; certyfikat
+i próbne podpisanie lokalnego APK 3.4 zweryfikowano. Nie opublikowano APK.
+Publikacja tego komentarza nadal pozostaje odłożona.
+
+**Nie wysyłać teraz.** Przy wznowieniu otworzyć
+[MR !45568](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/45568)
+w przeglądarce zalogowanej jako `radoslove`. Sprawdzić aktualny przepis, wydanie
+i komentarze, dostosować szkic poniżej, a po wysłaniu zapisać link do odpowiedzi
+w `MC_TODO_2026-09-23.md`. Ręczne wklejenie nie wymaga tokenu API.
+
+Nowy kontekst, który trzeba uwzględnić przed publikacją:
+
+- [Tester 23.09](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/45568#note_3889183213)
+  potwierdził poprawny podpis i odtwarzalność 3.3, ale zgłosił pola haseł, RTL,
+  backup danych słownych i pytanie o źródła/licencję słownika. `linsui` podziękował
+  za raport; nie oznacza to zamknięcia zgłoszonych uwag.
+- Kod 3.4 (`dd5cf49`) poprawia dopisywanie liter po swipe; nie rozwiązuje powyższych
+  uwag. Kompilacja bez podpisu przeszła na `mc`, ale najnowszym opublikowanym
+  wydaniem i wersją w przepisie F-Droida pozostaje 3.3.
+- Poniższy szkic dotyczy aktualizacji do 3.3. Po opublikowaniu kolejnej wersji
+  najpierw zaktualizować przepis i sprawdzić CI, dopiero potem zmienić treść.
+  Osobna odpowiedź na raport testera powinna wskazywać faktycznie wykonane poprawki
+  oraz konkretne źródła i warunki redystrybucji słownika. Nie oznaczać tych punktów
+  jako rozwiązanych na podstawie samego zielonego CI.
+
+## Szkic odpowiedzi o aktualizacji do 3.3
+
 *Do wklejenia przez ownera pod `https://gitlab.com/fdroid/fdroiddata/-/merge_requests/45568`.
 Zaktualizowane 2026-09-23 po pushu przepisu 3.3 z `mc`. **Nieopublikowane:** zapisany
 token GitLaba pozwala na push, ale API zwraca `403 insufficient_scope`.
@@ -9,7 +38,7 @@ oraz „if you release a new version please update this MR".*
 Warunek wypchnięcia przepisu spełniony: `a7fcf075b5` aktualizuje pięć pól do 3.3,
 `62e098c87c` usuwa nieużywany przez Android binarny zasób iOS podczas skanowania.
 [Pipeline 2873220674](https://gitlab.com/radoslove/fdroiddata/-/pipelines/2873220674)
-przeszedł w całości (9/9 zadań). Treść poniżej jest gotowa do publikacji.
+przeszedł w całości (9/9 zadań). Treść poniżej zachowano do aktualizacji przy wznowieniu.
 
 ---
 
@@ -43,5 +72,6 @@ Separately, a native macOS arm64 rebuild differs in the compression of three lau
 ## Wariant krótszy
 
 Gdyby powyższe było za długie: zostawić dwa punkty, link i informację o wyniku CI.
-Nie pisać, że odtworzono klucz na `mc` albo uzyskano identyczny podpisany APK — tych
-dwóch testów jeszcze nie ukończono. Szczegóły są w `MC_TODO_2026-09-23.md`.
+Odtworzenie klucza i podpisywanie na `mc` są potwierdzone od 25.09. Nie pisać,
+że natywny build macOS jest identyczny z wydaniem z `hp`; tego nie potwierdzono.
+Szczegóły są w `MC_TODO_2026-09-23.md`.
