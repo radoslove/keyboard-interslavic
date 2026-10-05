@@ -174,12 +174,12 @@ A plain XKB symbols file, installed with a copy into `/usr/share/X11/xkb/symbols
 Only needed for the **files** (Android APK, Windows DLLs, macOS keylayout).
 App-store routes (Keyman) are verified by the store.
 
-**Android APK — current release `v3.3`:**
+**Android APK — current release `v3.4`:**
 
 | What | Value |
 |---|---|
 | File | `app-release.apk` |
-| SHA-256 | `771f5dc9c2a0651b1e88f7b9227a446a1c8da59820ec45f3196120d1c7bc1863` |
+| SHA-256 | `aaf63843a25383c6140e2ffcc2e8cba684050e9c39f80299b559d4084a444a6c` |
 | Signing-certificate SHA-256 | `5fa81cd2fd62cbdd3580076b941c1711b4ddc625609b5c80ec7c135a56e3b98a` |
 
 The signing-certificate fingerprint is the same one registered in our F-Droid
