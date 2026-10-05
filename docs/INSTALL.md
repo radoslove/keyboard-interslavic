@@ -143,6 +143,21 @@ bar. Source and DLLs: <https://github.com/radoslove/keyboard-interslavic/tree/ma
 3. **System Settings → Keyboard → Input Sources** → add **Keyman**.
    **Option** + C/S/Z/E → č š ž ě.
 
+## macOS — installer package (`.pkg`)
+
+The same native layout as below, in a double-click installer. Download
+`Medzuslovjansky-standard-<version>.pkg` from the
+[Releases](https://github.com/radoslove/keyboard-interslavic/releases) page.
+
+1. Open the `.pkg`. The package is not signed with an Apple Developer ID yet, so
+   macOS blocks it the first time: go to **System Settings → Privacy & Security**
+   and click **Open Anyway**.
+2. Choose **Install for me only** (no admin password) or **Install for all users**.
+3. Log out and in, then add **Medžuslovjansky (standard)** under
+   **System Settings → Keyboard → Input Sources → Others**.
+
+Maintainers: `python3 build_mac_pkg.py` builds it into `dist/mac/`.
+
 ## macOS — advanced: `.keylayout` file
 
 A native Apple layout file, no app at all:
