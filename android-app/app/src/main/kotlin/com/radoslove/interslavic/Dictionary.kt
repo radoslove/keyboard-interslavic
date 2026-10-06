@@ -55,6 +55,12 @@ object Dictionary {
                 }
             }
             list.sortBy { it.word }
+            val known = HashSet<String>(list.size * 2)
+            for (e in list) known.add(e.word)
+            for (w in UserWords.all(context)) {
+                if (known.add(w)) list.add(Entry(w, USER_FREQ))
+            }
+            list.sortBy { it.word }
             entries = list.toTypedArray()
             ready = true
         } catch (_: Throwable) {
@@ -216,6 +222,27 @@ object Dictionary {
         val arr = entries
         val i = lowerBound(arr, word)
         return if (i < arr.size && arr[i].word == word) arr[i].freq else 0
+    }
+
+    /**
+     * A word the user added themselves ([UserWords]). Middling frequency: it has
+     * to be offered and glidable, but must not outrank everyday words that share
+     * its prefix. Measured shipped frequencies run to roughly 250.
+     */
+    private const val USER_FREQ = 120
+
+    /** Insert a user-added word into the live list; no-op if known or not loaded. */
+    @Synchronized
+    fun addUserWord(word: String) {
+        if (!ready || contains(word)) return
+        val arr = entries
+        val i = lowerBound(arr, word)
+        val out = arrayOfNulls<Entry>(arr.size + 1)
+        System.arraycopy(arr, 0, out, 0, i)
+        out[i] = Entry(word, USER_FREQ)
+        System.arraycopy(arr, i, out, i + 1, arr.size - i)
+        @Suppress("UNCHECKED_CAST")
+        entries = out as Array<Entry>
     }
 
     /** Exact membership test (binary search). Used to decide MISS for M3. */

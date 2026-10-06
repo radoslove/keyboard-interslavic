@@ -18,6 +18,17 @@ val diagnosticsFile = rootProject.file("diagnostics.local.properties")
 val diagnosticsProps = Properties().apply {
     if (diagnosticsFile.exists()) diagnosticsFile.inputStream().use { load(it) }
 }
+// Every debug build carries its own test number, in its version AND in both
+// visible names. Two test builds that are both called "(test)" cannot be told
+// apart on the phone - and an install that silently UPDATED the previous test
+// build (no welcome screen) looked exactly like a fresh one. Test builds count
+// towards the NEXT release: bump TEST_BUILD for every build handed to a phone,
+// and TEST_BASE when a release is cut. Release builds do not use this, so
+// F-Droid's reproducible build is unaffected.
+val TEST_BASE = "3.5"
+val TEST_BUILD = 2
+val testVersion = "$TEST_BASE.$TEST_BUILD"
+
 fun javaString(value: String): String = "\"" + value
     .replace("\\", "\\\\").replace("\"", "\\\"")
     .replace("\r", "\\r").replace("\n", "\\n") + "\""
@@ -73,6 +84,13 @@ android {
             // id lets both live side by side: the published keyboard keeps
             // working while a test build is being tried next to it.
             applicationIdSuffix = ".debug"
+            // BOTH labels: app_name is what the installer shows, ime_name labels
+            // the SERVICE and is what the system keyboard list shows.
+            // Short on purpose: the keyboard list truncates, and the version is
+            // the part that matters.
+            val testLabel = "MS test $testVersion"
+            resValue("string", "app_name", testLabel)
+            resValue("string", "ime_name", testLabel)
             buildConfigField("String", "CRASH_REPORT_URL",
                 javaString(diagnosticsProps.getProperty("crashReportUrl", "")))
             buildConfigField("String", "GESTURE_REPORT_URLS",
@@ -86,6 +104,13 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+    }
+}
+
+// The version shown in Settings -> Apps: the test number, not the last release.
+androidComponents {
+    onVariants(selector().withBuildType("debug")) { variant ->
+        variant.outputs.forEach { it.versionName.set("$testVersion-test") }
     }
 }
 

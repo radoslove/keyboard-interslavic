@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Debug builds install alongside the released app (see applicationIdSuffix in
      build.gradle.kts), so every user-visible name has to say which one this is.
-     `ime_name` is the one that matters: it labels the SERVICE, and that is what
-     the system keyboard list shows. Overriding only `app_name` renamed the icon
-     and left the two keyboards indistinguishable in Settings. -->
+     Both `app_name` and `ime_name` are now set by resValue in build.gradle.kts,
+     with the build's date and time in them, so each test build is
+     distinguishable on the phone. Defining them here as well would be a
+     duplicate resource. -->
 <resources>
-    <string name="app_name">Medžuslovjansky (test)</string>
-    <string name="ime_name">Medžuslovjansky (test)</string>
 </resources>

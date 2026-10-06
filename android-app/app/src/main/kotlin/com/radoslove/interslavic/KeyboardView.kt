@@ -195,6 +195,11 @@ class KeyboardView(
     private val USAGE_W_SUGGEST = 8000       // in freq*64 units (max freq term ~16k)
     private val USAGE_W_SWIPE = 8.0          // in px-equivalent of the shape score
 
+    /** Shortest real glide, in key widths. A tap that rolls over a key edge
+     *  travels a fraction of a key; the shortest real word glide, between two
+     *  neighbouring keys, travels about one. */
+    private val MIN_GLIDE_KEYS = 0.8f
+
     // Visible trail so the user can SEE the glide as it happens. Flat triples
     // (x, y, t) - the timestamp is what makes velocityPivots possible, and the
     // trail is the only place the raw gesture exists.
@@ -913,10 +918,10 @@ class KeyboardView(
     }
 
     /**
-     * Recompute the strip: predictions in the left slots, and — when collection
-     * is on and the typed word is a MISS — an explicit "＋ save" chip on the
-     * right. Saving is a deliberate tap, never silent, so the user always sees
-     * the option android_PLAN.md's collection loop needs.
+     * Recompute the strip: predictions in the left slots, and — when the typed
+     * word is a MISS — an explicit "＋ save" chip on the right that adds it to
+     * the user's dictionary (and to the collection queue when that is on).
+     * Saving is a deliberate tap, never silent.
      */
     private fun refreshSuggestions() {
         val before = service.currentInputConnection
@@ -930,8 +935,10 @@ class KeyboardView(
         if (word.isEmpty()) return
 
         val lower = word.lowercase()
-        val canSave = Collector.isEnabled(context) &&
-            Dictionary.isReady() &&
+        // Offered whenever the word is unknown, not only with collection on: the
+        // chip now saves into the user's own dictionary first (UserWords), and
+        // collection stays opt-in inside Collector.record.
+        val canSave = Dictionary.isReady() &&
             word.length >= 3 &&
             !word.first().isUpperCase() &&
             !Dictionary.contains(lower)
@@ -993,7 +1000,8 @@ class KeyboardView(
         when {
             slotIsUndo[i] -> undoLastDelete()
             slotIsSave[i] -> {
-                Collector.record(context, w)
+                Collector.record(context, w)       // before UserWords: it only queues a MISS
+                UserWords.add(context, w)
                 suggestionViews[i].text = "✓"          // language-neutral: no PL/MS wording needed
                 flickHandler.postDelayed({ refreshSuggestions() }, 700)
             }
@@ -1128,11 +1136,21 @@ class KeyboardView(
             }
             MotionEvent.ACTION_UP -> {
                 val pts = ArrayList(trailPts)          // snapshot BEFORE clearing
+                val start = swipeStartKey
                 swiping = false
                 swipeStartKey = null
                 trailPts.clear()
                 invalidate()
-                if (pts.size >= 9) decodeSwipe(pts)    // >= 3 points = a real glide
+                // The glide fires the moment the finger enters a neighbouring key,
+                // so a tap that rolls a few pixels over a key edge became a "glide"
+                // and the decoder committed a whole unrelated word (`opreděl`,
+                // `prošlo`, ` ili `) in place of one letter. A real glide travels;
+                // a tap does not. Below a fraction of a key width it was a tap:
+                // type the key it started on, exactly as the child would have.
+                if (start != null && trailLength(pts) < keyWidth(computeCenters()) * MIN_GLIDE_KEYS) {
+                    val up = swipeShift || swipeCaps
+                    commit(if (up) start.uppercaseChar().toString() else start.toString())
+                } else if (pts.size >= 9) decodeSwipe(pts)    // >= 3 points = a real glide
             }
             MotionEvent.ACTION_CANCEL -> {
                 swiping = false
@@ -1416,6 +1434,19 @@ class KeyboardView(
         val seq = ArrayList<FloatArray>(folded.length)
         for (c in folded) seq.add(centers[c] ?: return null)
         return if (seq.size < 2) null else seq
+    }
+
+    /** Distance the finger actually travelled, over (x, y, t) triples. */
+    private fun trailLength(pts: List<Float>): Float {
+        var len = 0f
+        var i = 3
+        while (i + 1 < pts.size) {
+            val dx = pts[i] - pts[i - 3]
+            val dy = pts[i + 1] - pts[i - 2]
+            len += sqrt(dx * dx + dy * dy)
+            i += 3
+        }
+        return len
     }
 
     /** One key width, taken from the snapshotted centres so no View is read. */
