@@ -3,7 +3,7 @@
 build_klc.py — generate our own Interslavic Windows layout (KBDMSSTD.klc).
 
 WHY NOT JUST USE THE UPSTREAM ONE
-The upstream KBDMSLAT.klc ((c) 2013 Adam Gola, medzuslovjansky/keyboards)
+The upstream KBDMSLAT.klc ((c) 2013 Adam Gola, Roberto Lombino jr., tyflonet.com/siciliano/klaviatury)
 provides the scan-code skeleton, with the following differences:
 
   1. EIGHT DEAD KEYS, and two of them sit on the BASE layer: OEM_3 makes plain

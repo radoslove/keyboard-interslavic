@@ -81,7 +81,7 @@ Android has **two** independent pieces. Test both.
 | Swipe **up-left** on the top row | digits | ☐ |
 | Tap normally | plain letters | ☐ |
 
-(Also try `isv_cyrillic.xml` and `isv_runic.xml` the same way.)
+(Also try `isv_runic.xml` the same way.)
 
 ### B. HeliBoard — the glide/swipe **dictionary** (the crown jewel)
 

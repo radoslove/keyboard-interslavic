@@ -73,6 +73,5 @@ finish line.
 
 ## Not submitted
 
-The Cyrillic and runic layouts stay in this repo only. They have never been
-audited to the standard of `docs/ms-latin-table.md` — that is open question #1
-in that file.
+The runic layouts stay in this repo only. They have never been audited to the
+standard of `docs/ms-latin-table.md`. There is no Cyrillic layout at present.

@@ -75,7 +75,6 @@ scripts, the other two are upstream packages with an installer.*
 | Ukladj / Layout | Instalacija / How to install |
 |---|---|
 | Medžuslovjanska **latinica** (Latin) | `windows/installers/kbdmsstd/` → `install.ps1` (PowerShell, kako administrator) |
-| Medžuslovjanska **cyrilica** (Cyrillic) | `windows/installers/kbdmskir/kbdmskir.exe` |
 | **Runy** (runic) | `windows/installers/runy_5/setup.exe` |
 
 Ukladj se sam dopiše do liste jezykov, pod polsky — tako stoji pri tvojih tipkovnicah i
@@ -126,7 +125,6 @@ provided here:*
 | Fajl / File | Ukladj / Layout |
 |---|---|
 | `android/isv_latin.xml` | latinica / Latin |
-| `android/isv_cyrillic.xml` | cyrilica / Cyrillic |
 | `android/isv_runic.xml` | runy / Runic |
 
 **Instalacija / Installation:**
@@ -336,15 +334,29 @@ rather than the promise.*
 
 ## Licencije · Licenses
 
-Vse pod **MIT.** *Everything under **MIT.***
+Kod i vlastne razloženja klaviatury pod **MIT.** *Code and original layouts under **MIT.***
 
-- Ukladji `kbdmslat` (latinica) i `kbdmskir` (cyrilica) izvorno iz projekta
-  [medzuslovjansky/keyboards](https://github.com/medzuslovjansky/keyboards). Avtorske prava
-  pri avtorah: **Adam Gola, Roberto Lombino jr.**
-  *The `kbdmslat` (Latin) and `kbdmskir` (Cyrillic) layouts originate from
-  medzuslovjansky/keyboards. Copyright with the authors: **Adam Gola, Roberto Lombino jr.***
-- Ostatok — runy, android ukladji, `docs/`, slovnik — vlastno, MIT.
-  *The rest — runic layouts, Android layouts, `docs/`, the dictionary — original, MIT.*
+- Razloženje klaviatury `kbdmslat` (latinica) izvorno iz
+  [tyflonet.com/siciliano/klaviatury](https://tyflonet.com/siciliano/klaviatury/) (2013).
+  Avtorske prava pri avtorah: **Adam Gola, Roberto Lombino jr.** Licencija MIT togo
+  projekta jego ne obsegaje; licencija originalov ješče ne jest potvrdžena.
+  *The `kbdmslat` (Latin) layout comes from
+  [tyflonet.com/siciliano/klaviatury](https://tyflonet.com/siciliano/klaviatury/) (2013).
+  Copyright with the authors: **Adam Gola, Roberto Lombino jr.** It is not covered by this
+  repository's MIT licence; the licence of the originals is not yet confirmed.*
+- Ostatok — runy, android ukladji, `docs/` — vlastno, MIT.
+  *The rest — runic layouts, Android layouts, `docs/` — original, MIT.*
+- Slovnik: [`android-app/DICTIONARY_DATA.md`](android-app/DICTIONARY_DATA.md).
+  *The dictionary data is not under MIT; see
+  [`android-app/DICTIONARY_DATA.md`](android-app/DICTIONARY_DATA.md).*
 
 Polny tekst: [`LICENSE`](LICENSE).
 *Full text: [`LICENSE`](LICENSE).*
+
+Avtorsko pravo © 2026 Radosław Kaczmarczyk. Licencija MIT obsegaje kod i vlastne
+razloženja klaviatury, ne ikonu i ne identifikatory aplikacije (`com.radoslove.*`).
+Kopija projekta (fork) jest vitana, ale pod svojeju ikonoju. Oficialne versije sut samo te, ktore avtor publikuje iz togo projekta.
+*Copyright © 2026 Radosław Kaczmarczyk. The MIT licence covers the code and the original
+layouts, not the icon or the app identifiers (`com.radoslove.*`). A fork is welcome, but
+with its own icon. The official builds are the ones published from this
+repository and by this author.*

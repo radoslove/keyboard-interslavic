@@ -7,8 +7,7 @@ standard-orthography character set and key mappings.*
 
 | Source | What it is | Status |
 |---|---|---|
-| Upstream `KBDMSLAT.klc` | (c) 2013 Adam Gola / Roberto Lombino jr. — `medzuslovjansky/keyboards` Latin layout | scan-code skeleton; differences below |
-| Upstream `KBDMSKIR.klc` | same authors, Cyrillic | untouched, out of scope here |
+| Upstream `KBDMSLAT.klc` | (c) 2013 Adam Gola / Roberto Lombino jr. — Latin layout from tyflonet.com/siciliano/klaviatury | scan-code skeleton; differences below |
 | Standard-orthography character set below | letters available on this layout | priority order |
 
 **Rule applied — the last working artefact wins.** The Gola layout is a decision made
@@ -53,7 +52,7 @@ Verified against the artefacts — `windows/src/KBDMSSTD.klc` contains exactly
 `Č č Ě ě Š š Ž ž – — ’ “ ” „` and nothing else.
 
 The cut letters were `å ś ę ŕ ų ė ȯ ď đ ľ ť ć ź ń`. They are recorded here as history
-only. To quote them, use a dictionary or the Cyrillic layout — not this keyboard.
+only. To quote them, use a dictionary — not this keyboard.
 
 ### Punctuation
 
@@ -79,8 +78,8 @@ was dropped.
 
 Questions for a separate linguistic/layout review.
 
-1. **Cyrillic layout not reviewed.** `KBDMSKIR.klc` was not audited for the same class
-   of defects. If the Cyrillic layout ever gets used, run this same comparison.
+1. ~~**Cyrillic layout not reviewed.**~~ **CLOSED 2026-10-07.** The upstream `KBDMSKIR` files were
+   removed from the repository. A Cyrillic layout is possible later; it would get this review then.
 2. **`ĺ` vs `ľ` upstream.** Worth reporting to `medzuslovjansky/keyboards` — if the
    upstream really means `ĺ`, our reading of the alphabet is what needs revisiting.
 3. ~~**Android parity.**~~ **RESOLVED 2026-08-08.** `android/isv_latin.xml` was diffed
