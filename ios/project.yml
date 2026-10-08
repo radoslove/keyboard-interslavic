@@ -15,7 +15,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "0.1"
+    MARKETING_VERSION: "0.1.4"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
@@ -31,6 +31,13 @@ settings:
     # A free Personal Team is enough to run on your own device; the profile
     # expires after 7 days and you rebuild. $99/year is only for distribution.
     DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM}
+  # Test builds show their number in Settings -> Keyboards, so two builds can
+  # be told apart on the phone (owner, 2026-10-08: shorter, with the version).
+  configs:
+    Debug:
+      KEYBOARD_NAME: "isv $(MARKETING_VERSION)"
+    Release:
+      KEYBOARD_NAME: Medžuslovjansky
 
 targets:
   InterslavicKeyboard:
@@ -51,7 +58,7 @@ targets:
     info:
       path: App/Info.plist
       properties:
-        CFBundleDisplayName: Medžuslovjansky
+        CFBundleDisplayName: $(KEYBOARD_NAME)
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
@@ -70,7 +77,7 @@ targets:
     info:
       path: Keyboard/Info.plist
       properties:
-        CFBundleDisplayName: Medžuslovjansky
+        CFBundleDisplayName: $(KEYBOARD_NAME)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.keyboard-service
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController

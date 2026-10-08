@@ -83,6 +83,48 @@ final class SwipeDictionary {
         }
     }
 
+    /// The most frequent words starting with `prefix` (folded key indices),
+    /// for the bar while typing by taps. Scans the 26 buckets of the first
+    /// letter - a few thousand entries, well under a frame.
+    func completions(prefix: [Int], limit: Int) -> [(freq: UInt8, word: String)] {
+        guard let first = prefix.first else { return [] }
+        var best: [(freq: UInt8, offset: Int, length: Int)] = []
+        for last in 0..<26 {
+            forEachEntry(first: first, last: last) { e in
+                guard e.keys.count >= prefix.count else { return }
+                for i in 1..<prefix.count where Int(e.keys[i]) != prefix[i] { return }
+                if best.count >= limit * 4, let worst = best.last, e.freq <= worst.freq { return }
+                best.append((e.freq, e.wordOffset, e.wordLength))
+                best.sort { $0.freq > $1.freq }
+                if best.count > limit * 4 { best.removeLast() }
+            }
+        }
+        return best.map { ($0.freq, word(at: $0.offset, length: $0.length)) }
+    }
+
+    /// Folded key indices of a word, or nil if it has a letter no key types.
+    static func keys(of word: String) -> [Int]? {
+        let folded = word.lowercased().folding(options: .diacriticInsensitive, locale: nil)
+        let keys = folded.unicodeScalars.compactMap { u -> Int? in
+            let v = Int(u.value) - 97
+            return (0..<26).contains(v) ? v : nil
+        }
+        return keys.count == folded.unicodeScalars.count && !keys.isEmpty ? keys : nil
+    }
+
+    /// Whether this exact form (ignoring case) is in the wordlist.
+    func contains(_ word: String) -> Bool {
+        guard let k = Self.keys(of: word), let first = k.first, let last = k.last else { return false }
+        let lower = word.lowercased()
+        var found = false
+        forEachEntry(first: first, last: last) { e in
+            guard !found, e.keys.count == k.count else { return }
+            for i in 0..<k.count where Int(e.keys[i]) != k[i] { return }
+            if self.word(at: e.wordOffset, length: e.wordLength).lowercased() == lower { found = true }
+        }
+        return found
+    }
+
     func word(at offset: Int, length: Int) -> String {
         guard offset >= 0, length > 0, offset + length <= data.count else { return "" }
         return String(decoding: data[offset..<(offset + length)], as: UTF8.self)

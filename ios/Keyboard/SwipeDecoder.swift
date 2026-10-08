@@ -31,15 +31,38 @@ struct SwipeDecoder {
     /// wrong bucket cannot be recovered later.
     private static let endpointRadius: Double = 1.4
 
+    /// See `decode`: how far real touches sit above the intended key, in key
+    /// widths. The starting value; each phone then learns its own thumb
+    /// (`SwipeInput.learn`).
+    static let defaultTouchLift: Double = 0.35
+    /// How hard frequency pulls. 0.03 before; 0.06 took the real-gesture set
+    /// from 23/34 to 25/34 top-1 (28 -> 30 top-3) at a cost of 1.6 points on
+    /// synthetic glides. Short common words (`se`, `ne`, `kako`) are what a
+    /// thumb actually swipes, so real data wins.
+    private static let freqWeight: Double = 0.06
+
     let dictionary: SwipeDictionary
     /// Centre of each letter key, indexed 0..25 for 'a'..'z'. Missing keys are
     /// .zero and are skipped - a layer without letters simply decodes nothing.
     let keyCentres: [CGPoint]
     let keyWidth: CGFloat
+    var touchLift: Double = SwipeDecoder.defaultTouchLift
+    /// The user's own words (`＋` in the bar), with their folded keys. Scored
+    /// like a fairly common word - around `kolega` - because adding one is a
+    /// deliberate act; it should win its shape, not every shape.
+    var userWords: [(word: String, keys: [UInt8])] = []
+    private static let userWordFreq: Double = 140
 
     func decode(path rawPath: [CGPoint], limit: Int = 4) -> [Candidate] {
         guard keyWidth > 0, rawPath.count >= 2 else { return [] }
-        let path = Self.resample(rawPath, to: Self.samples)
+        // Measured on 34 labelled real gestures on an iPhone 13 (2026-10-07):
+        // touches register on average 0.35 key widths ABOVE the key the thumb
+        // meant, at both ends of the path. Shifting the path back down moved
+        // top-1 from 16/34 to 23/34 on its own - `ne` stopped starting on
+        // `h`/`j`, `da` stopped ending on `q`.
+        let lift = Double(keyWidth) * touchLift
+        let path = Self.resample(rawPath.map { CGPoint(x: $0.x, y: $0.y + lift) },
+                                 to: Self.samples)
         guard path.count == Self.samples else { return [] }
 
         let starts = nearestKeys(to: path.first!)
@@ -72,7 +95,7 @@ struct SwipeDecoder {
                     // Frequency breaks ties between shapes the finger cannot
                     // distinguish anyway. It nudges, it does not decide: a
                     // common word still loses to a clearly better fit.
-                    let score = rms - 0.12 * (Double(entry.freq) + 1).squareRoot() / 4
+                    let score = rms - Self.freqWeight * (Double(entry.freq) + 1).squareRoot()
                     guard best.count < limit * 4 || score < worstKept else { return }
 
                     best.append((score, entry.wordOffset, entry.wordLength))
@@ -85,6 +108,25 @@ struct SwipeDecoder {
             }
         }
 
+        // User words: few, so simply scored one by one. A negative offset
+        // marks them in `best`: -1 is userWords[0], -2 userWords[1], ...
+        let startKeys = Set(starts.map(\.key)), endKeys = Set(ends.map(\.key))
+        for (i, extra) in userWords.enumerated() {
+            guard let f = extra.keys.first, let l = extra.keys.last,
+                  startKeys.contains(Int(f)), endKeys.contains(Int(l)),
+                  extra.keys.count <= maxLetters,
+                  let ideal = extra.keys.withUnsafeBufferPointer({ idealPath(for: $0) })
+            else { continue }
+            var sum = 0.0
+            for j in 0..<Self.samples {
+                let dx = Double(path[j].x - ideal[j].x)
+                let dy = Double(path[j].y - ideal[j].y)
+                sum += dx * dx + dy * dy
+            }
+            let rms = (sum / Double(Self.samples)).squareRoot() / Double(keyWidth)
+            best.append((rms - Self.freqWeight * (Self.userWordFreq + 1).squareRoot(), -1 - i, 0))
+        }
+
         best.sort { $0.score < $1.score }
 
         // Strings are built only for the survivors - decoding a gesture touches
@@ -93,7 +135,9 @@ struct SwipeDecoder {
         var seen = Set<String>()
         var out: [Candidate] = []
         for hit in best {
-            let word = dictionary.word(at: hit.offset, length: hit.length)
+            let word = hit.offset < 0
+                ? userWords[-1 - hit.offset].word
+                : dictionary.word(at: hit.offset, length: hit.length)
             guard seen.insert(word).inserted else { continue }
             out.append(Candidate(word: word, score: hit.score))
             if out.count == limit { break }

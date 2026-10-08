@@ -21,6 +21,9 @@ protocol SwipeHost: AnyObject {
     /// False while something else owns the finger - the longpress popup, or a
     /// layer without letters.
     var swipeCanBegin: Bool { get }
+    /// The finger lifted and decoding started; keys pressed from now until
+    /// `swipeDidFinish` must wait, or they land BEFORE the word.
+    func swipeWillDecode()
     /// Best first, already ranked. Empty means the path decoded to nothing.
     func swipeDidFinish(candidates: [String])
 }
@@ -90,6 +93,33 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     private let trail = CAShapeLayer()
     private var dictionary: SwipeDictionary?
 
+    /// Where this user's touches sit above the key they mean, in key widths.
+    /// Learned from words they KEPT, so a thumb that lands high (or a phone
+    /// whose glass makes it look so) stops costing them the first guess.
+    private(set) var touchLift: Double = {
+        let d = UserDefaults.standard
+        return d.object(forKey: "touchLift") == nil
+            ? SwipeDecoder.defaultTouchLift : d.double(forKey: "touchLift")
+    }()
+    /// Words the user added with `＋`, lowercase. On this phone only.
+    private(set) var userWords: [String] = UserDefaults.standard.stringArray(forKey: "userWords") ?? []
+
+    /// Saves a word the wordlist lacks (`napiše`, `koležanka`). From then on
+    /// it completes and can be swiped. Never leaves the phone.
+    func addUserWord(_ word: String) {
+        let w = word.lowercased()
+        guard SwipeDictionary.keys(of: w) != nil, !userWords.contains(w) else { return }
+        userWords.append(w)
+        UserDefaults.standard.set(userWords, forKey: "userWords")
+    }
+
+    private var userWordKeys: [(word: String, keys: [UInt8])] {
+        userWords.compactMap { w in SwipeDictionary.keys(of: w).map { (w, $0.map(UInt8.init)) } }
+    }
+
+    /// The last gesture's ends, waiting to learn from until its word is kept.
+    private var sample: (start: CGPoint, end: CGPoint, centres: [CGPoint], keyWidth: CGFloat)?
+
     /// Decoding runs off the main thread. On a 248 845-form lexicon a gesture
     /// touches a few thousand entries, which is fast - but "fast" on the main
     /// thread still means the trail stops moving, and a keyboard that stutters
@@ -110,6 +140,10 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         recognizer.delegate = self
         // The keys must not also act on a touch that turned into a word.
         recognizer.cancelsTouchesInView = true
+        // A tap must reach its key the moment the finger lifts. With the default
+        // (true) every key press waited for this recognizer to give up first,
+        // which read as "backspace often doesn't catch".
+        recognizer.delaysTouchesEnded = false
     }
 
     func attach() {
@@ -187,13 +221,83 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
             return
         }
 
+        host.swipeWillDecode()   // may still learn from the previous gesture
+        sample = nil
+        let lift = touchLift
+        let mine = userWordKeys
         queue.async { [weak self] in
             let decoder = SwipeDecoder(dictionary: dictionary,
                                        keyCentres: centres,
-                                       keyWidth: keyWidth)
+                                       keyWidth: keyWidth,
+                                       touchLift: lift,
+                                       userWords: mine)
             let words = decoder.decode(path: path).map(\.word)
             swipeLog.notice("isv-swipe: \(path.count, privacy: .public) points -> \(words.joined(separator: " "), privacy: .public)")
-            DispatchQueue.main.async { self?.host?.swipeDidFinish(candidates: words) }
+            #if DEBUG
+            GestureFile.append(path: path, centres: centres, keyWidth: keyWidth, words: words, lift: lift)
+            #endif
+            DispatchQueue.main.async {
+                self?.sample = (path.first!, path.last!, centres, keyWidth)
+                self?.host?.swipeDidFinish(candidates: words)
+            }
+        }
+    }
+
+    // MARK: - Learning the thumb
+
+    /// The last swiped word was kept (the next word or a space followed it):
+    /// compare where the path began and ended with that word's first and last
+    /// keys, and move the learned lift a little toward what was measured.
+    func learn(from word: String) {
+        guard let s = sample else { return }
+        sample = nil
+        let folded = word.lowercased().folding(options: .diacriticInsensitive, locale: nil)
+        guard folded.count >= 2,
+              let a = folded.first?.asciiValue, let b = folded.last?.asciiValue,
+              (97...122).contains(a), (97...122).contains(b), s.keyWidth > 0
+        else { return }
+        let first = s.centres[Int(a) - 97], last = s.centres[Int(b) - 97]
+        guard first != .zero, last != .zero else { return }
+        let measured = Double((first.y + last.y) - (s.start.y + s.end.y)) / 2 / Double(s.keyWidth)
+        // One sloppy word must not drag the keyboard around: wild readings are
+        // dropped, the rest only nudge, and the result stays in a sane band.
+        guard (-0.3...0.9).contains(measured) else { return }
+        touchLift = min(0.6, max(0, touchLift + 0.1 * (measured - touchLift)))
+        UserDefaults.standard.set(touchLift, forKey: "touchLift")
+    }
+
+    /// The word did not come from this gesture (a completion was tapped, or it
+    /// was trimmed by hand), so the gesture says nothing about the thumb.
+    func forgetSample() { sample = nil }
+
+    /// Words starting with what is being typed by taps. Diacritics fold to
+    /// their base key (`č` -> `c`); if the typed part has diacritics, only
+    /// words that really start with it are offered.
+    /// `known` says whether `typed` itself is a word (wordlist or user's own),
+    /// which decides whether the bar offers `＋` to save it.
+    func complete(_ typed: String, limit: Int = 3,
+                  _ done: @escaping (_ words: [String], _ known: Bool) -> Void) {
+        guard let dictionary else { done([], true); return }
+        let lower = typed.lowercased()
+        let folded = lower.folding(options: .diacriticInsensitive, locale: nil)
+        guard let keys = SwipeDictionary.keys(of: lower) else { done([], true); return }
+        let exact = lower != folded
+        let mine = userWords
+        queue.async {
+            var out: [String] = []
+            let known = mine.contains(lower) || dictionary.contains(lower)
+            // The user's own words first: they were added because they are used.
+            for w in mine where w.hasPrefix(lower) && w != lower && out.count < limit {
+                out.append(w)
+            }
+            for hit in dictionary.completions(prefix: keys, limit: limit) {
+                let w = hit.word
+                if exact && !w.lowercased().hasPrefix(lower) { continue }
+                if w.lowercased() == lower || out.contains(w) { continue }
+                out.append(w)
+                if out.count == limit { break }
+            }
+            DispatchQueue.main.async { done(out, known) }
         }
     }
 
@@ -223,3 +327,33 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         }
     }
 }
+
+#if DEBUG
+/// Test builds only: every gesture as one JSON line in the extension's own
+/// container, so the ranking can be tuned on real thumbs instead of synthetic
+/// paths. Never compiled into a Release build. Pull it from the Mac with
+/// `xcrun devicectl device copy from --domain-type appDataContainer
+///  --domain-identifier com.radoslove.interslavic.keyboard ...`.
+enum GestureFile {
+    static func append(path: [CGPoint], centres: [CGPoint], keyWidth: CGFloat, words: [String], lift: Double) {
+        guard let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        else { return }
+        let row: [String: Any] = [
+            "t": Date().timeIntervalSince1970,
+            "kw": Double(keyWidth),
+            "keys": centres.map { [Double($0.x), Double($0.y)] },
+            "path": path.map { [Double($0.x), Double($0.y)] },
+            "words": words,
+            "lift": lift,
+        ]
+        guard var line = try? JSONSerialization.data(withJSONObject: row) else { return }
+        line.append(0x0A)
+        let url = dir.appendingPathComponent("gestures.jsonl")
+        if let h = try? FileHandle(forWritingTo: url) {
+            h.seekToEndOfFile(); h.write(line); try? h.close()
+        } else {
+            try? line.write(to: url)
+        }
+    }
+}
+#endif

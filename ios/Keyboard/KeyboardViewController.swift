@@ -30,6 +30,40 @@ final class KeyboardViewController: UIInputViewController {
     /// What the last swipe put in, so tapping another suggestion knows how much
     /// to take back out.
     private var lastSwipedWord: String?
+    /// When that word went in. A backspace inside `wipeWindow` means "wrong
+    /// word" and takes it whole; later it deletes one letter, because in
+    /// Interslavic the stem is usually right and only the ending needs fixing.
+    /// Mirrors the Android keyboard (SWIPE_WIPE_WINDOW_MS).
+    private var swipeCommittedAt = Date.distantPast
+    private static let wipeWindow: TimeInterval = 1.2
+    /// Smart space: a swiped word gets its space BEFORE it, never after, and
+    /// owes one to whatever comes next. A trailing space doubled up with the
+    /// space bar habit (`Kako  se`) and sat between a word and its punctuation.
+    private var pendingSpace = false
+    /// The candidates of the last swipe, kept so a rejected word can be
+    /// replaced by tapping the next one.
+    private var lastCandidates: [String] = []
+    /// The partly typed word the bar is completing; nil when the bar shows
+    /// swipe candidates instead.
+    private var completingPrefix: String?
+    private var backspaceRepeat: Timer?
+    /// " " when a swiped word went in right before more text and brought its
+    /// own space after it (`byh dobra |možlivost`); empty otherwise.
+    private var swipeSuffix = ""
+    /// Between the finger lifting and the word landing. Keys pressed then are
+    /// held back: a quick space used to land BEFORE the word and look missed.
+    private var decoding = 0
+    private var queuedKeys: [() -> Void] = []
+    /// The word a backspace press has just wiped; if the press is held, it
+    /// comes back one letter short and keeps trimming.
+    private var trimAfterWipe: String?
+    private var wipedSuffix = ""
+    /// No space after these: `(jedino`, `„dobro`.
+    private static let openers: Set<Character> = ["(", "[", "{", "„", "‚", "«", "‹", "¿", "¡", "\n"]
+
+    private var insideWipeWindow: Bool {
+        Date().timeIntervalSince(swipeCommittedAt) <= Self.wipeWindow
+    }
 
     // MARK: - Lifecycle
 
@@ -41,6 +75,22 @@ final class KeyboardViewController: UIInputViewController {
         swipeInput = SwipeInput(host: self)
         swipeInput.attach()
         swipeLog.notice("isv-swipe: keyboard loaded, swipe build")
+    }
+
+    // Shift starts armed at load, and the extension is reloaded every time
+    // the user comes back from another app - so returning from the dictionary
+    // to the middle of a sentence typed the next word with a capital
+    // (`byh Dobra`). Ask the text instead, on appearing and on every cursor move.
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        lastSwipedWord = nil
+        pendingSpace = false
+        rearmShiftIfSentenceStart()
+    }
+
+    override func textDidChange(_ textInput: UITextInput?) {
+        super.textDidChange(textInput)
+        rearmShiftIfSentenceStart()
     }
 
     // MARK: - Building
@@ -80,20 +130,45 @@ final class KeyboardViewController: UIInputViewController {
 
         // The third letter row carries shift and backspace on either side.
         let isLastLetterRow = !showingNumeric && chars == Layout.letterRows[2]
+        // Shift and backspace are 1.5 keys wide here, as on the system
+        // keyboard: 7 letters + 2 x 1.5 = the 10 keys of the top row, so the
+        // letters keep the same width (swipe geometry depends on it). The
+        // period moved to the bottom row - next to backspace it stole presses.
+        var first: UIButton?
+        var wide: [UIButton] = []
         if isLastLetterRow {
-            stack.addArrangedSubview(functionKey(shiftTitle, action: #selector(tapShift)))
+            stack.distribution = .fill
+            let shiftKey = functionKey(shiftTitle, action: #selector(tapShift))
+            stack.addArrangedSubview(shiftKey)
+            wide.append(shiftKey)
         }
         for ch in chars {
             let b = characterKey(ch)
             b.tag = row                      // which row a key sits in decides
             letterButtons.append(b)          // where its popup can go
             stack.addArrangedSubview(b)
+            if isLastLetterRow {
+                if let f = first { b.widthAnchor.constraint(equalTo: f.widthAnchor).isActive = true }
+                else { first = b }
+            }
         }
         if isLastLetterRow {
-            let period = characterKey(".")
-            period.tag = row
-            stack.addArrangedSubview(period)
-            stack.addArrangedSubview(functionKey("⌫", action: #selector(tapBackspace)))
+            let back = styledKey("⌫")
+            back.backgroundColor = .tertiarySystemFill
+            back.addTarget(self, action: #selector(backspaceDown), for: .touchDown)
+            back.addTarget(self, action: #selector(backspaceUp),
+                           for: [.touchUpInside, .touchUpOutside, .touchCancel])
+            back.addTarget(self, action: #selector(keyDown(_:)), for: .touchDown)
+            back.addTarget(self, action: #selector(keyUp(_:)),
+                           for: [.touchUpInside, .touchUpOutside, .touchCancel])
+            stack.addArrangedSubview(back)
+            wide.append(back)
+            if let f = first {
+                for w in wide {
+                    w.widthAnchor.constraint(equalTo: f.widthAnchor, multiplier: 1.5,
+                                             constant: 2.5).isActive = true
+                }
+            }
         }
         return stack
     }
@@ -119,6 +194,13 @@ final class KeyboardViewController: UIInputViewController {
         let space = functionKey(" ", action: #selector(tapSpace))
         space.backgroundColor = .systemBackground
         stack.addArrangedSubview(space)
+
+        if !showingNumeric {
+            let period = characterKey(".")
+            period.tag = 3
+            period.widthAnchor.constraint(equalToConstant: 40).isActive = true
+            stack.addArrangedSubview(period)
+        }
 
         let ret = functionKey("⏎", action: #selector(tapReturn))
         ret.widthAnchor.constraint(equalToConstant: 74).isActive = true
@@ -246,7 +328,91 @@ final class KeyboardViewController: UIInputViewController {
         buildKeyboard()
     }
 
-    @objc private func tapBackspace() { textDocumentProxy.deleteBackward() }
+    /// Fires on touch DOWN, like the system keyboard: waiting for the lift is
+    /// what made backspace feel like it "doesn't catch". Holding repeats.
+    ///
+    /// A hold that began by wiping a swiped word TRIMS it instead: the word
+    /// comes back one letter short and loses letters while held, slowly enough
+    /// to stop on the right one. That is the one-gesture way to fix an ending
+    /// (owner, 2026-10-08: space-then-backspace was too much fiddling).
+    @objc private func backspaceDown() {
+        if decoding > 0 { queuedKeys.append { [weak self] in self?.tapBackspace() }; return }
+        let before = lastSwipedWord
+        tapBackspace()
+        trimAfterWipe = (before != nil && lastSwipedWord == nil && !lastCandidates.isEmpty) ? before : nil
+        backspaceRepeat?.invalidate()
+        backspaceRepeat = Timer.scheduledTimer(withTimeInterval: 0.45, repeats: false) { [weak self] _ in
+            guard let self else { return }
+            if let word = self.trimAfterWipe {
+                self.trimAfterWipe = nil
+                self.restoreTrimmed(word)
+                self.backspaceRepeat = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { _ in
+                    self.tapBackspace()
+                }
+            } else {
+                self.backspaceRepeat = Timer.scheduledTimer(withTimeInterval: 0.08, repeats: true) { _ in
+                    self.tapBackspace()
+                }
+            }
+        }
+    }
+
+    @objc private func backspaceUp() {
+        backspaceRepeat?.invalidate()
+        backspaceRepeat = nil
+        trimAfterWipe = nil
+    }
+
+    /// Puts a wiped word back minus its last letter, as plain typed text, so
+    /// further backspaces take letters and the bar completes the stem.
+    private func restoreTrimmed(_ word: String) {
+        let stem = String(word.dropLast())
+        if !stem.isEmpty { textDocumentProxy.insertText(stem) }
+        if !wipedSuffix.isEmpty {
+            textDocumentProxy.insertText(wipedSuffix)
+            textDocumentProxy.adjustTextPosition(byCharacterOffset: -wipedSuffix.count)
+        }
+        wipedSuffix = ""
+        swipeSuffix = ""
+        lastSwipedWord = nil
+        pendingSpace = false
+        lastCandidates = []
+        swipeInput.forgetSample()
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        refreshCompletions()
+    }
+
+    @objc private func tapBackspace() {
+        defer { rearmShiftIfSentenceStart() }
+        // Right after a swipe (no other key in between) backspace means "wrong
+        // word" and takes it whole - at once, no matter how long the thumb took
+        // to come back (owner, 2026-10-07: "nobody can be made to wait").
+        // To fix only an ending: space first, then backspace deletes letters.
+        // Only if the word is still right behind the cursor: after a tap
+        // somewhere else in the text, wiping word.count letters there would
+        // eat whatever sits at the new spot.
+        if let word = lastSwipedWord,
+           (textDocumentProxy.documentContextBeforeInput ?? "").hasSuffix(word + swipeSuffix) {
+            for _ in 0..<(word.count + swipeSuffix.count) { textDocumentProxy.deleteBackward() }
+            wipedSuffix = swipeSuffix
+            swipeSuffix = ""
+            lastSwipedWord = nil
+            pendingSpace = false
+            swipeCommittedAt = .distantPast
+            // Offer the other guesses first; the rejected one goes last, not
+            // away - the press is often reflex, before the eye has read it.
+            var rest = lastCandidates.filter { $0.lowercased() != word.lowercased() }
+            rest.append(word)
+            lastCandidates = rest
+            showSuggestions(rest, current: nil)
+            return
+        }
+        lastSwipedWord = nil
+        swipeSuffix = ""
+        pendingSpace = false
+        textDocumentProxy.deleteBackward()
+        refreshCompletions()
+    }
     @objc private func tapSpace() { insert(" ") }
     @objc private func tapReturn() { insert("\n") }
     @objc private func tapNextKeyboard() { advanceToNextInputMode() }
@@ -258,8 +424,70 @@ final class KeyboardViewController: UIInputViewController {
     }
 
     private func insert(_ ch: Character) {
+        if decoding > 0 { queuedKeys.append { [weak self] in self?.insert(ch) }; return }
+        // Anything but a letter extending a swiped word means the word was
+        // kept: that gesture now tells us where this thumb lands.
+        if let kept = lastSwipedWord, !(ch.isLetter && insideWipeWindow) {
+            swipeInput.learn(from: kept)
+        }
+        if pendingSpace {
+            // A letter right after a swipe extends that word (`pisem` + `s`);
+            // a letter later starts the next word and gets the owed space.
+            // Space and punctuation simply cancel it.
+            if ch.isLetter && !insideWipeWindow { textDocumentProxy.insertText(" ") }
+            pendingSpace = false
+        }
+        lastSwipedWord = nil
+        swipeSuffix = ""
         textDocumentProxy.insertText(String(ch))
         rearmShiftIfSentenceStart()
+        refreshCompletions()
+    }
+
+    /// The bar while typing by taps: completions of the word under the cursor.
+    /// Before this the bar kept the LAST SWIPE's candidates, which read as
+    /// suggestions with no relation to what was being typed.
+    ///
+    /// A word the wordlist does not know gets `＋ word` in the last slot - also
+    /// right after its space, since that is when the eye notices nothing was
+    /// offered. Lowercase-initial only, as on Android: a capital is usually a
+    /// name, and names do not belong in the wordlist.
+    private func refreshCompletions() {
+        let before = textDocumentProxy.documentContextBeforeInput ?? ""
+        let typed = String(before.reversed().prefix { $0.isLetter }.reversed())
+        barToken += 1
+        let token = barToken
+        guard !typed.isEmpty else {
+            completingPrefix = nil
+            showSuggestions([])
+            guard before.hasSuffix(" ") else { return }
+            let finished = String(before.dropLast().reversed().prefix { $0.isLetter }.reversed())
+            guard Self.saveable(finished) else { return }
+            swipeInput.complete(finished, limit: 0) { [weak self] _, known in
+                guard let self, self.barToken == token, !known else { return }
+                self.showSuggestions(["", "", Self.savePrefix + finished], current: nil)
+            }
+            return
+        }
+        completingPrefix = typed
+        swipeInput.complete(typed) { [weak self] words, known in
+            guard let self, self.barToken == token, self.completingPrefix == typed else { return }
+            let upper = typed.first?.isUppercase == true
+            var shown = words.map { upper ? $0.prefix(1).uppercased() + $0.dropFirst() : $0 }
+            if !known && Self.saveable(typed) {
+                shown = Array(shown.prefix(2))
+                while shown.count < 2 { shown.append("") }
+                shown.append(Self.savePrefix + typed)
+            }
+            self.showSuggestions(shown, current: nil)
+        }
+    }
+
+    private var barToken = 0
+    fileprivate static let savePrefix = "＋ "
+
+    private static func saveable(_ word: String) -> Bool {
+        word.count >= 3 && word.first?.isLowercase == true && SwipeDictionary.keys(of: word) != nil
     }
 
     /// Shift used to arm once at load and never again, so everything after the
@@ -269,7 +497,10 @@ final class KeyboardViewController: UIInputViewController {
         guard shift != .locked else { return }
         let before = textDocumentProxy.documentContextBeforeInput ?? ""
         let trimmed = before.trimmingCharacters(in: .whitespaces)
-        let atStart = trimmed.isEmpty
+        // An EMPTY context is not proof of an empty field: right after our own
+        // edits some hosts briefly report nothing, and that armed shift in the
+        // middle of a word (`napiŠ`). Empty counts only when the field is.
+        let atStart = before.isEmpty ? !textDocumentProxy.hasText : trimmed.isEmpty
         let afterStop = trimmed.last.map { ".!?".contains($0) } ?? false
         // Only act on a real transition, or every keystroke rebuilds the view.
         let wanted: ShiftState = (atStart || (afterStop && before.hasSuffix(" ")))
@@ -426,21 +657,50 @@ extension KeyboardViewController: SwipeHost {
         ])
     }
 
-    fileprivate func showSuggestions(_ words: [String]) {
+    /// `current` is the index of the word now in the text, marked bold; nil
+    /// after a rejected swipe, when none of them is.
+    fileprivate func showSuggestions(_ words: [String], current: Int? = 0) {
         for (i, b) in suggestionButtons.enumerated() {
-            let word = i < words.count ? words[i] : nil
+            let word = i < words.count && !words[i].isEmpty ? words[i] : nil
             b.setTitle(word, for: .normal)
             b.isEnabled = word != nil
-            // The first one is what actually went in; marking it says which of
-            // the alternatives is currently in the text.
-            b.setTitleColor(i == 0 ? .label : .secondaryLabel, for: .normal)
-            b.titleLabel?.font = .systemFont(ofSize: 17, weight: i == 0 ? .semibold : .regular)
+            b.setTitleColor(i == current ? .label : .secondaryLabel, for: .normal)
+            b.titleLabel?.font = .systemFont(ofSize: 17, weight: i == current ? .semibold : .regular)
         }
     }
 
     @objc fileprivate func tapSuggestion(_ sender: UIButton) {
         guard let word = sender.title(for: .normal), !word.isEmpty else { return }
-        replaceLastSwipedWord(with: word)
+        if word.hasPrefix(Self.savePrefix) {
+            // Saves; the text stays exactly as typed.
+            let saved = String(word.dropFirst(Self.savePrefix.count))
+            swipeInput.addUserWord(saved)
+            sender.setTitle("✓ " + saved, for: .normal)
+            sender.isEnabled = false
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            return
+        }
+        if let typed = completingPrefix {
+            // Replace the partly typed word and treat the result like a swipe:
+            // space owed before the next word, backspace takes it whole.
+            completingPrefix = nil
+            for _ in 0..<typed.count { textDocumentProxy.deleteBackward() }
+            textDocumentProxy.insertText(word)
+            lastSwipedWord = word
+            swipeSuffix = ""
+            swipeCommittedAt = Date()
+            pendingSpace = true
+            lastCandidates = []
+            swipeInput.forgetSample()
+            showSuggestions([word])
+            return
+        }
+        if lastSwipedWord == nil {
+            // After a rejected swipe nothing is in the text to replace.
+            commitSwipe(word)
+        } else {
+            replaceLastSwipedWord(with: word)
+        }
         // The tapped word becomes the committed one, so the bar re-marks it.
         var words = suggestionButtons.compactMap { $0.title(for: .normal) }
         if let at = words.firstIndex(of: word) {
@@ -454,25 +714,29 @@ extension KeyboardViewController: SwipeHost {
     fileprivate func commitSwipe(_ word: String) {
         let cased = isUppercase ? word.prefix(1).uppercased() + word.dropFirst() : word
         let before = textDocumentProxy.documentContextBeforeInput ?? ""
-        if let last = before.last, !last.isWhitespace {
-            textDocumentProxy.insertText(" ")
-        }
-        // The trailing space is what makes swiping continuous - without it the
-        // next gesture would run into the previous word.
-        textDocumentProxy.insertText(cased + " ")
+        let after = textDocumentProxy.documentContextAfterInput ?? ""
+        let lead = pendingSpace
+            || (before.last.map { !$0.isWhitespace && !Self.openers.contains($0) } ?? false)
+        // Swiped into the middle of text, right before a word: bring the space
+        // after it too, or it glues on (`Dobramožlivost`).
+        let trail = after.first.map { $0.isLetter || $0.isNumber } ?? false
+        swipeSuffix = trail ? " " : ""
+        textDocumentProxy.insertText((lead ? " " : "") + cased + swipeSuffix)
         lastSwipedWord = cased
+        swipeCommittedAt = Date()
+        pendingSpace = !trail
         if shift == .on { shift = .off; refreshTitles() }
     }
 
     fileprivate func replaceLastSwipedWord(with word: String) {
         guard let previous = lastSwipedWord else { return }
-        // One extra for the space `commitSwipe` added.
-        for _ in 0..<(previous.count + 1) { textDocumentProxy.deleteBackward() }
-        let cased = previous.first?.isUppercase == true
-            ? word.prefix(1).uppercased() + word.dropFirst()
-            : word
-        textDocumentProxy.insertText(cased + " ")
-        lastSwipedWord = cased
+        for _ in 0..<(previous.count + swipeSuffix.count) { textDocumentProxy.deleteBackward() }
+        // Exactly as tapped. Copying the old word's capital here is why
+        // tapping `dobra` under a wrongly capitalised `Dobra` changed nothing;
+        // the bar already shows the candidates in the case they went in.
+        textDocumentProxy.insertText(word + swipeSuffix)
+        lastSwipedWord = word
+        pendingSpace = swipeSuffix.isEmpty
     }
 
     // MARK: SwipeHost
@@ -503,13 +767,45 @@ extension KeyboardViewController: SwipeHost {
         return (centres, width)
     }
 
+    func swipeWillDecode() {
+        // Two swipes in a row: the first word was kept.
+        if let kept = lastSwipedWord { swipeInput.learn(from: kept) }
+        decoding += 1
+        // Never strand the keys: if a decode somehow never reports back, let
+        // them through after a second anyway.
+        let mine = decoding
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self, self.decoding == mine else { return }
+            self.decoding = 0
+            self.flushQueuedKeys()
+        }
+    }
+
+    private func flushQueuedKeys() {
+        let keys = queuedKeys
+        queuedKeys = []
+        keys.forEach { $0() }
+    }
+
     func swipeDidFinish(candidates: [String]) {
+        decoding = max(0, decoding - 1)
+        defer { if decoding == 0 { flushQueuedKeys() } }
         guard let best = candidates.first else {
             showSuggestions([])
             return
         }
+        completingPrefix = nil
         commitSwipe(best)
-        showSuggestions(candidates)
+        // Show the candidates in the case the word went in, so the bar and the
+        // text agree and a tap puts in exactly what it shows.
+        let upper = lastSwipedWord?.first?.isUppercase == true
+        var shown: [String] = []
+        for c in candidates {
+            let w = upper ? c.prefix(1).uppercased() + c.dropFirst() : c
+            if !shown.contains(w) { shown.append(w) }
+        }
+        lastCandidates = shown
+        showSuggestions(shown)
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 }
