@@ -51,7 +51,7 @@ struct SwipeDecoder {
     /// like a fairly common word - around `kolega` - because adding one is a
     /// deliberate act; it should win its shape, not every shape.
     var userWords: [(word: String, keys: [UInt8])] = []
-    private static let userWordFreq: Double = 140
+    static let userWordFreq: Double = 140
 
     func decode(path rawPath: [CGPoint], limit: Int = 4) -> [Candidate] {
         guard keyWidth > 0, rawPath.count >= 2 else { return [] }
@@ -139,10 +139,16 @@ struct SwipeDecoder {
                 ? userWords[-1 - hit.offset].word
                 : dictionary.word(at: hit.offset, length: hit.length)
             guard seen.insert(word).inserted else { continue }
-            out.append(Candidate(word: word, score: hit.score))
-            if out.count == limit { break }
+            out.append(Candidate(word: word, score: hit.score + Self.acronymPenalty(word)))
         }
-        return out
+        // `SSSR` kept beating `se`: an acronym has the frequency of a word but
+        // is almost never what a swipe meant. It still wins a clearly better fit.
+        out.sort { $0.score < $1.score }
+        return Array(out.prefix(limit))
+    }
+
+    static func acronymPenalty(_ word: String) -> Double {
+        word.filter(\.isUppercase).count >= 2 ? 0.6 : 0
     }
 
     // MARK: - Geometry

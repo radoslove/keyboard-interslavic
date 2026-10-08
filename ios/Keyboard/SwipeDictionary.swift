@@ -113,14 +113,19 @@ final class SwipeDictionary {
     }
 
     /// Whether this exact form (ignoring case) is in the wordlist.
-    func contains(_ word: String) -> Bool {
-        guard let k = Self.keys(of: word), let first = k.first, let last = k.last else { return false }
+    func contains(_ word: String) -> Bool { frequency(of: word) != nil }
+
+    /// The frequency byte of this exact form (ignoring case), nil if absent.
+    func frequency(of word: String) -> UInt8? {
+        guard let k = Self.keys(of: word), let first = k.first, let last = k.last else { return nil }
         let lower = word.lowercased()
-        var found = false
+        var found: UInt8?
         forEachEntry(first: first, last: last) { e in
-            guard !found, e.keys.count == k.count else { return }
+            guard e.keys.count == k.count else { return }
             for i in 0..<k.count where Int(e.keys[i]) != k[i] { return }
-            if self.word(at: e.wordOffset, length: e.wordLength).lowercased() == lower { found = true }
+            if self.word(at: e.wordOffset, length: e.wordLength).lowercased() == lower {
+                found = max(found ?? 0, e.freq)
+            }
         }
         return found
     }

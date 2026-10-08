@@ -130,6 +130,8 @@ final class KeyboardViewController: UIInputViewController {
 
         // The third letter row carries shift and backspace on either side.
         let isLastLetterRow = !showingNumeric && chars == Layout.letterRows[2]
+        // The numeric layer had no backspace at all; its last row gets one too.
+        let isLastRow = row == 2
         // Shift and backspace are 1.5 keys wide here, as on the system
         // keyboard: 7 letters + 2 x 1.5 = the 10 keys of the top row, so the
         // letters keep the same width (swipe geometry depends on it). The
@@ -147,12 +149,14 @@ final class KeyboardViewController: UIInputViewController {
             b.tag = row                      // which row a key sits in decides
             letterButtons.append(b)          // where its popup can go
             stack.addArrangedSubview(b)
-            if isLastLetterRow {
+            if !showingNumeric, let digit = Layout.topRowDigits[ch] { addHint(digit, to: b) }
+            if isLastRow {
                 if let f = first { b.widthAnchor.constraint(equalTo: f.widthAnchor).isActive = true }
                 else { first = b }
             }
         }
-        if isLastLetterRow {
+        if isLastRow {
+            stack.distribution = .fill
             let back = styledKey("⌫")
             back.backgroundColor = .tertiarySystemFill
             back.addTarget(self, action: #selector(backspaceDown), for: .touchDown)
@@ -191,9 +195,25 @@ final class KeyboardViewController: UIInputViewController {
             stack.addArrangedSubview(globe)
         }
 
-        let space = functionKey(" ", action: #selector(tapSpace))
+        // The comma is the most used mark there is; it was a longpress on the
+        // period, at the far end of the popup. Now a key, left of space.
+        if !showingNumeric {
+            let comma = characterKey(",")
+            comma.tag = 3
+            comma.widthAnchor.constraint(equalToConstant: 40).isActive = true
+            stack.addArrangedSubview(comma)
+        }
+
+        // Space fires on touch DOWN, like backspace: on lift, a thumb that
+        // slid a little lost the press ("space sometimes takes two taps").
+        let space = styledKey(" ")
         space.backgroundColor = .systemBackground
+        space.addTarget(self, action: #selector(tapSpace), for: .touchDown)
+        space.addTarget(self, action: #selector(keyDown(_:)), for: .touchDown)
+        space.addTarget(self, action: #selector(keyUp(_:)),
+                        for: [.touchUpInside, .touchUpOutside, .touchCancel])
         stack.addArrangedSubview(space)
+        bottomRowView = stack
 
         if !showingNumeric {
             let period = characterKey(".")
@@ -209,6 +229,23 @@ final class KeyboardViewController: UIInputViewController {
     }
 
     // MARK: - Keys
+
+    /// Small digit in the corner of a top-row key; holding the key gives it.
+    private func addHint(_ digit: Character, to key: UIButton) {
+        let hint = UILabel()
+        hint.text = String(digit)
+        hint.font = .systemFont(ofSize: 10)
+        hint.textColor = .secondaryLabel
+        hint.isUserInteractionEnabled = false
+        hint.translatesAutoresizingMaskIntoConstraints = false
+        key.addSubview(hint)
+        NSLayoutConstraint.activate([
+            hint.topAnchor.constraint(equalTo: key.topAnchor, constant: 2),
+            hint.trailingAnchor.constraint(equalTo: key.trailingAnchor, constant: -3),
+        ])
+    }
+
+    private var bottomRowView: UIView?
 
     private func styledKey(_ title: String) -> UIButton {
         let b = UIButton(type: .system)
@@ -410,6 +447,7 @@ final class KeyboardViewController: UIInputViewController {
         lastSwipedWord = nil
         swipeSuffix = ""
         pendingSpace = false
+        tappedWord = tappedWord.map { String($0.dropLast()) }
         textDocumentProxy.deleteBackward()
         refreshCompletions()
     }
@@ -437,12 +475,30 @@ final class KeyboardViewController: UIInputViewController {
             if ch.isLetter && !insideWipeWindow { textDocumentProxy.insertText(" ") }
             pendingSpace = false
         }
+        // Track a word typed letter by letter: that is the sign a swipe did
+        // not find it, and the only case where `＋` is offered for a word the
+        // list already has.
+        let extendsSwipe = lastSwipedWord != nil && ch.isLetter && insideWipeWindow
+        if ch.isLetter && !extendsSwipe {
+            let prev = textDocumentProxy.documentContextBeforeInput?.last
+            tappedWord = (prev?.isLetter == true) ? tappedWord.map { $0 + String(ch) } : String(ch)
+        } else if ch.isLetter {
+            tappedWord = nil
+        } else {
+            lastTappedWord = tappedWord
+            tappedWord = nil
+        }
         lastSwipedWord = nil
         swipeSuffix = ""
         textDocumentProxy.insertText(String(ch))
         rearmShiftIfSentenceStart()
         refreshCompletions()
     }
+
+    /// The word being typed by taps, nil once a swipe or a suggestion touched it.
+    private var tappedWord: String?
+    /// The tapped word just finished by a space or punctuation.
+    private var lastTappedWord: String?
 
     /// The bar while typing by taps: completions of the word under the cursor.
     /// Before this the bar kept the LAST SWIPE's candidates, which read as
@@ -463,18 +519,21 @@ final class KeyboardViewController: UIInputViewController {
             guard before.hasSuffix(" ") else { return }
             let finished = String(before.dropLast().reversed().prefix { $0.isLetter }.reversed())
             guard Self.saveable(finished) else { return }
-            swipeInput.complete(finished, limit: 0) { [weak self] _, known in
-                guard let self, self.barToken == token, !known else { return }
+            let tapped = lastTappedWord
+            swipeInput.complete(finished, limit: 0) { [weak self] _, known, rare in
+                guard let self, self.barToken == token,
+                      !known || (rare && tapped == finished) else { return }
                 self.showSuggestions(["", "", Self.savePrefix + finished], current: nil)
             }
             return
         }
         completingPrefix = typed
-        swipeInput.complete(typed) { [weak self] words, known in
+        let tapped = tappedWord
+        swipeInput.complete(typed) { [weak self] words, known, rare in
             guard let self, self.barToken == token, self.completingPrefix == typed else { return }
             let upper = typed.first?.isUppercase == true
             var shown = words.map { upper ? $0.prefix(1).uppercased() + $0.dropFirst() : $0 }
-            if !known && Self.saveable(typed) {
+            if (!known || (rare && tapped == typed)) && Self.saveable(typed) {
                 shown = Array(shown.prefix(2))
                 while shown.count < 2 { shown.append("") }
                 shown.append(Self.savePrefix + typed)
@@ -493,9 +552,18 @@ final class KeyboardViewController: UIInputViewController {
     /// Shift used to arm once at load and never again, so everything after the
     /// first word was lowercase forever. Re-arm at the start of a sentence -
     /// but never while Caps Lock is deliberately on.
-    private func rearmShiftIfSentenceStart() {
+    private func rearmShiftIfSentenceStart(confirmed: Bool = false) {
         guard shift != .locked else { return }
         let before = textDocumentProxy.documentContextBeforeInput ?? ""
+        // `Probne versije SŠA`: shift came on mid-line after a cursor move.
+        // Right after one, the proxy can report no context AND no text for a
+        // moment. Never decide from that - look again once it has settled.
+        if before.isEmpty && !confirmed {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                self?.rearmShiftIfSentenceStart(confirmed: true)
+            }
+            return
+        }
         let trimmed = before.trimmingCharacters(in: .whitespaces)
         // An EMPTY context is not proof of an empty field: right after our own
         // edits some hosts briefly report nothing, and that armed shift in the
@@ -506,6 +574,11 @@ final class KeyboardViewController: UIInputViewController {
         let wanted: ShiftState = (atStart || (afterStop && before.hasSuffix(" ")))
             ? .on : .off
         if wanted != shift {
+            #if DEBUG
+            // Why shift switched: the tail the proxy reported at that moment.
+            GestureFile.note("shift", ["on": wanted == .on, "ctx": String(before.suffix(16)),
+                                       "hasText": textDocumentProxy.hasText, "confirmed": confirmed])
+            #endif
             shift = wanted
             refreshTitles()
             rowsStack?.arrangedSubviews.forEach { row in
@@ -684,6 +757,7 @@ extension KeyboardViewController: SwipeHost {
             // Replace the partly typed word and treat the result like a swipe:
             // space owed before the next word, backspace takes it whole.
             completingPrefix = nil
+            tappedWord = nil
             for _ in 0..<typed.count { textDocumentProxy.deleteBackward() }
             textDocumentProxy.insertText(word)
             lastSwipedWord = word
@@ -712,6 +786,7 @@ extension KeyboardViewController: SwipeHost {
 
     /// Puts a decoded word in, spacing it from whatever came before.
     fileprivate func commitSwipe(_ word: String) {
+        tappedWord = nil
         let cased = isUppercase ? word.prefix(1).uppercased() + word.dropFirst() : word
         let before = textDocumentProxy.documentContextBeforeInput ?? ""
         let after = textDocumentProxy.documentContextAfterInput ?? ""
@@ -742,6 +817,13 @@ extension KeyboardViewController: SwipeHost {
     // MARK: SwipeHost
 
     var swipeSurface: UIView { view }
+
+    /// A gesture may not START on the bottom row: a thumb sliding a little on
+    /// space was taken for a swipe and the space was cancelled.
+    func swipeCanStart(at point: CGPoint) -> Bool {
+        guard let bottom = bottomRowView else { return true }
+        return point.y < bottom.convert(bottom.bounds, to: view).minY - 3
+    }
 
     var swipeCanBegin: Bool {
         // No letters to cross on the numeric layer, and the longpress popup

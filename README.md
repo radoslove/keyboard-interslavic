@@ -1,8 +1,7 @@
 # Medžuslovjanske tipkovnici · Interslavic Keyboards
 
-**Prvy nabor tipkovnic za medžuslovjansky jezyk — i prvy slovnik za pisanje gestami.**
-*The first keyboard set for the Interslavic language — and the first swipe-typing
-dictionary for it.*
+**Klaviatury za medžuslovjansky jezyk — i slovnik za pisanje gestami.**
+*Keyboards for the Interslavic language — and a swipe-typing dictionary for it.*
 
 Tu možeš daunlodovati i instalovati tipkovnice (klaviatury) za medžuslovjansky jezyk na
 Windows, Android, iPhone/iPad, macOS i Linux. Slovnik za pisanje gestami imaje
@@ -10,9 +9,6 @@ Windows, Android, iPhone/iPad, macOS i Linux. Slovnik za pisanje gestami imaje
 *Here you can download and install Interslavic keyboards for Windows, Android,
 iPhone/iPad, macOS and Linux. The swipe-typing dictionary carries **253 273 words** —
 inflected forms, not just lemmas.*
-
-Nikto togo dosej ne napravil.
-*Nobody had built this before.*
 
 ---
 

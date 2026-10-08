@@ -21,6 +21,7 @@ protocol SwipeHost: AnyObject {
     /// False while something else owns the finger - the longpress popup, or a
     /// layer without letters.
     var swipeCanBegin: Bool { get }
+    func swipeCanStart(at point: CGPoint) -> Bool
     /// The finger lifted and decoding started; keys pressed from now until
     /// `swipeDidFinish` must wait, or they land BEFORE the word.
     func swipeWillDecode()
@@ -175,6 +176,11 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         host?.swipeCanBegin ?? false
     }
 
+    func gestureRecognizer(_ g: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard let host else { return false }
+        return host.swipeCanStart(at: touch.location(in: host.swipeSurface))
+    }
+
     func gestureRecognizer(_ g: UIGestureRecognizer,
                            shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer)
     -> Bool {
@@ -276,16 +282,21 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     /// `known` says whether `typed` itself is a word (wordlist or user's own),
     /// which decides whether the bar offers `＋` to save it.
     func complete(_ typed: String, limit: Int = 3,
-                  _ done: @escaping (_ words: [String], _ known: Bool) -> Void) {
-        guard let dictionary else { done([], true); return }
+                  _ done: @escaping (_ words: [String], _ known: Bool, _ rare: Bool) -> Void) {
+        guard let dictionary else { done([], true, false); return }
         let lower = typed.lowercased()
         let folded = lower.folding(options: .diacriticInsensitive, locale: nil)
-        guard let keys = SwipeDictionary.keys(of: lower) else { done([], true); return }
+        guard let keys = SwipeDictionary.keys(of: lower) else { done([], true, false); return }
         let exact = lower != folded
         let mine = userWords
         queue.async {
             var out: [String] = []
-            let known = mine.contains(lower) || dictionary.contains(lower)
+            // `rare`: in the list but ranked below the user's own words
+            // (`pisanja`). The bar may offer `＋` for it to make it swipeable.
+            let freq = dictionary.frequency(of: lower)
+            let known = mine.contains(lower) || freq != nil
+            let rare = !mine.contains(lower)
+                && (freq.map { Double($0) < SwipeDecoder.userWordFreq } ?? false)
             // The user's own words first: they were added because they are used.
             for w in mine where w.hasPrefix(lower) && w != lower && out.count < limit {
                 out.append(w)
@@ -297,7 +308,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
                 out.append(w)
                 if out.count == limit { break }
             }
-            DispatchQueue.main.async { done(out, known) }
+            DispatchQueue.main.async { done(out, known, rare) }
         }
     }
 
@@ -346,6 +357,20 @@ enum GestureFile {
             "words": words,
             "lift": lift,
         ]
+        write(row)
+    }
+
+    /// Any other debug event, same file, marked by `kind`.
+    static func note(_ kind: String, _ fields: [String: Any]) {
+        var row = fields
+        row["kind"] = kind
+        row["t"] = Date().timeIntervalSince1970
+        write(row)
+    }
+
+    private static func write(_ row: [String: Any]) {
+        guard let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        else { return }
         guard var line = try? JSONSerialization.data(withJSONObject: row) else { return }
         line.append(0x0A)
         let url = dir.appendingPathComponent("gestures.jsonl")
