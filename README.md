@@ -332,6 +332,21 @@ rather than the promise.*
 
 ---
 
+## Blagodarjenje · Thanks
+
+Adam Gola i Roberto Lombino jr. sut sdělali razloženja klaviatury za Windows uže v 2013
+godu, davno prěd tym projektom, i oficialny veb-sajt medžuslovjanskogo jezyka ješče
+ukazyvaje na njih. Toj projekt jest izrasl iz jihnoj raboty: naše razloženje za Windows
+jest osnovano na skeletu jihnogo `KBDMSLAT.klc`. Jihne razloženja:
+[tyflonet.com/siciliano/klaviatury](https://tyflonet.com/siciliano/klaviatury/). Hvala vam!
+*Adam Gola and Roberto Lombino jr. made Interslavic keyboard layouts for Windows back in
+2013, long before this project, and the official Interslavic website still links to them.
+This project grew out of their work: our Windows layout is built on the skeleton of their
+`KBDMSLAT.klc`. Their layouts:
+[tyflonet.com/siciliano/klaviatury](https://tyflonet.com/siciliano/klaviatury/). Thank you!*
+
+---
+
 ## Licencije · Licenses
 
 Kod i vlastne razloženja klaviatury pod **MIT.** *Code and original layouts under **MIT.***
