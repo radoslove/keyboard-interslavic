@@ -26,7 +26,7 @@ val diagnosticsProps = Properties().apply {
 // and TEST_BASE when a release is cut. Release builds do not use this, so
 // F-Droid's reproducible build is unaffected.
 val TEST_BASE = "3.5"
-val TEST_BUILD = 2
+val TEST_BUILD = 3
 val testVersion = "$TEST_BASE.$TEST_BUILD"
 
 fun javaString(value: String): String = "\"" + value

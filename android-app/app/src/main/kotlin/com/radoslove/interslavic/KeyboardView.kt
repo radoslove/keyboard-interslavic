@@ -122,17 +122,18 @@ class KeyboardView(
     /**
      * When the glide that armed [swipeJustCommitted] landed.
      *
-     * A backspace straight after a glide means "that wasn't the word I wanted"
-     * and wipes the whole word - but only for a moment. Once the eye has read
-     * the word and the thumb has come back to fix an ENDING (`pišem` ->
-     * `pišeš`), the same press must delete one letter, because in Interslavic
-     * a nearly-right guess is the common case, not the edge case: the stem is
-     * right and only the inflection is off. So the whole-word wipe lives
-     * inside a short window after the commit, and on the FIRST press only -
-     * the deliberate way to take a whole word is holding backspace.
+     * Used only to tell a letter that EXTENDS the glided word (`pisem` + `s`)
+     * from one that starts the next word. Backspace no longer looks at it: the
+     * first press after a glide takes the word whatever the delay, and an
+     * ending is fixed by holding backspace (owner, 2026-10-08).
      */
     private var swipeCommitAtMs = 0L
     private val SWIPE_WIPE_WINDOW_MS = 1200L
+    /** What the last whole-word wipe took out; read by a held backspace. */
+    private var lastWipeRemoved = ""
+    /** Set when a backspace press began with a wipe: holding trims instead. */
+    private var trimAfterWipe = ""
+    private var trimming = false
 
     /**
      * One-shot undo for a whole-word delete (glide-reject or held backspace).
@@ -464,7 +465,10 @@ class KeyboardView(
     }
 
     /** Backspace with press-and-hold: one tap deletes normally; holding deletes
-     *  word by word, a little faster the longer you hold (never whole lines). */
+     *  word by word, a little faster the longer you hold (never whole lines).
+     *  A hold that STARTED by wiping a glided word trims it instead: the word
+     *  comes back one letter short and loses letters while held - the way to
+     *  fix an ending without first tapping space (owner, 2026-10-08). */
     private fun backspaceKey(): TextView {
         val tv = baseKey("⌫", 1.5f)
         // The view's own long-press machinery competes with ours for the same
@@ -472,6 +476,27 @@ class KeyboardView(
         tv.isLongClickable = false
         val repeat = object : Runnable {
             override fun run() {
+                if (trimAfterWipe.isNotEmpty()) {
+                    val back = trimAfterWipe.trimEnd().dropLast(1)
+                    trimAfterWipe = ""
+                    trimming = true
+                    val ic = service.currentInputConnection
+                    if (ic != null && back.isNotEmpty()) {
+                        ic.commitText(back, 1)
+                        afterSelfEdit(back.length)
+                    }
+                    clearUndo()
+                    refreshSuggestions()
+                    feedback()
+                    flickHandler.postDelayed(this, 300L)
+                    return
+                }
+                if (trimming) {
+                    // Letters, slowly enough to stop on the one that is wrong.
+                    backspace()
+                    flickHandler.postDelayed(this, 180L)
+                    return
+                }
                 // deleteWordBackward decides whether it is safe to carry on: it
                 // refuses to cross a line break, and stops the repeat there.
                 val more = deleteWordBackward()
@@ -495,7 +520,10 @@ class KeyboardView(
                     // That is why holding backspace appeared to do nothing.
                     (tv.parent as? android.view.ViewGroup)
                         ?.requestDisallowInterceptTouchEvent(true)
+                    lastWipeRemoved = ""
+                    trimming = false
                     backspace()                       // a tap is still one character
+                    trimAfterWipe = lastWipeRemoved
                     backspaceInterval = 260L
                     flickHandler.postDelayed(repeat, 500L)   // then whole words; 350 ms fired on ordinary taps
                     true
@@ -508,6 +536,8 @@ class KeyboardView(
                     (tv.parent as? android.view.ViewGroup)
                         ?.requestDisallowInterceptTouchEvent(false)
                     flickHandler.removeCallbacks(repeat)
+                    trimAfterWipe = ""
+                    trimming = false
                     true
                 }
                 else -> false
@@ -751,22 +781,19 @@ class KeyboardView(
         // wanted" — wipe the WHOLE word in one press so the user can re-swipe,
         // instead of tapping backspace letter by letter.
         //
-        // IMMEDIATELY is the whole point, and it used to be missing: the flag
-        // survived until some other key was pressed, so coming back to a word
-        // minutes later to fix its ENDING emptied the field instead. The wipe
-        // now only answers a press inside [SWIPE_WIPE_WINDOW_MS] of the commit,
-        // and only the first one - after that backspace deletes one letter,
-        // which is what fixing an inflection needs. Taking a whole word
-        // deliberately is still one gesture away: hold backspace.
-        val wipeWindowOpen =
-            SystemClock.uptimeMillis() - swipeCommitAtMs <= SWIPE_WIPE_WINDOW_MS
-        if (swipeJustCommitted && lastSwipeWord.isNotEmpty() && wipeWindowOpen) {
+        // No time limit (owner, 2026-10-08: "nobody can be made to wait"):
+        // the first press after a glide always takes the word, however long
+        // the eye took to read it. Fixing only the ENDING is a hold instead -
+        // see backspaceKey: the word comes back one letter short and trims.
+        // Any other key or a cursor jump still closes the glide state.
+        if (swipeJustCommitted && lastSwipeWord.isNotEmpty()) {
             // Classic mode put a space after the word; wipe that with it.
             val n = lastSwipeWord.length + if (smartSpace) 0 else 1
             // Read it before it is gone: undo restores the exact characters.
             val removed = ic.getTextBeforeCursor(n, 0)?.toString().orEmpty()
             ic.deleteSurroundingText(n, 0)
             afterSelfEdit(-n)
+            lastWipeRemoved = removed
             pushUndo(removed, arm = true, restoreRank = true)
             // Deleting it whole is a verdict on the guess, so take back the
             // count the commit just added - otherwise being wrong trains the
