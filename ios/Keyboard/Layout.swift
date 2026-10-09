@@ -20,7 +20,15 @@ enum Layout {
     /// Punctuation our MS texts actually use, held on the `.` key. The comma
     /// used to lead this list, which put the most used mark at the far end of
     /// a popup that opens leftward from the right edge - it has its own key now.
-    static let periodAccents: [Character] = ["?", "!", "„", "”", "'", ":", ";"]
+    /// The frequent marks live behind the three punctuation keys of the
+    /// letter layer, so `123` is needed only for the rare ones.
+    static let periodAccents: [Character] = ["…", "!", "„", "”", "\"", "'"]
+
+    /// Held on `,`: the rest of the sentence punctuation.
+    static let commaAccents: [Character] = [";", ":", "-", "–", "(", ")"]
+
+    /// `?` has its own key next to the period; `!` waits behind it.
+    static let questionAccents: [Character] = ["!", "¿", "¡"]
 
     /// Held on keys of the numeric layer; the layer itself keeps only what is
     /// used often enough to deserve a key.
@@ -33,10 +41,6 @@ enum Layout {
         ")": ["]", "}", ">"],
         "/": ["\\", "|"],
     ]
-
-    /// Digits held on the top letter row, shown small in the key corner.
-    static let topRowDigits: [Character: Character] = Dictionary(
-        uniqueKeysWithValues: zip("qwertyuiop", "1234567890"))
 
     static let letterRows: [[Character]] = [
         Array("qwertyuiop"),
@@ -52,16 +56,25 @@ enum Layout {
         Array(".,?!'"),
     ]
 
+    /// Second symbol page, `#+=` on the numeric layer - as on iOS.
+    static let symbolRows: [[Character]] = [
+        Array("[]{}#%^*+="),
+        Array("_\\|~<>€£¥•"),
+        Array(".,?!'"),
+    ]
+
     /// Longpress variants for any key, or nil if the key has none.
-    static func variants(for key: Character, uppercase: Bool) -> [Character]? {
+    static func variants(for key: Character, uppercase: Bool,
+                         numericLayer: Bool = false) -> [Character]? {
         let lower = Character(key.lowercased())
         var out: [Character] = []
         if let accent = accents[lower] {
             out.append(uppercase ? Character(accent.uppercased()) : accent)
         }
-        if let digit = topRowDigits[lower] { out.append(digit) }
         if !out.isEmpty { return out }
         if key == "." { return periodAccents }
+        if key == "," && !numericLayer { return commaAccents }
+        if key == "?" && !numericLayer { return questionAccents }
         return numericAccents[key]
     }
 }

@@ -17,6 +17,8 @@ final class KeyboardViewController: UIInputViewController {
 
     private var shift: ShiftState = .on          // sentence start
     private var showingNumeric = false
+    /// The `#+=` page of the numeric layer.
+    private var showingSymbols = false
     private var rowsStack: UIStackView!
     private var letterButtons: [UIButton] = []
     private var popup: UIView?
@@ -99,8 +101,14 @@ final class KeyboardViewController: UIInputViewController {
         rowsStack?.removeFromSuperview()
         letterButtons.removeAll()
 
-        let rows = showingNumeric ? Layout.numericRows : Layout.letterRows
+        let rows = showingNumeric
+            ? (showingSymbols ? Layout.symbolRows : Layout.numericRows)
+            : Layout.letterRows
         var rowViews: [UIView] = rows.enumerated().map { characterRow($1, row: $0) }
+        topLetterRowView = showingNumeric ? nil : rowViews.first
+        // No digit row above the letters (tried in 0.1.7): the host does not
+        // let the keyboard grow, so five rows squeezed every key. Digits live
+        // on `123` only.
         rowViews.append(bottomRow())
 
         let stack = UIStackView(arrangedSubviews: rowViews)
@@ -149,11 +157,15 @@ final class KeyboardViewController: UIInputViewController {
             b.tag = row                      // which row a key sits in decides
             letterButtons.append(b)          // where its popup can go
             stack.addArrangedSubview(b)
-            if !showingNumeric, let digit = Layout.topRowDigits[ch] { addHint(digit, to: b) }
             if isLastRow {
                 if let f = first { b.widthAnchor.constraint(equalTo: f.widthAnchor).isActive = true }
                 else { first = b }
             }
+        }
+        if isLastRow && showingNumeric {
+            let page = functionKey(showingSymbols ? "123" : "#+=", action: #selector(tapSymbols))
+            stack.insertArrangedSubview(page, at: 0)
+            wide.append(page)
         }
         if isLastRow {
             stack.distribution = .fill
@@ -185,7 +197,8 @@ final class KeyboardViewController: UIInputViewController {
 
         let layerKey = functionKey(showingNumeric ? "ABC" : "123",
                                    action: #selector(tapLayer))
-        layerKey.widthAnchor.constraint(equalToConstant: 46).isActive = true
+        // Narrower than before (46): it is pressed rarely, punctuation often.
+        layerKey.widthAnchor.constraint(equalToConstant: 40).isActive = true
         stack.addArrangedSubview(layerKey)
 
         // Apple requires a way off our keyboard when the system offers one.
@@ -200,7 +213,7 @@ final class KeyboardViewController: UIInputViewController {
         if !showingNumeric {
             let comma = characterKey(",")
             comma.tag = 3
-            comma.widthAnchor.constraint(equalToConstant: 40).isActive = true
+            comma.widthAnchor.constraint(equalToConstant: 34).isActive = true
             stack.addArrangedSubview(comma)
         }
 
@@ -218,34 +231,25 @@ final class KeyboardViewController: UIInputViewController {
         if !showingNumeric {
             let period = characterKey(".")
             period.tag = 3
-            period.widthAnchor.constraint(equalToConstant: 40).isActive = true
+            period.widthAnchor.constraint(equalToConstant: 34).isActive = true
             stack.addArrangedSubview(period)
+            // `?` on the letters too - space gave up the room for it.
+            let question = characterKey("?")
+            question.tag = 3
+            question.widthAnchor.constraint(equalToConstant: 34).isActive = true
+            stack.addArrangedSubview(question)
         }
 
         let ret = functionKey("⏎", action: #selector(tapReturn))
-        ret.widthAnchor.constraint(equalToConstant: 74).isActive = true
+        ret.widthAnchor.constraint(equalToConstant: 64).isActive = true
         stack.addArrangedSubview(ret)
         return stack
     }
 
     // MARK: - Keys
 
-    /// Small digit in the corner of a top-row key; holding the key gives it.
-    private func addHint(_ digit: Character, to key: UIButton) {
-        let hint = UILabel()
-        hint.text = String(digit)
-        hint.font = .systemFont(ofSize: 10)
-        hint.textColor = .secondaryLabel
-        hint.isUserInteractionEnabled = false
-        hint.translatesAutoresizingMaskIntoConstraints = false
-        key.addSubview(hint)
-        NSLayoutConstraint.activate([
-            hint.topAnchor.constraint(equalTo: key.topAnchor, constant: 2),
-            hint.trailingAnchor.constraint(equalTo: key.trailingAnchor, constant: -3),
-        ])
-    }
-
     private var bottomRowView: UIView?
+    private var topLetterRowView: UIView?
 
     private func styledKey(_ title: String) -> UIButton {
         let b = UIButton(type: .system)
@@ -270,7 +274,7 @@ final class KeyboardViewController: UIInputViewController {
         b.addTarget(self, action: #selector(keyDown(_:)), for: .touchDown)
         b.addTarget(self, action: #selector(keyUp(_:)),
                     for: [.touchUpInside, .touchUpOutside, .touchCancel])
-        if Layout.variants(for: ch, uppercase: false) != nil {
+        if Layout.variants(for: ch, uppercase: false, numericLayer: showingNumeric) != nil {
             let hold = UILongPressGestureRecognizer(target: self,
                                                     action: #selector(holdKey(_:)))
             hold.minimumPressDuration = 0.3
@@ -330,7 +334,8 @@ final class KeyboardViewController: UIInputViewController {
     @objc private func holdKey(_ g: UILongPressGestureRecognizer) {
         guard let key = g.view as? UIButton,
               let id = key.accessibilityIdentifier, let ch = id.first,
-              let variants = Layout.variants(for: ch, uppercase: isUppercase)
+              let variants = Layout.variants(for: ch, uppercase: isUppercase,
+                                             numericLayer: showingNumeric)
         else { return }
 
         switch g.state {
@@ -455,8 +460,14 @@ final class KeyboardViewController: UIInputViewController {
     @objc private func tapReturn() { insert("\n") }
     @objc private func tapNextKeyboard() { advanceToNextInputMode() }
 
+    @objc private func tapSymbols() {
+        showingSymbols.toggle()
+        buildKeyboard()
+    }
+
     @objc private func tapLayer() {
         showingNumeric.toggle()
+        showingSymbols = false
         showSuggestions([])
         buildKeyboard()
     }
@@ -822,6 +833,10 @@ extension KeyboardViewController: SwipeHost {
     /// space was taken for a swipe and the space was cancelled.
     func swipeCanStart(at point: CGPoint) -> Bool {
         guard let bottom = bottomRowView else { return true }
+        // Nor above the letters (the suggestion bar).
+        if let top = topLetterRowView, point.y < top.convert(top.bounds, to: view).minY - 3 {
+            return false
+        }
         return point.y < bottom.convert(bottom.bounds, to: view).minY - 3
     }
 
