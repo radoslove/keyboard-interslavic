@@ -159,7 +159,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         // Mapped, so this is cheap - but it is still file I/O and it still
         // happens while the user is looking at the keyboard.
         queue.async { [weak self] in
-            guard let url = Bundle.main.url(forResource: "isv_swipe",
+            guard let url = Bundle.main.url(forResource: Layout.language + "_swipe",
                                             withExtension: "bin") else {
                 swipeLog.error("isv-swipe: isv_swipe.bin NOT in bundle")
                 return
@@ -257,7 +257,8 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     func learn(from word: String) {
         guard let s = sample else { return }
         sample = nil
-        let folded = word.lowercased().folding(options: .diacriticInsensitive, locale: nil)
+        let folded = word.lowercased().replacingOccurrences(of: "ł", with: "l")
+            .folding(options: .diacriticInsensitive, locale: nil)
         guard folded.count >= 2,
               let a = folded.first?.asciiValue, let b = folded.last?.asciiValue,
               (97...122).contains(a), (97...122).contains(b), s.keyWidth > 0
@@ -285,7 +286,8 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
                   _ done: @escaping (_ words: [String], _ known: Bool, _ rare: Bool) -> Void) {
         guard let dictionary else { done([], true, false); return }
         let lower = typed.lowercased()
-        let folded = lower.folding(options: .diacriticInsensitive, locale: nil)
+        let folded = lower.replacingOccurrences(of: "ł", with: "l")
+            .folding(options: .diacriticInsensitive, locale: nil)
         guard let keys = SwipeDictionary.keys(of: lower) else { done([], true, false); return }
         let exact = lower != folded
         let mine = userWords

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Compile the wordlist into the binary the swipe decoder reads at runtime.
 
-    python3 build_swipe_dictionary.py
+    python3 build_swipe_dictionary.py          # isv
+    python3 build_swipe_dictionary.py pl       # the Polish keyboard
 
 Source is `dictionary/main_isv.combined` - the same 248 845 forms shipped to
 Android. Nothing is pruned. The 5.2 MB cut we made for Keyman in August was
@@ -42,14 +43,21 @@ import struct
 import sys
 from pathlib import Path
 
-SRC = Path("dictionary/main_isv.combined")
-OUT = Path("ios/Keyboard/Resources/isv_swipe.bin")
+LANG = sys.argv[1] if len(sys.argv) > 1 else "isv"
+SRC = Path(f"dictionary/main_{LANG}.combined")
+OUT = Path(f"ios/Keyboard/Resources/{LANG}_swipe.bin")
 
 # The four standard-orthography letters, mapped to the key they are held on.
 # HOUSE_STYLE §1: the extended alphabet does not exist here, so this is the
 # complete set - if that ever changes, this table and Layout.accents change
 # together.
 FOLD = {"č": "c", "š": "s", "ž": "z", "ě": "e"}
+if LANG == "pl":
+    # Polish letters on longpress of their base key, as on every Polish
+    # phone keyboard. `ł` is folded here explicitly: Unicode does not treat it
+    # as `l` with a diacritic, so no generic folding would.
+    FOLD = {"ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n",
+            "ó": "o", "ś": "s", "ź": "z", "ż": "z"}
 ALPHA = "abcdefghijklmnopqrstuvwxyz"
 INDEX = {c: i for i, c in enumerate(ALPHA)}
 

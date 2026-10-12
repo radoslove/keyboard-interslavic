@@ -211,6 +211,12 @@ final class KeyboardViewController: UIInputViewController {
         // The comma is the most used mark there is; it was a longpress on the
         // period, at the far end of the popup. Now a key, left of space.
         if !showingNumeric {
+            // The period sat right of space and caught presses meant for it
+            // (owner 2026-10-10); it moved to the far side of the comma.
+            let period = characterKey(".")
+            period.tag = 3
+            period.widthAnchor.constraint(equalToConstant: 34).isActive = true
+            stack.addArrangedSubview(period)
             let comma = characterKey(",")
             comma.tag = 3
             comma.widthAnchor.constraint(equalToConstant: 34).isActive = true
@@ -229,10 +235,6 @@ final class KeyboardViewController: UIInputViewController {
         bottomRowView = stack
 
         if !showingNumeric {
-            let period = characterKey(".")
-            period.tag = 3
-            period.widthAnchor.constraint(equalToConstant: 34).isActive = true
-            stack.addArrangedSubview(period)
             // `?` on the letters too - space gave up the room for it.
             let question = characterKey("?")
             question.tag = 3
@@ -579,7 +581,9 @@ final class KeyboardViewController: UIInputViewController {
         // An EMPTY context is not proof of an empty field: right after our own
         // edits some hosts briefly report nothing, and that armed shift in the
         // middle of a word (`napiŠ`). Empty counts only when the field is.
-        let atStart = before.isEmpty ? !textDocumentProxy.hasText : trimmed.isEmpty
+        // A new line starts a new sentence too (log 2026-10-10: ctx "\n", off).
+        let atStart = before.isEmpty ? !textDocumentProxy.hasText
+            : (trimmed.isEmpty || trimmed.last == "\n")
         let afterStop = trimmed.last.map { ".!?".contains($0) } ?? false
         // Only act on a real transition, or every keystroke rebuilds the view.
         let wanted: ShiftState = (atStart || (afterStop && before.hasSuffix(" ")))

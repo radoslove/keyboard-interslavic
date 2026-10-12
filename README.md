@@ -279,6 +279,17 @@ past what an iOS keyboard extension can hold — it would take the keyboard down
 Vocabulary specific to Interslavic is kept regardless of frequency, because the underlying
 corpus barely knows the words this project is about.*
 
+### Vlastna aplikacija za iPhone — probna versija · Own iPhone app — test build
+
+Bez API ot iOS jest možno pisati gestami vo vlastnoj aplikaciji, i taka aplikacija jest
+v izvoru: [`ios/`](ios/). V njej sut dvě tipkovnice — medžuslovjanska i poljska — i
+prěključiti možno s 🌐. Ona ne prosi „Full Access" i ničego ne posylaje. Ješče ne jest
+v App Store; do togo časa služi vyše opisany put črěz Keyman.
+*Without an iOS API, swipe typing is still possible in an app's own keyboard, and that app
+is in this repository: [`ios/`](ios/). It carries two keyboards — Interslavic and Polish —
+switched with 🌐. It does not ask for Full Access and sends nothing. It is not in the App
+Store yet; until then the Keyman route above stays.*
+
 ---
 
 ## Slova, ktorogo ne jest · Missing a word
@@ -360,6 +371,13 @@ Kod i vlastne razloženja klaviatury pod **MIT.** *Code and original layouts und
 - Slovnik: [`android-app/DICTIONARY_DATA.md`](android-app/DICTIONARY_DATA.md).
   *The dictionary data is not under MIT; see
   [`android-app/DICTIONARY_DATA.md`](android-app/DICTIONARY_DATA.md).*
+- Poljsky slovnik (`dictionary/main_pl.combined`, `ios/Keyboard/Resources/pl_swipe.bin`)
+  jest izvedeny iz [FrequencyWords](https://github.com/hermitdave/FrequencyWords)
+  (CC BY-SA 4.0) i [PoliMorf](https://zil.ipipan.waw.pl/PoliMorf) (BSD-2), zato jest pod
+  **CC BY-SA 4.0**, ne MIT. Gl. [`dictionary/sources_pl/README.md`](dictionary/sources_pl/README.md).
+  *The Polish wordlist is derived from FrequencyWords (CC BY-SA 4.0) and PoliMorf (BSD-2),
+  so it is under **CC BY-SA 4.0**, not MIT; see
+  [`dictionary/sources_pl/README.md`](dictionary/sources_pl/README.md).*
 
 Polny tekst: [`LICENSE`](LICENSE).
 *Full text: [`LICENSE`](LICENSE).*

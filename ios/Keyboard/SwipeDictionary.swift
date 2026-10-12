@@ -104,7 +104,9 @@ final class SwipeDictionary {
 
     /// Folded key indices of a word, or nil if it has a letter no key types.
     static func keys(of word: String) -> [Int]? {
-        let folded = word.lowercased().folding(options: .diacriticInsensitive, locale: nil)
+        // `ł` is not `l` plus a diacritic to Unicode, so folding leaves it.
+        let folded = word.lowercased().replacingOccurrences(of: "ł", with: "l")
+            .folding(options: .diacriticInsensitive, locale: nil)
         let keys = folded.unicodeScalars.compactMap { u -> Int? in
             let v = Int(u.value) - 97
             return (0..<26).contains(v) ? v : nil

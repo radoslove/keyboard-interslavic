@@ -22,3 +22,7 @@ dist/
 *.tar.gpg
 keystore.properties
 *.password.txt
+
+# Downloaded inputs of the Polish wordlist (large; see dictionary/sources_pl/README.md)
+/dictionary/sources_pl/*
+!/dictionary/sources_pl/README.md
