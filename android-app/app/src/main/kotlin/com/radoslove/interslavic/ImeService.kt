@@ -21,7 +21,19 @@ class ImeService : InputMethodService() {
 
     private var view: KeyboardView? = null
 
-    override fun onCreateInputView(): View = KeyboardView(this, this).also { view = it }
+    /** The script the current view was built with (key labels are drawn once). */
+    private var builtScript: Script.Mode? = null
+
+    override fun onCreateInputView(): View {
+        builtScript = Script.mode(this)
+        return KeyboardView(this, this).also { view = it }
+    }
+
+    /** A script chosen in the settings takes effect the next time the keyboard opens. */
+    override fun onStartInputView(info: android.view.inputmethod.EditorInfo?, restarting: Boolean) {
+        if (builtScript != null && Script.mode(this) != builtScript) setInputView(onCreateInputView())
+        super.onStartInputView(info, restarting)
+    }
 
     /**
      * The editor tells us where the cursor and selection are. This is the only

@@ -45,6 +45,33 @@ class SetupActivity : Activity() {
             "an upward flick; a suggestion bar from the dictionary."
         ))
 
+        // Script choice. Every MS word here is checked against medzuslove (izberi,
+        // ili, latinica, kirilica, glagolica); `pismo` is NOT in the dictionary, so
+        // the header names the three alphabets instead.
+        root.addView(header("Latinica, kirilica ili glagolica"))
+        root.addView(gloss(
+            "Latin, Cyrillic or Glagolitic: the keyboard writes in the chosen script. " +
+            "The letters stay on the same keys, and the dictionary and swipe work the same."
+        ))
+        root.addView(body("Izberi:"))
+        val scripts = listOf(
+            Script.Mode.LATIN to "Latinica (Latin)",
+            Script.Mode.CYRILLIC to "Kirilica (Cyrillic)",
+            Script.Mode.GLAGOLITIC to "Glagolica (Glagolitic)",
+        )
+        val current = Script.mode(this)
+        root.addView(android.widget.RadioGroup(this).apply {
+            for ((mode, label) in scripts) {
+                addView(android.widget.RadioButton(this@SetupActivity).apply {
+                    id = android.view.View.generateViewId()
+                    text = label
+                    textSize = 17f
+                    isChecked = mode == current
+                    setOnClickListener { Script.setMode(this@SetupActivity, mode) }
+                })
+            }
+        })
+
         root.addView(header("Sbiranje novyh slov (opcionalno)"))
         root.addView(gloss("Collecting new words (optional)"))
         root.addView(body(

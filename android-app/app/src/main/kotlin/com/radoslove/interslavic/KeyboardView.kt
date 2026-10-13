@@ -355,7 +355,15 @@ class KeyboardView(
         b.addView(functionKey("?123", 1.6f) { symbols = true; render() })
         b.addView(functionKey(",", 1f) { commit(",") })
         b.addView(functionKey("🌐", 1f) { service.switchIme() })
-        b.addView(functionKey("space", 4f) { commit(" ") })
+        // Script key: like 🌐 switches the keyboard, this switches the alphabet,
+        // Latin -> Cyrillic -> Glagolitic. It names the current alphabet; the
+        // key labels and everything written from now on follow it. Label: ABC / АБВ / ⰀⰁⰂ.
+        b.addView(functionKey(Script.keyLabel(context), 1.3f) {
+            Script.next(context)
+            render()
+            refreshSuggestions()
+        })
+        b.addView(functionKey("space", 2.7f) { commit(" ") })
         b.addView(functionKey(".", 1f) { commit(".") })
         b.addView(functionKey("⏎", 1.6f) { enter() })
         addView(b)
@@ -388,7 +396,8 @@ class KeyboardView(
     }
 
     private fun letterKey(ch: Char): TextView {
-        val label = if (shift) ch.uppercaseChar().toString() else ch.toString()
+        // Label in the chosen script; the key itself stays the Latin letter `ch`.
+        val label = Script.out(context, if (shift) ch.uppercaseChar().toString() else ch.toString())
         val tv = baseKey(label, 1f)
         // Whether this key has an accent/digraph at all (c/s/z/e, d/l/n).
         val hasAccent = Layout.longPress(ch, false) != null
@@ -400,7 +409,7 @@ class KeyboardView(
         val longPress = Runnable {
             val out = Layout.longPress(ch, shift)
             if (out != null) {
-                commit(out)
+                commit(Script.out(context, out))
                 handled = true
                 tv.isPressed = false
             }
@@ -432,9 +441,9 @@ class KeyboardView(
                         // Upward flick (mostly vertical) => the accent/digraph.
                         val flickUp = hasAccent && dy < -flickThreshold && abs(dy) >= abs(dx)
                         if (flickUp) {
-                            Layout.longPress(ch, shift)?.let { commit(it) }
+                            Layout.longPress(ch, shift)?.let { commit(Script.out(context, it)) }
                         } else {
-                            commit(if (shift) ch.uppercaseChar().toString() else ch.toString())
+                            commit(Script.out(context, if (shift) ch.uppercaseChar().toString() else ch.toString()))
                         }
                     }
                     true
@@ -581,7 +590,7 @@ class KeyboardView(
         // Adaptive ranking: count a hand-typed known word when a terminator lands.
         if (!c0.isLetter()) {
             val before = ic.getTextBeforeCursor(48, 0)?.toString().orEmpty()
-            val w = before.takeLastWhile { it.isLetter() }.lowercase()
+            val w = Script.toLatin(context, before.takeLastWhile { it.isLetter() }).lowercase()
             if (w.length >= 2 && Dictionary.contains(w)) {
                 Usage.record(context, w)
                 Popularity.record(context, w)
@@ -734,9 +743,10 @@ class KeyboardView(
             // The delete un-counted the word and demoted it. Taking the delete
             // back has to take that verdict back too, or an undo still teaches
             // the ranking that the word was wrong.
-            Usage.record(context, word)
-            Popularity.record(context, word)
-            rejectedStrikes.remove(word)
+            val latin = Script.toLatin(context, word)
+            Usage.record(context, latin)
+            Popularity.record(context, latin)
+            rejectedStrikes.remove(latin)
         }
         // It is a committed word again, exactly as it was before the delete.
         lastSwipeWord = word
@@ -798,9 +808,9 @@ class KeyboardView(
             // Deleting it whole is a verdict on the guess, so take back the
             // count the commit just added - otherwise being wrong trains the
             // ranking exactly as hard as being right.
-            Usage.unrecord(context, lastSwipeWord)
-            Popularity.unrecord(context, lastSwipeWord)
-            val rejected = lastSwipeWord
+            Usage.unrecord(context, Script.toLatin(context, lastSwipeWord))
+            Popularity.unrecord(context, Script.toLatin(context, lastSwipeWord))
+            val rejected = Script.toLatin(context, lastSwipeWord)
             GestureLog.resolve("deleted", null)
             rejectedStrikes[rejected] = (rejectedStrikes[rejected] ?: 0) + 1
             while (rejectedStrikes.size > REJECT_MEMORY) {
@@ -961,7 +971,8 @@ class KeyboardView(
         val first = if (canUndo()) { setUndoSlot(0); 1 } else 0
         if (word.isEmpty()) return
 
-        val lower = word.lowercase()
+        // `word` is what is on screen (any script); the dictionary is Latin.
+        val lower = Script.toLatin(context, word).lowercase()
         // Offered whenever the word is unknown, not only with collection on: the
         // chip now saves into the user's own dictionary first (UserWords), and
         // collection stays opt-in inside Collector.record.
@@ -981,9 +992,9 @@ class KeyboardView(
         val capital = word.first().isUpperCase()
         for (i in preds.indices) {
             val w = if (capital) preds[i].replaceFirstChar { it.uppercaseChar() } else preds[i]
-            setSlot(first + i, w, w, save = false)
+            setSlot(first + i, Script.out(context, w), w, save = false)
         }
-        if (canSave) setSlot(SLOTS - 1, "＋ $lower", lower, save = true)
+        if (canSave) setSlot(SLOTS - 1, "＋ ${Script.out(context, lower)}", lower, save = true)
     }
 
     /** The "put it back" chip: `↶ word`, amber, always the leftmost slot. */
@@ -1051,7 +1062,8 @@ class KeyboardView(
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (!replacing && (pendingSpace ||
                 (prev.isNotEmpty() && !prev[0].isWhitespace()))) " " else ""
-        val out = if (smartSpace) "$lead$word" else "$lead$word "
+        val shownWord = Script.out(context, word)
+        val out = if (smartSpace) "$lead$shownWord" else "$lead$shownWord "
         ic.commitText(out, 1)
         ic.endBatchEdit()
         afterSelfEdit(out.length - if (replacing) currentWord.length else 0)
@@ -1286,7 +1298,7 @@ class KeyboardView(
             // of the bug the user sees first - the strip contradicts the shift
             // they just pressed, mid-gesture, before anything is committed.
             val w = words.getOrNull(i)?.let { caseSwipe(it, swipeShift, swipeCaps) }
-            suggestionViews[i].text = w.orEmpty()
+            suggestionViews[i].text = w?.let { Script.out(context, it) }.orEmpty()
             suggestionViews[i].setTextColor(Color.parseColor("#1C2529"))
             suggestionViews[i].setBackgroundColor(
                 if (i == 0 && w != null) Color.parseColor("#DCE3E7") else Color.TRANSPARENT
@@ -1329,13 +1341,14 @@ class KeyboardView(
         // at field start or already after a space), and none after it.
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (pendingSpace || (prev.isNotEmpty() && !prev[0].isWhitespace())) " " else ""
-        val written = if (smartSpace) "$lead$best" else "$lead$best "
+        val shownBest = Script.out(context, best)
+        val written = if (smartSpace) "$lead$shownBest" else "$lead$shownBest "
         ic.commitText(written, 1)
         afterSelfEdit(written.length)
         clearUndo()
         Usage.record(context, best)
         Popularity.record(context, best)
-        lastSwipeWord = best
+        lastSwipeWord = shownBest          // on-screen form: its length is what gets deleted
         lastSwipeCandidates = words
         swipeJustCommitted = true
         swipeCommitAtMs = SystemClock.uptimeMillis()
@@ -1361,7 +1374,7 @@ class KeyboardView(
         for (i in shown.indices) {
             slotWord[i + off] = shown[i]
             slotIsSwipeAlt[i + off] = true
-            suggestionViews[i + off].text = shown[i]
+            suggestionViews[i + off].text = Script.out(context, shown[i])
             suggestionViews[i + off].setTextColor(Color.parseColor("#1C2529"))
             suggestionViews[i + off].setBackgroundColor(
                 if (i == highlight) Color.parseColor("#DCE3E7") else Color.TRANSPARENT
@@ -1385,8 +1398,8 @@ class KeyboardView(
         var removed = 0
         if (lastSwipeWord.isNotEmpty() && !hasSelection()) {
             // Choosing another word means the committed one was wrong.
-            Usage.unrecord(context, lastSwipeWord)
-            Popularity.unrecord(context, lastSwipeWord)
+            Usage.unrecord(context, Script.toLatin(context, lastSwipeWord))
+            Popularity.unrecord(context, Script.toLatin(context, lastSwipeWord))
             // Classic mode wrote a trailing space with the word, so take it too.
             removed = lastSwipeWord.length + if (smartSpace) 0 else 1
             ic.deleteSurroundingText(removed, 0)
@@ -1396,14 +1409,15 @@ class KeyboardView(
         val out = caseSwipe(word, shift || lastSwipeCapitalized, capsLocked || lastSwipeLocked)
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (lastSwipeWord.isEmpty() && prev.isNotEmpty() && !prev[0].isWhitespace()) " " else ""
-        val written = if (smartSpace) "$lead$out" else "$lead$out "
+        val shownOut = Script.out(context, out)
+        val written = if (smartSpace) "$lead$shownOut" else "$lead$shownOut "
         ic.commitText(written, 1)   // leading space before the old word stays
         ic.endBatchEdit()
         afterSelfEdit(written.length - removed)
         clearUndo()
         Usage.record(context, out)
         Popularity.record(context, out)
-        lastSwipeWord = out
+        lastSwipeWord = shownOut
         swipeJustCommitted = true    // still a swipe result — backspace wipes it whole
         swipeCommitAtMs = SystemClock.uptimeMillis()
         pendingSpace = smartSpace

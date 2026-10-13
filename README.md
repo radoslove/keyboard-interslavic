@@ -366,6 +366,12 @@ Kod i vlastne razloženja klaviatury pod **MIT.** *Code and original layouts und
   [tyflonet.com/siciliano/klaviatury](https://tyflonet.com/siciliano/klaviatury/) (2013).
   Copyright with the authors: **Adam Gola, Roberto Lombino jr.** It is not covered by this
   repository's MIT licence; the licence of the originals is not yet confirmed.*
+- Kirilica i glagolica: pravila transliteracije iz
+  [medzuslovjansky/js-utils](https://github.com/medzuslovjansky/js-utils) (MIT),
+  gl. [`docs/script-tables.md`](docs/script-tables.md).
+  *Cyrillic and Glagolitic: transliteration rules from
+  [medzuslovjansky/js-utils](https://github.com/medzuslovjansky/js-utils) (MIT); see
+  [`docs/script-tables.md`](docs/script-tables.md).*
 - Ostatok — runy, android ukladji, `docs/` — vlastno, MIT.
   *The rest — runic layouts, Android layouts, `docs/` — original, MIT.*
 - Slovnik: [`android-app/DICTIONARY_DATA.md`](android-app/DICTIONARY_DATA.md).
