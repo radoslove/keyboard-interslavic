@@ -44,6 +44,10 @@ because that is the Glagolitic readers of the dictionary have seen. Checked agai
   already type Cyrillic are used to national layouts (ЙЦУКЕН, the Serbian/Macedonian layout, the 2012
   Interslavic `KBDMSKIR`); offer them as an option later. Swipe then needs the key positions of that
   layout in the decoder, not the Latin ones.
+- **`nj` / `lj` across a morpheme boundary.** Today `nj` always becomes `њ`, so `pytanje` comes out as
+  `пытање`; the Interslavic course (Matija, 2026) writes **`пытанје`** — `n` and `j` stay apart in the
+  `-nje` ending. Needs to know where the boundary is (an ending list or dictionary data), not a guess.
+  Glagolitic is affected the same way (`ⱀⱐ` vs `ⱀⰹ`).
 - `q w x` have no letter in either script; they stay Latin for foreign words.
 - Glagolitic needs a font on the phone. Most Android phones ship Noto Sans Glagolitic; if keys
   show boxes, the font must be bundled (Noto Sans Glagolitic, OFL).

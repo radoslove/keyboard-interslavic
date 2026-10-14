@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- IME metadata. One subtype per language, so each shows in the system
+     keyboard list and picker the way iOS lists one keyboard per language.
+     The app's own language is on by default (overridesImplicitlyEnabledSubtype);
+     the others are ticked on the system's Languages page (the app's button
+     opens it). Only that one carries the flag, because Android shows NO name
+     for a subtype that has it. subtypeId keeps each identity fixed: without it
+     the system hashes label + extra value, and any change drops what the user
+     ticked. Ids are per app and never reused. -->
+<input-method xmlns:android="http://schemas.android.com/apk/res/android"
+    android:supportsSwitchingToNextInputMethod="true">
+    <subtype
+        android:label="@string/subtype_isc"
+        android:languageTag="nb"
+        android:imeSubtypeLocale="nb"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="lang=isc"
+        android:subtypeId="5631"
+        android:overridesImplicitlyEnabledSubtype="true" />
+    <subtype
+        android:label="@string/subtype_isv"
+        android:languageTag="isv"
+        android:imeSubtypeLocale="isv"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="lang=isv"
+        android:subtypeId="5635" />
+    <subtype
+        android:label="@string/subtype_nb"
+        android:languageTag="nb"
+        android:imeSubtypeLocale="nb"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="lang=nb"
+        android:subtypeId="5632" />
+    <subtype
+        android:label="@string/subtype_en"
+        android:languageTag="en"
+        android:imeSubtypeLocale="en_US"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="lang=en"
+        android:subtypeId="5633" />
+    <subtype
+        android:label="@string/subtype_pl"
+        android:languageTag="pl"
+        android:imeSubtypeLocale="pl"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="lang=pl"
+        android:subtypeId="5634" />
+</input-method>

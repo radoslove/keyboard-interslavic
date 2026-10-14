@@ -8,6 +8,8 @@ import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.ScrollView
 import android.widget.Switch
 import android.widget.TextView
@@ -18,13 +20,21 @@ import android.widget.Toast
  * consent surface the keyboard cannot show itself: an opt-in switch (default
  * OFF), the pending count, and a deliberate export. Everything here is on-device
  * — the export hands the owner a file; it does not send anything anywhere.
+ *
+ * Every text comes from [Ui], in the language chosen at the top: Interslavic
+ * with an English gloss (the original), or English, Polish or Norwegian alone.
+ * MS texts are checked against medzuslove (DB-verified :30020 / host canon):
+ * izberi, ili, latinica, kirilica, glagolica, jezyk (język), klaviatura;
+ * `pismo` is NOT in the dictionary, so the script header names the alphabets.
  */
 class SetupActivity : Activity() {
 
     private lateinit var status: TextView
+    private lateinit var ui: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        ui = Ui.current(this)
 
         val pad = (16 * resources.displayMetrics.density).toInt()
         val root = LinearLayout(this).apply {
@@ -33,109 +43,92 @@ class SetupActivity : Activity() {
             setBackgroundColor(Color.parseColor("#FAFAFA"))
         }
 
-        // MS-first + EN gloss (interslavic-tutor ruling, DB-verified :30020).
-        root.addView(header("Medžuslovjansky"))
-        root.addView(gloss("Interslavic"))
-        root.addView(body(
-            "Medžuslovjanska klaviatura. Standardne bukvy (č š ž ě) na dolgom " +
-            "pritisku i mahu nagoru; pas prědloženj iz slovnika."
-        ))
-        root.addView(gloss(
-            "Interslavic keyboard. Standard letters (č š ž ě) on long-press and " +
-            "an upward flick; a suggestion bar from the dictionary."
-        ))
-
-        // Script choice. Every MS word here is checked against medzuslove (izberi,
-        // ili, latinica, kirilica, glagolica); `pismo` is NOT in the dictionary, so
-        // the header names the three alphabets instead.
-        root.addView(header("Latinica, kirilica ili glagolica"))
-        root.addView(gloss(
-            "Latin, Cyrillic or Glagolitic: the keyboard writes in the chosen script. " +
-            "The letters stay on the same keys, and the dictionary and swipe work the same."
-        ))
-        root.addView(body("Izberi:"))
-        val scripts = listOf(
-            Script.Mode.LATIN to "Latinica (Latin)",
-            Script.Mode.CYRILLIC to "Kirilica (Cyrillic)",
-            Script.Mode.GLAGOLITIC to "Glagolica (Glagolitic)",
-        )
-        val current = Script.mode(this)
-        root.addView(android.widget.RadioGroup(this).apply {
-            for ((mode, label) in scripts) {
-                addView(android.widget.RadioButton(this@SetupActivity).apply {
+        // Language of this screen. The heading carries all four names, so it can
+        // be found whichever language the screen is in now.
+        root.addView(header(Ui.LANG_HEAD))
+        root.addView(RadioGroup(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            for (lang in Ui.ALL) {
+                addView(RadioButton(this@SetupActivity).apply {
                     id = android.view.View.generateViewId()
-                    text = label
+                    text = Ui.NAMES.getValue(lang)
+                    textSize = 15f
+                    isChecked = lang == ui
+                    setOnClickListener {
+                        if (lang != ui) { Ui.set(this@SetupActivity, lang); recreate() }
+                    }
+                })
+            }
+        })
+
+        section(root, "title", null)
+        root.addView(body(t("intro")))
+        glossOf("intro")?.let { root.addView(gloss(it)) }
+
+        // Languages, as on iOS where each one is its own keyboard (7801f4b):
+        // on Android they are the keyboard's entries in the SYSTEM list, ticked
+        // on the system's Languages page - this screen shows them and opens it.
+        section(root, "langs_head", "langs_body")
+        langsNow = body("")
+        root.addView(langsNow)
+        root.addView(Button(this).apply {
+            text = labelled("btn_langs", " — ")
+            setOnClickListener {
+                val imi = Lang.imi(this@SetupActivity)
+                val i = Intent(android.provider.Settings.ACTION_INPUT_METHOD_SUBTYPE_SETTINGS)
+                if (imi != null) i.putExtra(android.provider.Settings.EXTRA_INPUT_METHOD_ID, imi.id)
+                // Not yet a keyboard at all: the list where it is switched on.
+                try { startActivity(if (imi != null) i else Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) }
+                catch (_: Exception) { startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) }
+            }
+        })
+
+        val hasScripts = Lang.ISV in Lang.ALL
+        if (hasScripts) section(root, "script_head", "script_body")
+        val scripts = listOf(
+            Script.Mode.LATIN to "s_latin",
+            Script.Mode.CYRILLIC to "s_cyrillic",
+            Script.Mode.GLAGOLITIC to "s_glagolitic",
+        )
+        val prefs = getSharedPreferences("isv_collector", MODE_PRIVATE)
+        val current = prefs.getString("script", "latin")
+        if (hasScripts) root.addView(RadioGroup(this).apply {
+            for ((mode, key) in scripts) {
+                addView(RadioButton(this@SetupActivity).apply {
+                    id = android.view.View.generateViewId()
+                    text = labelled(key)
                     textSize = 17f
-                    isChecked = mode == current
+                    isChecked = mode.name.lowercase() == current
                     setOnClickListener { Script.setMode(this@SetupActivity, mode) }
                 })
             }
         })
 
-        root.addView(header("Sbiranje novyh slov (opcionalno)"))
-        root.addView(gloss("Collecting new words (optional)"))
-        root.addView(body(
-            "Kogda je vključeno, klaviatura lokalno zapisyvaje slova, ktoryh ně v " +
-            "slovniku, da by pozdněje šli do revizije (nikoli ně avtomatično " +
-            "popravjena). Ničto se ne posyla — izvoz je fajl, ktory sam prědaješ " +
-            "dalje. Standardno vyključeno."
-        ))
-        root.addView(gloss(
-            "When on, the keyboard saves words NOT in the dictionary LOCALLY, to " +
-            "later go to review (never auto-corrected). Nothing is sent — the " +
-            "export is a file you pass on yourself. Off by default."
-        ))
-
-        val sw = Switch(this).apply {
-            text = "Sbiraj nove slova (Collect new words)"
+        section(root, "collect_head", "collect_body")
+        root.addView(Switch(this).apply {
+            text = labelled("collect_sw")
             textSize = 17f
             isChecked = Collector.isEnabled(this@SetupActivity)
             setOnCheckedChangeListener { _, on ->
                 Collector.setEnabled(this@SetupActivity, on)
                 refreshStatus()
             }
-        }
-        root.addView(sw)
+        })
 
-        root.addView(header("Poredok popularnosti (opcionalno)"))
-        root.addView(gloss("Popularity ranking (optional)"))
-        root.addView(body(
-            "Kogda je vključeno, slova, ktora potvrdiš pri pisanju — svaipom, " +
-            "izborom iz pasa, dovršenjem znanego slova — sut lokalno čislena za " +
-            "spisok najpopularnějših medžuslovjanskih slov. Psevdonimno " +
-            "(identifikator ustrojstva niže), bez ličnyh danyh. Ničto ne odhodi " +
-            "avtomatično — do bazy dojde tolko pri tvojem izvozu. Standardno " +
-            "vyključeno."
-        ))
-        root.addView(gloss(
-            "When on, words you CONFIRM while typing — swipe, picking from the " +
-            "bar, finishing a known word — are counted LOCALLY to feed a ranking " +
-            "of the most popular Interslavic words. Pseudonymously (device id " +
-            "below), no personal data. Nothing leaves automatically — it reaches " +
-            "the database only on your export. Off by default."
-        ))
-        val swPop = Switch(this).apply {
-            text = "Vklad do poredka popularnosti (Contribute to the popularity ranking)"
+        section(root, "pop_head", "pop_body")
+        root.addView(Switch(this).apply {
+            text = labelled("pop_sw")
             textSize = 17f
             isChecked = Popularity.isEnabled(this@SetupActivity)
             setOnCheckedChangeListener { _, on ->
                 Popularity.setEnabled(this@SetupActivity, on)
                 refreshStatus()
             }
-        }
-        root.addView(swPop)
+        })
 
-        root.addView(header("Zvuk i vibracija (opcionalno)"))
-        root.addView(gloss("Sound and vibration (optional)"))
-        root.addView(body(
-            "Kratky zvuk i vibracija pri každoj klaviši. Standardno vyključeno."
-        ))
-        root.addView(gloss(
-            "A short sound and vibration on each key. Off by default."
-        ))
-        val prefs = getSharedPreferences("isv_collector", MODE_PRIVATE)
+        section(root, "sound_head", "sound_body")
         root.addView(Switch(this).apply {
-            text = "Zvuk i vibracija klaviš (Key sound and vibration)"
+            text = labelled("sound_sw")
             textSize = 17f
             isChecked = prefs.getBoolean("feedback", false)
             setOnCheckedChangeListener { _, on ->
@@ -143,20 +136,9 @@ class SetupActivity : Activity() {
             }
         })
 
-        root.addView(header("Razstup medžu slovami"))
-        root.addView(gloss("Spacing between words"))
-        root.addView(body(
-            "Standardno razstup jest dodavany PRED slědujuće slovo, tako že " +
-            "interpunkcija drži se slova bez razstupa. Iz-ključi, ako hoćeš " +
-            "stary sposob: razstup naide srazu po slovu."
-        ))
-        root.addView(gloss(
-            "By default the space is added BEFORE the next word, so punctuation " +
-            "stays tight against the word. Turn this off for the classic way: " +
-            "the space follows the word immediately."
-        ))
+        section(root, "space_head", "space_body")
         root.addView(Switch(this).apply {
-            text = "Umny razstup (Smart space)"
+            text = labelled("space_sw")
             textSize = 17f
             isChecked = prefs.getBoolean("smart_space", true)
             setOnCheckedChangeListener { _, on ->
@@ -168,19 +150,19 @@ class SetupActivity : Activity() {
         root.addView(status)
 
         root.addView(Button(this).apply {
-            text = "Pošli do bazy (grupa JSON) — Send to the database (JSON batch)"
+            text = labelled("btn_batch", " — ")
             setOnClickListener { exportBatch() }
         })
         root.addView(Button(this).apply {
-            text = "Izvezi do revizije (spisok) — Export for review (list)"
+            text = labelled("btn_export", " — ")
             setOnClickListener { exportQueue() }
         })
         root.addView(Button(this).apply {
-            text = "Očisti red (Clear the queue)"
+            text = labelled("btn_clear")
             setOnClickListener {
                 Collector.clear(this@SetupActivity)
                 refreshStatus()
-                toast("Kolejka wyczyszczona")
+                toast(t("t_cleared"))
             }
         })
 
@@ -197,42 +179,65 @@ class SetupActivity : Activity() {
     override fun onResume() {
         super.onResume()
         refreshStatus()
+        langsNow.text = "${t("langs_now")}: " + Lang.enabled(this).joinToString(", ") { langName(it) }
+    }
+
+    private lateinit var langsNow: TextView
+
+    private fun t(key: String) = Ui.t(ui, key)
+    private fun glossOf(key: String) = Ui.gloss(ui, key)
+
+    /** `ms` shows `Interslavic (English)`, the other languages their text alone. */
+    private fun labelled(key: String, sep: String = " "): String =
+        glossOf(key)?.let { "${t(key)}$sep($it)" } ?: t(key)
+
+    /** Language names in their own language, and in the screen's in brackets. */
+    private fun langName(lang: String): String = Ui.langName(ui, lang)
+
+    /** Header, its English gloss in `ms`, then the body and its gloss. */
+    private fun section(root: LinearLayout, head: String, text: String?) {
+        root.addView(header(t(head)))
+        glossOf(head)?.let { root.addView(gloss(it)) }
+        if (text != null) {
+            root.addView(body(t(text)))
+            glossOf(text)?.let { root.addView(gloss(it)) }
+        }
     }
 
     private fun refreshStatus() {
         val n = Collector.pendingCount(this)
-        val on = if (Collector.isEnabled(this)) "włączone" else "wyłączone"
-        val pop = if (Popularity.isEnabled(this)) "on (${Popularity.pendingCount(this)})" else "off"
-        status.text = "Nowe słowa: $on · w kolejce: $n · ranking: $pop · " +
+        val on = if (Collector.isEnabled(this)) t("st_on") else t("st_off")
+        val pop = if (Popularity.isEnabled(this)) "${t("st_on")} (${Popularity.pendingCount(this)})" else t("st_off")
+        status.text = "${t("st_new")}: $on · ${t("st_queue")}: $n · ${t("st_rank")}: $pop · " +
             "id: ${Collector.contributorId(this)}"
     }
 
     private fun exportBatch() {
         if (Collector.pendingCount(this) == 0 && Popularity.pendingCount(this) == 0) {
-            toast("Kolejka jest pusta")
+            toast(t("t_empty"))
             return
         }
         val json = Collector.exportBatchJson(this)
         val send = Intent(Intent.ACTION_SEND).apply {
             type = "application/json"
-            putExtra(Intent.EXTRA_SUBJECT, "medžuslovjansky — batch do bazy")
+            putExtra(Intent.EXTRA_SUBJECT, t("sub_batch"))
             putExtra(Intent.EXTRA_TEXT, json)
         }
-        startActivity(Intent.createChooser(send, "Wyślij batch do bazy"))
+        startActivity(Intent.createChooser(send, t("chooser")))
     }
 
     private fun exportQueue() {
         val text = Collector.exportInboxText(this)
         if (text.isBlank()) {
-            toast("Kolejka jest pusta")
+            toast(t("t_empty"))
             return
         }
         val send = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, "medžuslovjansky — słowa do rewizji")
+            putExtra(Intent.EXTRA_SUBJECT, t("sub_review"))
             putExtra(Intent.EXTRA_TEXT, text)
         }
-        startActivity(Intent.createChooser(send, "Eksportuj kolejkę"))
+        startActivity(Intent.createChooser(send, t("chooser")))
     }
 
     private fun header(t: String) = TextView(this).apply {

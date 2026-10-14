@@ -5,7 +5,7 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 
 /**
- * The prediction model (android_PLAN.md M2). Loads `assets/main_isv.combined`
+ * The prediction model (android_PLAN.md M2). Loads `assets/main_<lang>.combined`
  * — the same wordlist that feeds HeliBoard's swipe dictionary, 248 845 forms in
  * the format `word=X,f=N` — into memory and answers prefix queries ranked by
  * frequency.
@@ -21,23 +21,40 @@ object Dictionary {
 
     private class Entry(val word: String, val freq: Int)
 
-    @Volatile private var ready = false
-    private var entries: Array<Entry> = emptyArray()
+    /** Asset per language; see [Lang]. */
+    private fun asset(lang: String) = "main_$lang.combined"
 
-    /** Idempotent; the first call kicks off the background load. */
-    fun ensureLoaded(context: Context) {
-        if (ready || loading) return
-        loading = true
+    /** Every language loaded so far. A language is read the first time it is
+     *  used and then kept, so 🌐 switches back without a second load. */
+    private val loaded = HashMap<String, Array<Entry>>()
+    private val loading = HashSet<String>()
+
+    @Volatile private var current = Lang.MAIN
+    @Volatile private var ready = false
+    @Volatile private var entries: Array<Entry> = emptyArray()
+
+    /** Idempotent; makes the keyboard's current language the active list and
+     *  kicks off its background load the first time. */
+    fun ensureLoaded(context: Context) = use(context, Lang.current(context))
+
+    /** Switch the active list to [lang]; until it has loaded, [suggest] is empty. */
+    @Synchronized
+    fun use(context: Context, lang: String) {
+        current = lang
+        val have = loaded[lang]
+        if (have != null) { entries = have; ready = true; return }
+        ready = false
+        entries = emptyArray()
+        if (!loading.add(lang)) return
         val app = context.applicationContext
-        Thread({ load(app) }, "isv-dict-load").apply { isDaemon = true; start() }
+        Thread({ load(app, lang) }, "dict-load-$lang").apply { isDaemon = true; start() }
     }
 
-    @Volatile private var loading = false
-
-    private fun load(context: Context) {
+    private fun load(context: Context, lang: String) {
+        var arr: Array<Entry>? = null
         try {
-            val list = ArrayList<Entry>(250_000)
-            context.assets.open("main_isv.combined").use { stream ->
+            val list = ArrayList<Entry>(if (lang == Lang.PL) 410_000 else 250_000)
+            context.assets.open(asset(lang)).use { stream ->
                 BufferedReader(InputStreamReader(stream, Charsets.UTF_8)).use { br ->
                     var line = br.readLine()
                     while (line != null) {
@@ -57,17 +74,20 @@ object Dictionary {
             list.sortBy { it.word }
             val known = HashSet<String>(list.size * 2)
             for (e in list) known.add(e.word)
-            for (w in UserWords.all(context)) {
+            for (w in UserWords.all(context, lang)) {
                 if (known.add(w)) list.add(Entry(w, USER_FREQ))
             }
             list.sortBy { it.word }
-            entries = list.toTypedArray()
-            ready = true
+            arr = list.toTypedArray()
         } catch (_: Throwable) {
             // A missing/broken asset just means no predictions — never crash typing.
-            ready = false
-        } finally {
-            loading = false
+        }
+        synchronized(this) {
+            loading.remove(lang)
+            if (arr != null) {
+                loaded[lang] = arr
+                if (current == lang) { entries = arr; ready = true }
+            }
         }
     }
 
@@ -117,9 +137,13 @@ object Dictionary {
 
     // ---- Swipe decoding (M4) --------------------------------------------
 
-    /** Fold an accent to its base key: č->c š->s ž->z ě->e (others unchanged). */
+    /** Fold a held letter to the key it lives on: č->c ž->z ě->e, and the
+     *  Polish ą ć ę ł ń ó ś ź ż likewise - a glide over `żółw` crosses z o l w. */
     private fun foldBase(c: Char): Char = when (c) {
-        'č' -> 'c'; 'š' -> 's'; 'ž' -> 'z'; 'ě' -> 'e'
+        'č', 'ć' -> 'c'; 'š', 'ś' -> 's'; 'ž', 'ż', 'ź' -> 'z'; 'ě', 'ę', 'é', 'è', 'ê' -> 'e'
+        'ą', 'à' -> 'a'; 'ł' -> 'l'; 'ń' -> 'n'; 'ó', 'ò', 'ô' -> 'o'
+        // Norwegian: ä and ö are held on æ and ø, which are keys of their own.
+        'ä' -> 'æ'; 'ö' -> 'ø'
         else -> c
     }
 
@@ -172,7 +196,7 @@ object Dictionary {
             val folded = buildString { for (c in w) append(foldBase(c)) }
             val geo = coarse(folded)
             if (geo == Double.NEGATIVE_INFINITY) continue
-            val s = geo + Math.log((e.freq + 1).toDouble()) * FREQ_W
+            val s = geo + freqTerm(e.freq)
             if (s > keptScore[SHORTLIST - 1]) {
                 var j = SHORTLIST - 1
                 while (j > 0 && keptScore[j - 1] < s) {
@@ -196,7 +220,8 @@ object Dictionary {
             // frequency nudge breaks ties, and adaptive usage nudges harder so a
             // word you keep swiping wins the near-ties geometry cannot resolve.
             val freq = freqOf(w)
-            val s = geo + Math.log((freq + 1).toDouble()) * FREQ_W + boost(w)
+            val s = geo + freqTerm(freq) + boost(w) -
+                doubles(folded) * DOUBLE_W
             if (s > topScore[n - 1]) {
                 var j = n - 1
                 while (j > 0 && topScore[j - 1] < s) {
@@ -206,6 +231,38 @@ object Dictionary {
             }
         }
         return topWords.filterNotNull()
+    }
+
+    /**
+     * Lists built by log-scaling corpus counts into `f` (FrequencyWords: isc, nb,
+     * en) pull LINEARLY in `f`: taking log(f) again flattened them, and everyday
+     * `her` (f=217) beat a rare three-letter word (f=60) by only ~4.5 px, so `her`
+     * and `vi` lost glides to rarer neighbours (tester report, ISC test 0.1.3).
+     * FREQ_LIN * f gives that pair ~18 px, with FREQ_W's log as the floor.
+     * The Interslavic and Polish lists keep the log.
+     */
+    private const val FREQ_LIN = 0.15
+    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN)
+
+    private fun freqTerm(f: Int): Double {
+        val log = Math.log((f + 1).toDouble()) * FREQ_W
+        return if (current in LINEAR_FREQ) maxOf(log, f * FREQ_LIN) else log
+    }
+
+    /**
+     * A doubled letter is invisible in a glide: `žže` and `že` draw the same
+     * line, so geometry ties and the decision falls to frequency and usage.
+     * One kept `žže` (usage +8) outweighed the whole frequency gap (že 204,
+     * žže 74 = +3.5), and `žže` then came first every time (owner 2026-10-05).
+     * Each double therefore costs a fixed penalty: the double form stays in the
+     * strip, one tap away, but needs real repeated use to lead.
+     */
+    private const val DOUBLE_W = 10.0
+
+    private fun doubles(folded: String): Int {
+        var n = 0
+        for (i in 1 until folded.length) if (folded[i] == folded[i - 1]) n++
+        return n
     }
 
     /** How many words survive pass 1. Measured: 100, 200 and 400 all score the
@@ -243,6 +300,7 @@ object Dictionary {
         System.arraycopy(arr, i, out, i + 1, arr.size - i)
         @Suppress("UNCHECKED_CAST")
         entries = out as Array<Entry>
+        loaded[current] = entries
     }
 
     /** Exact membership test (binary search). Used to decide MISS for M3. */

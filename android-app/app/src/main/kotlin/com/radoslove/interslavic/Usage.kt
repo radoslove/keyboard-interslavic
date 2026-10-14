@@ -18,9 +18,9 @@ import java.io.File
  */
 object Usage {
 
-    private const val FILE = "usage.tsv"
-    private val counts = HashMap<String, Int>()
-    private var loaded = false
+    private val byLang = HashMap<String, HashMap<String, Int>>()
+    private var lang = Lang.MAIN
+    private val counts: HashMap<String, Int> get() = byLang.getOrPut(lang) { HashMap() }
 
     @Synchronized
     fun record(context: Context, word: String) {
@@ -56,11 +56,13 @@ object Usage {
         return counts[word.lowercase()] ?: 0
     }
 
-    private fun file(context: Context) = File(context.filesDir, FILE)
+    private fun file(context: Context) =
+        File(context.filesDir, if (lang == Lang.MAIN) "usage.tsv" else "usage_$lang.tsv")
 
     private fun ensureLoaded(context: Context) {
-        if (loaded) return
-        loaded = true
+        lang = Lang.current(context)
+        if (byLang.containsKey(lang)) return
+        byLang[lang] = HashMap()
         val f = file(context)
         if (!f.exists()) return
         try {

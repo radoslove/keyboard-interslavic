@@ -41,7 +41,7 @@ object Popularity {
     /** No-op unless the user consented. Counts a confirmed, real word. */
     @Synchronized
     fun record(context: Context, word: String) {
-        if (!isEnabled(context)) return
+        if (!isEnabled(context) || !Lang.isMain(context)) return   // the project language only
         val w = word.lowercase()
         if (w.length < 2 || !w.all { it.isLetter() }) return
         ensureLoaded(context)
@@ -57,7 +57,7 @@ object Popularity {
      */
     @Synchronized
     fun unrecord(context: Context, word: String) {
-        if (!isEnabled(context)) return
+        if (!isEnabled(context) || !Lang.isMain(context)) return   // the project language only
         val w = word.lowercase()
         if (w.isEmpty()) return
         ensureLoaded(context)

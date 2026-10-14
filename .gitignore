@@ -26,3 +26,7 @@ keystore.properties
 # Downloaded inputs of the Polish wordlist (large; see dictionary/sources_pl/README.md)
 /dictionary/sources_pl/*
 !/dictionary/sources_pl/README.md
+# Downloaded inputs of the English and Norwegian wordlists (see dictionary/sources_en/README.md)
+/dictionary/sources_en/*
+!/dictionary/sources_en/README.md
+/dictionary/sources_nb/*

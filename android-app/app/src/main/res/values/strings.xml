@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Shared by both apps; app_name and ime_name are set per flavor
+     (src/<flavor>/res/values/names.xml) and, in test builds, by build.gradle.kts. -->
 <resources>
-    <string name="app_name">Medžuslovjansky</string>
-    <string name="ime_name">Medžuslovjansky</string>
-    <string name="subtype_isv">Interslavic</string>
+    <string name="subtype_isv">Medžuslovjansky</string>
+    <string name="subtype_isc">isc-no</string>
+    <string name="subtype_pl">Polski</string>
+    <string name="subtype_nb">Norsk</string>
+    <string name="subtype_en">English</string>
 </resources>

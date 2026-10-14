@@ -38,6 +38,22 @@ listing them here does not imply an accepted or active listing.
 recovery procedure. Device locations, backup inventories and signing credentials
 must not be included in release notes.
 
+## Two apps from one code (since 3.5)
+
+`android-app/` has two product flavors. Releases of the published app are the **`interslove`**
+flavor (`com.radoslove.interslavic`, display name Medžuslovjansky; a rename to **Interslove** is planned):
+
+```sh
+./gradlew --no-daemon clean assembleIntersloveRelease
+# output: app/build/outputs/apk/interslove/release/app-interslove-release.apk
+# publish it under the unchanged asset name app-release.apk
+```
+
+The `isc` flavor (`com.radoslove.interscandinavian`, Mellomskandinavisk) is built the same way
+(`assembleIscRelease`) and is not part of the F-Droid submission. Before the first 3.5 release:
+the F-Droid recipe needs `gradle: [interslove]`, and the store title and `AutoName` follow the new
+display name.
+
 ## F-Droid recipe
 
 The submission is [MR !45568](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/45568).

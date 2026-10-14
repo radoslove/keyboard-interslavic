@@ -1,3 +1,4 @@
+import com.android.build.api.variant.ResValue
 import java.util.Properties
 
 plugins {
@@ -25,9 +26,13 @@ val diagnosticsProps = Properties().apply {
 // towards the NEXT release: bump TEST_BUILD for every build handed to a phone,
 // and TEST_BASE when a release is cut. Release builds do not use this, so
 // F-Droid's reproducible build is unaffected.
-val TEST_BASE = "3.5"
-val TEST_BUILD = 6
-val testVersion = "$TEST_BASE.$TEST_BUILD"
+//
+// Two apps are built from this one code (product flavors below), each with its
+// own test number: flavor -> (TEST_BASE, TEST_BUILD, label prefix).
+val TESTS = mapOf(
+    "interslove" to Triple("3.5", 18, "MS test"),
+    "isc" to Triple("0.1", 11, "ISC test"),
+)
 
 fun javaString(value: String): String = "\"" + value
     .replace("\\", "\\\\").replace("\"", "\\\"")
@@ -42,13 +47,30 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.radoslove.interslavic"
         minSdk = 24
         targetSdk = 34
-        versionCode = 34
-        versionName = "3.4"
         buildConfigField("String", "CRASH_REPORT_URL", "\"\"")
         buildConfigField("String", "GESTURE_REPORT_URLS", "\"\"")
+    }
+
+    // Two apps, one code. Per flavor only src/<flavor>/ differs: App.kt (main
+    // language, language order), Ui.kt (settings texts), res/xml/method.xml and
+    // the app/keyboard name. Both offer every language; each collects data for
+    // its own project. `interslove` keeps the id published on F-Droid.
+    flavorDimensions += "app"
+    productFlavors {
+        create("interslove") {
+            dimension = "app"
+            applicationId = "com.radoslove.interslavic"
+            versionCode = 34
+            versionName = "3.4"
+        }
+        create("isc") {
+            dimension = "app"
+            applicationId = "com.radoslove.interscandinavian"
+            versionCode = 1
+            versionName = "0.1"
+        }
     }
 
     // F-Droid reproducible builds reject the AGP "Dependency metadata"
@@ -84,13 +106,8 @@ android {
             // id lets both live side by side: the published keyboard keeps
             // working while a test build is being tried next to it.
             applicationIdSuffix = ".debug"
-            // BOTH labels: app_name is what the installer shows, ime_name labels
-            // the SERVICE and is what the system keyboard list shows.
-            // Short on purpose: the keyboard list truncates, and the version is
-            // the part that matters.
-            val testLabel = "MS test $testVersion"
-            resValue("string", "app_name", testLabel)
-            resValue("string", "ime_name", testLabel)
+            // The test labels (app_name AND ime_name) are set per flavor in
+            // androidComponents below.
             buildConfigField("String", "CRASH_REPORT_URL",
                 javaString(diagnosticsProps.getProperty("crashReportUrl", "")))
             buildConfigField("String", "GESTURE_REPORT_URLS",
@@ -107,10 +124,18 @@ android {
     }
 }
 
-// The version shown in Settings -> Apps: the test number, not the last release.
+// Test builds: the version shown in Settings -> Apps is the test number, and
+// BOTH labels carry it - app_name is what the installer shows, ime_name labels
+// the SERVICE and is what the system keyboard list shows. Short on purpose:
+// the keyboard list truncates, and the version is the part that matters.
 androidComponents {
     onVariants(selector().withBuildType("debug")) { variant ->
-        variant.outputs.forEach { it.versionName.set("$testVersion-test") }
+        val (base, build, prefix) = TESTS.getValue(variant.flavorName ?: "interslove")
+        val version = "$base.$build"
+        variant.outputs.forEach { it.versionName.set("$version-test") }
+        for (name in listOf("app_name", "ime_name")) {
+            variant.resValues.put(variant.makeResValueKey("string", name), ResValue("$prefix $version", null))
+        }
     }
 }
 

@@ -16,18 +16,19 @@ import java.io.File
  * telling their own keyboard "this is a word". Adding one also offers it to the
  * collector, which still decides by its own opt-in.
  *
- * On-device only. Storage: `filesDir/user_words.txt`, one lowercase word a line.
+ * On-device only. Storage: `filesDir/user_words.txt` (Interslavic) and
+ * `user_words_<lang>.txt` for every other language, one lowercase word a line -
+ * a Polish word saved on the Polish keyboard must not turn up in Interslavic.
  */
 object UserWords {
 
-    private const val FILE = "user_words.txt"
+    private fun file(context: Context, lang: String) =
+        File(context.filesDir, if (lang == Lang.MAIN) "user_words.txt" else "user_words_$lang.txt")
 
-    private fun file(context: Context) = File(context.filesDir, FILE)
-
-    /** Every saved word; empty when there is no file or it cannot be read. */
+    /** Every saved word of [lang]; empty when there is no file or it cannot be read. */
     @Synchronized
-    fun all(context: Context): List<String> = try {
-        val f = file(context)
+    fun all(context: Context, lang: String = Lang.current(context)): List<String> = try {
+        val f = file(context, lang)
         if (f.exists()) f.readLines().map { it.trim() }.filter { it.isNotEmpty() } else emptyList()
     } catch (_: Throwable) {
         emptyList()
@@ -38,9 +39,10 @@ object UserWords {
     fun add(context: Context, word: String) {
         val w = word.lowercase()
         if (w.isEmpty() || !w.all { it.isLetter() }) return
-        if (w !in all(context)) {
+        val lang = Lang.current(context)
+        if (w !in all(context, lang)) {
             try {
-                file(context).appendText(w + "\n")
+                file(context, lang).appendText(w + "\n")
             } catch (_: Throwable) {
                 // Losing a saved word is bad; crashing the keyboard is worse.
             }

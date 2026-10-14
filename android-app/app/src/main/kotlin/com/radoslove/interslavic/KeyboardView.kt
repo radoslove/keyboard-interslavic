@@ -51,6 +51,8 @@ class KeyboardView(
     private var lastShiftTapMs = 0L    // double-tap-to-lock window
     private val doubleTapMs = 300L
     private var symbols = false
+    /** The `#+=` page of the symbol layer (iOS 559a71f). */
+    private var symbolsPage2 = false
 
     private val flickHandler = Handler(Looper.getMainLooper())
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
@@ -128,7 +130,10 @@ class KeyboardView(
      * ending is fixed by holding backspace (owner, 2026-10-08).
      */
     private var swipeCommitAtMs = 0L
-    private val SWIPE_WIPE_WINDOW_MS = 1200L
+    /** Norwegian compounds are long (`søtningsstoff`) and take longer to read,
+     *  so a letter typed after a Norwegian glide extends it for longer (isc 0.1.3). */
+    private val SWIPE_WIPE_WINDOW_MS: Long
+        get() = if (Lang.current(context) in setOf(Lang.NB, Lang.ISC)) 2500L else 1200L
     /** What the last whole-word wipe took out; read by a held backspace. */
     private var lastWipeRemoved = ""
     /** Set when a backspace press began with a wipe: holding trims instead. */
@@ -249,6 +254,81 @@ class KeyboardView(
             val fm = previewTxt.fontMetrics
             canvas.drawText(t, previewCx, (top + bottom) / 2f - (fm.ascent + fm.descent) / 2f, previewTxt)
         }
+        popupItems?.let { items ->
+            val r = dp(8).toFloat()
+            val right = popupLeft + popupCell * items.size
+            canvas.drawRoundRect(popupLeft, popupTop, right, popupBottom, r, r, previewBg)
+            canvas.drawRoundRect(popupLeft, popupTop, right, popupBottom, r, r, previewBorder)
+            previewTxt.textSize = dp(24).toFloat()
+            val fm = previewTxt.fontMetrics
+            val baseline = (popupTop + popupBottom) / 2f - (fm.ascent + fm.descent) / 2f
+            for (i in items.indices) {
+                val l = popupLeft + popupCell * i
+                if (i == popupSel) {
+                    canvas.drawRoundRect(l + 2f, popupTop + 2f, l + popupCell - 2f, popupBottom - 2f, r, r, popupSelBg)
+                    previewTxt.color = Color.WHITE
+                } else previewTxt.color = Color.parseColor("#1C2529")
+                canvas.drawText(Script.out(context, items[i]), l + popupCell / 2f, baseline, previewTxt)
+            }
+            previewTxt.color = Color.parseColor("#1C2529")
+        }
+    }
+
+    // Hold popup, as on iOS (7801f4b): every letter or mark the key holds, the
+    // keyboard's own first. The finger slides along it to choose and the choice
+    // lands on lift. It replaced a hold that committed its one letter at once -
+    // which showed nothing but the key's own letter (`з`, not `ж`) above the
+    // finger. Items are kept Latin and drawn through Script, like key labels.
+    private var popupItems: List<String>? = null
+    private var popupLeft = 0f
+    private var popupTop = 0f
+    private var popupBottom = 0f
+    private var popupCell = 0f
+    private var popupSel = 0
+    private val popupSelBg = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.parseColor("#1E88E5"); style = Paint.Style.FILL
+    }
+
+    /** Open the popup over [tv]; [fingerX] (in the key's coordinates) picks the first selection. */
+    private fun showPopup(tv: TextView, items: List<String>, fingerX: Float) {
+        val row = tv.parent as? android.view.View ?: return
+        hideKeyPreview()
+        val keyLeft = (row.left + tv.left).toFloat()
+        val keyTop = (row.top + tv.top).toFloat()
+        popupCell = maxOf(tv.width.toFloat(), dp(38).toFloat())
+        val w = popupCell * items.size
+        // The first item sits over the key, the rest run rightward; near the
+        // right edge the strip shifts left instead of leaving the keyboard.
+        var left = keyLeft + tv.width / 2f - popupCell / 2f
+        left = left.coerceAtMost(width - w - dp(2)).coerceAtLeast(dp(2).toFloat())
+        popupLeft = left
+        popupBottom = keyTop - dp(2)
+        popupTop = popupBottom - dp(52)
+        if (popupTop < 0f) { popupTop = 0f; popupBottom = dp(52).toFloat() }   // top row: overlap, stay visible
+        popupItems = items
+        popupSel = popupIndex(keyLeft + fingerX)
+        (tv.parent as? android.view.ViewGroup)?.requestDisallowInterceptTouchEvent(true)
+        invalidate()
+    }
+
+    private fun popupIndex(x: Float): Int {
+        val n = popupItems?.size ?: return 0
+        return ((x - popupLeft) / popupCell).toInt().coerceIn(0, n - 1)
+    }
+
+    /** Finger moved while the popup is up; [x] in the key's coordinates. */
+    private fun movePopup(tv: TextView, x: Float) {
+        val row = tv.parent as? android.view.View ?: return
+        val i = popupIndex(row.left + tv.left + x)
+        if (i != popupSel) { popupSel = i; invalidate() }
+    }
+
+    /** Close the popup and return the chosen item (Latin), or null if none was up. */
+    private fun closePopup(): String? {
+        val items = popupItems ?: return null
+        popupItems = null
+        invalidate()
+        return items.getOrNull(popupSel)
     }
 
     private fun addTrailPoint(x: Float, y: Float, tMs: Float) {
@@ -334,7 +414,7 @@ class KeyboardView(
 
     private fun renderLetters() {
         letterKeyViews.clear()
-        Layout.letterRows.forEachIndexed { index, row ->
+        Layout.letterRows(Lang.current(context)).forEachIndexed { index, row ->
             val rv = makeRow()
             if (index == 2) {
                 val glyph = if (capsLocked) "⇪" else "⇧"
@@ -351,39 +431,73 @@ class KeyboardView(
             }
             addView(rv)
         }
+        // Bottom row: `123`, 🌐, the comma left of space and the period right of
+        // it - the two most used marks, one on each side of the thumb (owner
+        // 2026-10-14, replacing the iOS order `. , space ?`). `?` and `!` live on
+        // the `123` page next to backspace; the two marks hold the rest.
+        val isv = Lang.current(context) == Lang.ISV
         val b = makeRow()
-        b.addView(functionKey("?123", 1.6f) { symbols = true; render() })
-        b.addView(functionKey(",", 1f) { commit(",") })
-        b.addView(functionKey("🌐", 1f) { service.switchIme() })
+        b.addView(functionKey("123", 1.2f) { symbols = true; symbolsPage2 = false; render() })
+        b.addView(globeKey(0.95f))
         // Script key: like 🌐 switches the keyboard, this switches the alphabet,
         // Latin -> Cyrillic -> Glagolitic. It names the current alphabet; the
         // key labels and everything written from now on follow it. Label: ABC / АБВ / ⰀⰁⰂ.
-        b.addView(functionKey(Script.keyLabel(context), 1.3f) {
+        // Interslavic only - Polish is written in Latin.
+        if (isv) b.addView(functionKey(Script.keyLabel(context), 1.2f) {
             Script.next(context)
             render()
             refreshSuggestions()
         })
-        b.addView(functionKey("space", 2.7f) { commit(" ") })
-        b.addView(functionKey(".", 1f) { commit(".") })
-        b.addView(functionKey("⏎", 1.6f) { enter() })
+        b.addView(symbolKey(',', 0.9f, Layout.commaHold))
+        b.addView(spaceKey(if (isv) 3.45f else 4.65f))
+        b.addView(symbolKey('.', 0.9f, Layout.periodHold))
+        b.addView(functionKey("⏎", 1.4f) { enter() })
         addView(b)
     }
 
+    /** Names the language when there is more than one to tell apart. */
+    private fun spaceKey(weight: Float): TextView {
+        val many = Lang.enabled(context).size > 1
+        val tv = functionKey(if (many) Lang.label(Lang.current(context)) else "space", weight) { commit(" ") }
+        if (many) tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+        return tv
+    }
+
+    /** 🌐: tap = the next ticked language (Gboard's habit), or the system keyboard
+     *  picker when only one is ticked; hold = always the picker. */
+    private fun globeKey(weight: Float): TextView {
+        // The system rotates the languages (subtypes) and tells the service,
+        // which rebuilds the keyboard for the new one.
+        val tv = functionKey("🌐", weight) {
+            if (!service.nextLanguage()) service.switchIme()
+        }
+        tv.setOnLongClickListener { service.switchIme(); true }
+        return tv
+    }
+
+    /** `123` and `#+=` pages, laid out as on iOS (ab921f2, 559a71f): the third
+     *  row runs between the page key and backspace, and the bottom row is
+     *  ABC, 🌐, space, return. */
     private fun renderSymbols() {
-        Layout.symbolRows.forEachIndexed { index, row ->
+        val rows = if (symbolsPage2) Layout.symbolRows else Layout.numericRows
+        rows.forEachIndexed { index, row ->
             val rv = makeRow()
-            row.forEach { ch -> rv.addView(symbolKey(ch)) }
+            if (index == 2) {
+                rv.addView(functionKey(if (symbolsPage2) "123" else "#+=", 1.5f) {
+                    symbolsPage2 = !symbolsPage2; render()
+                })
+            }
+            // `,` and `?` hold nothing on these pages; the rest follow iOS.
+            row.forEach { ch -> rv.addView(symbolKey(ch, 1f, Layout.numericHold[ch])) }
             if (index == 2) {
                 rv.addView(backspaceKey())
             }
             addView(rv)
         }
         val b = makeRow()
-        b.addView(functionKey("ABC", 1.6f) { symbols = false; render() })
-        b.addView(functionKey(",", 1f) { commit(",") })
-        b.addView(functionKey("🌐", 1f) { service.switchIme() })
-        b.addView(functionKey("space", 4f) { commit(" ") })
-        b.addView(functionKey(".", 1f) { commit(".") })
+        b.addView(functionKey("ABC", 1.6f) { symbols = false; symbolsPage2 = false; render() })
+        b.addView(globeKey(1.2f))
+        b.addView(spaceKey(5.6f))
         b.addView(functionKey("⏎", 1.6f) { enter() })
         addView(b)
     }
@@ -399,17 +513,20 @@ class KeyboardView(
         // Label in the chosen script; the key itself stays the Latin letter `ch`.
         val label = Script.out(context, if (shift) ch.uppercaseChar().toString() else ch.toString())
         val tv = baseKey(label, 1f)
-        // Whether this key has an accent/digraph at all (c/s/z/e, d/l/n).
-        val hasAccent = Layout.longPress(ch, false) != null
+        val lang = Lang.current(context)
+        val latin = Script.mode(context) == Script.Mode.LATIN
+        // Whether this key has a letter of the keyboard's OWN on it (flick target).
+        val hasAccent = Layout.longPress(ch, false, lang) != null
+        val holds = Layout.variants(ch, false, lang, latin).isNotEmpty()
         val flickThreshold = dp(22)
 
         var downX = 0f
         var downY = 0f
         var handled = false
         val longPress = Runnable {
-            val out = Layout.longPress(ch, shift)
-            if (out != null) {
-                commit(Script.out(context, out))
+            val items = Layout.variants(ch, shift, lang, latin)
+            if (items.isNotEmpty()) {
+                showPopup(tv, items, downX)
                 handled = true
                 tv.isPressed = false
             }
@@ -421,10 +538,11 @@ class KeyboardView(
                     downX = e.x; downY = e.y; handled = false
                     tv.isPressed = true
                     showKeyPreview(tv)
-                    if (hasAccent) flickHandler.postDelayed(longPress, longPressMs)
+                    if (holds) flickHandler.postDelayed(longPress, longPressMs)
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
+                    if (popupItems != null) { movePopup(tv, e.x); return@setOnTouchListener true }
                     if (abs(e.x - downX) > touchSlop || abs(e.y - downY) > touchSlop) {
                         flickHandler.removeCallbacks(longPress)
                         hideKeyPreview()          // becoming a flick/glide, not a tap
@@ -435,13 +553,14 @@ class KeyboardView(
                     flickHandler.removeCallbacks(longPress)
                     tv.isPressed = false
                     hideKeyPreview()
+                    closePopup()?.let { commit(Script.out(context, it)) }
                     if (!handled) {
                         val dx = e.x - downX
                         val dy = e.y - downY
-                        // Upward flick (mostly vertical) => the accent/digraph.
+                        // Upward flick (mostly vertical) => the keyboard's own letter.
                         val flickUp = hasAccent && dy < -flickThreshold && abs(dy) >= abs(dx)
                         if (flickUp) {
-                            Layout.longPress(ch, shift)?.let { commit(Script.out(context, it)) }
+                            Layout.longPress(ch, shift, lang)?.let { commit(Script.out(context, it)) }
                         } else {
                             commit(Script.out(context, if (shift) ch.uppercaseChar().toString() else ch.toString()))
                         }
@@ -452,6 +571,7 @@ class KeyboardView(
                     flickHandler.removeCallbacks(longPress)
                     tv.isPressed = false
                     hideKeyPreview()
+                    closePopup()
                     true
                 }
                 else -> false
@@ -461,9 +581,48 @@ class KeyboardView(
         return tv
     }
 
-    private fun symbolKey(ch: Char): TextView {
-        val tv = baseKey(ch.toString(), 1f)
-        tv.setOnClickListener { commit(ch.toString()) }
+    /** A mark key. With [hold] it opens the popup like a letter (iOS 559a71f):
+     *  tap = the mark, hold and slide = one of [hold]. */
+    private fun symbolKey(ch: Char, weight: Float = 1f, hold: List<String>? = null): TextView {
+        val tv = baseKey(ch.toString(), weight)
+        if (hold == null) {
+            tv.setOnClickListener { commit(ch.toString()) }
+            return tv
+        }
+        tv.isLongClickable = false
+        var downX = 0f
+        var downY = 0f
+        val longPress = Runnable { showPopup(tv, hold, downX); tv.isPressed = false }
+        tv.setOnTouchListener { _, e ->
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    downX = e.x; downY = e.y
+                    tv.isPressed = true
+                    flickHandler.postDelayed(longPress, longPressMs)
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (popupItems != null) movePopup(tv, e.x)
+                    else if (abs(e.x - downX) > touchSlop * 2 || abs(e.y - downY) > touchSlop * 2) {
+                        flickHandler.removeCallbacks(longPress)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    flickHandler.removeCallbacks(longPress)
+                    tv.isPressed = false
+                    commit(closePopup() ?: ch.toString())
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    flickHandler.removeCallbacks(longPress)
+                    tv.isPressed = false
+                    closePopup()
+                    true
+                }
+                else -> false
+            }
+        }
         return tv
     }
 
@@ -931,6 +1090,14 @@ class KeyboardView(
             tv.setTextColor(Color.parseColor("#1C2529"))
             // Fixed width, not weight: weights collapse inside a scroll view,
             // and a stable width keeps the chips from jumping as words change.
+            // Long words (`søtningsstoff`, `najpopularniejszych`) wrapped onto a
+            // second line, cut mid-word (isc 0.1.3). One line, shrinking to fit.
+            tv.maxLines = 1
+            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                tv.setAutoSizeTextTypeUniformWithConfiguration(10, 17, 1, TypedValue.COMPLEX_UNIT_SP)
+            } else {
+                tv.ellipsize = android.text.TextUtils.TruncateAt.MIDDLE
+            }
             val lp = LayoutParams(dp(112), LayoutParams.MATCH_PARENT)
             lp.setMargins(dp(1), dp(1), dp(1), dp(1))
             tv.layoutParams = lp
@@ -1112,9 +1279,12 @@ class KeyboardView(
      * flick (up = diacritic) still works — everything else beyond slop is a glide.
      */
     override fun onInterceptTouchEvent(e: MotionEvent): Boolean {
-        if (symbols) return false
+        if (symbols || popupItems != null) return false
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
+                // A glide may not START on the bottom row (iOS swipeCanStart): a
+                // thumb sliding on space or on the held `.` was read as a word.
+                if (e.y > lettersBottom() + dp(2)) { swipeStartKey = null; return false }
                 // Fall back to the NEAREST key when the press lands in a margin or
                 // just off a key (common on edge keys like `a`); without this the
                 // whole glide was dead because the start key was null.
@@ -1140,7 +1310,7 @@ class KeyboardView(
                 // Eager: fire on enough movement OR the moment another key is
                 // entered — whichever comes first.
                 if (dist < touchSlop && !crossed) return false
-                val hasAccent = Layout.longPress(start, false) != null
+                val hasAccent = Layout.longPress(start, false, Lang.current(context)) != null
                 val isUpFlick = hasAccent && dy < 0 && abs(dy) >= abs(dx) && dist < dp(48)
                 if (isUpFlick) return false                   // let the child's flick handler take it
                 swiping = true
@@ -1208,6 +1378,16 @@ class KeyboardView(
      * each candidate word's ideal route; first key + length cap come from the
      * whole trail so fast swipes are not truncated.
      */
+    /** Lower edge of the letter rows, in KeyboardView coordinates. */
+    private fun lettersBottom(): Float {
+        var b = 0f
+        for ((_, v) in letterKeyViews) {
+            val row = v.parent as? android.view.View ?: continue
+            b = maxOf(b, (row.top + v.top + v.height).toFloat())
+        }
+        return if (b == 0f) Float.MAX_VALUE else b
+    }
+
     /** Key centres in KeyboardView coordinates. Built on the UI thread, then
      *  handed to the (possibly background) decode so no View is touched off-UI. */
     private fun computeCenters(): HashMap<Char, FloatArray> {

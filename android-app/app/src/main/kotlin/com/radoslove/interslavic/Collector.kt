@@ -17,7 +17,7 @@ import java.util.UUID
  *  - OPT-IN, default OFF. Nothing is collected until the user turns it on in the
  *    setup screen.
  *  - On-device only. This class never touches the network; export is a file the
- *    owner moves deliberately. The canonical online sink (host/hetz) is a
+ *    owner moves deliberately. The canonical online sink (a server) is a
  *    separate infra seam, not wired here.
  *  - A MISS is flagged for REVIEW, never treated as a correction — absence from
  *    the wordlist (≈⅓ of the DB) is not proof a form is wrong.
@@ -67,7 +67,7 @@ object Collector {
      */
     @Synchronized
     fun record(context: Context, rawWord: String) {
-        if (!isEnabled(context)) return
+        if (!isEnabled(context) || !Lang.isMain(context)) return   // the project language only
         if (!Dictionary.isReady()) return
         if (rawWord.length < MIN_LEN) return
         if (rawWord.first().isUpperCase()) return          // crude name filter
@@ -97,7 +97,7 @@ object Collector {
         ensureLoaded(context)
         if (counts.isEmpty()) return ""
         val sb = StringBuilder()
-        sb.append("<!-- medžuslovjansky collected MISS words — for review_lexicon.py -->\n")
+        sb.append("<!-- ${App.MAIN_NAME} collected MISS words — for review -->\n")
         counts.entries.sortedByDescending { it.value }.forEach { (w, n) ->
             sb.append("- ").append(w).append(" = seen ").append(n).append("×\n")
         }
@@ -107,7 +107,7 @@ object Collector {
     /**
      * The queue as a server-ingest batch: a pseudonymous contributor id and the
      * words with their counts. This is what `ingest_submissions.py` loads into
-     * the `submissions` table (locally now, host/hetz later — same shape).
+     * the `submissions` table (locally now, on a server later — same shape).
      */
     @Synchronized
     fun exportBatchJson(context: Context): String {

@@ -33,7 +33,8 @@ object Script {
     private const val PREFS = "isv_collector"
     private const val KEY = "script"
 
-    fun mode(context: Context): Mode =
+    /** The chosen script; always Latin while another language than Interslavic is typed. */
+    fun mode(context: Context): Mode = if (Lang.current(context) != Lang.ISV) Mode.LATIN else
         when (context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, "latin")) {
             "cyrillic" -> Mode.CYRILLIC
             "glagolitic" -> Mode.GLAGOLITIC
