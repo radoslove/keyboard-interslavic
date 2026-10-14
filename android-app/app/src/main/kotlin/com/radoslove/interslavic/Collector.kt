@@ -122,11 +122,21 @@ object Collector {
         Popularity.snapshot(context).entries.sortedByDescending { it.value }.forEach { (w, n) ->
             words.put(JSONObject().put("word", w).put("count", n).put("source", "keyboard-usage"))
         }
-        return JSONObject()
+        val batch = JSONObject()
             .put("contributor", contributorId(context))
             .put("source", "keyboard")          // batch-level fallback
             .put("words", words)
-            .toString(2)
+        // Mark counts travel only with the ranking's consent; a separate key so
+        // a loader that knows only `words` is unaffected.
+        if (Popularity.isEnabled(context)) {
+            val marks = JSONArray()
+            for ((k, n) in Symbols.rows(context)) {
+                marks.put(JSONObject().put("lang", k.first).put("mark", k.second)
+                    .put("via", k.third).put("count", n))
+            }
+            batch.put("symbols", marks)
+        }
+        return batch.toString(2)
     }
 
     @Synchronized

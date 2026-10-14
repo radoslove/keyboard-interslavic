@@ -46,13 +46,14 @@ class SetupActivity : Activity() {
         // Language of this screen. The heading carries all four names, so it can
         // be found whichever language the screen is in now.
         root.addView(header(Ui.LANG_HEAD))
+        // One per line: four names in a row did not fit a phone (a55: "Norsk" ran
+        // off the screen, "Polski" broke in two).
         root.addView(RadioGroup(this).apply {
-            orientation = LinearLayout.HORIZONTAL
             for (lang in Ui.ALL) {
                 addView(RadioButton(this@SetupActivity).apply {
                     id = android.view.View.generateViewId()
                     text = Ui.NAMES.getValue(lang)
-                    textSize = 15f
+                    textSize = 17f
                     isChecked = lang == ui
                     setOnClickListener {
                         if (lang != ui) { Ui.set(this@SetupActivity, lang); recreate() }
@@ -126,6 +127,11 @@ class SetupActivity : Activity() {
             }
         })
 
+        // Which marks are typed how often - the measurement behind key placement.
+        section(root, "sym_head", "sym_body")
+        symbolsNow = body("")
+        root.addView(symbolsNow)
+
         section(root, "sound_head", "sound_body")
         root.addView(Switch(this).apply {
             text = labelled("sound_sw")
@@ -180,9 +186,14 @@ class SetupActivity : Activity() {
         super.onResume()
         refreshStatus()
         langsNow.text = "${t("langs_now")}: " + Lang.enabled(this).joinToString(", ") { langName(it) }
+        val top = Symbols.top(this, 15)
+        symbolsNow.text = if (top.isEmpty()) t("sym_none")
+            else top.joinToString("   ") { (mark, n) -> "$mark $n" }
+        symbolsNow.textSize = 17f
     }
 
     private lateinit var langsNow: TextView
+    private lateinit var symbolsNow: TextView
 
     private fun t(key: String) = Ui.t(ui, key)
     private fun glossOf(key: String) = Ui.gloss(ui, key)
@@ -197,10 +208,11 @@ class SetupActivity : Activity() {
     /** Header, its English gloss in `ms`, then the body and its gloss. */
     private fun section(root: LinearLayout, head: String, text: String?) {
         root.addView(header(t(head)))
-        glossOf(head)?.let { root.addView(gloss(it)) }
+        glossOf(head)?.let { if (it != t(head)) root.addView(gloss(it)) }
         if (text != null) {
             root.addView(body(t(text)))
-            glossOf(text)?.let { root.addView(gloss(it)) }
+            // A key with no Interslavic text falls back to English: no gloss twice.
+            glossOf(text)?.let { if (it != t(text)) root.addView(gloss(it)) }
         }
     }
 

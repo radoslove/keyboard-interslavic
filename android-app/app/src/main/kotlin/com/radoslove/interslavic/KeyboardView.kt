@@ -586,7 +586,10 @@ class KeyboardView(
     private fun symbolKey(ch: Char, weight: Float = 1f, hold: List<String>? = null): TextView {
         val tv = baseKey(ch.toString(), weight)
         if (hold == null) {
-            tv.setOnClickListener { commit(ch.toString()) }
+            tv.setOnClickListener {
+                Symbols.record(context, ch.toString(), Symbols.TAP)
+                commit(ch.toString())
+            }
             return tv
         }
         tv.isLongClickable = false
@@ -611,7 +614,9 @@ class KeyboardView(
                 MotionEvent.ACTION_UP -> {
                     flickHandler.removeCallbacks(longPress)
                     tv.isPressed = false
-                    commit(closePopup() ?: ch.toString())
+                    val chosen = closePopup()
+                    Symbols.record(context, chosen ?: ch.toString(), if (chosen != null) Symbols.HOLD else Symbols.TAP)
+                    commit(chosen ?: ch.toString())
                     true
                 }
                 MotionEvent.ACTION_CANCEL -> {

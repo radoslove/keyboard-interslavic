@@ -139,6 +139,19 @@ object Ui {
         ),
         "pop_sw" to row("Bidra til popularitetsrangeringen", "Contribute to the popularity ranking",
             "Dokładaj do rankingu popularności"),
+        "sym_head" to row("Tegn", "Marks", "Znaki"),
+        "sym_body" to row(
+            "Hvor ofte du skriver hvert tegn (? , . „ € og resten), telt bare på denne telefonen, " +
+                "uten teksten rundt. Det avgjør hvor tastene står: jo mer brukt, jo nærmere tommelen. " +
+                "Deles bare i eksporten, og bare med rangeringen på.",
+            "How often you type each mark (? , . „ € and the rest), counted on this phone only, " +
+                "without the text around it. It decides where the keys go: the more used, the " +
+                "nearer the thumb. Shared only in the export, and only with the ranking on.",
+            "Jak często wpisujesz każdy znak (? , . „ € i reszta), liczone tylko na tym telefonie, " +
+                "bez tekstu dookoła. Na tej podstawie układamy klawisze: im częściej używany, tym " +
+                "bliżej kciuka. Wychodzi tylko w eksporcie i tylko przy włączonym rankingu.",
+        ),
+        "sym_none" to row("Ingenting telt ennå.", "Nothing counted yet.", "Jeszcze nic nie policzono."),
         "sound_head" to row("Lyd og vibrasjon (valgfritt)", "Sound and vibration (optional)",
             "Dźwięk i wibracja (opcjonalnie)"),
         "sound_body" to row(
