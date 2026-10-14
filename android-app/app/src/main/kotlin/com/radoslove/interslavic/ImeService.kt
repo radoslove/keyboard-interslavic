@@ -29,9 +29,13 @@ class ImeService : InputMethodService() {
     /** The languages the current view was built with (the space bar names them). */
     private var builtLangs: List<String>? = null
 
+    /** The theme choice the current view was built with. */
+    private var builtTheme: String? = null
+
     override fun onCreateInputView(): View {
         builtScript = Script.mode(this)
         builtLangs = Lang.enabled(this) + Lang.current(this)
+        builtTheme = Theme.choice(this)
         return KeyboardView(this, this).also { view = it }
     }
 
@@ -42,7 +46,8 @@ class ImeService : InputMethodService() {
         Lang.of(imm.currentInputMethodSubtype)?.let { Lang.setCurrent(this, it) }
         Dictionary.ensureLoaded(this)
         val langs = Lang.enabled(this) + Lang.current(this)
-        if (builtScript != null && (Script.mode(this) != builtScript || langs != builtLangs)) {
+        if (builtScript != null &&
+            (Script.mode(this) != builtScript || langs != builtLangs || Theme.choice(this) != builtTheme)) {
             setInputView(onCreateInputView())
         }
         super.onStartInputView(info, restarting)

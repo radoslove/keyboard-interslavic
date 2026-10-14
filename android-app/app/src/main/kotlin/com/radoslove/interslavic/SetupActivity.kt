@@ -73,7 +73,7 @@ class SetupActivity : Activity() {
         langsNow = body("")
         root.addView(langsNow)
         root.addView(Button(this).apply {
-            text = labelled("btn_langs", " — ")
+            text = button("btn_langs")
             setOnClickListener {
                 val imi = Lang.imi(this@SetupActivity)
                 val i = Intent(android.provider.Settings.ACTION_INPUT_METHOD_SUBTYPE_SETTINGS)
@@ -127,6 +127,21 @@ class SetupActivity : Activity() {
             }
         })
 
+        // Light or dark keyboard; automatic follows the phone.
+        section(root, "theme_head", null)
+        val theme = Theme.choice(this)
+        root.addView(RadioGroup(this).apply {
+            for ((value, key) in listOf(Theme.AUTO to "theme_auto", Theme.LIGHT to "theme_light", Theme.DARK to "theme_dark")) {
+                addView(RadioButton(this@SetupActivity).apply {
+                    id = android.view.View.generateViewId()
+                    text = labelled(key)
+                    textSize = 17f
+                    isChecked = value == theme
+                    setOnClickListener { Theme.set(this@SetupActivity, value) }
+                })
+            }
+        })
+
         // Which marks are typed how often - the measurement behind key placement.
         section(root, "sym_head", "sym_body")
         symbolsNow = body("")
@@ -156,11 +171,11 @@ class SetupActivity : Activity() {
         root.addView(status)
 
         root.addView(Button(this).apply {
-            text = labelled("btn_batch", " — ")
+            text = button("btn_batch")
             setOnClickListener { exportBatch() }
         })
         root.addView(Button(this).apply {
-            text = labelled("btn_export", " — ")
+            text = button("btn_export")
             setOnClickListener { exportQueue() }
         })
         root.addView(Button(this).apply {
@@ -201,6 +216,11 @@ class SetupActivity : Activity() {
     /** `ms` shows `Interslavic (English)`, the other languages their text alone. */
     private fun labelled(key: String, sep: String = " "): String =
         glossOf(key)?.let { "${t(key)}$sep($it)" } ?: t(key)
+
+    /** Buttons as before the translation: `Pošli do bazy (grupa JSON) — Send to the
+     *  database (JSON batch)`, no brackets around the English. */
+    private fun button(key: String): String =
+        glossOf(key)?.let { if (it != t(key)) "${t(key)} — $it" else null } ?: t(key)
 
     /** Language names in their own language, and in the screen's in brackets. */
     private fun langName(lang: String): String = Ui.langName(ui, lang)

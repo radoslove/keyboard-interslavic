@@ -206,6 +206,26 @@ class KeyboardView(
      *  neighbouring keys, travels about one. */
     private val MIN_GLIDE_KEYS = 0.8f
 
+    /**
+     * Light or dark ([Theme]: automatic with the phone, or chosen in the
+     * settings). Every colour the keyboard draws comes from here. The view is
+     * rebuilt when the system mode or the choice changes, so this is read once.
+     */
+    private val dark = Theme.isDark(context)
+    private fun c(light: String, night: String) = Color.parseColor(if (dark) night else light)
+    private val cBoard = c("#ECEFF1", "#1B1F22")
+    private val cKey = c("#FFFFFF", "#3A3F44")
+    private val cText = c("#1C2529", "#E8EAED")
+    private val cStrip = c("#E0E4E7", "#24292D")
+    private val cChipOn = c("#DCE3E7", "#3A444B")
+    private val cBorder = c("#90A4AE", "#5F6B73")
+    private val cShiftOne = c("#B0BEC5", "#56626B")
+    private val cShiftLock = c("#78909C", "#8A9AA5")
+    private val cUndoText = c("#4E342E", "#FFE0B2")
+    private val cUndoBg = c("#FFE0B2", "#5D4037")
+    private val cSaveText = c("#1B5E20", "#C8E6C9")
+    private val cSaveBg = c("#C8E6C9", "#2E5E33")
+
     // Visible trail so the user can SEE the glide as it happens. Flat triples
     // (x, y, t) - the timestamp is what makes velocityPivots possible, and the
     // trail is the only place the raw gesture exists.
@@ -221,7 +241,7 @@ class KeyboardView(
 
     init {
         orientation = VERTICAL
-        setBackgroundColor(Color.parseColor("#ECEFF1"))
+        setBackgroundColor(cBoard)
         setPadding(dp(3), dp(6), dp(3), dp(6))
         setWillNotDraw(false)        // a ViewGroup must be told to draw
         trailPaint.strokeWidth = dp(9).toFloat()
@@ -267,10 +287,10 @@ class KeyboardView(
                 if (i == popupSel) {
                     canvas.drawRoundRect(l + 2f, popupTop + 2f, l + popupCell - 2f, popupBottom - 2f, r, r, popupSelBg)
                     previewTxt.color = Color.WHITE
-                } else previewTxt.color = Color.parseColor("#1C2529")
+                } else previewTxt.color = cText
                 canvas.drawText(Script.out(context, items[i]), l + popupCell / 2f, baseline, previewTxt)
             }
-            previewTxt.color = Color.parseColor("#1C2529")
+            previewTxt.color = cText
         }
     }
 
@@ -341,13 +361,13 @@ class KeyboardView(
     private var previewKeyTop = 0f
     private var previewKeyW = 0f
     private val previewBg = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.WHITE; style = Paint.Style.FILL
+        color = cKey; style = Paint.Style.FILL
     }
     private val previewBorder = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#90A4AE"); style = Paint.Style.STROKE; strokeWidth = 2f
+        color = cBorder; style = Paint.Style.STROKE; strokeWidth = 2f
     }
     private val previewTxt = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#1C2529"); textAlign = Paint.Align.CENTER
+        color = cText; textAlign = Paint.Align.CENTER
     }
 
     private fun showKeyPreview(tv: TextView) {
@@ -420,8 +440,8 @@ class KeyboardView(
                 val glyph = if (capsLocked) "⇪" else "⇧"
                 val sk = functionKey(glyph, 1.5f) { onShiftTap() }
                 when {
-                    capsLocked -> sk.setBackgroundColor(Color.parseColor("#78909C"))  // locked: stronger
-                    shift -> sk.setBackgroundColor(Color.parseColor("#B0BEC5"))         // one-shot: light
+                    capsLocked -> sk.setBackgroundColor(cShiftLock)  // locked: stronger
+                    shift -> sk.setBackgroundColor(cShiftOne)         // one-shot: light
                 }
                 rv.addView(sk)
             }
@@ -459,7 +479,12 @@ class KeyboardView(
     private fun spaceKey(weight: Float): TextView {
         val many = Lang.enabled(context).size > 1
         val tv = functionKey(if (many) Lang.label(Lang.current(context)) else "space", weight) { commit(" ") }
-        if (many) tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+        if (many) {
+            // Smaller than a letter, still shrinking to fit (setTextSize would switch auto-size off).
+            if (android.os.Build.VERSION.SDK_INT >= 26) {
+                tv.setAutoSizeTextTypeUniformWithConfiguration(9, 14, 1, TypedValue.COMPLEX_UNIT_SP)
+            } else tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+        }
         return tv
     }
 
@@ -506,6 +531,10 @@ class KeyboardView(
         val row = LinearLayout(context)
         row.orientation = HORIZONTAL
         row.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
+        // A row lines its keys up by text BASELINE by default, so a label that
+        // wrapped onto two lines (`ⰀⰁⰂ`, `Medžuslovjansky`, Glagolitic `y` = `ⱐⰹ`)
+        // pushed its key down out of the row (owner 2026-10-14, a55).
+        row.isBaselineAligned = false
         return row
     }
 
@@ -724,8 +753,15 @@ class KeyboardView(
         tv.text = text
         tv.gravity = Gravity.CENTER
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
-        tv.setTextColor(Color.parseColor("#1C2529"))
-        tv.setBackgroundColor(Color.WHITE)
+        // One line, shrinking to fit: a wide label never wraps onto a second line.
+        tv.maxLines = 1
+        if (android.os.Build.VERSION.SDK_INT >= 26) {
+            tv.setAutoSizeTextTypeUniformWithConfiguration(10, 20, 1, TypedValue.COMPLEX_UNIT_SP)
+        } else {
+            tv.ellipsize = android.text.TextUtils.TruncateAt.END
+        }
+        tv.setTextColor(cText)
+        tv.setBackgroundColor(cKey)
         val lp = LayoutParams(0, dp(52), weight)
         lp.setMargins(dp(1), dp(1), dp(1), dp(1))   // bigger touch area, fewer dead gaps
         tv.layoutParams = lp
@@ -1087,12 +1123,12 @@ class KeyboardView(
     private fun buildSuggestionStrip(): android.view.View {
         val strip = LinearLayout(context)
         strip.orientation = HORIZONTAL
-        strip.setBackgroundColor(Color.parseColor("#E0E4E7"))
+        strip.setBackgroundColor(cStrip)
         repeat(SLOTS) { i ->
             val tv = TextView(context)
             tv.gravity = Gravity.CENTER
             tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
-            tv.setTextColor(Color.parseColor("#1C2529"))
+            tv.setTextColor(cText)
             // Fixed width, not weight: weights collapse inside a scroll view,
             // and a stable width keeps the chips from jumping as words change.
             // Long words (`søtningsstoff`, `najpopularniejszych`) wrapped onto a
@@ -1114,7 +1150,7 @@ class KeyboardView(
         val scroller = HorizontalScrollView(context)
         scroller.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, dp(42))
         scroller.isHorizontalScrollBarEnabled = false
-        scroller.setBackgroundColor(Color.parseColor("#E0E4E7"))
+        scroller.setBackgroundColor(cStrip)
         scroller.addView(strip)
         scroller.setOnTouchListener { v, e ->
             if (e.actionMasked == MotionEvent.ACTION_DOWN) {
@@ -1179,8 +1215,8 @@ class KeyboardView(
         // The ellipsis is not decoration: a held backspace can have eaten more
         // than the word named here, and the chip puts ALL of it back.
         tv.text = if (undoMore) "↶ $undoWord …" else "↶ $undoWord"
-        tv.setTextColor(Color.parseColor("#4E342E"))
-        tv.setBackgroundColor(Color.parseColor("#FFE0B2"))
+        tv.setTextColor(cUndoText)
+        tv.setBackgroundColor(cUndoBg)
     }
 
     private fun setSlot(i: Int, display: String, word: String, save: Boolean) {
@@ -1190,8 +1226,8 @@ class KeyboardView(
         slotIsUndo[i] = false
         val tv = suggestionViews[i]
         tv.text = display
-        tv.setTextColor(if (save) Color.parseColor("#1B5E20") else Color.parseColor("#1C2529"))
-        tv.setBackgroundColor(if (save) Color.parseColor("#C8E6C9") else Color.TRANSPARENT)
+        tv.setTextColor(if (save) cSaveText else cText)
+        tv.setBackgroundColor(if (save) cSaveBg else Color.TRANSPARENT)
     }
 
     private fun clearSlots() {
@@ -1484,9 +1520,9 @@ class KeyboardView(
             // they just pressed, mid-gesture, before anything is committed.
             val w = words.getOrNull(i)?.let { caseSwipe(it, swipeShift, swipeCaps) }
             suggestionViews[i].text = w?.let { Script.out(context, it) }.orEmpty()
-            suggestionViews[i].setTextColor(Color.parseColor("#1C2529"))
+            suggestionViews[i].setTextColor(cText)
             suggestionViews[i].setBackgroundColor(
-                if (i == 0 && w != null) Color.parseColor("#DCE3E7") else Color.TRANSPARENT
+                if (i == 0 && w != null) cChipOn else Color.TRANSPARENT
             )
         }
     }
@@ -1560,9 +1596,9 @@ class KeyboardView(
             slotWord[i + off] = shown[i]
             slotIsSwipeAlt[i + off] = true
             suggestionViews[i + off].text = Script.out(context, shown[i])
-            suggestionViews[i + off].setTextColor(Color.parseColor("#1C2529"))
+            suggestionViews[i + off].setTextColor(cText)
             suggestionViews[i + off].setBackgroundColor(
-                if (i == highlight) Color.parseColor("#DCE3E7") else Color.TRANSPARENT
+                if (i == highlight) cChipOn else Color.TRANSPARENT
             )
         }
     }

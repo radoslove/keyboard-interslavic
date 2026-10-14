@@ -71,7 +71,8 @@ object Ui {
         "title" to row("Medžuslovjansky", "Interslavic keyboard", "Klawiatura międzysłowiańska", "Interslavisk tastatur"),
         "intro" to row(
             "Medžuslovjanska klaviatura. Standardne bukvy (č š ž ě) na dolgom " +
-                "pritisku i mahu nagoru; pas prědloženj iz slovnika.",
+                "pritisku i mahu vgoru; pas prědloženij iz slovnika. Takože jezyky: " +
+                "medžuskandinavsky, poljsky, norvežsky i anglijsky.",
             "Interslavic keyboard. Standard letters (č š ž ě) on long-press and " +
                 "an upward flick; a suggestion bar from the dictionary. Also Interscandinavian, " +
                 "Polish, Norwegian and English.",
@@ -118,10 +119,10 @@ object Ui {
         "collect_head" to row("Sbiranje novyh slov (opcionalno)", "Collecting new words (optional)",
             "Zbieranie nowych słów (opcjonalnie)", "Innsamling av nye ord (valgfritt)"),
         "collect_body" to row(
-            "Kogda je vključeno, klaviatura lokalno zapisyvaje slova, ktoryh ně v " +
-                "slovniku, da by pozdněje šli do revizije (nikoli ně avtomatično " +
-                "popravjena). Ničto se ne posyla — izvoz je fajl, ktory sam prědaješ " +
-                "dalje. Standardno vyključeno.",
+            "Kogda je vključeno, klaviatura lokalno zapisyvaje slova, ktoryh nema v " +
+                "slovniku, da by pozdněje šli do prěgleda (nikogda ne avtomatično " +
+                "popravjene). Ničto se ne posyla — izvoz je fajl, ktory sam prědaješ " +
+                "dalje. Standardno izključeno.",
             "When on, the keyboard saves Interslavic words NOT in the dictionary LOCALLY, " +
                 "to later go to review (never auto-corrected). Nothing is sent — the " +
                 "export is a file you pass on yourself. Off by default.",
@@ -137,12 +138,12 @@ object Ui {
         "pop_head" to row("Poredok popularnosti (opcionalno)", "Popularity ranking (optional)",
             "Ranking popularności (opcjonalnie)", "Popularitetsrangering (valgfritt)"),
         "pop_body" to row(
-            "Kogda je vključeno, slova, ktora potvrdiš pri pisanju — svaipom, " +
-                "izborom iz pasa, dovršenjem znanego slova — sut lokalno čislena za " +
-                "spisok najpopularnějših medžuslovjanskih slov. Psevdonimno " +
-                "(identifikator ustrojstva niže), bez ličnyh danyh. Ničto ne odhodi " +
-                "avtomatično — do bazy dojde tolko pri tvojem izvozu. Standardno " +
-                "vyključeno.",
+            "Kogda je vključeno, slova, ktore potvrdiš pri pisanju — svajpom, " +
+                "izborom iz pasa, dokončenjem znanogo slova — sut lokalno čisljene za " +
+                "spis najpopularnějših medžuslovjanskih slov. Psevdonimno " +
+                "(identifikator telefona niže), bez personalnyh danyh. Ničto ne odhodi " +
+                "avtomatično — do bazy dojde jedino pri tvojem izvozu. Standardno " +
+                "izključeno.",
             "When on, Interslavic words you CONFIRM while typing — swipe, picking from the " +
                 "bar, finishing a known word — are counted LOCALLY to feed a ranking " +
                 "of the most popular Interslavic words. Pseudonymously (device id " +
@@ -161,6 +162,10 @@ object Ui {
         ),
         "pop_sw" to row("Vklad do poredka popularnosti", "Contribute to the popularity ranking",
             "Dokładaj do rankingu popularności", "Bidra til popularitetsrangeringen"),
+        "theme_head" to row("Tema klaviatury", "Keyboard theme", "Motyw klawiatury", "Tastaturtema"),
+        "theme_auto" to row("Avtomatično, kako telefon", "Automatic, as the phone", "Automatycznie, jak telefon", "Automatisk, som telefonen"),
+        "theme_light" to row("Světla", "Light", "Jasny", "Lyst"),
+        "theme_dark" to row("Temna", "Dark", "Ciemny", "Mørkt"),
         "sym_head" to row("Znaky", "Marks", "Znaki", "Tegn"),
         "sym_body" to row(
             null,
@@ -178,19 +183,19 @@ object Ui {
         "sound_head" to row("Zvuk i vibracija (opcionalno)", "Sound and vibration (optional)",
             "Dźwięk i wibracja (opcjonalnie)", "Lyd og vibrasjon (valgfritt)"),
         "sound_body" to row(
-            "Kratky zvuk i vibracija pri každoj klaviši. Standardno vyključeno.",
+            "Kratky zvuk i vibracija pri každoj klaviši. Standardno izključeno.",
             "A short sound and vibration on each key. Off by default.",
             "Krótki dźwięk i wibracja przy każdym klawiszu. Domyślnie wyłączone.",
             "En kort lyd og vibrasjon for hver tast. Av som standard.",
         ),
-        "sound_sw" to row("Zvuk i vibracija klaviš", "Key sound and vibration",
+        "sound_sw" to row("Zvuk i vibracija klaviatury", "Key sound and vibration",
             "Dźwięk i wibracja klawiszy", "Tastelyd og vibrasjon"),
-        "space_head" to row("Razstup medžu slovami", "Spacing between words",
+        "space_head" to row("Odstup medžu slovami", "Spacing between words",
             "Odstęp między słowami", "Mellomrom mellom ord"),
         "space_body" to row(
-            "Standardno razstup jest dodavany PRED slědujuće slovo, tako že " +
-                "interpunkcija drži se slova bez razstupa. Iz-ključi, ako hoćeš " +
-                "stary sposob: razstup naide srazu po slovu.",
+            "Standardno odstup jest dodavany PRĚD slědujuče slovo, tako že " +
+                "interpunkcija se drži slova bez odstupa. Izključi, ako hočeš " +
+                "stary sposob: odstup ide směsta po slovu.",
             "By default the space is added BEFORE the next word, so punctuation " +
                 "stays tight against the word. Turn this off for the classic way: " +
                 "the space follows the word immediately.",
@@ -199,10 +204,10 @@ object Ui {
             "Som standard settes mellomrommet inn FØR neste ord, slik at tegnsettingen " +
                 "står tett inntil ordet. Slå av for den klassiske måten: mellomrom rett etter ordet.",
         ),
-        "space_sw" to row("Umny razstup", "Smart space", "Inteligentna spacja", "Smart mellomrom"),
+        "space_sw" to row("Umny odstup", "Smart space", "Inteligentna spacja", "Smart mellomrom"),
         "btn_batch" to row("Pošli do bazy (grupa JSON)", "Send to the database (JSON batch)",
             "Wyślij do bazy (paczka JSON)", "Send til databasen (JSON-pakke)"),
-        "btn_export" to row("Izvezi do revizije (spisok)", "Export for review (list)",
+        "btn_export" to row("Izvezi do prěgleda (spis)", "Export for review (list)",
             "Eksportuj do przeglądu (lista)", "Eksporter til gjennomgang (liste)"),
         "btn_clear" to row("Očisti red", "Clear the queue", "Wyczyść kolejkę", "Tøm køen"),
         "t_cleared" to row(null, "Queue cleared", "Kolejka wyczyszczona", "Køen er tømt"),

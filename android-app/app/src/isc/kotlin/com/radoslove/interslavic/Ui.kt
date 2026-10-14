@@ -139,6 +139,10 @@ object Ui {
         ),
         "pop_sw" to row("Bidra til popularitetsrangeringen", "Contribute to the popularity ranking",
             "Dokładaj do rankingu popularności"),
+        "theme_head" to row("Tastaturtema", "Keyboard theme", "Motyw klawiatury"),
+        "theme_auto" to row("Automatisk, som telefonen", "Automatic, as the phone", "Automatycznie, jak telefon"),
+        "theme_light" to row("Lyst", "Light", "Jasny"),
+        "theme_dark" to row("Mørkt", "Dark", "Ciemny"),
         "sym_head" to row("Tegn", "Marks", "Znaki"),
         "sym_body" to row(
             "Hvor ofte du skriver hvert tegn (? , . „ € og resten), telt bare på denne telefonen, " +
