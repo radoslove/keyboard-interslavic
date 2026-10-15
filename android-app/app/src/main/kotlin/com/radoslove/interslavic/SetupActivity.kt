@@ -127,6 +127,11 @@ class SetupActivity : Activity() {
             }
         })
 
+        // The user's own words (the `＋ word` chip), per language, each removable.
+        section(root, "words_head", "words_body")
+        wordsBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        root.addView(wordsBox)
+
         // Light or dark keyboard; automatic follows the phone.
         section(root, "theme_head", null)
         val theme = Theme.choice(this)
@@ -201,6 +206,7 @@ class SetupActivity : Activity() {
         super.onResume()
         refreshStatus()
         langsNow.text = "${t("langs_now")}: " + Lang.enabled(this).joinToString(", ") { langName(it) }
+        refreshWords()
         val top = Symbols.top(this, 15)
         symbolsNow.text = if (top.isEmpty()) t("sym_none")
             else top.joinToString("   ") { (mark, n) -> "$mark $n" }
@@ -209,6 +215,40 @@ class SetupActivity : Activity() {
 
     private lateinit var langsNow: TextView
     private lateinit var symbolsNow: TextView
+    private lateinit var wordsBox: LinearLayout
+
+    /** One block per language that has words: its name, then each word with a remove button. */
+    private fun refreshWords() {
+        wordsBox.removeAllViews()
+        var any = false
+        for (lang in Lang.ALL) {
+            val words = UserWords.all(this, lang).sorted()
+            if (words.isEmpty()) continue
+            any = true
+            wordsBox.addView(body(langName(lang)).apply { textSize = 16f })
+            for (w in words) {
+                wordsBox.addView(LinearLayout(this).apply {
+                    orientation = LinearLayout.HORIZONTAL
+                    gravity = Gravity.CENTER_VERTICAL
+                    addView(TextView(this@SetupActivity).apply {
+                        text = w
+                        textSize = 17f
+                        setTextColor(Color.parseColor("#1C2529"))
+                        layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
+                    })
+                    addView(Button(this@SetupActivity).apply {
+                        text = t("words_remove")
+                        setOnClickListener {
+                            UserWords.remove(this@SetupActivity, lang, w)
+                            toast("${t("words_removed")}: $w")
+                            refreshWords()
+                        }
+                    })
+                })
+            }
+        }
+        if (!any) wordsBox.addView(body(t("words_none")))
+    }
 
     private fun t(key: String) = Ui.t(ui, key)
     private fun glossOf(key: String) = Ui.gloss(ui, key)

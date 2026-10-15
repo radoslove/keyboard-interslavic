@@ -288,6 +288,14 @@ object Dictionary {
      */
     private const val USER_FREQ = 120
 
+    /** Drop [lang]'s loaded list, so the next use reads it again - after a
+     *  user word was removed in the settings. */
+    @Synchronized
+    fun forget(lang: String) {
+        loaded.remove(lang)
+        if (current == lang) { ready = false; entries = emptyArray() }
+    }
+
     /** Insert a user-added word into the live list; no-op if known or not loaded. */
     @Synchronized
     fun addUserWord(word: String) {

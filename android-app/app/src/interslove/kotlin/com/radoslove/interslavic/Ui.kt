@@ -162,6 +162,20 @@ object Ui {
         ),
         "pop_sw" to row("Vklad do poredka popularnosti", "Contribute to the popularity ranking",
             "Dokładaj do rankingu popularności", "Bidra til popularitetsrangeringen"),
+        "words_head" to row("Moje slova", "My words", "Moje słowa", "Mine ord"),
+        "words_body" to row(
+            "Slova dodane čipom ＋ v pasu prědloženij, za každy jezyk. Odstrani slovo i " +
+                "klaviatura go prěstane prědlagati.",
+            "Words you added with the ＋ chip in the suggestion bar, per language. Remove a " +
+                "word and the keyboard stops suggesting it.",
+            "Słowa dodane chipem ＋ na pasku podpowiedzi, osobno dla każdego języka. Usuń słowo, " +
+                "a klawiatura przestanie je podpowiadać.",
+            "Ord du har lagt til med ＋ i forslagslinjen, for hvert språk. Fjern et ord, så " +
+                "slutter tastaturet å foreslå det.",
+        ),
+        "words_none" to row("Ješče ničto ne jest dodano.", "No words added yet.", "Nie dodano jeszcze słów.", "Ingen ord lagt til ennå."),
+        "words_remove" to row("Odstrani", "Remove", "Usuń", "Fjern"),
+        "words_removed" to row("Odstranjeno", "Removed", "Usunięto", "Fjernet"),
         "theme_head" to row("Tema klaviatury", "Keyboard theme", "Motyw klawiatury", "Tastaturtema"),
         "theme_auto" to row("Avtomatično, kako telefon", "Automatic, as the phone", "Automatycznie, jak telefon", "Automatisk, som telefonen"),
         "theme_light" to row("Světla", "Light", "Jasny", "Lyst"),

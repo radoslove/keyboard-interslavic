@@ -139,6 +139,18 @@ object Ui {
         ),
         "pop_sw" to row("Bidra til popularitetsrangeringen", "Contribute to the popularity ranking",
             "Dokładaj do rankingu popularności"),
+        "words_head" to row("Mine ord", "My words", "Moje słowa"),
+        "words_body" to row(
+            "Ord du har lagt til med ＋ i forslagslinjen, for hvert språk. Fjern et ord, så " +
+                "slutter tastaturet å foreslå det.",
+            "Words you added with the ＋ chip in the suggestion bar, per language. Remove a " +
+                "word and the keyboard stops suggesting it.",
+            "Słowa dodane chipem ＋ na pasku podpowiedzi, osobno dla każdego języka. Usuń słowo, " +
+                "a klawiatura przestanie je podpowiadać.",
+        ),
+        "words_none" to row("Ingen ord lagt til ennå.", "No words added yet.", "Nie dodano jeszcze słów."),
+        "words_remove" to row("Fjern", "Remove", "Usuń"),
+        "words_removed" to row("Fjernet", "Removed", "Usunięto"),
         "theme_head" to row("Tastaturtema", "Keyboard theme", "Motyw klawiatury"),
         "theme_auto" to row("Automatisk, som telefonen", "Automatic, as the phone", "Automatycznie, jak telefon"),
         "theme_light" to row("Lyst", "Light", "Jasny"),

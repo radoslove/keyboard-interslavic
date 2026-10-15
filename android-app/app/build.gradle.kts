@@ -30,8 +30,8 @@ val diagnosticsProps = Properties().apply {
 // Two apps are built from this one code (product flavors below), each with its
 // own test number: flavor -> (TEST_BASE, TEST_BUILD, label prefix).
 val TESTS = mapOf(
-    "interslove" to Triple("3.5", 27, "MS test"),
-    "isc" to Triple("0.1", 20, "ISC test"),
+    "interslove" to Triple("3.5", 29, "MS test"),
+    "isc" to Triple("0.1", 22, "ISC test"),
 )
 
 fun javaString(value: String): String = "\"" + value

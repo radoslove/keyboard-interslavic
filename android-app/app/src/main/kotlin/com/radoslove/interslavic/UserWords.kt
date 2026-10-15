@@ -34,6 +34,18 @@ object UserWords {
         emptyList()
     }
 
+    /** Remove [word] from [lang]'s list; the dictionary reloads it without the word. */
+    @Synchronized
+    fun remove(context: Context, lang: String, word: String) {
+        try {
+            val f = file(context, lang)
+            if (!f.exists()) return
+            f.writeText(all(context, lang).filter { it != word }.joinToString("") { it + "\n" })
+        } catch (_: Throwable) {
+        }
+        Dictionary.forget(lang)
+    }
+
     /** Save [word] (lowercased) once and make it known to [Dictionary] at once. */
     @Synchronized
     fun add(context: Context, word: String) {

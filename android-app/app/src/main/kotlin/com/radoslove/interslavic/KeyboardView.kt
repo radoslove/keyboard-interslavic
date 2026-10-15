@@ -1177,7 +1177,20 @@ class KeyboardView(
         // The undo chip takes the front slot: a word that has just vanished is
         // more urgent than a prediction for a word not yet finished.
         val first = if (canUndo()) { setUndoSlot(0); 1 } else 0
-        if (word.isEmpty()) return
+        if (word.isEmpty()) {
+            // Right after the space that finished an unknown word, offer it once
+            // more - that is when the eye notices nothing was suggested (as on
+            // iOS, refreshCompletions). Without this the chip vanished with the space.
+            if (before.endsWith(" ")) {
+                val finished = before.dropLast(1).takeLastWhile { it.isLetter() }
+                val fl = Script.toLatin(context, finished).lowercase()
+                if (Dictionary.isReady() && finished.length >= 3 && !finished.first().isUpperCase() &&
+                    !Dictionary.contains(fl)) {
+                    setSlot(first, "＋ ${Script.out(context, fl)}", fl, save = true)
+                }
+            }
+            return
+        }
 
         // `word` is what is on screen (any script); the dictionary is Latin.
         val lower = Script.toLatin(context, word).lowercase()
@@ -1198,11 +1211,17 @@ class KeyboardView(
         // spent by then, which is why reading it here would not help either.
         // What the user typed is the reliable signal, and it survives.
         val capital = word.first().isUpperCase()
+        // The `＋ word` chip goes FIRST, where it is seen. It used to sit in the
+        // last of six slots, off the right edge of the screen, so it could only be
+        // reached by scrolling the strip - which looked like no adding at all
+        // (owner 2026-10-15).
+        val off = if (canSave) {
+            setSlot(first, "＋ ${Script.out(context, lower)}", lower, save = true); first + 1
+        } else first
         for (i in preds.indices) {
             val w = if (capital) preds[i].replaceFirstChar { it.uppercaseChar() } else preds[i]
-            setSlot(first + i, Script.out(context, w), w, save = false)
+            setSlot(off + i, Script.out(context, w), w, save = false)
         }
-        if (canSave) setSlot(SLOTS - 1, "＋ ${Script.out(context, lower)}", lower, save = true)
     }
 
     /** The "put it back" chip: `↶ word`, amber, always the leftmost slot. */
@@ -1326,6 +1345,12 @@ class KeyboardView(
                 // A glide may not START on the bottom row (iOS swipeCanStart): a
                 // thumb sliding on space or on the held `.` was read as a word.
                 if (e.y > lettersBottom() + dp(2)) { swipeStartKey = null; return false }
+                // Nor from ABOVE the letters: dragging the suggestion strip to reach
+                // a chip was read as a glide - words flickered in the strip and `ore`
+                // was committed while scrolling to `＋ farmacevt` (owner 2026-10-15).
+                // The strip's own scroll listener cannot prevent this: the chips
+                // consume the touch, so the listener never sees ACTION_DOWN.
+                if (e.y < lettersTop() - dp(2)) { swipeStartKey = null; return false }
                 // Fall back to the NEAREST key when the press lands in a margin or
                 // just off a key (common on edge keys like `a`); without this the
                 // whole glide was dead because the start key was null.
@@ -1412,13 +1437,16 @@ class KeyboardView(
         return true
     }
 
-    /**
-     * The route-shape decode, returning the top candidates WITHOUT committing —
-     * shared by the live preview (during the glide) and the final commit (on
-     * lift). Resample the finger trajectory and compare it, point-for-point, to
-     * each candidate word's ideal route; first key + length cap come from the
-     * whole trail so fast swipes are not truncated.
-     */
+    /** Upper edge of the letter rows, in KeyboardView coordinates. */
+    private fun lettersTop(): Float {
+        var t = Float.MAX_VALUE
+        for ((_, v) in letterKeyViews) {
+            val row = v.parent as? android.view.View ?: continue
+            t = minOf(t, (row.top + v.top).toFloat())
+        }
+        return if (t == Float.MAX_VALUE) 0f else t
+    }
+
     /** Lower edge of the letter rows, in KeyboardView coordinates. */
     private fun lettersBottom(): Float {
         var b = 0f
@@ -1443,6 +1471,13 @@ class KeyboardView(
         return centers
     }
 
+    /**
+     * The route-shape decode, returning the top candidates WITHOUT committing —
+     * shared by the live preview (during the glide) and the final commit (on
+     * lift). Resample the finger trajectory and compare it, point-for-point, to
+     * each candidate word's ideal route; first key + length cap come from the
+     * whole trail so fast swipes are not truncated.
+     */
     private fun decodeCandidates(rawPts: List<Float>, centers: Map<Char, FloatArray>): List<String> {
         val pointList = ArrayList<FloatArray>(rawPts.size / 3)
         var i = 0
