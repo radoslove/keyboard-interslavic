@@ -100,6 +100,13 @@ class KeyboardView(
     private var swipeCaps = false
     private var swipeDownX = 0f
     private var swipeDownY = 0f
+    /** The finger a glide follows. Two-thumb typing overlaps touches: when the
+     *  first thumb lifted, "pointer 0" became the second one, the position jumped
+     *  `m`->`a`, and a run of hand-typed letters was decoded as ONE glide -
+     *  `master` typed by hand landed as `mastet` (owner 2026-10-15). */
+    private var swipePointerId = -1
+    /** When a letter was last TYPED (tapped); a touch right after is a tap too. */
+    private var lastLetterTapMs = 0L
     private val swipePath = StringBuilder()
     private var lastSwipeWord = ""
     private var lastSwipeCandidates: List<String> = emptyList()
@@ -205,6 +212,8 @@ class KeyboardView(
      *  travels a fraction of a key; the shortest real word glide, between two
      *  neighbouring keys, travels about one. */
     private val MIN_GLIDE_KEYS = 0.8f
+    /** A touch this soon after a typed letter belongs to the typing run, not a glide. */
+    private val TAP_RUN_MS = 250L
 
     /**
      * Light or dark ([Theme]: automatic with the phone, or chosen in the
@@ -786,6 +795,7 @@ class KeyboardView(
         val ic = service.currentInputConnection ?: return
         if (s.isEmpty()) return
         val c0 = s[0]
+        if (c0.isLetter()) lastLetterTapMs = SystemClock.uptimeMillis()
 
         // Adaptive ranking: count a hand-typed known word when a terminator lands.
         if (!c0.isLetter()) {
@@ -1351,6 +1361,13 @@ class KeyboardView(
                 // The strip's own scroll listener cannot prevent this: the chips
                 // consume the touch, so the listener never sees ACTION_DOWN.
                 if (e.y < lettersTop() - dp(2)) { swipeStartKey = null; return false }
+                // Mid-word hand typing: a touch landing right after a typed letter is
+                // the next tap, even if the finger rolls. What is typed by hand stays
+                // as typed - nothing gets decoded over it.
+                if (SystemClock.uptimeMillis() - lastLetterTapMs < TAP_RUN_MS) {
+                    swipeStartKey = null; return false
+                }
+                swipePointerId = e.getPointerId(0)
                 // Fall back to the NEAREST key when the press lands in a margin or
                 // just off a key (common on edge keys like `a`); without this the
                 // whole glide was dead because the start key was null.
@@ -1365,13 +1382,21 @@ class KeyboardView(
                 swipeT0 = e.eventTime
                 addTrailPoint(e.x, e.y, 0f)
             }
+            // A second finger before any glide began = two-thumb typing, never a
+            // glide: give this whole touch sequence to the keys.
+            MotionEvent.ACTION_POINTER_DOWN -> { swipeStartKey = null; return false }
             MotionEvent.ACTION_MOVE -> {
-                addTrailPoint(e.x, e.y, (e.eventTime - swipeT0).toFloat())
                 val start = swipeStartKey ?: return false
-                val dx = e.x - swipeDownX
-                val dy = e.y - swipeDownY
+                if (e.pointerCount > 1) { swipeStartKey = null; return false }
+                val pi = e.findPointerIndex(swipePointerId)
+                if (pi < 0) { swipeStartKey = null; return false }
+                val x = e.getX(pi)
+                val y = e.getY(pi)
+                addTrailPoint(x, y, (e.eventTime - swipeT0).toFloat())
+                val dx = x - swipeDownX
+                val dy = y - swipeDownY
                 val dist = sqrt(dx * dx + dy * dy)
-                val kNow = keyAt(e.x, e.y)
+                val kNow = keyAt(x, y)
                 val crossed = kNow != null && kNow != start
                 // Eager: fire on enough movement OR the moment another key is
                 // entered — whichever comes first.
@@ -1395,8 +1420,12 @@ class KeyboardView(
         if (!swiping) return super.onTouchEvent(e)
         when (e.actionMasked) {
             MotionEvent.ACTION_MOVE -> {
-                addTrailPoint(e.x, e.y, (e.eventTime - swipeT0).toFloat())
-                val k = keyAt(e.x, e.y)
+                // Only the glide's own finger draws; another one touching down
+                // mid-glide must not teleport the trail.
+                val pi = e.findPointerIndex(swipePointerId)
+                if (pi < 0) return true
+                addTrailPoint(e.getX(pi), e.getY(pi), (e.eventTime - swipeT0).toFloat())
+                val k = keyAt(e.getX(pi), e.getY(pi))
                 if (k != null && (swipePath.isEmpty() || swipePath.last() != k)) {
                     swipePath.append(k)
                 }

@@ -4,7 +4,7 @@
 gained since the last round is ported here before anything new is started, so the two apps never
 drift into different keyboards. Update the table at the end of the round.
 
-Last checked: 2026-10-14 (iOS 0.2.1 · Android MS 3.5.18-test, Mellomskandinavisk 0.1.11-test).
+Last checked: 2026-10-16 (iOS 0.2.1 · Android MS 3.5.30-test, Mellomskandinavisk 0.1.23-test).
 
 ## iOS has, Android does not yet → port to Android
 
@@ -27,6 +27,11 @@ Last checked: 2026-10-14 (iOS 0.2.1 · Android MS 3.5.18-test, Mellomskandinavis
 | Languages as system entries (one input-method subtype each, stable `subtypeId`), 🌐 rotates them | 3.5.9–3.5.10 | iOS already: one extension per language |
 | Doubled-letter penalty in the glide decoder (`žže` drew the same line as `že` and won on one kept use) | 3.5.10 (`Dictionary.DOUBLE_W`) | check `SwipeDecoder.swift`: same tie, same fix if `žže` leads there |
 | Instant whole-word wipe after a glide, hold trims the ending | 42c9c07 (3.5.3) | check iOS backspace (0.1.4 has its own) |
+| Mark counter ("Znaky": which symbols are typed, exported with the ranking only) | 9a02ea5 (3.5.20, `Symbols.kt`) | app screen + counting in the extension |
+| Theme choice: automatic (follows the phone) / light / dark | f48b96d (3.5.27, `Theme.kt`) | iOS follows the system only |
+| "My words": the user's added words per language, each removable | 7f0a768 (3.5.29, `UserWords.remove`, `Dictionary.forget`) | app screen list; extension reloads the list |
+| `＋ word` chip in the FIRST strip slot (after undo), predictions after it | 7f0a768 (3.5.29) | check where iOS puts it (Android had it in the last, off-screen slot) |
+| Hand typing is never decoded as a glide: a touch within 250 ms of a typed letter is a tap; a second finger = typing; the glide follows only its own finger (`master` typed fast landed as `mastet`, owner 2026-10-15) | 3.5.30 (`TAP_RUN_MS`, `swipePointerId`) | check `swipeCanStart` in the iOS view: same guard |
 
 ## Done in both
 
@@ -37,6 +42,8 @@ Last checked: 2026-10-14 (iOS 0.2.1 · Android MS 3.5.18-test, Mellomskandinavis
 | `,` `.` on the letter layer with hold popups | 559a71f (0.1.10) | 3.5.7 (`?` moved to `123` in 3.5.16) |
 | `123` like the system keyboard + `#+=` page, holds on numeric keys | ab921f2, 559a71f | 3.5.7 |
 | No glide starting on the bottom row | 7801f4b | 3.5.7 |
+| No glide starting on the suggestion strip (above the letters) | `swipeCanStart` | 7f0a768 (3.5.29, `lettersTop`) |
+| `＋ word` chip offered again right after the space that finished an unknown word | `refreshCompletions` | 7f0a768 (3.5.29) |
 
 ## Deliberate differences
 
