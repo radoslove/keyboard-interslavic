@@ -16,11 +16,14 @@ enum Layout {
         Bundle.main.object(forInfoDictionaryKey: "KeyboardLanguage") as? String ?? "isv"
 
     /// base letter -> the letters of THIS keyboard's language reached by
-    /// holding it; they come first in the popup.
-    static let accents: [Character: [Character]] = language == "pl"
+    /// holding it; they come first in the popup. The three Interslavic
+    /// digraphs sit on `d` / `l` / `n`, as on Android (3.5.7) and in
+    /// `android/isv_latin.xml`.
+    static let accents: [Character: [String]] = language == "pl"
         ? ["a": ["ą"], "c": ["ć"], "e": ["ę"], "l": ["ł"], "n": ["ń"],
            "o": ["ó"], "s": ["ś"], "z": ["ż", "ź"]]
-        : ["c": ["č"], "s": ["š"], "z": ["ž"], "e": ["ě"]]
+        : ["c": ["č"], "s": ["š"], "z": ["ž"], "e": ["ě"],
+           "d": ["dž"], "l": ["lj"], "n": ["nj"]]
 
     /// Letters of OTHER languages, after the Interslavic one in the same
     /// popup (owner 2026-10-10: `mañana` in a letter meant switching
@@ -28,7 +31,7 @@ enum Layout {
     /// for writing other languages - the Interslavic wordlist stays standard
     /// orthography (HOUSE_STYLE §1), and the first slot of every popup keeps
     /// its Interslavic letter so the old habit does not move.
-    static let foreignAccents: [Character: [Character]] = [
+    static let foreignAccents: [Character: [String]] = [
         "a": ["ą", "á", "ä", "à", "â", "ã", "å", "æ"],
         "c": ["ć", "ç"],
         "d": ["ď", "đ"],
@@ -50,17 +53,16 @@ enum Layout {
     /// a popup that opens leftward from the right edge - it has its own key now.
     /// The frequent marks live behind the three punctuation keys of the
     /// letter layer, so `123` is needed only for the rare ones.
-    static let periodAccents: [Character] = ["…", "!", "„", "”", "\"", "'"]
+    static let periodAccents: [String] = ["…", "!", "„", "”", "\"", "'"]
 
     /// Held on `,`: the rest of the sentence punctuation.
-    static let commaAccents: [Character] = [";", ":", "-", "–", "(", ")"]
-
-    /// `?` has its own key next to the period; `!` waits behind it.
-    static let questionAccents: [Character] = ["!", "¿", "¡"]
+    static let commaAccents: [String] = [";", ":", "-", "–", "(", ")"]
 
     /// Held on keys of the numeric layer; the layer itself keeps only what is
     /// used often enough to deserve a key.
-    static let numericAccents: [Character: [Character]] = [
+    /// `?` and `!` left the letters (Android 3.5.16, owner 2026-10-14) and sit
+    /// next to backspace on `123`; `¿` `¡` wait behind them there.
+    static let numericAccents: [Character: [String]] = [
         "-": ["–", "—", "_", "+", "="],
         "&": ["%", "#", "*"],
         "€": ["$", "£"],
@@ -68,6 +70,9 @@ enum Layout {
         "(": ["[", "{", "<"],
         ")": ["]", "}", ">"],
         "/": ["\\", "|"],
+        ".": periodAccents,
+        "?": ["¿"],
+        "!": ["¡"],
     ]
 
     static let letterRows: [[Character]] = [
@@ -76,39 +81,48 @@ enum Layout {
         Array("zxcvbnm"),
     ]
 
-    /// Same arrangement as the system keyboard's `123` layer, so the thumb
-    /// finds `,` and `.` where it already expects them.
+    /// `123` - rows 1-2 as on the system keyboard. Row 3 sits between `#+=`
+    /// and backspace and runs from the rarest mark to the most used, so `?`
+    /// and `!` are right next to backspace, nearest the thumb (Android 3.5.16).
     static let numericRows: [[Character]] = [
         Array("1234567890"),
         Array("-/:;()€&@\""),
-        Array(".,?!'"),
+        Array(".,'!?"),
     ]
 
     /// Second symbol page, `#+=` on the numeric layer - as on iOS.
     static let symbolRows: [[Character]] = [
         Array("[]{}#%^*+="),
         Array("_\\|~<>€£¥•"),
-        Array(".,?!'"),
+        Array(".,'!?"),
     ]
 
-    /// Longpress variants for any key, or nil if the key has none.
+    /// Longpress variants for any key, or nil if the key has none. Own
+    /// letters first; foreign Latin letters only while writing Latin - in
+    /// Cyrillic or Glagolitic they would be Latin in the middle of the other
+    /// script. Returned in Latin; the caller converts them with `Script.out`.
     static func variants(for key: Character, uppercase: Bool,
-                         numericLayer: Bool = false) -> [Character]? {
+                         numericLayer: Bool = false, latin: Bool = true) -> [String]? {
+        if numericLayer { return numericAccents[key] }
         let lower = Character(key.lowercased())
-        var out: [Character] = []
         let own = accents[lower] ?? []
-        let foreign = (foreignAccents[lower] ?? []) + (language == "pl"
-            ? [Character]([ "c": "č", "s": "š", "z": "ž", "e": "ě" ][lower].map { [$0] } ?? [])
-            : [])
-        for letter in own + foreign.filter({ !own.contains($0) }) {
-            // `ß` has no single-letter capital; keep it as it is.
-            let up = letter.uppercased()
-            out.append(uppercase && up.count == 1 ? Character(up) : letter)
+        var all = own
+        if latin {
+            let isvOnPl: [Character: String] = ["c": "č", "s": "š", "z": "ž", "e": "ě"]
+            let foreign = (foreignAccents[lower] ?? [])
+                + (language == "pl" ? isvOnPl[lower].map { [$0] } ?? [] : [])
+            for f in foreign where !all.contains(f) { all.append(f) }
         }
-        if !out.isEmpty { return out }
+        if !all.isEmpty { return all.map { cased($0, uppercase) } }
         if key == "." { return periodAccents }
-        if key == "," && !numericLayer { return commaAccents }
-        if key == "?" && !numericLayer { return questionAccents }
-        return numericAccents[key]
+        if key == "," { return commaAccents }
+        return nil
+    }
+
+    /// `ß` has no one-letter capital; a digraph capitalises its first letter
+    /// only (`Dž`, `Lj`).
+    private static func cased(_ s: String, _ uppercase: Bool) -> String {
+        guard uppercase, s != "ß" else { return s }
+        return s.prefix(1).uppercased() + s.dropFirst()
     }
 }

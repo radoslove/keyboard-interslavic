@@ -43,20 +43,31 @@ final class SwipeGestureRecognizer: UIGestureRecognizer {
 
     private(set) var points: [CGPoint] = []
     private var origin: CGPoint = .zero
+    /// The finger the swipe follows. Another one touching down mid-swipe
+    /// must not teleport the trail (Android 3.5.30, swipePointerId).
+    private weak var finger: UITouch?
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesBegan(touches, with: event)
+        if finger != nil {
+            // A second finger before any swipe began = two-thumb typing, never
+            // a swipe: the keys get this whole touch sequence. Once a swipe
+            // runs, the other finger is simply not followed.
+            if state == .possible { state = .failed }
+            return
+        }
         guard touches.count == 1, let touch = touches.first else {
             state = .failed
             return
         }
+        finger = touch
         origin = touch.location(in: view)
         points = [origin]
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesMoved(touches, with: event)
-        guard let touch = touches.first, let view else { return }
+        guard let touch = finger, touches.contains(touch), let view else { return }
         let p = touch.location(in: view)
         points.append(p)
 
@@ -72,6 +83,7 @@ final class SwipeGestureRecognizer: UIGestureRecognizer {
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesEnded(touches, with: event)
+        guard let touch = finger, touches.contains(touch) else { return }
         state = (state == .began || state == .changed) ? .ended : .failed
     }
 
@@ -83,6 +95,7 @@ final class SwipeGestureRecognizer: UIGestureRecognizer {
     override func reset() {
         super.reset()
         points = []
+        finger = nil
     }
 }
 
@@ -98,12 +111,14 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     /// Learned from words they KEPT, so a thumb that lands high (or a phone
     /// whose glass makes it look so) stops costing them the first guess.
     private(set) var touchLift: Double = {
-        let d = UserDefaults.standard
+        let d = Shared.store
         return d.object(forKey: "touchLift") == nil
             ? SwipeDecoder.defaultTouchLift : d.double(forKey: "touchLift")
     }()
     /// Words the user added with `＋`, lowercase. On this phone only.
-    private(set) var userWords: [String] = UserDefaults.standard.stringArray(forKey: "userWords") ?? []
+    /// Per language; with Full Access shared with the app, which lists them
+    /// and can remove one.
+    private(set) var userWords: [String] = Shared.userWords(Layout.language)
 
     /// Saves a word the wordlist lacks (`napiše`, `koležanka`). From then on
     /// it completes and can be swiped. Never leaves the phone.
@@ -111,7 +126,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         let w = word.lowercased()
         guard SwipeDictionary.keys(of: w) != nil, !userWords.contains(w) else { return }
         userWords.append(w)
-        UserDefaults.standard.set(userWords, forKey: "userWords")
+        Shared.setUserWords(userWords, Layout.language)
     }
 
     private var userWordKeys: [(word: String, keys: [UInt8])] {
@@ -270,7 +285,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         // dropped, the rest only nudge, and the result stays in a sane band.
         guard (-0.3...0.9).contains(measured) else { return }
         touchLift = min(0.6, max(0, touchLift + 0.1 * (measured - touchLift)))
-        UserDefaults.standard.set(touchLift, forKey: "touchLift")
+        Shared.store.set(touchLift, forKey: "touchLift")
     }
 
     /// The word did not come from this gesture (a completion was tapped, or it
