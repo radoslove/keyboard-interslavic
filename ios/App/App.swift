@@ -19,7 +19,7 @@ struct SetupView: View {
     @Environment(\.scenePhase) private var phase
 
     /// The keyboards this app carries, in the order of the list.
-    private let languages = [("isv", "Medžuslovjansky"), ("pl", "Polski")]
+    private let languages = [("isv", "Medžuslovjansky"), ("pl", "Polski"), ("en", "English")]
 
     private func reload() {
         words = Dictionary(uniqueKeysWithValues: languages.map { ($0.0, Shared.userWords($0.0)) })

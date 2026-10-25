@@ -3,6 +3,7 @@
 
     python3 build_swipe_dictionary.py          # isv
     python3 build_swipe_dictionary.py pl       # the Polish keyboard
+    python3 build_swipe_dictionary.py en       # the English keyboard
 
 Source is `dictionary/main_isv.combined` - the same 248 845 forms shipped to
 Android. Nothing is pruned. The 5.2 MB cut we made for Keyman in August was
@@ -58,6 +59,10 @@ if LANG == "pl":
     # as `l` with a diacritic, so no generic folding would.
     FOLD = {"ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n",
             "ó": "o", "ś": "s", "ź": "z", "ż": "z"}
+if LANG == "en":
+    # Plain a-z: a form with any other letter (`café`) cannot be swiped and
+    # is left out, as on Android.
+    FOLD = {}
 ALPHA = "abcdefghijklmnopqrstuvwxyz"
 INDEX = {c: i for i, c in enumerate(ALPHA)}
 

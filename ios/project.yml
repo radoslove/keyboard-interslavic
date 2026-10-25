@@ -15,7 +15,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "0.4.0"
+    MARKETING_VERSION: "0.4.3"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
@@ -77,13 +77,14 @@ targets:
     dependencies:
       - target: Keyboard
       - target: KeyboardPL
+      - target: KeyboardEN
 
   Keyboard:
     type: app-extension
     platform: iOS
     sources:
       - path: Keyboard
-        excludes: ["Resources/pl_swipe.bin"]
+        excludes: ["Resources/pl_swipe.bin", "Resources/en_swipe.bin"]
       - path: Shared
     entitlements:
       path: Keyboard/Keyboard.entitlements
@@ -141,7 +142,7 @@ targets:
       - path: Keyboard
         # Same code, other wordlist. Its own Info.plist is generated below,
         # so the isv one must not be copied in as a resource.
-        excludes: ["Resources/isv_swipe.bin", "Info.plist"]
+        excludes: ["Resources/isv_swipe.bin", "Resources/en_swipe.bin", "Info.plist"]
       - path: Shared
     entitlements:
       path: KeyboardPL/KeyboardPL.entitlements
@@ -195,4 +196,44 @@ targets:
             # changed in one build and the keyboard appeared, so which of the
             # two was decisive is NOT established - do not read this comment as
             # saying `isv` alone was fatal. Paid for 2026-08-20.
+            PrefersRightToLeft: false
+
+  KeyboardEN:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Keyboard
+        # Same code, English wordlist (dictionary/main_en.combined, the one
+        # Android ships), plain a-z: no own letters on hold, no script key.
+        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Info.plist"]
+      - path: Shared
+    entitlements:
+      path: KeyboardEN/KeyboardEN.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.radoslove.interslavic]
+    attributes:
+      SystemCapabilities:
+        com.apple.ApplicationGroups.iOS:
+          enabled: 1
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.radoslove.interslavic.english
+      configs:
+        Debug:
+          KEYBOARD_NAME: "en $(MARKETING_VERSION)"
+        Release:
+          KEYBOARD_NAME: English
+    info:
+      path: KeyboardEN/Info.plist
+      properties:
+        CFBundleDisplayName: $(KEYBOARD_NAME)
+        KeyboardLanguage: en
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController
+          NSExtensionAttributes:
+            # Same four attributes as the isv and pl keyboards (see there).
+            RequestsOpenAccess: true
+            PrimaryLanguage: en
+            IsASCIICapable: true
             PrefersRightToLeft: false

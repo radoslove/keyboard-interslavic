@@ -51,6 +51,21 @@ enum Shared {
         group.set(all, forKey: "userWords." + language)
     }
 
+    /// The learned touch offset moves into the group the same way, once.
+    /// 0.4.0 forgot it: with Full Access on, the decoder fell back to the
+    /// default 0.35 while the owner's thumb had taught it 0.15, and swipes
+    /// went wrong (`kuznja` -> `kyslina`, owner 2026-10-25: "as if the
+    /// dictionary stopped working"). Overwrites what the group learned since,
+    /// which started from that wrong default.
+    static func adoptLocalLift() {
+        guard fullAccess, let group = UserDefaults(suiteName: group) else { return }
+        let mine = UserDefaults.standard
+        guard !mine.bool(forKey: "touchLiftAdopted") else { return }
+        mine.set(true, forKey: "touchLiftAdopted")
+        guard mine.object(forKey: "touchLift") != nil else { return }
+        group.set(mine.double(forKey: "touchLift"), forKey: "touchLift")
+    }
+
     /// Keyboard theme: auto (follows the phone), light or dark.
     enum Theme: String, CaseIterable { case auto, light, dark }
 

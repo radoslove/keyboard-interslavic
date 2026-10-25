@@ -9,7 +9,7 @@ import Foundation
 /// which is the point: one habit across platforms.
 enum Layout {
 
-    /// Which keyboard this extension is: `isv` or `pl`. One code base, two
+    /// Which keyboard this extension is: `isv`, `pl` or `en`. One code base, two
     /// entries in Settings -> Keyboards; the language comes from the
     /// extension's Info.plist (`KeyboardLanguage`), set per target.
     static let language: String =
@@ -19,11 +19,20 @@ enum Layout {
     /// holding it; they come first in the popup. The three Interslavic
     /// digraphs sit on `d` / `l` / `n`, as on Android (3.5.7) and in
     /// `android/isv_latin.xml`.
-    static let accents: [Character: [String]] = language == "pl"
-        ? ["a": ["ą"], "c": ["ć"], "e": ["ę"], "l": ["ł"], "n": ["ń"],
-           "o": ["ó"], "s": ["ś"], "z": ["ż", "ź"]]
-        : ["c": ["č"], "s": ["š"], "z": ["ž"], "e": ["ě"],
-           "d": ["dž"], "l": ["lj"], "n": ["nj"]]
+    /// English has none of its own; its popups hold only the foreign
+    /// letters (Android `Lang.EN -> emptyMap()`).
+    static let accents: [Character: [String]] = {
+        switch language {
+        case "pl":
+            return ["a": ["ą"], "c": ["ć"], "e": ["ę"], "l": ["ł"], "n": ["ń"],
+                    "o": ["ó"], "s": ["ś"], "z": ["ż", "ź"]]
+        case "en":
+            return [:]
+        default:
+            return ["c": ["č"], "s": ["š"], "z": ["ž"], "e": ["ě"],
+                    "d": ["dž"], "l": ["lj"], "n": ["nj"]]
+        }
+    }()
 
     /// Letters of OTHER languages, after the Interslavic one in the same
     /// popup (owner 2026-10-10: `mañana` in a letter meant switching
@@ -54,6 +63,12 @@ enum Layout {
     /// The frequent marks live behind the three punctuation keys of the
     /// letter layer, so `123` is needed only for the rare ones.
     static let periodAccents: [String] = ["…", "!", "„", "”", "\"", "'"]
+
+    /// Held on `.` of the LETTER layer, where 😀 took the comma's key
+    /// (owner 2026-10-25): the comma comes first, then `?` (not on the
+    /// letters since 3.5.16) and the most used of the old comma hold.
+    static let periodLetterAccents: [String] =
+        [",", "?"] + periodAccents + [";", ":", "-"]
 
     /// Held on `,`: the rest of the sentence punctuation.
     static let commaAccents: [String] = [";", ":", "-", "–", "(", ")"]
@@ -114,7 +129,7 @@ enum Layout {
             for f in foreign where !all.contains(f) { all.append(f) }
         }
         if !all.isEmpty { return all.map { cased($0, uppercase) } }
-        if key == "." { return periodAccents }
+        if key == "." { return periodLetterAccents }
         if key == "," { return commaAccents }
         return nil
     }

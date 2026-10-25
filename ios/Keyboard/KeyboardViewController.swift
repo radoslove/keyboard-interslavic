@@ -26,6 +26,8 @@ final class KeyboardViewController: UIInputViewController {
     private var showingNumeric = false
     /// The `#+=` page of the numeric layer.
     private var showingSymbols = false
+    /// The emoji panel behind 😀, in place of the letter rows.
+    private var showingEmoji = false
     private var rowsStack: UIStackView!
     private var letterButtons: [UIButton] = []
     private var popup: UIView?
@@ -82,6 +84,7 @@ final class KeyboardViewController: UIInputViewController {
         // live in the group the app shares; without it, in this extension.
         Shared.fullAccess = hasFullAccess
         Shared.adoptLocalWords(Layout.language)
+        Shared.adoptLocalLift()
         applyTheme()
         view.backgroundColor = UIColor.secondarySystemBackground
         buildSuggestionBar()
@@ -126,8 +129,10 @@ final class KeyboardViewController: UIInputViewController {
         let rows = showingNumeric
             ? (showingSymbols ? Layout.symbolRows : Layout.numericRows)
             : Layout.letterRows
-        var rowViews: [UIView] = rows.enumerated().map { characterRow($1, row: $0) }
-        topLetterRowView = showingNumeric ? nil : rowViews.first
+        var rowViews: [UIView] = showingEmoji
+            ? [emojiPanel()]
+            : rows.enumerated().map { characterRow($1, row: $0) }
+        topLetterRowView = (showingNumeric || showingEmoji) ? nil : rowViews.first
         // No digit row above the letters (tried in 0.1.7): the host does not
         // let the keyboard grow, so five rows squeezed every key. Digits live
         // on `123` only.
@@ -137,6 +142,12 @@ final class KeyboardViewController: UIInputViewController {
         stack.axis = .vertical
         stack.distribution = .fillEqually
         stack.spacing = 6
+        if showingEmoji, let bottom = rowViews.last {
+            // The panel takes the three letter rows, the bottom row stays one.
+            stack.distribution = .fill
+            bottom.heightAnchor.constraint(equalTo: stack.heightAnchor, multiplier: 0.25,
+                                           constant: -4.5).isActive = true
+        }
         stack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(stack)
         rowsStack = stack
@@ -228,20 +239,24 @@ final class KeyboardViewController: UIInputViewController {
         var weights: [(UIView, CGFloat)] = []
         let isv = Layout.language == "isv"
 
-        let layerKey = functionKey(showingNumeric ? "ABC" : "123",
-                                   action: #selector(tapLayer))
+        // The emoji panel has the bottom row of `123`: ABC back, space, and a
+        // backspace, since the letter row that holds one is gone.
+        let panel = showingNumeric || showingEmoji
+        let layerKey = functionKey(panel ? "ABC" : "123",
+                                   action: showingEmoji ? #selector(tapEmojiKey) : #selector(tapLayer))
         stack.addArrangedSubview(layerKey)
-        weights.append((layerKey, showingNumeric ? 1.6 : 1.2))
+        weights.append((layerKey, panel ? 1.6 : 1.2))
 
         // Apple requires a way off our keyboard when the system offers one.
         if needsInputModeSwitchKey {
             let globe = functionKey("🌐", action: #selector(tapNextKeyboard))
             stack.addArrangedSubview(globe)
-            weights.append((globe, showingNumeric ? 1.2 : 0.95))
+            weights.append((globe, panel ? 1.2 : 0.95))
         }
 
-        var spaceWeight: CGFloat = showingNumeric ? 5.6 : (isv ? 3.45 : 4.65)
-        if !showingNumeric {
+        var spaceWeight: CGFloat = showingNumeric ? 5.6 : showingEmoji ? 4.2
+            : (isv ? 3.45 : 4.65)
+        if !panel {
             // Script key: as 🌐 switches the keyboard, this switches the
             // alphabet, Latin -> Cyrillic -> Glagolitic, and names the current
             // one (ABC / АБВ / ⰀⰁⰂ). Interslavic only.
@@ -252,16 +267,14 @@ final class KeyboardViewController: UIInputViewController {
                 stack.addArrangedSubview(script)
                 weights.append((script, 1.2))
             }
-            // Comma left of space, period right of it: the two most used marks,
-            // one on each side of the thumb (owner 2026-10-14, Android 3.5.16,
-            // replacing `. , space ?`). `?` and `!` live on `123` next to
-            // backspace; the two marks hold the rest.
-            let comma = characterKey(",")
-            comma.tag = 3
-            stack.addArrangedSubview(comma)
-            weights.append((comma, 0.9))
+            // 😀 left of space where `,` was (owner 2026-10-25); the comma is
+            // now the FIRST item held on `.`, so it is still one gesture away.
+            // `?` and `!` live on `123` next to backspace.
+            let emoji = functionKey("😀", action: #selector(tapEmojiKey))
+            stack.addArrangedSubview(emoji)
+            weights.append((emoji, 0.9))
         }
-        if !needsInputModeSwitchKey { spaceWeight += showingNumeric ? 1.2 : 0.95 }
+        if !needsInputModeSwitchKey { spaceWeight += panel ? 1.2 : 0.95 }
 
         // Space fires on touch DOWN, like backspace: on lift, a thumb that
         // slid a little lost the press ("space sometimes takes two taps").
@@ -274,7 +287,15 @@ final class KeyboardViewController: UIInputViewController {
         stack.addArrangedSubview(space)
         bottomRowView = stack
 
-        if !showingNumeric {
+        if showingEmoji {
+            let back = styledKey("⌫")
+            back.backgroundColor = .tertiarySystemFill
+            back.addTarget(self, action: #selector(backspaceDown), for: .touchDown)
+            back.addTarget(self, action: #selector(backspaceUp),
+                           for: [.touchUpInside, .touchUpOutside, .touchCancel])
+            stack.addArrangedSubview(back)
+            weights.append((back, 1.4))
+        } else if !showingNumeric {
             let period = characterKey(".")
             period.tag = 3
             stack.addArrangedSubview(period)
@@ -283,7 +304,7 @@ final class KeyboardViewController: UIInputViewController {
 
         let ret = functionKey("⏎", action: #selector(tapReturn))
         stack.addArrangedSubview(ret)
-        weights.append((ret, showingNumeric ? 1.6 : 1.4))
+        weights.append((ret, panel ? 1.6 : 1.4))
 
         // Space takes what is left; every other key gets its share.
         let total = weights.reduce(spaceWeight) { $0 + $1.1 }
@@ -535,7 +556,61 @@ final class KeyboardViewController: UIInputViewController {
         buildKeyboard()
     }
 
+    @objc private func tapEmojiKey() {
+        showingEmoji.toggle()
+        showingNumeric = false
+        showingSymbols = false
+        buildKeyboard()
+    }
+
+    /// The panel: lately used first, then the common set, in rows of eight.
+    private func emojiPanel() -> UIView {
+        let scroll = UIScrollView()
+        scroll.showsVerticalScrollIndicator = true
+        let column = UIStackView()
+        column.axis = .vertical
+        column.spacing = 2
+        column.translatesAutoresizingMaskIntoConstraints = false
+        scroll.addSubview(column)
+        NSLayoutConstraint.activate([
+            column.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor),
+            column.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor),
+            column.leadingAnchor.constraint(equalTo: scroll.contentLayoutGuide.leadingAnchor),
+            column.trailingAnchor.constraint(equalTo: scroll.contentLayoutGuide.trailingAnchor),
+            column.widthAnchor.constraint(equalTo: scroll.frameLayoutGuide.widthAnchor),
+        ])
+        let recent = Emoji.recent
+        let all = recent + Emoji.common.filter { !recent.contains($0) }
+        let perRow = 8
+        for start in stride(from: 0, to: all.count, by: perRow) {
+            let row = UIStackView()
+            row.axis = .horizontal
+            row.distribution = .fillEqually
+            for i in start..<start + perRow {
+                let b = UIButton(type: .system)
+                if i < all.count {
+                    b.setTitle(all[i], for: .normal)
+                    b.titleLabel?.font = .systemFont(ofSize: 28)
+                    b.addTarget(self, action: #selector(tapEmoji(_:)), for: .touchUpInside)
+                }
+                row.addArrangedSubview(b)
+            }
+            row.heightAnchor.constraint(equalToConstant: 42).isActive = true
+            column.addArrangedSubview(row)
+        }
+        return scroll
+    }
+
+    @objc private func tapEmoji(_ sender: UIButton) {
+        guard let e = sender.title(for: .normal) else { return }
+        // After a swipe the owed space comes first: `pisem 😀`, not `pisem😀`.
+        if pendingSpace { insert(" ") }
+        insert(e)
+        Emoji.used(e)
+    }
+
     @objc private func tapLayer() {
+        showingEmoji = false
         showingNumeric.toggle()
         showingSymbols = false
         showSuggestions([])
@@ -1006,7 +1081,7 @@ extension KeyboardViewController: SwipeHost {
     var swipeCanBegin: Bool {
         // No letters to cross on the numeric layer, and the longpress popup
         // owns the finger while it is up.
-        !showingNumeric && popup == nil
+        !showingNumeric && !showingEmoji && popup == nil
     }
 
     var swipeKeyCentres: ([CGPoint], CGFloat) {
