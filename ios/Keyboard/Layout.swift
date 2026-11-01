@@ -68,10 +68,10 @@ enum Layout {
     /// (owner 2026-10-25): the comma comes first, then `?` (not on the
     /// letters since 3.5.16) and the most used of the old comma hold.
     static let periodLetterAccents: [String] =
-        [",", "?"] + periodAccents + [";", ":", "-"]
+        [",", "?"] + periodAccents + [":", ";", "-"]
 
     /// Held on `,`: the rest of the sentence punctuation.
-    static let commaAccents: [String] = [";", ":", "-", "–", "(", ")"]
+    static let commaAccents: [String] = [":", ";", "-", "–", "(", ")"]
 
     /// Held on keys of the numeric layer; the layer itself keeps only what is
     /// used often enough to deserve a key.
