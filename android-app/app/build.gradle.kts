@@ -30,9 +30,18 @@ val diagnosticsProps = Properties().apply {
 // Two apps are built from this one code (product flavors below), each with its
 // own test number: flavor -> (TEST_BASE, TEST_BUILD, label prefix).
 val TESTS = mapOf(
-    "interslove" to Triple("3.5", 34, "MS test"),
-    "isc" to Triple("0.1", 26, "ISC test"),
+    "interslove" to Triple("3.5", 35, "MS test"),
+    "isc" to Triple("0.1", 27, "ISC test"),
 )
+
+// The system keyboard list shows ime_name, and the row of the subtype that
+// carries overridesImplicitlyEnabledSubtype has NO subtype name of its own, so
+// that row IS ime_name. In a release build that reads "Medzuslovjansky" and the
+// sixth language is named like the other five; only a test build hid it behind
+// "MS test 3.5.N" (owner 2026-11-01: all six names should stay). Test builds
+// therefore label the SERVICE with the language plus the number, and keep the
+// short prefix for app_name, which is what the installer and Settings show.
+val IME_NAMES = mapOf("interslove" to "Medžuslovjansky", "isc" to "Mellomskandinavisk")
 
 fun javaString(value: String): String = "\"" + value
     .replace("\\", "\\\\").replace("\"", "\\\"")
@@ -133,9 +142,12 @@ androidComponents {
         val (base, build, prefix) = TESTS.getValue(variant.flavorName ?: "interslove")
         val version = "$base.$build"
         variant.outputs.forEach { it.versionName.set("$version-test") }
-        for (name in listOf("app_name", "ime_name")) {
-            variant.resValues.put(variant.makeResValueKey("string", name), ResValue("$prefix $version", null))
-        }
+        val flavor = variant.flavorName ?: "interslove"
+        variant.resValues.put(variant.makeResValueKey("string", "app_name"), ResValue("$prefix $version", null))
+        variant.resValues.put(
+            variant.makeResValueKey("string", "ime_name"),
+            ResValue("${IME_NAMES.getValue(flavor)} $version", null),
+        )
     }
 }
 
