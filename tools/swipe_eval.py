@@ -83,8 +83,22 @@ def build_centers():
 CENTERS = build_centers()
 
 
+# Mirrors Dictionary.foldBase: every held letter folds to the KEY it lives on.
+# It used to list the four Interslavic ones only, which silently broke any
+# measurement on another language's wordlist - a Czech `říká` was synthesised as
+# a path through `k` alone, and the resulting 54% top-1 said nothing about the
+# keyboard. If a letter is missing here, the harness lies rather than fails.
+_FOLD = {}
+for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê", "e"),
+                   ("ąàá", "a"), ("ł", "l"), ("ńň", "n"), ("óòô", "o"),
+                   ("í", "i"), ("ý", "y"), ("úů", "u"), ("ř", "r"),
+                   ("ť", "t"), ("ď", "d"), ("ä", "æ"), ("ö", "ø")]:
+    for _ch in _src:
+        _FOLD[_ch] = _dst
+
+
 def fold(ch):
-    return {"č": "c", "š": "s", "ž": "z", "ě": "e"}.get(ch, ch)
+    return _FOLD.get(ch, ch)
 
 
 def fold_word(w):
@@ -122,7 +136,7 @@ def _dwell_factors(n, rng):
     return d
 
 
-def synth_path(word, noise=22.0, tremor=3.0, rng=None):
+def synth_path(word, noise=22.0, tremor=3.0, rng=None, lift=0.0):
     """A plausible finger path through the base-letter keys of `word`.
 
     Walks the polyline in fixed TIME steps at a speed that dips near the
@@ -168,6 +182,15 @@ def synth_path(word, noise=22.0, tremor=3.0, rng=None):
             t += dt
     ex, ey = aimed[-1]
     pts.append((ex + rng.gauss(0, tremor), ey + rng.gauss(0, tremor), t))
+    # TOUCH LIFT: a real touch is reported ABOVE the key the thumb means - the
+    # contact patch is the pad of the finger, the phone reports its centroid,
+    # and the thumb comes from below. Measured at 0.35 key widths on 34 labelled
+    # iPhone gestures (ios/Keyboard/SwipeDecoder.swift). Synthetic paths run
+    # through the exact centres, so this is the one knob that lets the harness
+    # ask what that offset does to a decoder that ignores it.
+    if lift:
+        off = lift * KEY_W
+        pts = [(x, y - off, t) for x, y, t in pts]
     return pts
 
 
@@ -401,12 +424,13 @@ RESAMPLE_N = 32
 DWELL_N = 28           # mirrors KeyboardView.DWELL_N
 ANCHOR_KEYS = 3        # mirrors KeyboardView.ANCHOR_KEYS
 FREQ_W = 2.5           # mirrors Dictionary.decodeSwipeGeo
+TOUCH_LIFT = 0.35      # mirrors KeyboardView.TOUCH_LIFT / SwipeDecoder.defaultTouchLift
 
 
 MODES = ("arc", "dwell", "dwellpivot", "pivot")
 
 
-def decode(path, buckets, n=3, mode="pivot"):
+def decode(path, buckets, n=3, mode="pivot", lift_comp=0.0):
     """How the finger's trail is compared to a word's ideal route:
 
       arc         arc-length resample, no dwell.       The harness's original.
@@ -419,6 +443,13 @@ def decode(path, buckets, n=3, mode="pivot"):
     use_pivots = mode in ("pivot", "dwellpivot")
     if len(path) < 3:
         return []
+    # Compensation for the touch lift, mirroring SwipeDecoder.swift (and
+    # KeyboardView.TOUCH_LIFT): push the whole trail back DOWN before anything
+    # reads it, so the anchor keys and the shape are judged where the thumb
+    # aimed, not where the glass reported it.
+    if lift_comp:
+        off = lift_comp * KEY_W
+        path = [(p[0], p[1] + off, p[2]) for p in path]
     ks = key_path(sample_points(path, 20))
     if len(ks) < 2:
         return []
@@ -480,21 +511,30 @@ MIN_TOP1 = 0.65
 MIN_TOP3 = 0.82
 
 
-def eval_sample(words, buckets, mode, sample, seed=7):
-    """top-1 / top-3 on `sample`. Same seed => same paths across modes."""
+def eval_sample(words, buckets, mode, sample, seed=7, lift=0.0, comp=0.0):
+    """top-1 / top-3 / nothing-at-all on `sample`.
+
+    Same seed => same paths across modes. `lift` synthesises the paths as a real
+    thumb reports them (high); `comp` is what the shipped decoder subtracts back.
+    `dead` counts the gestures that returned NO candidate at all - on the phone
+    those are the glides where nothing is typed and the user swipes again
+    (KeyboardView.commitSwipeResult: `if (words.isEmpty()) { clearSlots(); return }`).
+    """
     rng = random.Random(seed)
-    t1 = t3 = tot = 0
+    t1 = t3 = tot = dead = 0
     for tg in sample:
-        path = synth_path(tg, rng=rng)
+        path = synth_path(tg, rng=rng, lift=lift)
         if not path:
             continue
-        top = decode(path, buckets, 3, mode=mode)
+        top = decode(path, buckets, 3, mode=mode, lift_comp=comp)
         tot += 1
+        if not top:
+            dead += 1
         if top and top[0] == tg:
             t1 += 1
         if tg in top:
             t3 += 1
-    return t1 / tot, t3 / tot, tot
+    return t1 / tot, t3 / tot, tot, dead / tot
 
 
 def default_sample(words, k=80):
@@ -543,7 +583,8 @@ def run_test(words, buckets, mode="pivot"):
         print(f"       {tg!r:14} {hits}/{GATE_DRAWS}  e.g. {first}")
 
     sample = default_sample(words)
-    a1, a3, tot = eval_sample(words, buckets, mode, sample)
+    a1, a3, tot, _ = eval_sample(words, buckets, mode, sample,
+                                 lift=TOUCH_LIFT, comp=TOUCH_LIFT)
     print(f"\n== accuracy on {tot} words ==")
     print(f"  top-1 {a1:.0%} (min {MIN_TOP1:.0%})   top-3 {a3:.0%} (min {MIN_TOP3:.0%})")
     if a1 < MIN_TOP1 or a3 < MIN_TOP3:
@@ -553,6 +594,31 @@ def run_test(words, buckets, mode="pivot"):
     sys.exit(0 if ok else 1)
 
 
+def run_lift(words, buckets, mode="pivot"):
+    """What the touch lift costs, and what compensating for it buys back.
+
+    Reproduces the owner's standing complaint ("the swipe does not catch, I have
+    to do it two or three times") as a number: a thumb whose touches land high
+    pushes the first and last letters into the row ABOVE, the anchor sets
+    (`starts`, `ends`) then never contain the real letters, the decoder returns
+    NOTHING, and KeyboardView types nothing at all. The `nothing` column is that
+    silence - every one of those is a glide the user has to repeat.
+    """
+    sample = default_sample(words)
+    print(f"touch lift on {len(sample)} words, mode={mode} — identical paths per row\n")
+    print(f"  {'lift':>6} {'compensated':>12} {'top-1':>7} {'top-3':>7} {'nothing':>9}")
+    for lift in (0.0, 0.2, 0.35, 0.5):
+        for comp in (0.0, TOUCH_LIFT):
+            a1, a3, tot, dead = eval_sample(words, buckets, mode, sample,
+                                            lift=lift, comp=comp)
+            tag = f"-{comp:.2f}" if comp else "no"
+            print(f"  {lift:6.2f} {tag:>12} {a1:6.0%} {a3:6.0%} {dead:8.0%}")
+    print("\nThe lift is a property of the FINGER, so the synthetic paths get it")
+    print("applied on purpose; a path through the exact key centres cannot show")
+    print("what a real thumb costs. 0.35 is the figure measured on 34 labelled")
+    print("iPhone gestures (ios/Keyboard/SwipeDecoder.swift, 2026-10-07).")
+
+
 def run_ab(words, buckets):
     """Same synthetic paths, three decoders. The only honest way to read a gain."""
     sample = default_sample(words)
@@ -560,7 +626,7 @@ def run_ab(words, buckets):
     print(f"  {'mode':11} {'top-1':>7} {'top-3':>7}")
     base1 = base3 = None
     for mode in MODES:
-        a1, a3, tot = eval_sample(words, buckets, mode, sample)
+        a1, a3, tot, _ = eval_sample(words, buckets, mode, sample)
         if mode == "dwell":
             base1, base3 = a1, a3
         delta = ""
@@ -702,6 +768,9 @@ def main():
     if argv and argv[0] == "real":
         run_real(argv[1:])
         return
+    if argv and argv[0] == "lift":
+        run_lift(words, buckets, mode)
+        return
 
     if argv:
         rng = random.Random(1)
@@ -720,8 +789,9 @@ def main():
         return
 
     sample = default_sample(words, k=100)
-    a1, a3, tot = eval_sample(words, buckets, mode, sample)
-    print(f"sample={tot}  mode={mode}  top-1={a1:.0%}  top-3={a3:.0%}")
+    a1, a3, tot, dead = eval_sample(words, buckets, mode, sample,
+                                    lift=TOUCH_LIFT, comp=TOUCH_LIFT)
+    print(f"sample={tot}  mode={mode}  top-1={a1:.0%}  top-3={a3:.0%}  nothing={dead:.0%}")
 
 
 if __name__ == "__main__":

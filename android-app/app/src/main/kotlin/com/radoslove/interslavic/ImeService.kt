@@ -51,6 +51,8 @@ class ImeService : InputMethodService() {
             setInputView(onCreateInputView())
         }
         super.onStartInputView(info, restarting)
+        // Shift is decided by the text, every time the keyboard appears.
+        view?.onInputStarted()
     }
 
     /**

@@ -49,10 +49,19 @@ class KeyboardView(
     private var shift = false          // uppercase active now (one-shot OR locked)
     private var capsLocked = false     // caps-lock: stays until turned off
     private var lastShiftTapMs = 0L    // double-tap-to-lock window
+    /** Shift set by the KEY rather than by the text. While it is on, the
+     *  automatic re-arm ([rearmShift]) keeps its hands off. */
+    private var shiftByHand = false
+    /** The text the shift key last re-cased ([cycleCase]), so the next press can
+     *  go on from `Word` to `WORD`. Any other key ends the run. */
+    private var recased: String? = null
     private val doubleTapMs = 300L
     private var symbols = false
     /** The `#+=` page of the symbol layer (iOS 559a71f). */
     private var symbolsPage2 = false
+    /** The emoji panel, in place of the letter rows (iOS 0.4.2). */
+    private var emoji = false
+    private val EMOJI_PER_ROW = 8
 
     private val flickHandler = Handler(Looper.getMainLooper())
     private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
@@ -214,6 +223,18 @@ class KeyboardView(
     private val MIN_GLIDE_KEYS = 0.8f
     /** A touch this soon after a typed letter belongs to the typing run, not a glide. */
     private val TAP_RUN_MS = 250L
+
+    /** How far above the intended key this thumb's touches land, in key widths
+     *  ([Lift]). Read once per view and kept here, because the decode runs off
+     *  the UI thread and must not touch preferences per gesture. */
+    private var touchLift = Lift.get(context)
+    /** The gesture that produced the word now sitting in the text: its raw (NOT
+     *  lift-corrected) first and last point, and the key width they were
+     *  measured at. Kept so that a word the user KEEPS can teach [Lift] where
+     *  this thumb really sits; dropped the moment the word is rejected or
+     *  replaced, because then the gesture says nothing about the thumb. */
+    private var liftSample: FloatArray? = null
+    private var liftSampleWord = ""
 
     /**
      * Light or dark ([Theme]: automatic with the phone, or chosen in the
@@ -408,7 +429,11 @@ class KeyboardView(
     private fun render() {
         removeAllViews()
         addView(suggestionStrip)
-        if (symbols) renderSymbols() else renderLetters()
+        when {
+            emoji -> renderEmoji()
+            symbols -> renderSymbols()
+            else -> renderLetters()
+        }
     }
 
     /**
@@ -426,18 +451,71 @@ class KeyboardView(
      */
     private fun onShiftTap() {
         val now = SystemClock.uptimeMillis()
+        // With text selected (or right after this key re-cased something) the key
+        // changes THAT text instead of arming the next letter - iOS 0.4.2.
+        if (cycleCase()) return
         when {
             capsLocked -> { capsLocked = false; shift = false }
             shift -> capsLocked = true      // stays true; shift is already on
             else -> shift = true
         }
+        // Whatever the text says, a shift set by hand wins until it is spent:
+        // [rearmShift] keeps out of the way while this is true.
+        shiftByHand = shift
         lastShiftTapMs = now
         render()
+    }
+
+    /**
+     * Shift on selected text: small -> Capital -> CAPS -> small, as on the
+     * system keyboard (iOS 0.4.2, owner 2026-10-25). This is how an ACRONYM gets
+     * typed - write `sša`, select it, press shift twice - and how a word is
+     * fixed after the fact without retyping it.
+     *
+     * With nothing selected it still works on the text this key itself last
+     * re-cased: inserting drops the selection (an input connection cannot
+     * select), so the run is remembered and found again right before the caret.
+     * Any other key ends the run. Returns true when it handled the press.
+     */
+    private fun cycleCase(): Boolean {
+        val ic = service.currentInputConnection ?: return false
+        val selected = if (selStart != selEnd) ic.getSelectedText(0)?.toString() else null
+        val last = recased
+        val text: String
+        when {
+            selected != null && selected.any { it.isLetter() } -> text = selected
+            last != null && selStart == selEnd &&
+                ic.getTextBeforeCursor(last.length, 0)?.toString() == last -> {
+                ic.deleteSurroundingText(last.length, 0)
+                afterSelfEdit(-last.length)
+                text = last
+            }
+            else -> { recased = null; return false }
+        }
+        val next = when {
+            text == text.lowercase() -> text.split(" ")
+                .joinToString(" ") { it.replaceFirstChar { c -> c.uppercaseChar() } }
+            text == text.uppercase() -> text.lowercase()
+            else -> text.uppercase()
+        }
+        ic.commitText(next, 1)
+        afterSelfEdit(next.length - if (selected != null) selected.length else 0)
+        recased = next
+        swipeJustCommitted = false
+        lastSwipeWord = ""
+        liftSample = null
+        clearUndo()
+        feedback()
+        refreshSuggestions()
+        return true
     }
 
     /** A one-shot capital is consumed by the character it capitalised; caps-lock
      *  and plain lowercase are left untouched. Called after every committed glyph. */
     private fun consumeOneShotShift() {
+        // The capital is spent, so the hand that asked for it has had its way
+        // and the text may arm shift again (iOS: `shift` didSet).
+        shiftByHand = false
         if (shift && !capsLocked) { shift = false; render() }
     }
 
@@ -477,11 +555,71 @@ class KeyboardView(
             render()
             refreshSuggestions()
         })
-        b.addView(symbolKey(',', 0.9f, Layout.commaHold))
+        // 😀 left of space, where `,` used to be (iOS 0.4.2, owner 2026-10-25).
+        // The comma did not lose a gesture: it is the FIRST item held on `.`.
+        b.addView(functionKey("😀", 0.9f) { emoji = true; symbols = false; render() })
         b.addView(spaceKey(if (isv) 3.45f else 4.65f))
-        b.addView(symbolKey('.', 0.9f, Layout.periodHold))
+        b.addView(symbolKey('.', 0.9f, Layout.periodLetterHold))
         b.addView(functionKey("⏎", 1.4f) { enter() })
         addView(b)
+    }
+
+    /**
+     * The emoji panel (iOS 0.4.2): lately used first, then the common set, in
+     * rows of eight, scrolling. Its bottom row is the one from `123` - ABC to
+     * come back, 🌐, space - plus a backspace, because the letter row that
+     * carries one is not on screen.
+     */
+    private fun renderEmoji() {
+        letterKeyViews.clear()        // nothing here is a letter key: no glide can start
+        val scroll = android.widget.ScrollView(context)
+        scroll.isFillViewport = true
+        val column = LinearLayout(context)
+        column.orientation = VERTICAL
+        val all = Emoji.panel(context)
+        for (start in all.indices step EMOJI_PER_ROW) {
+            val rv = makeRow()
+            for (i in start until start + EMOJI_PER_ROW) {
+                val e = all.getOrNull(i)
+                if (e == null) {
+                    rv.addView(functionKey("", 1f) {})
+                } else {
+                    rv.addView(functionKey(e, 1f) { tapEmoji(e) })
+                }
+            }
+            column.addView(rv)
+        }
+        scroll.addView(column)
+        // Exactly the three letter rows it replaces: the keyboard must not jump
+        // in height when the panel opens, and a weighted height would collapse
+        // in an input view that sizes itself to its content.
+        addView(scroll, LayoutParams(LayoutParams.MATCH_PARENT, dp(52) * 3))
+        val b = makeRow()
+        b.addView(functionKey("ABC", 1.6f) { emoji = false; render() })
+        b.addView(globeKey(1.2f))
+        b.addView(spaceKey(4.2f))
+        b.addView(backspaceKey())
+        addView(b)
+    }
+
+    /** After a glide the owed space comes first: `pisem 😀`, not `pisem😀`. */
+    private fun tapEmoji(e: String) {
+        feedback()
+        val ic = service.currentInputConnection ?: return
+        if (pendingSpace) {
+            ic.commitText(" ", 1)
+            afterSelfEdit(1)
+            pendingSpace = false
+        }
+        swipeJustCommitted = false
+        lastSwipeWord = ""
+        liftSample = null
+        clearUndo()
+        ic.commitText(e, 1)
+        afterSelfEdit(e.length)
+        currentWord = ""
+        Emoji.used(context, e)
+        clearSlots()
     }
 
     /** Names the language when there is more than one to tell apart. */
@@ -789,6 +927,14 @@ class KeyboardView(
             SystemClock.uptimeMillis() - swipeCommitAtMs <= SWIPE_WIPE_WINDOW_MS
         if (extendingGlide) pendingSpace = false
 
+        // A glide the user KEPT is a measurement of their own thumb: the word
+        // stood in the text until a space or a mark closed it. A letter means
+        // the word is being EXTENDED, so the text no longer holds the word that
+        // was decoded and the gesture says nothing about where the thumb sits.
+        if (swipeJustCommitted && !extendingGlide && s.isNotEmpty() && !s[0].isLetter()) {
+            learnLift()
+        }
+        recased = null       // any other key ends a shift-key re-casing run
         swipeJustCommitted = false
         clearUndo()          // one-shot: the undo chip dies on the next key
         feedback()
@@ -870,6 +1016,20 @@ class KeyboardView(
         while (expectedCursors.size > 4) expectedCursors.removeFirst()
     }
 
+    /**
+     * The keyboard came up, or came back from another app. The text decides the
+     * shift: a keyboard that opens with shift off in the middle of a sentence
+     * used to type the rest of it lowercase forever, and one that opens armed
+     * puts a capital in the middle of a word (iOS `viewWillAppear`, `byh Dobra`).
+     */
+    fun onInputStarted() {
+        shiftByHand = false
+        recased = null
+        liftSample = null
+        touchLift = Lift.get(context)
+        rearmShift()
+    }
+
     /** Called by the service whenever the editor reports cursor/selection. */
     fun onSelectionChanged(start: Int, end: Int) {
         // Anything but a position one of our own edits produced means the user
@@ -896,12 +1056,52 @@ class KeyboardView(
             pendingSpace = false
             swipeJustCommitted = false
             lastSwipeWord = ""
+            liftSample = null          // the caret moved: that word is no longer ours to measure
             clearUndo()
             expectedCursors.clear()
             expectedCursors.addLast(start)   // resync: judge the next edit from here
             // The undo chip offers to put text back WHERE IT WAS; once the
             // caret has moved it would put it somewhere else, so it goes.
             if (hadUndo) refreshSuggestions()
+            // A caret moved by hand lands wherever it lands - including the
+            // middle of a word - so the shift the user had set by hand means
+            // nothing here and the text decides again.
+            shiftByHand = false
+        }
+        // The editor reports after OUR edits too, and that is the one moment the
+        // text is settled enough to ask it about the sentence.
+        rearmShift()
+    }
+
+    /**
+     * Shift armed where a sentence begins (iOS ab921f2): at the start of the
+     * field, after a new line, and after `. ! ?` once a space has followed.
+     *
+     * Android armed shift NOWHERE until 3.5.31 - it only ever came from the key,
+     * so every sentence after the first had to be capitalised by hand. Which
+     * state is wanted is read from the TEXT, never remembered, because the
+     * keyboard is also rebuilt under us (language, script, theme) and any
+     * remembered flag would survive that as a lie.
+     *
+     * Caps Lock is deliberate and never touched. A shift the user set BY HAND
+     * is left alone too, until the caret moves or the capital is spent.
+     */
+    private fun rearmShift() {
+        if (capsLocked || shiftByHand) return
+        val ic = service.currentInputConnection ?: return
+        val before = ic.getTextBeforeCursor(32, 0)?.toString().orEmpty()
+        // An empty answer is not proof of an empty field: editors report nothing
+        // for a moment after an edit, and acting on that armed shift in the
+        // middle of a word. Empty counts only with the caret at position 0.
+        if (before.isEmpty() && selStart > 0) return
+        val trimmed = before.trimEnd(' ')
+        val atStart = trimmed.isEmpty() || trimmed.last() == '\n'
+        val afterStop = (trimmed.lastOrNull() in listOf('.', '!', '?')) && before.endsWith(" ")
+        val wanted = atStart || afterStop
+        // Only act on a real transition, or every keystroke rebuilds the view.
+        if (wanted != shift) {
+            shift = wanted
+            render()
         }
     }
 
@@ -1020,6 +1220,7 @@ class KeyboardView(
             // ranking exactly as hard as being right.
             Usage.unrecord(context, Script.toLatin(context, lastSwipeWord))
             Popularity.unrecord(context, Script.toLatin(context, lastSwipeWord))
+            liftSample = null   // a rejected guess measures nothing about the thumb
             val rejected = Script.toLatin(context, lastSwipeWord)
             GestureLog.resolve("deleted", null)
             rejectedStrikes[rejected] = (rejectedStrikes[rejected] ?: 0) + 1
@@ -1193,10 +1394,9 @@ class KeyboardView(
             // iOS, refreshCompletions). Without this the chip vanished with the space.
             if (before.endsWith(" ")) {
                 val finished = before.dropLast(1).takeLastWhile { it.isLetter() }
-                val fl = Script.toLatin(context, finished).lowercase()
-                if (Dictionary.isReady() && finished.length >= 3 && !finished.first().isUpperCase() &&
-                    !Dictionary.contains(fl)) {
-                    setSlot(first, "＋ ${Script.out(context, fl)}", fl, save = true)
+                val ahead = before.dropLast(1 + finished.length)
+                saveForm(finished, ahead)?.let {
+                    setSlot(first, "＋ ${Script.out(context, it)}", it, save = true)
                 }
             }
             return
@@ -1207,10 +1407,8 @@ class KeyboardView(
         // Offered whenever the word is unknown, not only with collection on: the
         // chip now saves into the user's own dictionary first (UserWords), and
         // collection stays opt-in inside Collector.record.
-        val canSave = Dictionary.isReady() &&
-            word.length >= 3 &&
-            !word.first().isUpperCase() &&
-            !Dictionary.contains(lower)
+        val saved = saveForm(word, before.dropLast(word.length))
+        val canSave = saved != null
 
         val preds = Dictionary.suggest(lower, if (canSave) 2 else 3) { w ->
             Usage.count(context, w) * USAGE_W_SUGGEST
@@ -1225,13 +1423,44 @@ class KeyboardView(
         // last of six slots, off the right edge of the screen, so it could only be
         // reached by scrolling the strip - which looked like no adding at all
         // (owner 2026-10-15).
-        val off = if (canSave) {
-            setSlot(first, "＋ ${Script.out(context, lower)}", lower, save = true); first + 1
+        val off = if (saved != null) {
+            setSlot(first, "＋ ${Script.out(context, saved)}", saved, save = true); first + 1
         } else first
         for (i in preds.indices) {
             val w = if (capital) preds[i].replaceFirstChar { it.uppercaseChar() } else preds[i]
             setSlot(off + i, Script.out(context, w), w, save = false)
         }
+    }
+
+    /**
+     * What `＋` would save for [word], or null if it must not be offered.
+     * [ahead] is the text in front of the word.
+     *
+     * Lowercase-initial words go in as they are. A capital is kept out, because
+     * a capital mid-sentence is a NAME and names do not belong in a shared
+     * wordlist - with one exception the owner hit on 2026-10-25 (iOS 0.4.0):
+     * at the START of a sentence the capital was put there by shift, not by the
+     * writer, so `Neznaneslovo` is the same word as `neznaneslovo` and used to
+     * get no chip at all. There it is offered, and saved LOWERCASE.
+     * A word with further capitals inside (`SŠA`, `PiS`) stays out either way.
+     */
+    private fun saveForm(word: String, ahead: String): String? {
+        if (word.length < 3 || !Dictionary.isReady()) return null
+        val latin = Script.toLatin(context, word)
+        val lower = latin.lowercase()
+        if (Dictionary.contains(lower)) return null
+        val first = latin.first()
+        if (!first.isUpperCase()) return lower
+        if (latin.drop(1).any { it.isUpperCase() }) return null
+        return if (sentenceStart(ahead)) lower else null
+    }
+
+    /** True when [before] (the text ahead of a word) ends a sentence: nothing at
+     *  all, a new line, or `. ? ! …` and then spaces (iOS `sentenceStart`). */
+    private fun sentenceStart(before: String): Boolean {
+        val rest = before.trimEnd(' ')
+        val last = rest.lastOrNull() ?: return true
+        return last == '\n' || last in ".?!…"
     }
 
     /** The "put it back" chip: `↶ word`, amber, always the leftmost slot. */
@@ -1272,6 +1501,10 @@ class KeyboardView(
 
     private fun onSlotTap(i: Int) {
         val w = slotWord[i] ?: return
+        // Undoing, replacing or completing means the glide's word is NOT what
+        // stays in the text, so it must not teach [Lift] anything. Saving a word
+        // with `＋` changes no text and leaves the sample alone.
+        if (!slotIsSave[i]) liftSample = null
         when {
             slotIsUndo[i] -> undoLastDelete()
             slotIsSave[i] -> {
@@ -1349,7 +1582,9 @@ class KeyboardView(
      * flick (up = diacritic) still works — everything else beyond slop is a glide.
      */
     override fun onInterceptTouchEvent(e: MotionEvent): Boolean {
-        if (symbols || popupItems != null) return false
+        // No glide on a page without letters - and the emoji panel SCROLLS, so
+        // the parent must keep its hands off the drag entirely.
+        if (symbols || emoji || popupItems != null) return false
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 // A glide may not START on the bottom row (iOS swipeCanStart): a
@@ -1508,10 +1743,17 @@ class KeyboardView(
      * whole trail so fast swipes are not truncated.
      */
     private fun decodeCandidates(rawPts: List<Float>, centers: Map<Char, FloatArray>): List<String> {
+        // TOUCH LIFT: push the whole trail back DOWN before anything reads it, so
+        // the anchor keys and the shape are judged where the thumb AIMED, not
+        // where the glass reported it ([Lift]; iOS SwipeDecoder has done this
+        // since 0.1.4). Without it a thumb landing a third of a key high takes
+        // the word's real first and last letters out of `starts`/`ends`, the
+        // word is never looked at, and the glide commits nothing at all.
+        val lift = keyWidth(centers) * touchLift
         val pointList = ArrayList<FloatArray>(rawPts.size / 3)
         var i = 0
         while (i + 2 < rawPts.size) {
-            pointList.add(floatArrayOf(rawPts[i], rawPts[i + 1], rawPts[i + 2])); i += 3
+            pointList.add(floatArrayOf(rawPts[i], rawPts[i + 1] + lift, rawPts[i + 2])); i += 3
         }
         // Shape is compared on ARC LENGTH - even spacing in distance, so the
         // comparison says only "did the finger go this way".
@@ -1635,6 +1877,7 @@ class KeyboardView(
         Popularity.record(context, best)
         lastSwipeWord = shownBest          // on-screen form: its length is what gets deleted
         lastSwipeCandidates = words
+        rememberLiftSample(rawPts, centers, words[0])
         swipeJustCommitted = true
         swipeCommitAtMs = SystemClock.uptimeMillis()
         pendingSpace = smartSpace
@@ -1642,6 +1885,47 @@ class KeyboardView(
         showSwipeAlts(words, highlight = 0)   // a wrong guess is one tap from fixed
         GestureLog.committed(rawPts, centers, words, best)
         consumeOneShotShift()                 // one-shot capital ends with this word too
+    }
+
+    /**
+     * Keep the RAW (not lift-corrected) ends of the gesture that produced
+     * [word], so that if the word survives, [learnLift] can read this thumb's
+     * offset off it. Stored as `x0, y0, x1, y1, keyWidth`.
+     */
+    private fun rememberLiftSample(
+        rawPts: List<Float>,
+        centers: Map<Char, FloatArray>,
+        word: String,
+    ) {
+        val kw = keyWidth(centers)
+        if (rawPts.size < 6 || kw <= 0f) { liftSample = null; return }
+        liftSample = floatArrayOf(
+            rawPts[0], rawPts[1],
+            rawPts[rawPts.size - 3], rawPts[rawPts.size - 2],
+            kw,
+        )
+        liftSampleWord = word
+    }
+
+    /**
+     * One kept glide teaches [Lift] where this thumb really lands: compare the
+     * path's first and last point with the CENTRES of the word's first and last
+     * key. A positive reading means the touches sat above the keys.
+     *
+     * One word only nudges the value (and a wild reading is dropped), so a
+     * single sloppy glide cannot drag the keyboard around - but a few dozen
+     * words of real typing move it to this phone and this thumb.
+     */
+    private fun learnLift() {
+        val s = liftSample ?: return
+        liftSample = null
+        val word = liftSampleWord
+        if (word.length < 2 || s[4] <= 0f) return
+        val centers = computeCenters()
+        val first = centers[Dictionary.foldBase(word.first())] ?: return
+        val last = centers[Dictionary.foldBase(word.last())] ?: return
+        val measured = ((first[1] + last[1]) - (s[1] + s[3])) / 2f / s[4]
+        touchLift = Lift.learn(context, measured)
     }
 
     /** Put the swipe candidates in the strip as tappable alternatives. */
