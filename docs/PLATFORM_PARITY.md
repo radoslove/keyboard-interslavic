@@ -4,7 +4,7 @@
 gained since the last round is ported here before anything new is started, so the two apps never
 drift into different keyboards. Update the table at the end of the round.
 
-Last checked: 2026-11-01 (iOS 0.4.3 · Android MS 3.5.33-test, Mellomskandinavisk 0.1.26-test).
+Last checked: 2026-11-01 (iOS 0.4.3 · Android MS 3.5.34-test, Mellomskandinavisk 0.1.26-test).
 
 ## iOS has, Android does not yet → port to Android
 
@@ -15,6 +15,7 @@ ISC 0.1.24** (2026-11-01) and moved to *Done in both*.
 
 | Feature | Android commit | iOS notes |
 |---|---|---|
+| Each app names the keyboard languages in ITS OWN language: the MS app's picker and settings read `medžuskandinavsky poljsky norvežsky anglijsky češsky` (owner 2026-11-01, every adjective verified in medzuslove_canon) | 3.5.34 | one extension per language, so the names live in each `Info.plist` display name plus the list in `App/App.swift` |
 | **Czech** as a language (`cs`: QWERTY rows, á č ď ě é í ň ó ř š ť ú ů ý ž on hold) | 3.5.31 | needs its own extension + `cs_swipe.bin` from `main_cs.combined` (40 959 forms); `foldBase` must fold the Czech letters or every glide over them dies |
 | **Interscandinavian** as a language (`isc`: rows of 11, `å ø æ`) | 3.5.14 | fourth extension, wordlist `main_isc.combined` |
 | **Norwegian bokmål keyboard** (`nb`: `å ø æ` on own keys, rows of 11) | 3.5.8 | ⚠ needs design first: the iOS swipe binary knows 26 keys a–z, so `ø`/`æ` words drop out and `å` folds to `a`; widen to own keys (29), together with `isc` |

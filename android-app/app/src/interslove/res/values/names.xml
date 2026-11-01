@@ -2,4 +2,16 @@
 <resources>
     <string name="app_name">Medžuslovjansky</string>
     <string name="ime_name">Medžuslovjansky</string>
+
+    <!-- The system keyboard list, in THIS app's language (owner 2026-11-01:
+         "medžuskandinavsky, poljsky, češsky, norvežsky i anglijsky"). Every
+         adjective verified in medzuslove_canon; `medžuskandinavsky` is built
+         regularly from `skandinavsky` with the productive `medžu-`. The
+         Mellomskandinavisk app keeps the endonyms from main/strings.xml.
+         Changing a label is safe only because every subtypeId is written down. -->
+    <string name="subtype_isc">medžuskandinavsky</string>
+    <string name="subtype_pl">poljsky</string>
+    <string name="subtype_nb">norvežsky</string>
+    <string name="subtype_en">anglijsky</string>
+    <string name="subtype_cs">češsky</string>
 </resources>

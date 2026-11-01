@@ -44,17 +44,17 @@ object Ui {
     /** A keyboard language's own name, glossed in the screen's language [ui]. */
     fun langName(ui: String, lang: String): String {
         val own = when (lang) {
-            Lang.ISV -> "Medžuslovjansky"; Lang.ISC -> "Mellomskandinavisk (isc-no)"; Lang.PL -> "Polski"
+            Lang.ISV -> "Medžuslovjansky"; Lang.ISC -> "Mellomskandinavisk"; Lang.PL -> "Polski"
             Lang.NB -> "Norsk bokmål"; Lang.CS -> "Čeština"; else -> "English"
         }
         val gloss = mapOf(
             Lang.ISV to mapOf("pl" to "międzysłowiański", "nb" to "interslavisk", "en" to "Interslavic"),
-            Lang.ISC to mapOf("pl" to "międzyskandynawski", "nb" to "mellomskandinavisk", "en" to "Interscandinavian"),
-            Lang.PL to mapOf("nb" to "polsk", "en" to "Polish"),
-            Lang.NB to mapOf("pl" to "norweski", "en" to "Norwegian"),
-            Lang.EN to mapOf("pl" to "angielski", "nb" to "engelsk"),
-            Lang.CS to mapOf("pl" to "czeski", "nb" to "tsjekkisk", "en" to "Czech"),
-        )[lang]?.get(if (ui == MS) "en" else ui)
+            Lang.ISC to mapOf(MS to "medžuskandinavsky", "pl" to "międzyskandynawski", "nb" to "mellomskandinavisk", "en" to "Interscandinavian"),
+            Lang.PL to mapOf(MS to "poljsky", "nb" to "polsk", "en" to "Polish"),
+            Lang.NB to mapOf(MS to "norvežsky", "pl" to "norweski", "en" to "Norwegian"),
+            Lang.EN to mapOf(MS to "anglijsky", "pl" to "angielski", "nb" to "engelsk"),
+            Lang.CS to mapOf(MS to "češsky", "pl" to "czeski", "nb" to "tsjekkisk", "en" to "Czech"),
+        )[lang]?.get(ui)
         return if (gloss == null || gloss == own) own else "$own ($gloss)"
     }
 
