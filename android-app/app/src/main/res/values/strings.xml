@@ -3,8 +3,9 @@
      (src/<flavor>/res/values/names.xml) and, in test builds, by build.gradle.kts. -->
 <resources>
     <string name="subtype_isv">Medžuslovjansky</string>
-    <string name="subtype_isc">isc-no</string>
+    <string name="subtype_isc">Mellomskandinavisk</string>
     <string name="subtype_pl">Polski</string>
     <string name="subtype_nb">Norsk</string>
     <string name="subtype_en">English</string>
+    <string name="subtype_cs">Čeština</string>
 </resources>

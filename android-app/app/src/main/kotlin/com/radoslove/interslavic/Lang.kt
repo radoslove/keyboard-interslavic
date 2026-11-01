@@ -6,8 +6,9 @@ import android.view.inputmethod.InputMethodManager
 import android.view.inputmethod.InputMethodSubtype
 
 /**
- * The language the keyboard types: Interslavic (`isv`), Polish (`pl`),
- * Norwegian bokmål (`nb`) or English (`en`).
+ * The language the keyboard types: Interslavic (`isv`), Interscandinavian
+ * (`isc`), Polish (`pl`), Czech (`cs`), Norwegian bokmål (`nb`) or
+ * English (`en`).
  *
  * iOS lists each language as its own keyboard (`isv 0.2.1`, `pl 0.2.1`,
  * 7801f4b). The Android equivalent is one input-method SUBTYPE per language
@@ -30,6 +31,7 @@ object Lang {
     const val PL = "pl"
     const val NB = "nb"
     const val EN = "en"
+    const val CS = "cs"
 
     /** This app's own language ([App.MAIN]): `isv` in Interslove, `isc` in Mellomskandinavisk. */
     const val MAIN = App.MAIN
@@ -78,6 +80,7 @@ object Lang {
      *  and the bare `no` both get bokmål - the only Norwegian we have. */
     fun deviceLang(): String? = when (java.util.Locale.getDefault().language) {
         "pl" -> PL
+        "cs" -> CS
         "nb", "no", "nn" -> NB
         "en" -> EN
         else -> null
@@ -88,6 +91,7 @@ object Lang {
         PL -> "Polski"
         NB -> "Norsk"
         EN -> "English"
+        CS -> "Čeština"
         ISV -> "Medžuslovjansky"
         ISC -> "isc-no"
         else -> App.MAIN_NAME

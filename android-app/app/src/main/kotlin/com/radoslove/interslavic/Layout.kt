@@ -65,6 +65,28 @@ object Layout {
         'æ' to listOf("ä"), 'ø' to listOf("ö"), 'å' to listOf("ä", "ö"),
     )
 
+    /**
+     * Czech keyboard: the háček and length marks live on LONGPRESS of their base
+     * letter, exactly like the Interslavic ones - a Czech national keyboard puts
+     * them on the number row, but a phone has no room for a sixth row and the
+     * habit `c` held -> `č` is then the same in both languages.
+     *
+     * Rows stay QWERTY, not the Czech QWERTZ (owner 2026-11-01): one letter
+     * layout across all six languages, so 🌐 never moves the thumb.
+     *
+     * Two keys carry two letters, and the ORDER is measured, not guessed - on
+     * `main_cs.combined`, weighted by word frequency: ě (265 564) before é
+     * (146 362), ů (73 974) before ú (21 897). `e` -> `ě` first also matches
+     * the Interslavic popup, so the muscle memory carries across 🌐.
+     */
+    private val csOwn: Map<Char, List<String>> = mapOf(
+        'a' to listOf("á"), 'c' to listOf("č"), 'd' to listOf("ď"),
+        'e' to listOf("ě", "é"), 'i' to listOf("í"), 'n' to listOf("ň"),
+        'o' to listOf("ó"), 'r' to listOf("ř"), 's' to listOf("š"),
+        't' to listOf("ť"), 'u' to listOf("ů", "ú"), 'y' to listOf("ý"),
+        'z' to listOf("ž"),
+    )
+
     /** Polish keyboard: the Interslavic letters wait at the end of the popup. */
     private val isvOnPl: Map<Char, List<String>> = mapOf(
         'c' to listOf("č"), 's' to listOf("š"), 'z' to listOf("ž"), 'e' to listOf("ě"),
@@ -73,8 +95,16 @@ object Layout {
     /** Held on `.`: punctuation our MS texts actually use. */
     val periodHold = listOf("…", "!", "„", "”", "\"", "'")
 
+    /** Held on `.` of the LETTER layer, where 😀 took the comma's key
+     *  (iOS 0.4.2, owner 2026-10-25): the comma comes FIRST - it is the most
+     *  used mark and it must stay one gesture away - then `?` (off the letters
+     *  since 3.5.16), then the old `.` hold, then the most used of the comma's -
+     *  `:` BEFORE `;` (owner 2026-11-01: it is the one he actually types,
+     *  so it must sit nearer the thumb). */
+    val periodLetterHold = listOf(",", "?") + periodHold + listOf(":", ";", "-")
+
     /** Held on `,`: the rest of the sentence punctuation. */
-    val commaHold = listOf(";", ":", "-", "–", "(", ")")
+    val commaHold = listOf(":", ";", "-", "–", "(", ")")
 
 
     /** Held on keys of the numeric pages; the page keeps only the frequent ones. */
@@ -125,6 +155,7 @@ object Layout {
 
     private fun own(lang: String): Map<Char, List<String>> = when (lang) {
         Lang.PL -> plOwn
+        Lang.CS -> csOwn
         Lang.NB, Lang.ISC -> nbOwn
         Lang.EN -> emptyMap()
         else -> isvOwn

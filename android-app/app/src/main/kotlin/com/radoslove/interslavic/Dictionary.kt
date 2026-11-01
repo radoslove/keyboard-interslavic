@@ -138,10 +138,16 @@ object Dictionary {
     // ---- Swipe decoding (M4) --------------------------------------------
 
     /** Fold a held letter to the key it lives on: č->c ž->z ě->e, and the
-     *  Polish ą ć ę ł ń ó ś ź ż likewise - a glide over `żółw` crosses z o l w. */
-    private fun foldBase(c: Char): Char = when (c) {
+     *  Polish ą ć ę ł ń ó ś ź ż likewise - a glide over `żółw` crosses z o l w.
+     *  Public because KeyboardView needs the same answer to measure the touch
+     *  lift ([Lift]): which KEY the first and last letter of a glided word sat on. */
+    fun foldBase(c: Char): Char = when (c) {
         'č', 'ć' -> 'c'; 'š', 'ś' -> 's'; 'ž', 'ż', 'ź' -> 'z'; 'ě', 'ę', 'é', 'è', 'ê' -> 'e'
-        'ą', 'à' -> 'a'; 'ł' -> 'l'; 'ń' -> 'n'; 'ó', 'ò', 'ô' -> 'o'
+        'ą', 'à', 'á' -> 'a'; 'ł' -> 'l'; 'ń', 'ň' -> 'n'; 'ó', 'ò', 'ô' -> 'o'
+        // Czech: the length marks and háčeks sit on their base key, like every other
+        // held letter. Missing even one of these kills the glide for every word
+        // that contains it - the decoder would look for a key that is not there.
+        'í' -> 'i'; 'ý' -> 'y'; 'ú', 'ů' -> 'u'; 'ř' -> 'r'; 'ť' -> 't'; 'ď' -> 'd'
         // Norwegian: ä and ö are held on æ and ø, which are keys of their own.
         'ä' -> 'æ'; 'ö' -> 'ø'
         else -> c
@@ -239,7 +245,8 @@ object Dictionary {
      * `her` (f=217) beat a rare three-letter word (f=60) by only ~4.5 px, so `her`
      * and `vi` lost glides to rarer neighbours (tester report, ISC test 0.1.3).
      * FREQ_LIN * f gives that pair ~18 px, with FREQ_W's log as the floor.
-     * The Interslavic and Polish lists keep the log.
+     * The Interslavic, Polish and Czech lists keep the log: their bytes are
+     * taken from the isv distribution by quantile, not scaled from a count.
      */
     private const val FREQ_LIN = 0.15
     private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN)

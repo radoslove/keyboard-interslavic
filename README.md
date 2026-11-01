@@ -109,11 +109,11 @@ Interpunkcija jest takože pod AltGr:
 
 Vlastna klaviatura za Android: pisanje gestami, prědloženja iz slovnika, latinica, kirilica
 i glagolica (klaviša ABC / АБВ / ⰀⰁⰂ), světla i temna tema. Takože jezyky:
-medžuskandinavsky, poljsky, norvežsky i anglijsky — 🌐 prěključaje medžu nimi. Versija 3.4
+medžuskandinavsky, poljsky, češsky, norvežsky i anglijsky — 🌐 prěključaje medžu nimi. Versija 3.4
 ide do F-Droid; novějše versije sut ješče probne.
 *Our own Android keyboard: swipe typing, suggestions from the dictionary, Latin, Cyrillic
 and Glagolitic (the ABC / АБВ / ⰀⰁⰂ key), light and dark theme. Also Interscandinavian,
-Polish, Norwegian and English — 🌐 switches between them. Version 3.4 is on its way to
+Polish, Czech, Norwegian and English — 🌐 switches between them. Version 3.4 is on its way to
 F-Droid; newer versions are still test builds.*
 
 Izvor: [`android-app/`](android-app/).
@@ -409,6 +409,14 @@ Kod i vlastne razklady klaviatury pod **MIT.** *Code and original layouts under 
   *The Polish wordlist is derived from FrequencyWords (CC BY-SA 4.0) and PoliMorf (BSD-2),
   so it is under **CC BY-SA 4.0**, not MIT; see
   [`dictionary/sources_pl/README.md`](dictionary/sources_pl/README.md).*
+- Češsky slovnik (`dictionary/main_cs.combined`) jest izvedeny iz
+  [FrequencyWords](https://github.com/hermitdave/FrequencyWords) (CC BY-SA 4.0) i iz
+  slovnika [hunspell cs_CZ](https://github.com/LibreOffice/dictionaries/tree/master/cs_CZ)
+  (GPL/LGPL/MPL, samo kako pogled), zato jest pod **CC BY-SA 4.0**, ne MIT. Gl.
+  [`dictionary/sources_cs/README.md`](dictionary/sources_cs/README.md).
+  *The Czech wordlist is derived from FrequencyWords (CC BY-SA 4.0) and filtered through the
+  hunspell cs_CZ dictionary (GPL/LGPL/MPL, lookup only), so it is under **CC BY-SA 4.0**,
+  not MIT; see [`dictionary/sources_cs/README.md`](dictionary/sources_cs/README.md).*
 
 Polny tekst: [`LICENSE`](LICENSE).
 *Full text: [`LICENSE`](LICENSE).*

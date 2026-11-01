@@ -13,6 +13,7 @@ list is loaded only when that language is first used.
 | `main_nb.combined` | Norwegian bokmål | FrequencyWords `no_50k`, Bokmålsordboka-filtered (`tools/build_freq_wordlist.py`) | CC BY-SA 4.0 |
 | `main_en.combined` | English | FrequencyWords `en_50k` (`tools/build_freq_wordlist.py`) | CC BY-SA 4.0 |
 | `main_pl.combined` | Polish | FrequencyWords `pl_full` + [PoliMorf](https://zil.ipipan.waw.pl/PoliMorf) 0.6.7 (BSD 2-Clause) (`tools/build_pl_wordlist.py`) | CC BY-SA 4.0 |
+| `main_cs.combined` | Czech | FrequencyWords `cs_50k` + [hunspell cs_CZ](https://github.com/LibreOffice/dictionaries/tree/master/cs_CZ) (GPL/LGPL/MPL), read through [spylls](https://github.com/zverok/spylls) as a lookup only (`tools/build_cs_wordlist.py`) | CC BY-SA 4.0 |
 
 **License / ownership:** the apps' **code** is MIT (see the repository `LICENSE`). The
 FrequencyWords-based lists are derivatives of FrequencyWords and are distributed under

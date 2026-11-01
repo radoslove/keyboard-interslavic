@@ -45,7 +45,7 @@ object Ui {
     fun langName(ui: String, lang: String): String {
         val own = when (lang) {
             Lang.ISV -> "Medžuslovjansky"; Lang.ISC -> "Mellomskandinavisk (isc-no)"; Lang.PL -> "Polski"
-            Lang.NB -> "Norsk bokmål"; else -> "English"
+            Lang.NB -> "Norsk bokmål"; Lang.CS -> "Čeština"; else -> "English"
         }
         val gloss = mapOf(
             Lang.ISV to mapOf("pl" to "międzysłowiański", "nb" to "interslavisk", "en" to "Interslavic"),
@@ -53,6 +53,7 @@ object Ui {
             Lang.PL to mapOf("nb" to "polsk", "en" to "Polish"),
             Lang.NB to mapOf("pl" to "norweski", "en" to "Norwegian"),
             Lang.EN to mapOf("pl" to "angielski", "nb" to "engelsk"),
+            Lang.CS to mapOf("pl" to "czeski", "nb" to "tsjekkisk", "en" to "Czech"),
         )[lang]?.get(if (ui == MS) "en" else ui)
         return if (gloss == null || gloss == own) own else "$own ($gloss)"
     }
@@ -72,16 +73,16 @@ object Ui {
         "intro" to row(
             "Medžuslovjanska klaviatura. Standardne bukvy (č š ž ě) na dolgom " +
                 "pritisku i mahu vgoru; pas prědloženij iz slovnika. Takože jezyky: " +
-                "medžuskandinavsky, poljsky, norvežsky i anglijsky.",
+                "medžuskandinavsky, poljsky, češsky, norvežsky i anglijsky.",
             "Interslavic keyboard. Standard letters (č š ž ě) on long-press and " +
                 "an upward flick; a suggestion bar from the dictionary. Also Interscandinavian, " +
-                "Polish, Norwegian and English.",
+                "Polish, Czech, Norwegian and English.",
             "Klawiatura międzysłowiańska. Litery č š ž ě pod przytrzymaniem i ruchem " +
                 "w górę, podpowiedzi ze słownika. Można też pisać po międzyskandynawsku, polsku, " +
-                "norwesku i angielsku.",
+                "czesku, norwesku i angielsku.",
             "Interslavisk tastatur. Bokstavene č š ž ě ligger under langt trykk og et " +
                 "sveip oppover, med forslag fra ordboka. Du kan også skrive mellomskandinavisk, " +
-                "norsk, polsk og engelsk.",
+                "norsk, polsk, tsjekkisk og engelsk.",
         ),
         "ui_lang" to row(null, "Language of this screen", "Język tego ekranu", "Språk på denne skjermen"),
         "langs_head" to row("Jezyky klaviatury", "Keyboard languages", "Języki klawiatury", "Tastaturspråk"),

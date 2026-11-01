@@ -43,7 +43,7 @@ object Ui {
     fun langName(ui: String, lang: String): String {
         val own = when (lang) {
             Lang.ISV -> "Medžuslovjansky"; Lang.ISC -> "Mellomskandinavisk (isc-no)"; Lang.PL -> "Polski"
-            Lang.NB -> "Norsk bokmål"; else -> "English"
+            Lang.NB -> "Norsk bokmål"; Lang.CS -> "Čeština"; else -> "English"
         }
         val gloss = mapOf(
             Lang.ISC to mapOf("pl" to "międzyskandynawski", "en" to "Interscandinavian"),
@@ -51,6 +51,7 @@ object Ui {
             Lang.PL to mapOf("en" to "Polish"),
             Lang.NB to mapOf("pl" to "norweski", "en" to "Norwegian"),
             Lang.EN to mapOf("pl" to "angielski"),
+            Lang.CS to mapOf("pl" to "czeski", "nb" to "tsjekkisk", "en" to "Czech"),
         )[lang]?.let { it[ui] ?: it["en"] }
         return if (gloss == null || gloss == own) own else "$own ($gloss)"
     }
@@ -69,13 +70,13 @@ object Ui {
         "title" to row("Mellomskandinavisk", "Interscandinavian keyboard", "Klawiatura międzyskandynawska"),
         "intro" to row(
             "Mellomskandinavisk tastatur. Norsk oppsett (æ ø å); ä ö é med langt " +
-                "trykk på æ ø e; forslag fra ordboken. Du kan også skrive norsk, engelsk og polsk.",
+                "trykk på æ ø e; forslag fra ordboken. Du kan også skrive norsk, engelsk, polsk og tsjekkisk.",
             "Interscandinavian keyboard. Norwegian layout (æ ø å); ä ö é on " +
                 "long-press of æ ø e; a suggestion bar from the dictionary. Norwegian, " +
-                "English and Polish too.",
+                "English, Polish and Czech too.",
             "Klawiatura międzyskandynawska. Układ norweski (æ ø å); ä ö é pod " +
                 "przytrzymaniem æ ø e; podpowiedzi ze słownika. Można też pisać po " +
-                "norwesku, angielsku i polsku.",
+                "norwesku, angielsku, polsku i czesku.",
         ),
         "langs_head" to row("Tastaturspråk", "Keyboard languages", "Języki klawiatury"),
         "langs_body" to row(

@@ -6,7 +6,14 @@
      opens it). Only that one carries the flag, because Android shows NO name
      for a subtype that has it. subtypeId keeps each identity fixed: without it
      the system hashes label + extra value, and any change drops what the user
-     ticked. Ids are per app and never reused. -->
+     ticked. Ids are per app and never reused.
+     A language added by a LATER build is NOT switched on by itself on a phone
+     that already has the app: the new subtype arrives unticked, so it is
+     invisible in the keyboard picker until the user ticks it (or, over USB,
+     adb shell settings put secure enabled_input_methods "<old>;<new id>").
+     Cost a round trip 2026-11-01: Czech shipped in 3.5.31 and the owner could
+     not find it on `a55`.
+     -->
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
     android:supportsSwitchingToNextInputMethod="true">
     <subtype
@@ -45,4 +52,11 @@
         android:imeSubtypeMode="keyboard"
         android:imeSubtypeExtraValue="lang=en"
         android:subtypeId="5620" />
+    <subtype
+        android:label="@string/subtype_cs"
+        android:languageTag="cs"
+        android:imeSubtypeLocale="cs"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="lang=cs"
+        android:subtypeId="5622" />
 </input-method>
