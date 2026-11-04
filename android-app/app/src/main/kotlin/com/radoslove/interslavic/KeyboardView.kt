@@ -203,6 +203,7 @@ class KeyboardView(
     private val COARSE_RESAMPLE = 8
     private val SWIPE_CANDIDATES = SLOTS   // the strip scrolls, so every candidate is reachable
     private val ANCHOR_KEYS = 3       // start-key candidates; 1 hid `pisati` behind `ležati`
+    private val ANCHOR_MS = 120f      // how far back from each end anchorPoint looks
     // Velocity minima (see velocityPivots). Tuned in tools/swipe_eval.py against
     // synthetic glides at three dwell profiles, so no single style of swiper
     // sets them.
@@ -1854,7 +1855,8 @@ class KeyboardView(
         }
 
         val ks = keyPathFromTrail(pointList, centers)
-        val starts = nearestKeys(pointList.first(), centers, ANCHOR_KEYS)
+        val spd = speedCurve(pointList)
+        val starts = nearestKeys(anchorPoint(pointList, false, spd), centers, ANCHOR_KEYS)
             .ifEmpty { listOfNotNull(ks.firstOrNull() ?: swipeStartKey) }
             .toSet()
         if (starts.isEmpty()) return emptyList()
@@ -1866,7 +1868,7 @@ class KeyboardView(
         // recognition drag; requiring the final letter to sit near where the
         // finger stopped throws out the overwhelming majority for the price of
         // one character lookup.
-        val ends = nearestKeys(pointList.last(), centers, ANCHOR_KEYS).toSet()
+        val ends = nearestKeys(anchorPoint(pointList, true, spd), centers, ANCHOR_KEYS).toSet()
         return Dictionary.decodeSwipeGeo(starts, ends, ks.size + 2, SWIPE_CANDIDATES, coarse, fine) { w ->
             Usage.count(context, w) * USAGE_W_SWIPE - (rejectedStrikes[w] ?: 0) * REJECT_W
         }
@@ -2159,16 +2161,18 @@ class KeyboardView(
      * First and last sample always count at full confidence - a glide starts and
      * ends at rest, and those two are the anchors the decoder already trusts.
      */
-    private fun velocityPivots(pts: List<FloatArray>): List<FloatArray> {
+    /**
+     * Smoothed speed per sample, in px/ms. Raw touch deltas are far too noisy to
+     * read directly - a single jittery sample looks like a pause - so the curve
+     * is averaged over [V_SMOOTH] before anyone takes a minimum of it.
+     *
+     * Read by TWO callers now: [velocityPivots], which wants the minima in the
+     * middle of a glide, and [anchorPoint], which wants the slowest sample at
+     * each END. They must not drift apart, hence one function.
+     */
+    private fun speedCurve(pts: List<FloatArray>): FloatArray? {
         val n = pts.size
-        if (n < 2) return emptyList()
-        val first = floatArrayOf(pts[0][0], pts[0][1], 1f)
-        val last = floatArrayOf(pts[n - 1][0], pts[n - 1][1], 1f)
-        if (n < 5) return listOf(first, last)
-
-        // Speed per sample. Raw touch deltas are far too noisy to take a minimum
-        // of directly, so smooth first - a single jittery sample would otherwise
-        // read as a pause.
+        if (n < 2) return null
         val raw = FloatArray(n)
         for (i in 1 until n) {
             var dt = pts[i][2] - pts[i - 1][2]
@@ -2177,14 +2181,55 @@ class KeyboardView(
             raw[i] = sqrt(dx * dx + dy * dy) / dt
         }
         raw[0] = raw[1]
-        val v = FloatArray(n)
+        val out = FloatArray(n)
         val half = V_SMOOTH / 2
         for (i in 0 until n) {
             val lo = maxOf(0, i - half); val hi = minOf(n, i + half + 1)
             var acc = 0f
             for (j in lo until hi) acc += raw[j]
-            v[i] = acc / (hi - lo)
+            out[i] = acc / (hi - lo)
         }
+        return out
+    }
+
+    /**
+     * Where to read the first and last letter from. NOT the first and last
+     * sample: a thumb decelerates onto the letter it means and then carries
+     * past it, so those two points are the approach and the overshoot. This
+     * returns the SLOWEST sample within [ANCHOR_MS] of the chosen end.
+     *
+     * Both anchors are hard gates - the start picks the dictionary bucket, the
+     * end throws away every word that does not finish there - so one noisy
+     * sample used to decide whether the right word could compete at all.
+     *
+     * Measured in tools/swipe_eval.py across the whole touch-offset sweep:
+     * +1 to +3 points of top-1 and never below baseline in eight cells. The
+     * other obvious idea, widening the anchor set to every key that came within
+     * reach during the same window, measured as nothing at all - so the gate
+     * was never too narrow, only aimed at the wrong sample.
+     */
+    private fun anchorPoint(pts: List<FloatArray>, atEnd: Boolean, v: FloatArray?): FloatArray {
+        val n = pts.size
+        if (v == null || n < 3) return if (atEnd) pts[n - 1] else pts[0]
+        val edge = (if (atEnd) pts[n - 1] else pts[0])[2]
+        var best = if (atEnd) n - 1 else 0
+        var bestV = Float.MAX_VALUE
+        val order = if (atEnd) (n - 1) downTo 0 else 0 until n
+        for (i in order) {
+            if (abs(pts[i][2] - edge) > ANCHOR_MS) break
+            if (v[i] < bestV) { bestV = v[i]; best = i }
+        }
+        return pts[best]
+    }
+
+    private fun velocityPivots(pts: List<FloatArray>): List<FloatArray> {
+        val n = pts.size
+        if (n < 2) return emptyList()
+        val first = floatArrayOf(pts[0][0], pts[0][1], 1f)
+        val last = floatArrayOf(pts[n - 1][0], pts[n - 1][1], 1f)
+        if (n < 5) return listOf(first, last)
+
+        val v = speedCurve(pts) ?: return listOf(first, last)
 
         val idx = ArrayList<Int>()
         val conf = ArrayList<Float>()

@@ -33,7 +33,15 @@ object Lift {
     const val DEFAULT = 0.35f
 
     /** Learned values stay in a band a thumb can actually produce. */
-    private const val MIN = 0f
+    // A thumb that lands BELOW the key it aims at is just as real as one that
+    // lands above, and `a55` is one: after 195 glides the value sat on this
+    // floor with the estimator still pulling down, so compensation was simply
+    // switched off on the phone that needed it. Measured in swipe_eval.py: an
+    // offset of -0.35 costs 6 points of top-1 while clamped and none when
+    // compensated, and -0.50 costs 13. The floor stays rather than opening to
+    // -MAX, because the same sweep shows compensating with the WRONG sign is
+    // worth 45 % against 78 % - far worse than not compensating at all.
+    private const val MIN = -0.5f
     private const val MAX = 0.6f
 
     /** How hard one measured word moves the value, once the value has settled. */

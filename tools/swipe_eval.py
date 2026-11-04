@@ -423,6 +423,72 @@ def nearest_keys(p, limit, reach=KEY_W * 1.3):
     return [k for dist, k in sorted(d) if dist <= reach][:limit]
 
 
+# ---- anchors -----------------------------------------------------------------
+# Which keys a glide is ALLOWED to have started and ended on. Both are hard
+# gates: the start chooses the bucket, the end discards every word that does not
+# finish there. Today each is read off ONE sample - the first and the last - so a
+# single noisy point decides whether the right word may compete at all.
+#
+#   point  what ships: nearest keys to the first / last sample (the default)
+#   slow   nearest keys to the SLOWEST sample in a window at that end
+#   near   keys that came within reach ANYWHERE in that window, nearest first
+#
+# SWIPE_ANCHOR=slow SWIPE_ANCHOR_SIDE=end SWIPE_ANCHOR_MS=120 python tools/swipe_eval.py
+# Mirrors KeyboardView.anchorPoint since 3.6.1: "slow" is what ships. Set
+# SWIPE_ANCHOR=point to measure the old single-sample anchors again.
+ANCHOR_MODE = os.environ.get("SWIPE_ANCHOR", "slow")
+ANCHOR_SIDE = os.environ.get("SWIPE_ANCHOR_SIDE", "both")
+ANCHOR_MS = float(os.environ.get("SWIPE_ANCHOR_MS", "120"))   # mirrors KeyboardView.ANCHOR_MS
+
+
+def _anchor_window(path, at_end):
+    """Indices within ANCHOR_MS of the chosen end, always at least one."""
+    if at_end:
+        t_end = path[-1][2]
+        lo = 0
+        for i in range(len(path) - 1, -1, -1):
+            if t_end - path[i][2] > ANCHOR_MS:
+                lo = i + 1
+                break
+        return range(max(lo, 0), len(path))
+    t0 = path[0][2]
+    hi = len(path)
+    for i in range(len(path)):
+        if path[i][2] - t0 > ANCHOR_MS:
+            hi = max(i, 1)
+            break
+    return range(0, hi)
+
+
+def anchor_keys(path, at_end, speeds=None):
+    side_on = ANCHOR_SIDE == "both" or ANCHOR_SIDE == ("end" if at_end else "start")
+    p_ext = path[-1] if at_end else path[0]
+    if ANCHOR_MODE == "point" or not side_on:
+        return nearest_keys(p_ext, ANCHOR_KEYS)
+
+    win = _anchor_window(path, at_end)
+    if ANCHOR_MODE == "slow":
+        v = speeds or speed_curve(path)
+        if not v:
+            return nearest_keys(p_ext, ANCHOR_KEYS)
+        i = min(win, key=lambda j: v[j])
+        return nearest_keys(path[i], ANCHOR_KEYS)
+
+    if ANCHOR_MODE == "near":
+        # Closest this key ever came during the window, not at one instant.
+        best = {}
+        for j in win:
+            x, y = path[j][0], path[j][1]
+            for k, c in CENTERS.items():
+                d = math.hypot(x - c[0], y - c[1])
+                if d < best.get(k, 1e9):
+                    best[k] = d
+        reach = KEY_W * 1.3
+        return [k for d, k in sorted((d, k) for k, d in best.items() if d <= reach)][:ANCHOR_KEYS]
+
+    raise SystemExit("unknown SWIPE_ANCHOR=%r" % ANCHOR_MODE)
+
+
 # ---- decoders ----------------------------------------------------------------
 RESAMPLE_N = 32
 DWELL_N = 28           # mirrors KeyboardView.DWELL_N
@@ -476,8 +542,9 @@ def decode(path, buckets, n=3, mode="pivot", lift_comp=0.0):
     if len(ks) < 2:
         return []
     hi = len(ks) + 2                              # word no longer than keys crossed
-    starts = set(nearest_keys(path[0], ANCHOR_KEYS)) or {ks[0]}
-    ends = set(nearest_keys(path[-1], ANCHOR_KEYS))
+    spd = speed_curve(path) if ANCHOR_MODE == "slow" else None
+    starts = set(anchor_keys(path, False, spd)) or {ks[0]}
+    ends = set(anchor_keys(path, True, spd))
 
     rp = resample(path, RESAMPLE_N) if use_arc else index_resample(path, DWELL_N)
     if rp is None:
