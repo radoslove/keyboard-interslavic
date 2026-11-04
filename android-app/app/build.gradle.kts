@@ -30,8 +30,8 @@ val diagnosticsProps = Properties().apply {
 // Two apps are built from this one code (product flavors below), each with its
 // own test number: flavor -> (TEST_BASE, TEST_BUILD, label prefix).
 val TESTS = mapOf(
-    "interslove" to Triple("3.5", 43, "MS test"),
-    "isc" to Triple("0.1", 35, "ISC test"),
+    "interslove" to Triple("3.5", 44, "MS test"),
+    "isc" to Triple("0.1", 36, "ISC test"),
 )
 
 // The system keyboard list shows ime_name, and the row of the subtype that

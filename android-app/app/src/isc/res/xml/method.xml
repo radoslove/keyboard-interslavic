@@ -1,21 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- IME metadata. One subtype per language, so each shows in the system
      keyboard list and picker the way iOS lists one keyboard per language.
-     Every language is an ordinary, independently tickable subtype; they are
-     ticked on the system's Languages page (the app's button opens it).
-     The app's own language USED to carry overridesImplicitlyEnabledSubtype and
-     it cost twice. Samsung draws a subtype with that flag as a MASTER switch
-     above the others: turning it on WIPES the explicitly enabled list, which
-     leaves the keyboard with a single language - and with fewer than two the
-     globe stops cycling and opens the system picker instead, so the phone
-     quietly ends up on another keyboard (`a55`, 2026-11-04). The flag also hid
-     that subtype's name, because Android shows NO name for a subtype carrying
-     it. The price of dropping it: on a FRESH install, with nothing ticked yet,
-     Android picks the implicit subtype from the phone's locale instead of
-     always this app's own language.
-     subtypeId keeps each identity fixed: without it
+     The app's own language is on by default (overridesImplicitlyEnabledSubtype);
+     the others are ticked on the system's Languages page (the app's button
+     opens it). Only that one carries the flag, because Android shows NO name
+     for a subtype that has it. subtypeId keeps each identity fixed: without it
      the system hashes label + extra value, and any change drops what the user
      ticked. Ids are per app and never reused.
+     ⚠ The flag was removed on 2026-11-04 and put back the same evening, so do
+     not remove it again without reading this. Samsung draws the subtype that
+     carries it as a MASTER switch above the others, and turning that switch on
+     WIPES the explicitly enabled list - the keyboard is left with one language,
+     the globe stops cycling and opens the system picker, and the phone ends up
+     on another keyboard. That is real and it happened on `a55`. It is still the
+     smaller evil. Measured on a fresh install with nothing ticked: Android
+     implicitly enables the subtypes that match the PHONE's locales - on a phone
+     set to en-US with pl-PL and nb-NO it switched on English, Polish and the
+     nb-tagged subtype, and left Czech off because the phone has no Czech locale.
+     No phone is ever set to `isv`, so without this flag the app's own language
+     is the one language a new user does NOT get. The nameless row the flag
+     causes is not a defect in a RELEASE build: the row shows ime_name, which
+     reads Medzuslovjansky there, and only carries a number in test builds.
      A language added by a LATER build is NOT switched on by itself on a phone
      that already has the app: the new subtype arrives unticked, so it is
      invisible in the keyboard picker until the user ticks it (or, over USB,
@@ -31,7 +36,8 @@
         android:imeSubtypeLocale="nb"
         android:imeSubtypeMode="keyboard"
         android:imeSubtypeExtraValue="lang=isc"
-        android:subtypeId="5631" />
+        android:subtypeId="5631"
+        android:overridesImplicitlyEnabledSubtype="true" />
     <subtype
         android:label="@string/subtype_isv"
         android:languageTag="isv"
