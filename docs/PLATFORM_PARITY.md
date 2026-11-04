@@ -79,6 +79,17 @@ languages; per flavor only `src/<flavor>/` differs (`App.kt`, `Ui.kt`, `method.x
 The iOS app is one app with one extension per language; Interscandinavian is not an iOS
 extension yet (its iOS side is the Keyman package).
 
+⚠ **The `isc` flavor is PARKED from 2026-11-04** (owner's call): it stays in
+`build.gradle.kts` and nothing is cut, it simply is not built or handed to a phone any
+more. Do not read the two `Ui.kt` as being in step - they already differ by about thirty
+lines, and that gap grows with every settings text added to `interslove` alone.
+Un-parking costs one `assemble`; cutting the flavor out would cost half an hour twice and
+save nothing per round, which is why it is not cut.
+
+This parks the separate APP, not the language: Mellomskandinavisk stays one of the six
+languages of the published app, and its dictionary ships in `src/main/assets`, so both
+flavors carry it anyway.
+
 ## Both, shared
 
 - Dictionary format: iOS reads a compact binary (`Resources/<lang>_swipe.bin`), Android parses the

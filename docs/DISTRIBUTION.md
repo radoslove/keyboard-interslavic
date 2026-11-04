@@ -56,6 +56,9 @@ flavor (`com.radoslove.interslavic`, display name Medžuslovjansky; a rename to 
 # publish it under the unchanged asset name app-release.apk
 ```
 
+⚠ Since 2026-11-04 the `isc` flavor is PARKED: not built, not released, left in place.
+See docs/PLATFORM_PARITY.md for what that does and does not mean.
+
 The `isc` flavor (`com.radoslove.interscandinavian`, Mellomskandinavisk) is built the same way
 (`assembleIscRelease`) and is not part of the F-Droid submission. Before the first 3.5 release:
 the F-Droid recipe needs `gradle: [interslove]`, and the store title and `AutoName` follow the new

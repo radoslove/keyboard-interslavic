@@ -9,7 +9,7 @@ in three languages — Medžuslovjansky, English, Polish — ready to copy.
 
 | Route | What it is | Who it is for |
 |---|---|---|
-| **[Test build 3.5.39](https://drive.google.com/open?id=1vEifcc55MWuHJkkpil3rJGUXqSX0L9q7)** | Newest: 934 233 dictionary entries across five languages, Czech, the fixed glide-and-type rule. Debug-signed, 7 MB. Installs as `com.radoslove.interslavic.debug`, i.e. **next to** a published build instead of replacing it. | Someone who is actually testing. This is the build worth feedback. |
+| **[Test build 3.5.39](https://drive.google.com/open?id=1vEifcc55MWuHJkkpil3rJGUXqSX0L9q7)** | Newest: 987 006 dictionary entries across six languages, Czech, the fixed glide-and-type rule. Debug-signed, 7 MB. Installs as `com.radoslove.interslavic.debug`, i.e. **next to** a published build instead of replacing it. | Someone who is actually testing. This is the build worth feedback. |
 | **[Release v3.4](https://github.com/radoslove/keyboard-interslavic/releases/download/v3.4/app-release.apk)** | Stable, release-signed, 2.4 MB, published 2026-10-05. Downloads as `app-release.apk`, with no version in the name - from v3.5 the asset is `interslove-<version>.apk`. Older: no Czech, a much smaller dictionary, and the glide-and-type rule that joins two words when you type fast. | Someone who just wants to use a keyboard and not report anything. |
 
 Checked 2026-11-04, each one by its own measurement:
