@@ -197,12 +197,12 @@ A plain XKB symbols file, installed with a copy into `/usr/share/X11/xkb/symbols
 Only needed for the **files** (Android APK, Windows DLLs, macOS keylayout).
 App-store routes (Keyman) are verified by the store.
 
-**Android APK — current release `v3.4`:**
+**Android APK — current release `v3.5`:**
 
 | What | Value |
 |---|---|
-| File | `app-release.apk` (from v3.5: `interslove-<version>.apk`) |
-| SHA-256 | `aaf63843a25383c6140e2ffcc2e8cba684050e9c39f80299b559d4084a444a6c` |
+| File | `interslove-3.5.apk` (and `app-release.apk`, the same bytes under the old name) |
+| SHA-256 | `4dde33d5bd003a2c148d848d4336f3998579e6a408be36e9b559153586ee00d8` |
 | Signing-certificate SHA-256 | `5fa81cd2fd62cbdd3580076b941c1711b4ddc625609b5c80ec7c135a56e3b98a` |
 
 The signing-certificate fingerprint is the same one registered in our F-Droid

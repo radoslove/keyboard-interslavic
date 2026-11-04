@@ -1,0 +1,14 @@
+Czech, a much larger Polish wordlist, and the settings one hold away.
+
+- Czech is the sixth language; the keyboard now carries 987 006 dictionary
+  entries across all six.
+- Polish gained its past-personal and conditional forms - zrobilem, chcialbym,
+  zebym - which the wordlist simply did not have before, plus first names and
+  surnames from the public registers.
+- Typing a letter right after a glide joins it to that word only when the two
+  can still grow into a word, instead of whenever you typed quickly.
+- Hold the globe to reach this keyboard's own settings without leaving what you
+  are writing; the keyboard picker stays where it was, first in the strip.
+- The settings screen shows which build you are running.
+- Suggestions rank frequency properly for Polish and Czech, and the keyboard
+  learns your touch offset several times faster in its first twenty glides.
