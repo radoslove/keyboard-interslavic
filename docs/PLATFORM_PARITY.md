@@ -4,7 +4,7 @@
 gained since the last round is ported here before anything new is started, so the two apps never
 drift into different keyboards. Update the table at the end of the round.
 
-Last checked: 2026-11-01 (iOS 0.4.3 · Android MS 3.5.35-test, Mellomskandinavisk 0.1.27-test).
+Last checked: 2026-11-04 (iOS 0.4.3 · Android MS 3.5.42-test, Mellomskandinavisk 0.1.34-test).
 
 ## iOS has, Android does not yet → port to Android
 
@@ -15,6 +15,10 @@ ISC 0.1.24** (2026-11-01) and moved to *Done in both*.
 
 | Feature | Android commit | iOS notes |
 |---|---|---|
+| **A way into the keyboard's own settings FROM the keyboard**: hold 🌐 for a two-item strip: 🌐 the system keyboard picker first, over the key, and ⚙ settings one slide to the right. Before this the settings were reachable only from the app icon, so changing anything meant leaving what you were typing - and a tester does not necessarily know the keyboard has an app at all (owner, 2026-11-04). Icons, not words: the keyboard surface carries no translated strings | 3.5.42 (`KeyboardView.globeKey`, `ImeService.openSettings`) | iOS has no globe of its own (the system key switches extensions) and an extension cannot just start an activity - it needs its own route into the container app; decide the gesture first |
+| A letter tapped after a glide extends that word only if the WORDLIST says it still can; time is just a ceiling. Deciding it on the clock alone glued the next word onto the last one whenever typing was quick (`wyjsc` + `s` -> `wyjscs`, owner 2026-11-04) | 3.5.39 (`Dictionary.hasPrefix`) | `SwipeInput.swift` has the same post-glide window; the iOS dictionary needs the same prefix query |
+| Frequency pulls LINEARLY in the byte for Polish and Czech too, not log-of-a-rank. The byte is already a quantile, so the second log left the whole signal worth ~5 px of path deviation - 5 % of a key - and `semtex` outranked the median of the dictionary | 3.5.39 (`Dictionary.LINEAR_FREQ`) | `SwipeDictionary.swift` scores its own way; check which transform its binary carries before copying the constant |
+| Polish PAST-PERSONAL and CONDITIONAL forms in the wordlist (136 577 added): the endings are agglutinants, so PoliMorf has no composite form and the filter dropped every one - `zrobil` was in, `zrobilem` was not | 3.5.39 (`tools/build_pl_aglutynanty.py`) | rebuild `pl_swipe.bin` from the new `main_pl.combined` |
 | Each app names the keyboard languages in ITS OWN language: the MS app's picker and settings read `medžuskandinavsky poljsky norvežsky anglijsky češsky`, and the sixth is the service's own name (owner 2026-11-01, every adjective verified in medzuslove_canon) | 3.5.34–3.5.35 | one extension per language, so the names live in each `Info.plist` display name plus the list in `App/App.swift` |
 | **Czech** as a language (`cs`: QWERTY rows, á č ď ě é í ň ó ř š ť ú ů ý ž on hold) | 3.5.31 | needs its own extension + `cs_swipe.bin` from `main_cs.combined` (40 959 forms); `foldBase` must fold the Czech letters or every glide over them dies |
 | **Interscandinavian** as a language (`isc`: rows of 11, `å ø æ`) | 3.5.14 | fourth extension, wordlist `main_isc.combined` |

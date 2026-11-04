@@ -5,6 +5,10 @@ How to verify each keyboard layout + the swipe dictionary actually work — as a
 never seen this project. If a step is unclear or missing, that's a doc bug worth
 fixing → note it under [What to report](#what-to-report).
 
+Handing the keyboard to someone else to try? [docs/TESTERS.md](docs/TESTERS.md)
+carries the short instruction in Medžuslovjansky, English and Polish, plus which
+file to give them and which download routes are currently dead.
+
 Every desktop layout (Windows / macOS / Linux) shares the same **core checks**.
 Android is different (tap + swipe) and adds the dictionary.
 

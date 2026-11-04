@@ -69,8 +69,14 @@ No swipe typing on this route — Keyman does not do gestures.
 
 ## Android — route B: swipe-typing app
 
-Our own keyboard app: **swipe (glide) typing with a 253 273-form Interslavic
+Our own keyboard app: **swipe (glide) typing with a 248 845-form Interslavic
 dictionary, fully offline, no permissions, MIT licence.**
+
+<!-- 253 273 is the compiled .dict for HeliBoard (route C); the app ships
+     dictionary/main_isv.combined, which is a different list with a different
+     total. Both figures are right in their own sentence, which is exactly how
+     the wrong one ended up here. check_docs.py validates counts in the README
+     only, so this line was never checked. -->
 
 Package name: `com.radoslove.interslavic`
 
@@ -85,8 +91,10 @@ Package name: `com.radoslove.interslavic`
 
 ### Installing the GitHub release safely
 
-1. Open the **Releases** link above **on the phone** and download
-   `app-release.apk` from the newest release.
+1. Open the **Releases** link above **on the phone** and download the `.apk`
+   from the newest release. From v3.5 it is named after the version
+   (`interslove-3.5.apk`), so the file in your Downloads folder says what it
+   is; v3.4 and older are called `app-release.apk`.
 2. Android will ask to allow installs from your browser — allow it once for
    this install; you can turn it off again afterwards.
 3. Before you tap *Install*, you can **verify the file** (recommended, takes a
@@ -193,7 +201,7 @@ App-store routes (Keyman) are verified by the store.
 
 | What | Value |
 |---|---|
-| File | `app-release.apk` |
+| File | `app-release.apk` (from v3.5: `interslove-<version>.apk`) |
 | SHA-256 | `aaf63843a25383c6140e2ffcc2e8cba684050e9c39f80299b559d4084a444a6c` |
 | Signing-certificate SHA-256 | `5fa81cd2fd62cbdd3580076b941c1711b4ddc625609b5c80ec7c135a56e3b98a` |
 

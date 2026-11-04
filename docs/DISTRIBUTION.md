@@ -29,7 +29,14 @@ listing them here does not imply an accepted or active listing.
 3. Sign with the established release key. Verify the certificate fingerprint and
    record the APK's SHA-256. The expected certificate SHA-256 is
    `5fa81cd2fd62cbdd3580076b941c1711b4ddc625609b5c80ec7c135a56e3b98a`.
-4. The maintainer publishes a `vX.Y` tag and an asset named **`app-release.apk`**.
+4. The maintainer publishes a `vX.Y` tag and an asset named
+   **`interslove-X.Y.apk`** - `tools/name_release_apk.py` produces exactly that
+   file from the build output. Up to and including v3.4 the asset was called
+   `app-release.apk`, which told a person who downloaded it nothing: four
+   different versions landed in one Downloads folder as `app-release (1).apk`
+   and so on, and the file had to be installed to find out what it was. Upload
+   `app-release.apk` as a SECOND copy of the same bytes for as long as anything
+   still links to `releases/latest/download/app-release.apk` (the website does).
    Update `docs/INSTALL.md` and the corresponding fastlane changelog.
 5. Update any pending catalogue recipes to reference that exact published version
    and source revision, then verify their CI results.
@@ -59,8 +66,11 @@ display name.
 The submission is [MR !45568](https://gitlab.com/fdroid/fdroiddata/-/merge_requests/45568).
 Use its current discussion and diff as the source of submission status.
 
-- `Binaries` uses the release pattern `.../releases/download/v%v/app-release.apk`.
-  Preserve the asset filename and version-tag convention.
+- `Binaries` is NOT set (the field is only described in a comment), so F-Droid
+  builds and signs from source and nothing outside this repo pins the asset
+  filename - that is why renaming it is safe. If reproducible builds are ever
+  turned on, the pattern becomes `.../releases/download/v%v/interslove-%v.apk`
+  and from then on the filename IS pinned.
 - Pin the full source commit and the public certificate in
   `AllowedAPKSigningKeys`.
 - Keep `versionName`, `versionCode`, `commit`, `CurrentVersion` and

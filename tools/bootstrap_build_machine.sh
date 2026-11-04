@@ -145,8 +145,11 @@ fi
 
 if [ "$DOBUILD" = "1" ] && [ "$FAIL" = "0" ]; then
   echo "-- build --"
-  ( cd android-app && ./gradlew --no-daemon clean assembleRelease ) || exit 1
-  APK=android-app/app/build/outputs/apk/release/app-release.apk
+  # Two flavors since 3.5: a bare assembleRelease builds both, and the output
+  # moved under apk/<flavor>/release/. This path was left behind by that change
+  # and pointed at a file that no longer exists.
+  ( cd android-app && ./gradlew --no-daemon clean assembleIntersloveRelease ) || exit 1
+  APK=android-app/app/build/outputs/apk/interslove/release/app-interslove-release.apk
   SIGNER="$ANDROID_HOME/build-tools/34.0.0/apksigner"
   [ -f "$SIGNER" ] || SIGNER="$SIGNER.bat"
   CERTS=$("$SIGNER" verify --print-certs "$APK") || { bad "invalid APK signature"; exit 1; }

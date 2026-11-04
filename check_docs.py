@@ -135,7 +135,20 @@ def main():
     #    already gone wrong once, in both directions. Both halves of README.md
     #    are checked: the Interslavic sentence AND its English gloss, which is
     #    where the two files used to disagree before they were merged.
-    check("prěvlečeš" in ms, "README.md: iOS section does not teach the swipe")
+    #    Pinned to one spelling, this failed for the wrong reason: the README
+    #    was rewritten from "prěvlečeš palcem v goru" to "svajp vgoru" (commit
+    #    921be14), which teaches the same gesture in the same place - the row
+    #    and the English gloss both survived - while the check went red and
+    #    stayed red, so the whole gate stopped being believed. Assert the
+    #    INVARIANT instead: the iPhone row names an upward swipe on both sides
+    #    of the slash. Either Interslavic wording passes; the English half must
+    #    always be there, because that is the half a stranger reads.
+    wiersz = next((l for l in ms.splitlines() if "iPhone / iPad" in l), "")
+    check(bool(wiersz), "README.md: no iPhone row in the gesture table")
+    check(any(w in wiersz for w in ("svajp vgoru", "prěvlečeš")),
+          "README.md: iOS section does not teach the swipe", wiersz[:90])
+    check("swipe up" in wiersz,
+          "README.md: the iOS gesture has no English gloss", wiersz[:90])
     check("swipe up" in ms.lower(), "README.md: English gloss does not teach the swipe")
     check("prěvlečeš" in welcome, "welcome.htm: does not teach the swipe")
     check("prěvlečeš" in help_php, "help/isv_latin.php: does not teach the swipe")
@@ -215,6 +228,58 @@ def main():
     check(list(touch.keys()) == ["phone"],
           "touch layout: expected the phone form only",
           "found %s" % sorted(touch.keys()))
+
+    # 11. The same discipline as check 3, for the two docs a TESTER reads -
+    #     and measured on what SHIPS. The app's dictionaries live in the
+    #     assets folder; `dictionary/` holds five of the six lists, because
+    #     main_isc.combined is produced in the Interscandinavian repo and
+    #     copied in. Counting the wrong folder is how the website came to
+    #     understate the total by 52 774 with a green gate, and counting LINES
+    #     instead of entries is how the rest of the drift got in: four of the
+    #     six lists indent their `word=` rows, and every list has a header.
+    assets_dir = os.path.join(HERE, "android-app", "app", "src", "main", "assets")
+    per_list = {}
+    for name in sorted(os.listdir(assets_dir)):
+        if name.startswith("main_") and name.endswith(".combined"):
+            per_list[name] = sum(
+                1 for line in read("android-app/app/src/main/assets/" + name).splitlines()
+                if line.lstrip().startswith("word="))
+    check(len(per_list) == 6, "the app no longer ships six dictionaries",
+          "found %s" % sorted(per_list))
+    total = sum(per_list.values())
+    shipped = set(per_list.values()) | {
+        total,
+        # What the five advertised languages hold: isc is built but not
+        # advertised while it is still developmental (owner, 2026-11-04).
+        total - per_list.get("main_isc.combined", 0),
+    }
+    # Measured figures these docs quote that are NOT dictionary sizes. Named
+    # one by one with their source, the way check 3 names the compiled .dict:
+    # an unexplained exception is how a gate stops meaning anything.
+    other = {
+        32951,   # Polish past-tense forms recovered by tools/build_pl_aglutynanty.py
+    }
+    for doc in ("docs/TESTERS.md", "docs/INSTALL.md"):
+        text = read(doc)
+        # A number inside a link or a merge-request id is not a count. Strip
+        # them first, or the gate cries wolf over !45568 and over file ids.
+        text = re.sub(r"https?://\S+", " ", text)
+        text = re.sub(r"!\d+", " ", text)
+        flat = re.sub(r"(?<=\d)[\s,](?=\d)", "", text)
+        for n in set(re.findall(r"\b(\d{5,6})\b", flat)):
+            check(int(n) in shipped or int(n) in real or int(n) in other,
+                  "%s: quotes a count nothing produces" % doc,
+                  "%s (shipped: %s)" % (n, sorted(shipped)))
+
+    # 12. The release asset must be named after the version, in the procedure
+    #     and in the tool that produces it - one convention, two files. Up to
+    #     v3.4 it was `app-release.apk`, which said nothing once downloaded.
+    dist = read("docs/DISTRIBUTION.md")
+    namer = read("tools/name_release_apk.py")
+    check("interslove-X.Y.apk" in dist,
+          "DISTRIBUTION.md: the release asset is no longer named after the version")
+    check("interslove-<version>.apk" in namer,
+          "name_release_apk.py: lost the documented release-asset pattern")
 
     print("%d checks" % checks)
     if failures:
