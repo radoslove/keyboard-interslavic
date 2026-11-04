@@ -43,6 +43,15 @@ class SetupActivity : Activity() {
             setBackgroundColor(Color.parseColor("#FAFAFA"))
         }
 
+        // Which build is this? The released app showed its version nowhere at
+        // all - only a test build carried it, and only inside its label - so a
+        // tester who had installed it could not answer "which one do you have?",
+        // and a bug report could not say which build it was about. Not
+        // translated on purpose: a version and a package id read the same in all
+        // four screen languages, and the `.debug` suffix is itself the answer to
+        // "is this the test build or the published one?".
+        root.addView(buildLine())
+
         // Language of this screen. The heading carries all four names, so it can
         // be found whichever language the screen is in now.
         root.addView(header(Ui.LANG_HEAD))
@@ -310,6 +319,20 @@ class SetupActivity : Activity() {
             putExtra(Intent.EXTRA_TEXT, text)
         }
         startActivity(Intent.createChooser(send, t("chooser")))
+    }
+
+    /** `<version> · com.radoslove.interslavic.debug` - the two facts every
+     *  bug report needs, at the top so they are read without scrolling. */
+    private fun buildLine() = TextView(this).apply {
+        text = "${BuildConfig.VERSION_NAME} · $packageName"
+        textSize = 13f
+        // Content colour, not the gloss grey it first had: that grey is 3.2:1 on
+        // this background, and it is used for text the eye may skip. This line is
+        // the opposite - it exists to be READ and copied into a bug report, so it
+        // gets the body colour at 9.2:1. Measured on a screenshot of the phone,
+        // not judged in the editor.
+        setTextColor(Color.parseColor("#37474F"))
+        setPadding(0, 0, 0, 2)
     }
 
     private fun header(t: String) = TextView(this).apply {

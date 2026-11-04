@@ -555,10 +555,14 @@ class KeyboardView(
             render()
             refreshSuggestions()
         })
-        // 😀 left of space, where `,` used to be (iOS 0.4.2, owner 2026-10-25).
-        // The comma did not lose a gesture: it is the FIRST item held on `.`.
-        b.addView(functionKey("😀", 0.9f) { emoji = true; symbols = false; render() })
-        b.addView(spaceKey(if (isv) 3.45f else 4.65f))
+        // `,` is back on a key of its own, right next to space (owner 2026-11-01:
+        // "przecinek musi byc bardziej pod reka, a dokladnie to kciukiem"). 😀 keeps
+        // its key to its left - it took the comma's place in 3.5.31 (iOS 0.4.2)
+        // and that turned out to be one hop too far for the mark used most.
+        // The comma also stays FIRST in the `.` hold, so nothing lost a gesture.
+        b.addView(functionKey("😀", 0.8f) { emoji = true; symbols = false; render() })
+        b.addView(symbolKey(',', 0.8f, Layout.commaHold))
+        b.addView(spaceKey(if (isv) 2.75f else 3.95f))
         b.addView(symbolKey('.', 0.9f, Layout.periodLetterHold))
         b.addView(functionKey("⏎", 1.4f) { enter() })
         addView(b)
@@ -635,15 +639,65 @@ class KeyboardView(
         return tv
     }
 
-    /** 🌐: tap = the next ticked language (Gboard's habit), or the system keyboard
-     *  picker when only one is ticked; hold = always the picker. */
+    /** 🌐: tap = the next ticked language (Gboard's habit), or the system
+     *  keyboard picker when only one is ticked. HOLD opens a two-item strip:
+     *  ⚙ this keyboard's own settings, 🌐 the system keyboard picker.
+     *
+     *  The settings were reachable only from the app icon, which meant leaving
+     *  whatever you were typing - and a tester does not necessarily know the
+     *  keyboard has an app at all (owner, 2026-11-04). Icons and not words on
+     *  purpose: the keyboard surface carries no translated strings, and a gear
+     *  reads the same in all six languages. The strip is the same one the
+     *  letter keys use, so a hold-and-slide works exactly as it does there;
+     *  The PICKER sits first, over the key, so a plain hold-and-release does
+     *  what holding the globe always did - and it is the only way back from
+     *  a foreign keyboard, so it must not need aiming. The gear is one slide
+     *  to the right (owner, 2026-11-04). */
     private fun globeKey(weight: Float): TextView {
-        // The system rotates the languages (subtypes) and tells the service,
-        // which rebuilds the keyboard for the new one.
-        val tv = functionKey("🌐", weight) {
-            if (!service.nextLanguage()) service.switchIme()
+        val gear = "⚙"
+        val picker = "🌐"
+        val tv = baseKey("🌐", weight)
+        // The view's own long-press machinery competes with ours for the hold.
+        tv.isLongClickable = false
+        var downX = 0f
+        var downY = 0f
+        val longPress = Runnable { showPopup(tv, listOf(picker, gear), downX); tv.isPressed = false }
+        tv.setOnTouchListener { _, e ->
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    downX = e.x; downY = e.y
+                    tv.isPressed = true
+                    flickHandler.postDelayed(longPress, longPressMs)
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (popupItems != null) movePopup(tv, e.x)
+                    else if (abs(e.x - downX) > touchSlop * 2 || abs(e.y - downY) > touchSlop * 2) {
+                        flickHandler.removeCallbacks(longPress)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    flickHandler.removeCallbacks(longPress)
+                    tv.isPressed = false
+                    // The system rotates the languages (subtypes) and tells the
+                    // service, which rebuilds the keyboard for the new one.
+                    when (closePopup()) {
+                        gear -> service.openSettings()
+                        picker -> service.switchIme()
+                        else -> if (!service.nextLanguage()) service.switchIme()
+                    }
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    flickHandler.removeCallbacks(longPress)
+                    tv.isPressed = false
+                    closePopup()
+                    true
+                }
+                else -> false
+            }
         }
-        tv.setOnLongClickListener { service.switchIme(); true }
         return tv
     }
 
@@ -923,8 +977,19 @@ class KeyboardView(
         // Smart space must not fire there, or `pisem` + `s` lands as `pisem s`
         // instead of `pisems`, which in an inflected language is the common case,
         // not the edge one. Read it BEFORE swipeJustCommitted is cleared.
+        // The window is now only a CEILING. Inside it, the wordlist decides: a
+        // letter extends the glided word only if the two together can still
+        // grow into a word. Time alone glued the start of the next word onto
+        // the last one whenever the user typed quickly (`wyjsc` + `s` ->
+        // `wyjscs`), and that is the frequent case - extending a glide is the
+        // rare one. Price: extending into a word the list does NOT know gets a
+        // space instead; adding it once with the + chip fixes it for good,
+        // because UserWords is part of the list this asks.
         val extendingGlide = swipeJustCommitted && s.isNotEmpty() && s[0].isLetter() &&
-            SystemClock.uptimeMillis() - swipeCommitAtMs <= SWIPE_WIPE_WINDOW_MS
+            SystemClock.uptimeMillis() - swipeCommitAtMs <= SWIPE_WIPE_WINDOW_MS &&
+            Dictionary.hasPrefix(
+                (Script.toLatin(context, lastSwipeWord) + Script.toLatin(context, s)).lowercase()
+            )
         if (extendingGlide) pendingSpace = false
 
         // A glide the user KEPT is a measurement of their own thumb: the word
@@ -1501,10 +1566,16 @@ class KeyboardView(
 
     private fun onSlotTap(i: Int) {
         val w = slotWord[i] ?: return
-        // Undoing, replacing or completing means the glide's word is NOT what
-        // stays in the text, so it must not teach [Lift] anything. Saving a word
-        // with `＋` changes no text and leaves the sample alone.
-        if (!slotIsSave[i]) liftSample = null
+        // Taking another candidate from the strip is not a lost sample - it is a
+        // LABELLED one: the gesture is the same and now the true word is known.
+        // Dropping it was the deadlock behind "swipe nie łapie": while the offset
+        // is wrong nothing is ever kept, so nothing could ever teach [Lift]
+        // (owner 2026-11-01). Undo and completion still teach nothing, and `＋`
+        // changes no text so it leaves the sample alone.
+        if (slotIsSwipeAlt[i]) {
+            liftSampleWord = Script.toLatin(context, w).lowercase()
+            learnLift()
+        } else if (!slotIsSave[i]) liftSample = null
         when {
             slotIsUndo[i] -> undoLastDelete()
             slotIsSave[i] -> {

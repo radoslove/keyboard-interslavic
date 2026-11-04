@@ -1,5 +1,6 @@
 package com.radoslove.interslavic
 
+import android.content.Intent
 import android.inputmethodservice.InputMethodService
 import android.os.Build
 import android.view.inputmethod.InputMethodSubtype
@@ -104,5 +105,21 @@ class ImeService : InputMethodService() {
     fun switchIme() {
         val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
         imm.showInputMethodPicker()
+    }
+
+    /**
+     * This keyboard's own settings, from the globe's hold strip. Until now there
+     * was NO way in from the keyboard at all: someone who wanted to turn the key
+     * sound off, or who met the glue-two-words rule, had to leave what they were
+     * typing and find the app icon - and a tester who does not know the keyboard
+     * HAS an app simply does not find it. A service is not an activity, so the
+     * intent needs its own task, and the keyboard gets out of the way first.
+     */
+    fun openSettings() {
+        requestHideSelf(0)
+        startActivity(
+            Intent(this, SetupActivity::class.java)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        )
     }
 }

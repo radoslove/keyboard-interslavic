@@ -93,7 +93,7 @@ object Lang {
         EN -> "English"
         CS -> "Čeština"
         ISV -> "Medžuslovjansky"
-        ISC -> "isc-no"
+        ISC -> "Mellomskandinavisk"
         else -> App.MAIN_NAME
     }
 }

@@ -1,10 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- IME metadata. One subtype per language, so each shows in the system
      keyboard list and picker the way iOS lists one keyboard per language.
-     The app's own language is on by default (overridesImplicitlyEnabledSubtype);
-     the others are ticked on the system's Languages page (the app's button
-     opens it). Only that one carries the flag, because Android shows NO name
-     for a subtype that has it. subtypeId keeps each identity fixed: without it
+     Every language is an ordinary, independently tickable subtype; they are
+     ticked on the system's Languages page (the app's button opens it).
+     The app's own language USED to carry overridesImplicitlyEnabledSubtype and
+     it cost twice. Samsung draws a subtype with that flag as a MASTER switch
+     above the others: turning it on WIPES the explicitly enabled list, which
+     leaves the keyboard with a single language - and with fewer than two the
+     globe stops cycling and opens the system picker instead, so the phone
+     quietly ends up on another keyboard (`a55`, 2026-11-04). The flag also hid
+     that subtype's name, because Android shows NO name for a subtype carrying
+     it. The price of dropping it: on a FRESH install, with nothing ticked yet,
+     Android picks the implicit subtype from the phone's locale instead of
+     always this app's own language.
+     subtypeId keeps each identity fixed: without it
      the system hashes label + extra value, and any change drops what the user
      ticked. Ids are per app and never reused.
      A language added by a LATER build is NOT switched on by itself on a phone
@@ -22,8 +31,7 @@
         android:imeSubtypeLocale="isv"
         android:imeSubtypeMode="keyboard"
         android:imeSubtypeExtraValue="lang=isv"
-        android:subtypeId="5617"
-        android:overridesImplicitlyEnabledSubtype="true" />
+        android:subtypeId="5617" />
     <subtype
         android:label="@string/subtype_isc"
         android:languageTag="nb"
