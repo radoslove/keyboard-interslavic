@@ -37,6 +37,14 @@ ISV = ROOT / "dictionary/main_isv.combined"
 OUT = ROOT / "dictionary/main_pl.combined"
 
 MIN_COUNT = 2
+
+# PoliMorf is the filter, and it does not list every closed-class word: the
+# reflexive pronoun `siebie` has no entry at all, so `sobie` - around rank 20 in
+# Polish - fell out of the wordlist and the keyboard offered `➕ sobie` as if it
+# were a new word (owner 2026-11-01, measured on a 150-word probe of pronouns,
+# prepositions and conjunctions: these three were the ONLY holes). A form here is
+# added with the frequency byte of its neighbours in the frequency list.
+SUPPLEMENT = {"sobie": 237, "siebie": 207, "sobą": 180}
 LETTERS = set("aąbcćdeęfghijklłmnńoóprsśtuwyzźżqvx")
 
 
@@ -79,11 +87,16 @@ def main():
     with OUT.open("w", encoding="utf-8") as out:
         out.write("dictionary=main:pl,locale=pl,description=Polski (FrequencyWords "
                   "CC BY-SA 4.0 + PoliMorf BSD-2),version=1\n")
+        written = set()
         for rank, form in enumerate(words):
             f = isv[min(k - 1, rank * k // n)]
             out.write(f"word={form},f={max(1, min(255, f))}\n")
+            written.add(form)
+        extra = [(w, f) for w, f in SUPPLEMENT.items() if w not in written]
+        for w, f in extra:
+            out.write("word=%s,f=%d\n" % (w, f))
 
-    print(f"{n} forms -> {OUT}")
+    print(f"{n} forms -> {OUT}" + (f" (+{len(extra)} closed-class PoliMorf lacks)" if extra else ""))
 
 
 if __name__ == "__main__":

@@ -30,3 +30,6 @@ keystore.properties
 /dictionary/sources_en/*
 !/dictionary/sources_en/README.md
 /dictionary/sources_nb/*
+
+# Odlozone wersje plikow (zasada: nic sie nie kasuje, tylko wersjonuje).
+trash/
