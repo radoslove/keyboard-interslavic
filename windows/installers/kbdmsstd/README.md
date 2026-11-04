@@ -22,7 +22,7 @@ Preview first without changing anything (no admin needed):
 ```
 
 After install: **Settings → Time & language → Language → Polish → Language options →
-Add a keyboard → “Medzuslovjansky (standard)”**. Switch with **Win+Space**.
+Add a keyboard → “Medžuslovjansky (standard)”**. Switch with **Win+Space**.
 
 ## Uninstall
 

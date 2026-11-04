@@ -16,7 +16,7 @@ is needed to PRODUCE one - only to run it. This mirrors the Windows/Android layo
 Install on macOS:
   cp mac/KBDMSSTD.keylayout ~/Library/Keyboard\\ Layouts/
   then System Settings -> Keyboard -> Input Sources -> + -> Others ->
-  "Medzuslovjansky (standard)". Switch with the input-source menu / Caps or ^Space.
+  "Medžuslovjansky (standard)". Switch with the input-source menu / Caps or ^Space.
 
 USAGE
     python build_keylayout.py

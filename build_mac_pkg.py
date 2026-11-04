@@ -7,7 +7,7 @@ The package copies the layout into "Keyboard Layouts". Installer offers two targ
   * only me    -> ~/Library/Keyboard Layouts  (no admin needed)
 
 After installing: log out and back in, then System Settings -> Keyboard ->
-Input Sources -> Edit -> + -> Others -> "Medzuslovjansky (standard)".
+Input Sources -> Edit -> + -> Others -> "Medžuslovjansky (standard)".
 
 Signing: the package is unsigned unless --sign names a "Developer ID Installer"
 identity (an "Apple Development" certificate cannot sign installers). macOS blocks

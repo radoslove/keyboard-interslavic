@@ -1,6 +1,6 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
-    install.ps1 - install the "Medzuslovjansky (standard)" keyboard layout (KBDMSSTD).
+    install.ps1 - install the "Medžuslovjansky (standard)" keyboard layout (KBDMSSTD).
 
     Standard-orthography Interslavic Latin layout. AltGr carries c-caron / s-caron /
     z-caron / e-caron (c s z e) plus the punctuation our texts use. No dead keys.
@@ -19,7 +19,7 @@ param([switch]$DryRun)
 $ErrorActionPreference = 'Stop'
 $here       = Split-Path -Parent $MyInvocation.MyCommand.Path
 $DllName    = 'KBDMSSTD.DLL'
-$LayoutText = 'Medzuslovjansky (standard)'
+$LayoutText = 'Medžuslovjansky (standard)'
 $BaseLang   = '0415'   # pl-PL
 
 # --- admin check (skipped for -DryRun) ---
@@ -80,7 +80,7 @@ if ($already) {
 # --- report ---
 $mode = if ($DryRun) { 'DRY RUN' } else { 'INSTALL' }
 Write-Host ""
-Write-Host "Medzuslovjansky (standard) keyboard - $mode" -ForegroundColor Cyan
+Write-Host "Medžuslovjansky (standard) keyboard - $mode" -ForegroundColor Cyan
 Write-Host ("  KLID       : {0}{1}" -f $klid, $(if($reuse){' (already registered - reusing)'}else{''}))
 Write-Host ("  Layout Id  : {0}" -f $lidHex)
 Write-Host ("  Layout Text: {0}" -f $LayoutText)
@@ -105,5 +105,5 @@ Write-Host ""
 Write-Host "Installed." -ForegroundColor Green
 Write-Host "Add it to your input methods:"
 Write-Host "  Settings -> Time & language -> Language & region -> Polish -> ... -> Language options"
-Write-Host "  -> Add a keyboard -> 'Medzuslovjansky (standard)'."
+Write-Host "  -> Add a keyboard -> 'Medžuslovjansky (standard)'."
 Write-Host "Then switch with Win+Space. (A sign-out/in helps if it does not appear immediately.)"

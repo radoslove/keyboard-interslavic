@@ -44,7 +44,7 @@ layout.
 ## Windows — KBDMSSTD
 
 1. `install.ps1` (elevated) per `windows/installers/kbdmsstd/README.md`
-2. Settings → Language → **Polish** → add keyboard → **“Medzuslovjansky (standard)”**
+2. Settings → Language → **Polish** → add keyboard → **“Medžuslovjansky (standard)”**
 3. Switch with **Win+Space**
 4. Run the **Core checks** above (Mod = AltGr)
 5. If it doesn't appear in the add-keyboard list → sign out/in
@@ -54,7 +54,7 @@ layout.
 ## macOS — KBDMSSTD.keylayout
 
 1. Copy `mac/KBDMSSTD.keylayout` → `~/Library/Keyboard Layouts/`
-2. System Settings → Keyboard → Input Sources → **+** → **“Medzuslovjansky (standard)”**
+2. System Settings → Keyboard → Input Sources → **+** → **“Medžuslovjansky (standard)”**
 3. Switch via the input-source menu (or ⌃Space)
 4. Run the **Core checks** (Mod = **Option**)
 5. This layout has never been runtime-tested on real hardware — **watch check #3–7 closely**

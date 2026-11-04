@@ -44,7 +44,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 
 KBD_NAME = "KBDMSSTD"                      # max 8 chars, must match the filename
-DISPLAY = "Medzuslovjansky (standard)"     # MSKLC is happier with ASCII here
+DISPLAY = "Medžuslovjansky (standard)"     # Settings shows install.ps1's Layout Text; .ps1 must keep its BOM
 LOCALENAME = "pl-PL"
 LOCALEID = "00000415"
 LANGNAME = "Polish (Poland)"

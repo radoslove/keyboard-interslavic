@@ -1,6 +1,6 @@
-#Requires -Version 5.1
+﻿#Requires -Version 5.1
 <#
-    uninstall.ps1 - remove the "Medzuslovjansky (standard)" keyboard layout (KBDMSSTD).
+    uninstall.ps1 - remove the "Medžuslovjansky (standard)" keyboard layout (KBDMSSTD).
     Run in an ELEVATED PowerShell (Run as administrator).
 #>
 $ErrorActionPreference = 'Stop'
