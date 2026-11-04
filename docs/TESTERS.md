@@ -95,6 +95,8 @@ reproduced: what you did, what you expected, what the keyboard actually typed.
 > kakuju aplikaciju za pisanje i izberi našu klaviaturu. Android pokaže ostrěženje
 > o novoj klaviaturě. Tako jest u vsih klaviatur, prosto potvrdi.
 >
+> Na ekranu jezykov klaviatury prěključ na vrhu to jest sam Medžuslovjansky. Ne klikaj na njego: potom ostane jedino Medžuslovjansky, a telefon može izbrati inu klaviaturu. Pod njim jest spis ostalyh jezykov — jezyky izbiraj tam.
+>
 > **4. Čto probovati**
 >
 > Piši gestami tako, kako pišeš normalno, cěly denj.
@@ -148,6 +150,8 @@ language names are the ones the app itself uses.
 > the app cannot start until the phone is unlocked — every third-party keyboard
 > gets that notice, just confirm it.
 >
+> On that screen the switch at the top IS Interslavic itself. Do not tap it: only Interslavic would be left, and the phone may switch to a different keyboard. The list below it holds the other languages — choose them there.
+>
 > **4. What to try**
 >
 > Type by swiping, all day, the way you normally write.
@@ -193,6 +197,8 @@ language names are the ones the app itself uses.
 > otwórz dowolną aplikację do pisania i wybierz naszą klawiaturę. Android pokaże
 > ostrzeżenie, że aplikacja nie może się uruchomić, dopóki telefon nie zostanie
 > odblokowany. Tak jest przy każdej klawiaturze innej firmy, po prostu potwierdź.
+>
+> Na tym ekranie przełącznik na górze to sam międzysłowiański. Nie klikaj w niego: zostanie wtedy tylko międzysłowiański, a telefon może włączyć inną klawiaturę. Pod nim jest lista pozostałych języków — tam je wybieraj.
 >
 > **4. Co sprawdzić**
 >
