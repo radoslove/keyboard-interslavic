@@ -441,22 +441,36 @@ ANCHOR_SIDE = os.environ.get("SWIPE_ANCHOR_SIDE", "both")
 ANCHOR_MS = float(os.environ.get("SWIPE_ANCHOR_MS", "120"))   # mirrors KeyboardView.ANCHOR_MS
 
 
+def _anchor_span(path):
+    """How far back each anchor may look, in ms.
+
+    Never more than a THIRD of the gesture, so the two windows cannot meet. A
+    quick flick - `se` is one - can last under 240 ms end to end, and with a
+    flat 120 ms each side the start anchor was free to pick a sample from the
+    end of the path and vice versa. Measured before the clamp: `se` at 90 ms
+    decoded as `rese`, `pisati` at 240 ms as `porastes`.
+    """
+    span = path[-1][2] - path[0][2]
+    return min(ANCHOR_MS, span / 3.0) if span > 0 else 0.0
+
+
 def _anchor_window(path, at_end):
-    """Indices within ANCHOR_MS of the chosen end, always at least one."""
+    """Indices within the allowed span of the chosen end, always at least one."""
+    ms = _anchor_span(path)
     if at_end:
         t_end = path[-1][2]
-        lo = 0
+        lo = len(path) - 1
         for i in range(len(path) - 1, -1, -1):
-            if t_end - path[i][2] > ANCHOR_MS:
-                lo = i + 1
+            if t_end - path[i][2] > ms:
                 break
-        return range(max(lo, 0), len(path))
+            lo = i
+        return range(lo, len(path))
     t0 = path[0][2]
-    hi = len(path)
+    hi = 1
     for i in range(len(path)):
-        if path[i][2] - t0 > ANCHOR_MS:
-            hi = max(i, 1)
+        if path[i][2] - t0 > ms:
             break
+        hi = i + 1
     return range(0, hi)
 
 
@@ -594,6 +608,14 @@ WATCH_TOP3 = ["kako", "izdělati"]
 # `dělati` and `pisati` each failed a single draw while hitting 7 of 8, in BOTH
 # decoders, which would have read as a regression that was never there. So each
 # gate word is swiped GATE_DRAWS times and has to land most of them.
+# A real glide is FAST. The harness synthesises generous timings, so these
+# shapes are squeezed and must still decode as themselves - the gate that was
+# missing when the anchor windows began to overlap on short gestures.
+FAST_WORDS = ["se", "to", "je", "pisati", "slovo"]
+FAST_MS = (240, 150, 90)
+FAST_DRAWS = 6
+FAST_MS_PER_LETTER = 40
+FAST_MIN_HITS = 4
 GATE_DRAWS = 8
 GATE_MIN_HITS = 5
 MIN_TOP1 = 0.65
@@ -670,6 +692,53 @@ def run_test(words, buckets, mode="pivot"):
             if tg in top:
                 hits += 1
         print(f"       {tg!r:14} {hits}/{GATE_DRAWS}  e.g. {first}")
+
+    # The synthetic paths are generous in TIME - `pisati` comes out 1880 ms, and
+    # nobody swipes like that. That blind spot let an anchor change ship that
+    # broke every quick flick: the two anchor windows overlapped, so the start
+    # was read off the end of the path. Squeeze the same gestures and insist
+    # they still decode.
+    print("== fast flicks (same shapes, squeezed in time) ==")
+    for tg in FAST_WORDS:
+        if tg not in by:
+            continue
+        row = []
+        # Below roughly 40 ms per letter the digitiser has fewer than three
+        # samples per transition, which is less than the shape can be described
+        # with - demanding recovery there would be demanding it from physics,
+        # not from the decoder. `pisati` in 90 ms is eleven samples for five
+        # transitions.
+        speeds = [ms for ms in FAST_MS if ms >= FAST_MS_PER_LETTER * len(tg)] or [max(FAST_MS)]
+        for ms in speeds:
+          hits = 0
+          for draw in range(FAST_DRAWS):
+            path = synth_path(tg, rng=random.Random(100 + draw))
+            if not path:
+                continue
+            t0, t1 = path[0][2], path[-1][2]
+            span = (t1 - t0) or 1.0
+            # A fast gesture has FEWER samples, not the same ones crammed
+            # together: the digitiser keeps reporting every ~SAMPLE_MS whatever
+            # the finger does. Compressing time alone produced sub-millisecond
+            # spacing and its own artefacts - `slovo` "failed" on an instrument
+            # error before this line existed.
+            keep = max(4, int(round(ms / SAMPLE_MS)))
+            step = (len(path) - 1) / float(keep - 1)
+            idx = sorted({int(round(i * step)) for i in range(keep)})
+            squeezed = [(path[j][0], path[j][1], t0 + (path[j][2] - t0) / span * ms)
+                        for j in idx]
+            top = decode(squeezed, buckets, 3, mode=mode)
+            if tg in top:
+                hits += 1
+          # Same contract as the gate words above: top-3, several draws, a
+          # majority. One draw is a coin flip - `slovo` failed at 150 ms and
+          # passed at 90 ms on single draws, which is noise wearing a verdict's
+          # clothes. What this must catch is the anchors COLLAPSING, and that
+          # returns words with nothing in common with the target at all.
+          row.append(f"{ms}ms {hits}/{FAST_DRAWS}")
+          if hits < FAST_MIN_HITS:
+                ok = False
+        print(f"       {tg!r:14} " + "   ".join(row))
 
     sample = default_sample(words)
     a1, a3, tot, _ = eval_sample(words, buckets, mode, sample,

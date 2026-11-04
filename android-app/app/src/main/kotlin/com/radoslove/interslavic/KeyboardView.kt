@@ -2212,11 +2212,19 @@ class KeyboardView(
         val n = pts.size
         if (v == null || n < 3) return if (atEnd) pts[n - 1] else pts[0]
         val edge = (if (atEnd) pts[n - 1] else pts[0])[2]
+        // Never look back more than a THIRD of the gesture: a quick flick can
+        // last under 240 ms end to end, and with a flat window each side the
+        // two would OVERLAP - the start anchor picking a sample from the end of
+        // the path and the end anchor one from its start. Both are hard gates,
+        // so that does not blur the result, it destroys it: measured at 90 ms,
+        // `se` decoded as `resě` and `pisati` at 240 ms as `porasteš`.
+        val span = pts[n - 1][2] - pts[0][2]
+        val reach = if (span > 0f) minOf(ANCHOR_MS, span / 3f) else 0f
         var best = if (atEnd) n - 1 else 0
         var bestV = Float.MAX_VALUE
         val order = if (atEnd) (n - 1) downTo 0 else 0 until n
         for (i in order) {
-            if (abs(pts[i][2] - edge) > ANCHOR_MS) break
+            if (abs(pts[i][2] - edge) > reach) break
             if (v[i] < bestV) { bestV = v[i]; best = i }
         }
         return pts[best]
