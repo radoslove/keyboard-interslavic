@@ -55,7 +55,11 @@ for _s in (sys.stdout, sys.stderr):
         _s.reconfigure(encoding="utf-8", errors="replace")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-WORDLIST = os.path.join(HERE, "..", "dictionary", "main_isv.combined")
+# Which wordlist to measure. The decoder behaves DIFFERENTLY per language
+# (frequency scaling below), so the language is part of every measurement:
+#     SWIPE_LANG=pl python tools/swipe_eval.py
+LANG = os.environ.get("SWIPE_LANG", "isv")
+WORDLIST = os.path.join(HERE, "..", "dictionary", "main_%s.combined" % LANG)
 
 random.seed(1)
 
@@ -423,7 +427,25 @@ def nearest_keys(p, limit, reach=KEY_W * 1.3):
 RESAMPLE_N = 32
 DWELL_N = 28           # mirrors KeyboardView.DWELL_N
 ANCHOR_KEYS = 3        # mirrors KeyboardView.ANCHOR_KEYS
-FREQ_W = 2.5           # mirrors Dictionary.decodeSwipeGeo
+FREQ_W = 3.5           # mirrors Dictionary.FREQ_W
+FREQ_LIN = 0.15        # mirrors Dictionary.FREQ_LIN
+DOUBLE_W = 10.0        # mirrors Dictionary.DOUBLE_W
+# Mirrors Dictionary.LINEAR_FREQ. A list whose byte was log-scaled from a corpus
+# COUNT must pull linearly in the byte, or scoring takes the log twice and the
+# frequency signal nearly vanishes. Override to test a language's move:
+#     SWIPE_LINEAR=pl,cs SWIPE_LANG=pl python tools/swipe_eval.py
+LINEAR_FREQ = set(filter(None, os.environ.get("SWIPE_LINEAR", "isc,nb,en").split(",")))
+
+
+def freq_term(f):
+    """Mirrors Dictionary.freqTerm - in PIXELS of path deviation."""
+    log = math.log(f + 1) * FREQ_W
+    return max(log, f * FREQ_LIN) if LANG in LINEAR_FREQ else log
+
+
+def doubles(folded):
+    """Mirrors Dictionary.doubles: a doubled letter draws the same line as one."""
+    return sum(1 for a, b in zip(folded, folded[1:]) if a == b)
 TOUCH_LIFT = 0.35      # mirrors KeyboardView.TOUCH_LIFT / SwipeDecoder.defaultTouchLift
 
 
@@ -477,7 +499,7 @@ def decode(path, buckets, n=3, mode="pivot", lift_comp=0.0):
                 ideal = index_resample(raw, DWELL_N) if raw else None
             if ideal is None:
                 continue
-            score = -shape_dist(rp, ideal) + math.log(fr + 1) * FREQ_W
+            score = -shape_dist(rp, ideal) + freq_term(fr) - doubles(folded) * DOUBLE_W
             if pivots:
                 pen = pivot_penalty(pivots, folded)
                 if pen is not None:

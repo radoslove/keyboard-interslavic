@@ -249,7 +249,15 @@ object Dictionary {
      * taken from the isv distribution by quantile, not scaled from a count.
      */
     private const val FREQ_LIN = 0.15
-    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN)
+    // Polish and Czech joined 2026-11-04. Their byte is a RANK (quantile-matched
+    // onto the isv distribution), so taking the log again left the whole signal
+    // worth ~5 px of path deviation - 5 % of a key - and `semtex` outranked the
+    // median of the dictionary. Measured on the same synthetic glides: on the
+    // words people actually type, Polish top-1 68 % -> 74 %; on a sample drawn
+    // uniformly from 412 k forms it is a wash (61 % both ways) and on the rare
+    // half it costs nothing, so the gain is real but narrow - it buys the
+    // frequent words, which is what running text is made of.
+    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN, Lang.PL, Lang.CS)
 
     private fun freqTerm(f: Int): Double {
         val log = Math.log((f + 1).toDouble()) * FREQ_W
@@ -316,6 +324,24 @@ object Dictionary {
         @Suppress("UNCHECKED_CAST")
         entries = out as Array<Entry>
         loaded[current] = entries
+    }
+
+    /**
+     * Is [prefix] the beginning of any word in the list?
+     *
+     * Asked when a letter is tapped right after a glide, to tell "the glided
+     * word is being EXTENDED" from "the next word is starting". That used to be
+     * decided by a clock alone, so whether two words came out glued depended on
+     * how fast the user typed: a letter tapped within 1.2 s of a glide to begin
+     * the next word landed as `wyjscs` (owner 2026-11-04). The list can answer
+     * the real question - can the word still grow this way? - and it includes
+     * the user's own words, so a word they added behaves like any other.
+     */
+    fun hasPrefix(prefix: String): Boolean {
+        if (!ready || prefix.isEmpty()) return false
+        val arr = entries
+        val i = lowerBound(arr, prefix)
+        return i < arr.size && arr[i].word.startsWith(prefix)
     }
 
     /** Exact membership test (binary search). Used to decide MISS for M3. */

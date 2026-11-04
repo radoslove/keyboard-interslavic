@@ -36,8 +36,20 @@ object Lift {
     private const val MIN = 0f
     private const val MAX = 0.6f
 
-    /** How hard one kept word moves the value: a tenth of the gap. */
+    /** How hard one measured word moves the value, once the value has settled. */
     private const val RATE = 0.1f
+
+    /**
+     * Until this many words have been measured the value moves by 1/(n+1) of the
+     * gap, i.e. the first word counts for half and the tenth for a tenth. The old
+     * flat tenth needed dozens of KEPT glides to walk away from a wrong default -
+     * and a wrong default is exactly the state in which nothing gets kept
+     * (owner 2026-11-01 on `a55`: the value had crawled 0.35 -> 0.276 and was
+     * still over-compensating, which drags a top-row start down onto the home row:
+     * `wyjść` came back as `semtex`, `wysoko` as `do`).
+     */
+    private const val WARMUP = 20
+    private const val KEY_N = "touchLiftN"
 
     /** Readings outside this are noise (a glide that wandered, a mis-decode). */
     private val SANE = -0.3f..0.9f
@@ -59,8 +71,11 @@ object Lift {
     fun learn(context: Context, measured: Float): Float {
         val now = get(context)
         if (measured !in SANE) return now
-        val next = (now + RATE * (measured - now)).coerceIn(MIN, MAX)
-        prefs(context).edit().putFloat(KEY, next).apply()
+        val p = prefs(context)
+        val n = p.getInt(KEY_N, 0)
+        val rate = if (n < WARMUP) maxOf(RATE, 1f / (n + 1)) else RATE
+        val next = (now + rate * (measured - now)).coerceIn(MIN, MAX)
+        p.edit().putFloat(KEY, next).putInt(KEY_N, n + 1).apply()
         return next
     }
 }
