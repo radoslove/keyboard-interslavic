@@ -304,6 +304,16 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     /// was trimmed by hand), so the gesture says nothing about the thumb.
     func forgetSample() { sample = nil }
 
+    /// Can `text` still grow into a word (wordlist or the user's own)? Asked
+    /// when a letter is tapped right after a glide: only then does it EXTEND
+    /// the glided word (Android 3.5.39, Dictionary.hasPrefix).
+    func canExtend(_ text: String) -> Bool {
+        let lower = text.lowercased()
+        if userWords.contains(where: { $0.lowercased().hasPrefix(lower) }) { return true }
+        guard let dictionary, let keys = SwipeDictionary.keys(of: lower) else { return false }
+        return dictionary.hasPrefix(keys)
+    }
+
     /// Words starting with what is being typed by taps. Diacritics fold to
     /// their base key (`č` -> `c`); if the typed part has diacritics, only
     /// words that really start with it are offered.

@@ -102,6 +102,22 @@ final class SwipeDictionary {
         return best.map { ($0.freq, word(at: $0.offset, length: $0.length)) }
     }
 
+    /// Whether any word starts with `prefix` (folded key indices) - the word
+    /// itself counts. Stops at the first hit, so a live prefix costs almost
+    /// nothing; a dead one scans the first letter's 26 buckets.
+    func hasPrefix(_ prefix: [Int]) -> Bool {
+        guard let first = prefix.first else { return false }
+        var found = false
+        for last in 0..<26 where !found {
+            forEachEntry(first: first, last: last) { e in
+                guard !found, e.keys.count >= prefix.count else { return }
+                for i in 1..<prefix.count where Int(e.keys[i]) != prefix[i] { return }
+                found = true
+            }
+        }
+        return found
+    }
+
     /// Folded key indices of a word, or nil if it has a letter no key types.
     static func keys(of word: String) -> [Int]? {
         // `ł` is not `l` plus a diacritic to Unicode, so folding leaves it.

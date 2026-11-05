@@ -623,22 +623,29 @@ final class KeyboardViewController: UIInputViewController {
         guard let ch = latin.first else { return }
         recased = nil
         if decoding > 0 { queuedKeys.append { [weak self] in self?.insert(latin) }; return }
+        // A letter right after a glide EXTENDS the glided word only if the two
+        // together can still grow into a word. The window is now just a
+        // ceiling: time alone glued the start of the next word onto the last
+        // one whenever the user typed quickly (`wyjsc` + `s` -> `wyjscs`), and
+        // that is the common case (Android 3.5.39). Price: extending into a
+        // word the list does not know gets a space; `＋` once fixes it for good.
+        let extendsSwipe = ch.isLetter && insideWipeWindow
+            && lastSwipedWord.map { swipeInput.canExtend(Script.toLatin($0) + latin) } == true
         // Anything but a letter extending a swiped word means the word was
         // kept: that gesture now tells us where this thumb lands.
-        if let kept = lastSwipedWord, !(ch.isLetter && insideWipeWindow) {
+        if let kept = lastSwipedWord, !extendsSwipe {
             swipeInput.learn(from: Script.toLatin(kept))
         }
         if pendingSpace {
             // A letter right after a swipe extends that word (`pisem` + `s`);
             // a letter later starts the next word and gets the owed space.
             // Space and punctuation simply cancel it.
-            if ch.isLetter && !insideWipeWindow { textDocumentProxy.insertText(" ") }
+            if ch.isLetter && !extendsSwipe { textDocumentProxy.insertText(" ") }
             pendingSpace = false
         }
         // Track a word typed letter by letter: that is the sign a swipe did
         // not find it, and the only case where `＋` is offered for a word the
         // list already has. Kept in Latin, like everything inside.
-        let extendsSwipe = lastSwipedWord != nil && ch.isLetter && insideWipeWindow
         if ch.isLetter && !extendsSwipe {
             let prev = textDocumentProxy.documentContextBeforeInput?.last
             tappedWord = (prev?.isLetter == true) ? tappedWord.map { $0 + latin } : latin
