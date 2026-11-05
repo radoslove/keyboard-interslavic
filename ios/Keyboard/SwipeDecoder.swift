@@ -252,7 +252,36 @@ struct SwipeDecoder {
             guard let only = points.first else { return nil }
             return Array(repeating: only, count: Self.samples)
         }
-        return Self.resample(points, to: Self.samples)
+        return Self.resample(Self.cutCorners(points), to: Self.samples)
+    }
+
+    /// How much of each segment next to an inner corner the ideal path cuts
+    /// off (0 = sharp polyline through the key centres). A thumb rounds every
+    /// turn, so a sharp ideal penalises exactly the words with corners.
+    /// EXPERIMENT, measured by replay before any value ships.
+    static var cornerCut: Double = 0
+    /// Only turns gentler than this (degrees between the incoming and the
+    /// outgoing direction) are rounded. A hairpin (`o-v-o` in `slovo`) is not
+    /// a bend the thumb rounds - it has to reach the key to come back.
+    static var cornerMaxTurn: Double = 180
+
+    static func cutCorners(_ pts: [CGPoint]) -> [CGPoint] {
+        guard cornerCut > 0, pts.count >= 3 else { return pts }
+        let c = CGFloat(cornerCut)
+        var out: [CGPoint] = [pts[0]]
+        for i in 1..<(pts.count - 1) {
+            let a = pts[i - 1], p = pts[i], b = pts[i + 1]
+            let ux = Double(p.x - a.x), uy = Double(p.y - a.y)
+            let vx = Double(b.x - p.x), vy = Double(b.y - p.y)
+            let nu = (ux * ux + uy * uy).squareRoot(), nv = (vx * vx + vy * vy).squareRoot()
+            let cosT = nu > 0 && nv > 0 ? (ux * vx + uy * vy) / (nu * nv) : 1
+            let turn = acos(max(-1, min(1, cosT))) * 180 / .pi
+            if turn > cornerMaxTurn { out.append(p); continue }
+            out.append(CGPoint(x: p.x + (a.x - p.x) * c, y: p.y + (a.y - p.y) * c))
+            out.append(CGPoint(x: p.x + (b.x - p.x) * c, y: p.y + (b.y - p.y) * c))
+        }
+        out.append(pts[pts.count - 1])
+        return out
     }
 
     /// Even spacing along the polyline, endpoints preserved.
