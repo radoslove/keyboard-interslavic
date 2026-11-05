@@ -65,10 +65,22 @@ targets:
         # sibling. XcodeGen's bundleIdPrefix alone produces siblings and the
         # link step rejects it, so both ids are stated explicitly.
         PRODUCT_BUNDLE_IDENTIFIER: com.radoslove.interslavic
+        # The App Store and TestFlight reject an upload without an app icon.
+        # One 1024 px image (brand/src/icon_b_hearts.svg, the chosen mark), no
+        # alpha channel; Xcode derives every smaller size from it.
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     info:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: $(KEYBOARD_NAME)
+        # Without these two XcodeGen writes a literal 1.0 / 1 into the plist, so
+        # MARKETING_VERSION never reached the build and every TestFlight upload
+        # would carry the same build number - the second one is rejected.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        # No cryptography of our own (no network code at all), so the upload
+        # needs no export-compliance documents.
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
@@ -101,6 +113,11 @@ targets:
       path: Keyboard/Info.plist
       properties:
         CFBundleDisplayName: $(KEYBOARD_NAME)
+        # Without these two XcodeGen writes a literal 1.0 / 1 into the plist, so
+        # MARKETING_VERSION never reached the build and every TestFlight upload
+        # would carry the same build number - the second one is rejected.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         KeyboardLanguage: isv
         NSExtension:
           NSExtensionPointIdentifier: com.apple.keyboard-service
@@ -164,6 +181,11 @@ targets:
       path: KeyboardPL/Info.plist
       properties:
         CFBundleDisplayName: $(KEYBOARD_NAME)
+        # Without these two XcodeGen writes a literal 1.0 / 1 into the plist, so
+        # MARKETING_VERSION never reached the build and every TestFlight upload
+        # would carry the same build number - the second one is rejected.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         KeyboardLanguage: pl
         NSExtension:
           NSExtensionPointIdentifier: com.apple.keyboard-service
@@ -227,6 +249,11 @@ targets:
       path: KeyboardEN/Info.plist
       properties:
         CFBundleDisplayName: $(KEYBOARD_NAME)
+        # Without these two XcodeGen writes a literal 1.0 / 1 into the plist, so
+        # MARKETING_VERSION never reached the build and every TestFlight upload
+        # would carry the same build number - the second one is rejected.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         KeyboardLanguage: en
         NSExtension:
           NSExtensionPointIdentifier: com.apple.keyboard-service
