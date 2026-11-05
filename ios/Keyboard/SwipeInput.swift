@@ -42,6 +42,9 @@ final class SwipeGestureRecognizer: UIGestureRecognizer {
     var threshold: CGFloat = 22
 
     private(set) var points: [CGPoint] = []
+    /// When each of `points` was sampled, in milliseconds. The decoder reads
+    /// the slowest sample near each end as its anchor (Android 3.6.0).
+    private(set) var times: [Double] = []
     private var origin: CGPoint = .zero
     /// The finger the swipe follows. Another one touching down mid-swipe
     /// must not teleport the trail (Android 3.5.30, swipePointerId).
@@ -63,6 +66,7 @@ final class SwipeGestureRecognizer: UIGestureRecognizer {
         finger = touch
         origin = touch.location(in: view)
         points = [origin]
+        times = [touch.timestamp * 1000]
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
@@ -70,6 +74,7 @@ final class SwipeGestureRecognizer: UIGestureRecognizer {
         guard let touch = finger, touches.contains(touch), let view else { return }
         let p = touch.location(in: view)
         points.append(p)
+        times.append(touch.timestamp * 1000)
 
         if state == .possible {
             let dx = p.x - origin.x, dy = p.y - origin.y
@@ -95,6 +100,7 @@ final class SwipeGestureRecognizer: UIGestureRecognizer {
     override func reset() {
         super.reset()
         points = []
+        times = []
         finger = nil
     }
 }
@@ -221,8 +227,9 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
             draw(g.points)
         case .ended:
             let path = g.points
+            let times = g.times
             clearTrail()
-            decode(path)
+            decode(path, times: times)
         case .cancelled, .failed:
             clearTrail()
         default:
@@ -230,7 +237,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         }
     }
 
-    private func decode(_ path: [CGPoint]) {
+    private func decode(_ path: [CGPoint], times: [Double]) {
         guard let host else { return }
         guard let dictionary else {
             swipeLog.error("isv-swipe: gesture ended but dictionary is nil")
@@ -252,10 +259,10 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
                                        keyWidth: keyWidth,
                                        touchLift: lift,
                                        userWords: mine)
-            let words = decoder.decode(path: path).map(\.word)
+            let words = decoder.decode(path: path, times: times).map(\.word)
             swipeLog.notice("isv-swipe: \(path.count, privacy: .public) points -> \(words.joined(separator: " "), privacy: .public)")
             #if DEBUG
-            GestureFile.append(path: path, centres: centres, keyWidth: keyWidth, words: words, lift: lift)
+            GestureFile.append(path: path, times: times, centres: centres, keyWidth: keyWidth, words: words, lift: lift)
             #endif
             DispatchQueue.main.async {
                 self?.sample = (path.first!, path.last!, centres, keyWidth)
@@ -284,7 +291,12 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         // One sloppy word must not drag the keyboard around: wild readings are
         // dropped, the rest only nudge, and the result stays in a sane band.
         guard (-0.3...0.9).contains(measured) else { return }
-        touchLift = min(0.6, max(0, touchLift + 0.1 * (measured - touchLift)))
+        // A thumb that lands BELOW the key it aims at is as real as one above
+        // (Android 3.6.0, Lift.MIN): a floor at 0 switched compensation off on
+        // exactly the phone that needed it. The floor stays at -0.5 rather than
+        // opening further - compensating with the WRONG sign measured 45 %
+        // top-1 against 78 %, worse than not compensating at all.
+        touchLift = min(0.6, max(-0.5, touchLift + 0.1 * (measured - touchLift)))
         Shared.store.set(touchLift, forKey: "touchLift")
     }
 
@@ -363,7 +375,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
 /// `xcrun devicectl device copy from --domain-type appDataContainer
 ///  --domain-identifier com.radoslove.interslavic.keyboard ...`.
 enum GestureFile {
-    static func append(path: [CGPoint], centres: [CGPoint], keyWidth: CGFloat, words: [String], lift: Double) {
+    static func append(path: [CGPoint], times: [Double], centres: [CGPoint], keyWidth: CGFloat, words: [String], lift: Double) {
         guard let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         else { return }
         let row: [String: Any] = [
@@ -371,6 +383,7 @@ enum GestureFile {
             "kw": Double(keyWidth),
             "keys": centres.map { [Double($0.x), Double($0.y)] },
             "path": path.map { [Double($0.x), Double($0.y)] },
+            "ms": times.map { $0 - (times.first ?? 0) },
             "words": words,
             "lift": lift,
         ]

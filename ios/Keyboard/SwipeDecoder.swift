@@ -53,7 +53,7 @@ struct SwipeDecoder {
     var userWords: [(word: String, keys: [UInt8])] = []
     static let userWordFreq: Double = 140
 
-    func decode(path rawPath: [CGPoint], limit: Int = 4) -> [Candidate] {
+    func decode(path rawPath: [CGPoint], times: [Double] = [], limit: Int = 4) -> [Candidate] {
         guard keyWidth > 0, rawPath.count >= 2 else { return [] }
         // Measured on 34 labelled real gestures on an iPhone 13 (2026-10-07):
         // touches register on average 0.35 key widths ABOVE the key the thumb
@@ -65,8 +65,11 @@ struct SwipeDecoder {
                                  to: Self.samples)
         guard path.count == Self.samples else { return [] }
 
-        let starts = nearestKeys(to: path.first!)
-        let ends = nearestKeys(to: path.last!)
+        // The first and last letter are read from the slowest sample near each
+        // end, not from the end samples themselves (Android 3.6.0-3.6.2).
+        let shifted = rawPath.map { CGPoint(x: $0.x, y: $0.y + lift) }
+        let starts = nearestKeys(to: Self.anchorPoint(shifted, times: times, atEnd: false))
+        let ends = nearestKeys(to: Self.anchorPoint(shifted, times: times, atEnd: true))
         guard !starts.isEmpty, !ends.isEmpty else { return [] }
 
         // A gesture cannot spell more letters than it had room to cross, and a
@@ -149,6 +152,73 @@ struct SwipeDecoder {
 
     static func acronymPenalty(_ word: String) -> Double {
         word.filter(\.isUppercase).count >= 2 ? 0.6 : 0
+    }
+
+    // MARK: - Anchors
+
+    /// How far back from each end `anchorPoint` looks, in milliseconds.
+    static let anchorMs: Double = 120
+    /// Moving-average width over the speed curve, as on Android (V_SMOOTH).
+    private static let speedSmooth = 5
+
+    /// Smoothed speed per sample, in points per millisecond. Raw deltas are far
+    /// too noisy to take a minimum of - one jittery sample reads as a pause.
+    static func speedCurve(_ pts: [CGPoint], _ times: [Double]) -> [Double]? {
+        let n = pts.count
+        guard n >= 2, times.count == n else { return nil }
+        var raw = [Double](repeating: 0, count: n)
+        for i in 1..<n {
+            var dt = times[i] - times[i - 1]
+            if dt <= 0 { dt = 8 }          // a batched/duplicate timestamp
+            raw[i] = distance(pts[i], pts[i - 1]) / dt
+        }
+        raw[0] = raw[1]
+        let half = speedSmooth / 2
+        var out = [Double](repeating: 0, count: n)
+        for i in 0..<n {
+            let lo = max(0, i - half), hi = min(n, i + half + 1)
+            var acc = 0.0
+            for j in lo..<hi { acc += raw[j] }
+            out[i] = acc / Double(hi - lo)
+        }
+        return out
+    }
+
+    /// Where to read the first and last letter from. NOT the first and last
+    /// sample: a thumb decelerates onto the letter it means and carries past
+    /// it, so those two are the approach and the overshoot. This returns the
+    /// SLOWEST sample within `anchorMs` of the chosen end.
+    ///
+    /// The window never exceeds a THIRD of the gesture. A quick flick can last
+    /// under 240 ms, and with a flat window the two would overlap - the start
+    /// anchor reading a sample from the end of the path. Both anchors are hard
+    /// gates, so that destroys the result: Android 3.6.1 typed `se` as `resě`
+    /// and `pisati` as `porasteš` until 3.6.2 added this clamp.
+    ///
+    /// ⚠ OFF on iOS (`slowAnchors = false`), measured 2026-11-05 on 21 real
+    /// glides from an iPhone 13 replayed both ways: `pisati` top-1 4/13 -> 0/13,
+    /// `slovo` 8/8 -> 3/8, `se`/`to` unchanged. iOS sends no touchesMoved while
+    /// the finger rests, so the deceleration onto the last letter is never
+    /// sampled and the slowest point near the end is the previous TURN (`v` in
+    /// `slovo` -> `suprug`, `doč`). The code stays so the replay can measure it
+    /// again once the end of the gesture is sampled (e.g. coalesced touches).
+    static var slowAnchors = false
+
+    static func anchorPoint(_ pts: [CGPoint], times: [Double], atEnd: Bool) -> CGPoint {
+        let n = pts.count
+        let edgeIndex = atEnd ? n - 1 : 0
+        guard slowAnchors, n >= 3, let v = speedCurve(pts, times) else { return pts[edgeIndex] }
+        let edge = times[edgeIndex]
+        let span = times[n - 1] - times[0]
+        let reach = span > 0 ? min(anchorMs, span / 3) : 0
+        var best = edgeIndex
+        var bestV = Double.greatestFiniteMagnitude
+        let order: [Int] = atEnd ? Array((0..<n).reversed()) : Array(0..<n)
+        for i in order {
+            if abs(times[i] - edge) > reach { break }
+            if v[i] < bestV { bestV = v[i]; best = i }
+        }
+        return pts[best]
     }
 
     // MARK: - Geometry
