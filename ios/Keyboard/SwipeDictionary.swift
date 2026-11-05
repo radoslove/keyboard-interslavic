@@ -2,9 +2,9 @@ import Foundation
 
 /// The wordlist, read where it lies.
 ///
-/// 248 845 forms, the full Android lexicon with nothing pruned. It is mapped,
+/// 248 840 forms, the full Android lexicon with nothing pruned. It is mapped,
 /// not parsed: a keyboard extension is killed for holding memory, and building
-/// 248 845 Swift `String`s at launch would both blow that budget and make the
+/// 248 840 Swift `String`s at launch would both blow that budget and make the
 /// keyboard appear a second after the field is tapped. Mapped, the file costs
 /// almost no resident memory and the pages a gesture touches are the only ones
 /// the system ever reads.

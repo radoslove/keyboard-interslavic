@@ -5,7 +5,7 @@
     python3 build_swipe_dictionary.py pl       # the Polish keyboard
     python3 build_swipe_dictionary.py en       # the English keyboard
 
-Source is `dictionary/main_isv.combined` - the same 248 845 forms shipped to
+Source is `dictionary/main_isv.combined` - the same 248 840 forms shipped to
 Android. Nothing is pruned. The 5.2 MB cut we made for Keyman in August was
 forced by the trie format, not by the data: as a flat blob the whole lexicon is
 3.2 MB, which a keyboard extension can hold without noticing. That matters,

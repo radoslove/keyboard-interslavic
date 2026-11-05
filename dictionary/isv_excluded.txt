@@ -1,0 +1,18 @@
+# Forms deliberately kept OUT of main_isv.combined.
+#
+# The Interslavic list arrives assembled (there is no sources_isv/ here), so a
+# removal is a hand edit. If the list is ever regenerated upstream, re-apply
+# every line below, or the keyboard regains a word someone threw out on purpose.
+#
+# Each removal names what it cost: a short, everyday word losing a glide to a
+# rare one is a decoder problem, and until that is fixed, pulling the rare
+# competitor out of the list is the cheap half of the cure.
+#
+# word<TAB>reason
+# The whole paradigm, not just the lemma: four inflected forms sat right
+# behind the nominative and would have kept the same rival in the race.
+sssr	abbreviation, f=26, kept beating `se` (f=205) on a drifting glide; owner, 2026-11-05
+sssra	same
+sssre	same
+sssrom	same
+sssru	same

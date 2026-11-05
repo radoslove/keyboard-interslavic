@@ -6,7 +6,7 @@ import java.io.InputStreamReader
 
 /**
  * The prediction model (android_PLAN.md M2). Loads `assets/main_<lang>.combined`
- * — the same wordlist that feeds HeliBoard's swipe dictionary, 248 845 forms in
+ * — the same wordlist that feeds HeliBoard's swipe dictionary, 248 840 forms in
  * the format `word=X,f=N` — into memory and answers prefix queries ranked by
  * frequency.
  *

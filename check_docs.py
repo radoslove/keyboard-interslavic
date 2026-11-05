@@ -258,6 +258,11 @@ def main():
     # an unexplained exception is how a gate stops meaning anything.
     other = {
         32951,   # Polish past-tense forms recovered by tools/build_pl_aglutynanty.py
+        # What the PUBLISHED 3.5 holds. The SSSR paradigm (5 forms) came out of
+        # the Interslavic list on 2026-11-05, so the live total is lower - but
+        # the row describing release 3.5 must keep saying what that file really
+        # contains, and a released tag cannot be edited after the fact.
+        987006,
     }
     for doc in ("docs/TESTERS.md", "docs/INSTALL.md"):
         text = read(doc)

@@ -69,7 +69,7 @@ reproduced: what you did, what you expected, what the keyboard actually typed.
 > Poprobuj medžuslovjansku klaviaturu na telefonu s Androidom
 >
 > To jest klaviatura za medžuslovjansky jezyk, s pisanjem gestami: vodiš prstom po
-> literah i klaviatura najde slovo v slovniku. Slovnik imaje 248 845
+> literah i klaviatura najde slovo v slovniku. Slovnik imaje 248 840
 > medžuslovjanskyh slov, s formami, ne samo lematami. Klaviatura takože znaje
 > poljsky, češsky, norvežsky, anglijsky i medžuskandinavsky jezyk, a klaviša
 > globusa prěključaje medžu nimi.
@@ -124,7 +124,7 @@ language names are the ones the app itself uses.
 >
 > This is a keyboard for the Interslavic language, with swipe typing: you drag a
 > finger across the letters and the keyboard finds the word in its dictionary. The
-> dictionary holds 248,845 Interslavic words — inflected forms, not just lemmas.
+> dictionary holds 248,840 Interslavic words — inflected forms, not just lemmas.
 > It also types Polish, Czech, Norwegian, English and Interscandinavian, and the
 > globe key switches between them.
 >
@@ -171,7 +171,7 @@ language names are the ones the app itself uses.
 > Wypróbuj klawiaturę międzysłowiańską na telefonie z Androidem
 >
 > To klawiatura do języka międzysłowiańskiego, z pisaniem gestami: przesuwasz
-> palcem po literach, a klawiatura znajduje słowo w słowniku. Słownik ma 248 845
+> palcem po literach, a klawiatura znajduje słowo w słowniku. Słownik ma 248 840
 > międzysłowiańskich słów, w odmianie, nie same hasła. Klawiatura obsługuje też
 > polski, czeski, norweski, angielski i międzyskandynawski, a klawisz globusa
 > przełącza między nimi.

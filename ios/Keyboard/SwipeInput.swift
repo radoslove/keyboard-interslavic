@@ -136,7 +136,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     /// The last gesture's ends, waiting to learn from until its word is kept.
     private var sample: (start: CGPoint, end: CGPoint, centres: [CGPoint], keyWidth: CGFloat)?
 
-    /// Decoding runs off the main thread. On a 248 845-form lexicon a gesture
+    /// Decoding runs off the main thread. On a 248 840-form lexicon a gesture
     /// touches a few thousand entries, which is fast - but "fast" on the main
     /// thread still means the trail stops moving, and a keyboard that stutters
     /// under the finger feels broken however good its guesses are.

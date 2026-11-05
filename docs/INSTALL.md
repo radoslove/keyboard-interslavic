@@ -69,7 +69,7 @@ No swipe typing on this route — Keyman does not do gestures.
 
 ## Android — route B: swipe-typing app
 
-Our own keyboard app: **swipe (glide) typing with a 248 845-form Interslavic
+Our own keyboard app: **swipe (glide) typing with a 248 840-form Interslavic
 dictionary, fully offline, no permissions, MIT licence.**
 
 <!-- 253 273 is the compiled .dict for HeliBoard (route C); the app ships
