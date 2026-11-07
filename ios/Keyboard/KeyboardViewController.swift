@@ -225,8 +225,14 @@ final class KeyboardViewController: UIInputViewController {
             stack.addArrangedSubview(back)
             wide.append(back)
             if let f = first {
+                // Shift + letters + backspace = the width of the top row, so
+                // every letter keeps the same width (swipe geometry depends on
+                // it): 1.5 keys each beside 7 letters under 10, 2 under the
+                // Norwegian 11.
+                let side = showingNumeric ? 1.5
+                    : CGFloat(Layout.letterRows[0].count - chars.count) / 2
                 for w in wide {
-                    w.widthAnchor.constraint(equalTo: f.widthAnchor, multiplier: 1.5,
+                    w.widthAnchor.constraint(equalTo: f.widthAnchor, multiplier: side,
                                              constant: 2.5).isActive = true
                 }
             }
@@ -1259,18 +1265,17 @@ extension KeyboardViewController: SwipeHost {
     }
 
     var swipeKeyCentres: ([CGPoint], CGFloat) {
-        var centres = [CGPoint](repeating: .zero, count: 26)
+        var centres = [CGPoint](repeating: .zero, count: Layout.swipeKeys.count)
         var width: CGFloat = 0
         guard !showingNumeric else { return (centres, 0) }
 
         for b in letterButtons {
             guard let id = b.accessibilityIdentifier,
                   let ch = id.lowercased().first,
-                  let ascii = ch.asciiValue,
-                  ascii >= 97, ascii <= 122
+                  let index = Layout.swipeIndex(ch)
             else { continue }
             let centre = b.superview?.convert(b.center, to: view) ?? b.center
-            centres[Int(ascii) - 97] = centre
+            centres[index] = centre
             width = max(width, b.bounds.width)
         }
         return (centres, width)

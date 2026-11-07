@@ -9,7 +9,7 @@ import Foundation
 /// which is the point: one habit across platforms.
 enum Layout {
 
-    /// Which keyboard this extension is: `isv`, `pl`, `cs` or `en`. One code base, two
+    /// Which keyboard this extension is: `isv`, `pl`, `cs`, `nb` or `en`. One code base, two
     /// entries in Settings -> Keyboards; the language comes from the
     /// extension's Info.plist (`KeyboardLanguage`), set per target.
     static let language: String =
@@ -34,6 +34,11 @@ enum Layout {
                     "t": ["ť"], "u": ["ů", "ú"], "y": ["ý"], "z": ["ž"]]
         case "en":
             return [:]
+        case "nb":
+            // Android `Layout.nbOwn` (3.5.8): æ ø å have keys of their own;
+            // held, they give the Swedish/Danish neighbours.
+            return ["e": ["é", "è", "ê"], "o": ["ó", "ò", "ô"], "a": ["à"],
+                    "æ": ["ä"], "ø": ["ö"], "å": ["ä", "ö"]]
         default:
             return ["c": ["č"], "s": ["š"], "z": ["ž"], "e": ["ě"],
                     "d": ["dž"], "l": ["lj"], "n": ["nj"]]
@@ -98,11 +103,19 @@ enum Layout {
         "!": ["¡"],
     ]
 
-    static let letterRows: [[Character]] = [
-        Array("qwertyuiop"),
-        Array("asdfghjkl"),
-        Array("zxcvbnm"),
-    ]
+    static let letterRows: [[Character]] = language == "nb"
+        ? [Array("qwertyuiopå"), Array("asdfghjkløæ"), Array("zxcvbnm")]   // Android `nbRows`
+        : [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")]
+
+    /// The keys a swipe can cross, in the order of the wordlist's key indices:
+    /// a-z, then the language's own letter keys (`build_swipe_dictionary.py`).
+    static let swipeKeys: [Character] =
+        Array("abcdefghijklmnopqrstuvwxyz") + (language == "nb" ? Array("åøæ") : [])
+
+    /// Index of a key letter in `swipeKeys`, nil for anything else.
+    static func swipeIndex(_ ch: Character) -> Int? { swipeKeyIndex[ch] }
+    private static let swipeKeyIndex: [Character: Int] =
+        Dictionary(uniqueKeysWithValues: swipeKeys.enumerated().map { ($1, $0) })
 
     /// `123` - rows 1-2 as on the system keyboard. Row 3 sits between `#+=`
     /// and backspace and runs from the rarest mark to the most used, so `?`

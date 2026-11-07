@@ -4,6 +4,7 @@
     python3 build_swipe_dictionary.py          # isv
     python3 build_swipe_dictionary.py pl       # the Polish keyboard
     python3 build_swipe_dictionary.py en       # the English keyboard
+    python3 build_swipe_dictionary.py nb       # Norwegian: 29 keys, format version 2
 
 Source is `dictionary/main_isv.combined` - the same 248 840 forms shipped to
 Android. Nothing is pruned. The 5.2 MB cut we made for Keyman in August was
@@ -21,16 +22,17 @@ and startup cost is zero.
 Layout (little endian):
 
     magic     8    "ISVSWIPE"
-    version   2    1
+    version   2    1 (26 keys a-z) or 2
+    keys      1    ONLY in version 2: number of keys K (29 for nb: a-z å ø æ)
     count     4    number of entries
-    offsets   4*677  byte offset of each bucket into the entry blob,
+    offsets   4*(K*K+1)  byte offset of each bucket into the entry blob,
                      plus a terminator, relative to the blob start
     blob      ...  entries, grouped by bucket, each bucket sorted by
                    descending frequency:
                        freq     1   1..255, as in the source
                        keyLen   1   letters in the folded key sequence
                        wordLen  1   bytes of UTF-8 in the display form
-                       keys     n   0..25, index into 'a'..'z'
+                       keys     n   0..K-1, index into 'a'..'z' (+ 'åøæ')
                        word     m   UTF-8, WITH its diacritics
 
 The key sequence is folded to the base letters because the accented letters are
@@ -69,7 +71,14 @@ if LANG == "en":
     # Plain a-z: a form with any other letter (`café`) cannot be swiped and
     # is left out, as on Android.
     FOLD = {}
-ALPHA = "abcdefghijklmnopqrstuvwxyz"
+if LANG in ("nb", "isc"):
+    # Norwegian: æ ø å are KEYS (rows of 11, as on Android 3.5.8), so they
+    # are key indices 26-28, not folded. Held accents fold to their base;
+    # the Swedish/Danish ä ö held on æ ø fold to those keys.
+    FOLD = {"é": "e", "è": "e", "ê": "e", "ó": "o", "ò": "o", "ô": "o",
+            "à": "a", "ä": "æ", "ö": "ø"}
+ALPHA = "abcdefghijklmnopqrstuvwxyz" + ("åøæ" if LANG in ("nb", "isc") else "")
+KEYS = len(ALPHA)
 INDEX = {c: i for i, c in enumerate(ALPHA)}
 
 
@@ -107,8 +116,8 @@ def main():
 
     blob = bytearray()
     offsets = []
-    for first in range(26):
-        for last in range(26):
+    for first in range(KEYS):
+        for last in range(KEYS):
             offsets.append(len(blob))
             # Descending frequency so the likeliest reading of an ambiguous
             # path is also the one found first.
@@ -122,7 +131,13 @@ def main():
                 blob += utf8
     offsets.append(len(blob))
 
-    header = b"ISVSWIPE" + struct.pack("<HI", 1, len(entries))
+    # Version 1 = the 26 keys a-z (every file before nb). Version 2 adds one
+    # byte, the number of keys, so a layout with own keys (å ø æ) gets
+    # KEYS x KEYS buckets and old files stay readable unchanged.
+    if KEYS == 26:
+        header = b"ISVSWIPE" + struct.pack("<HI", 1, len(entries))
+    else:
+        header = b"ISVSWIPE" + struct.pack("<HBI", 2, KEYS, len(entries))
     header += struct.pack(f"<{len(offsets)}I", *offsets)
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
@@ -130,7 +145,7 @@ def main():
 
     used = sum(1 for b in buckets.values() if b)
     print(f"{len(entries)} forms -> {OUT} ({OUT.stat().st_size / 1024 / 1024:.2f} MB)")
-    print(f"{used} of 676 buckets used, largest {max(len(b) for b in buckets.values())}")
+    print(f"{used} of {KEYS * KEYS} buckets used, largest {max(len(b) for b in buckets.values())}")
     if skipped:
         print(f"{skipped} forms skipped (not typeable on the letter layout)")
 

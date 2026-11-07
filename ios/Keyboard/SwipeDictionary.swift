@@ -23,7 +23,10 @@ final class SwipeDictionary {
     }
 
     private static let magic = Array("ISVSWIPE".utf8)
-    private static let bucketCount = 676
+    /// Keys per side of the bucket grid: 26 (a-z, version 1) or what a
+    /// version-2 file says (29 for Norwegian: a-z å ø æ).
+    let keyCount: Int
+    private var bucketCount: Int { keyCount * keyCount }
 
     private let data: Data
     private let blobStart: Int
@@ -32,19 +35,26 @@ final class SwipeDictionary {
 
     init?(url: URL) {
         guard let data = try? Data(contentsOf: url, options: .mappedIfSafe),
-              data.count > 8 + 2 + 4 + (Self.bucketCount + 1) * 4
+              data.count > 8 + 2 + 4 + (26 * 26 + 1) * 4
         else { return nil }
 
         guard Array(data.prefix(8)) == Self.magic else { return nil }
 
         var cursor = 8
         let version = data.readUInt16(at: cursor); cursor += 2
-        guard version == 1 else { return nil }
+        switch version {
+        case 1: keyCount = 26
+        case 2: keyCount = Int(data[cursor]); cursor += 1
+        default: return nil
+        }
+        guard keyCount >= 26, data.count > cursor + 4 + (keyCount * keyCount + 1) * 4
+        else { return nil }
         self.count = Int(data.readUInt32(at: cursor)); cursor += 4
 
+        let buckets = keyCount * keyCount
         var offsets: [Int] = []
-        offsets.reserveCapacity(Self.bucketCount + 1)
-        for _ in 0...Self.bucketCount {
+        offsets.reserveCapacity(buckets + 1)
+        for _ in 0...buckets {
             offsets.append(Int(data.readUInt32(at: cursor)))
             cursor += 4
         }
@@ -56,8 +66,8 @@ final class SwipeDictionary {
     /// Walks one bucket. The entries are already ordered by descending
     /// frequency, so a caller that wants to stop early may.
     func forEachEntry(first: Int, last: Int, _ body: (Entry) -> Void) {
-        guard first >= 0, first < 26, last >= 0, last < 26 else { return }
-        let bucket = first * 26 + last
+        guard first >= 0, first < keyCount, last >= 0, last < keyCount else { return }
+        let bucket = first * keyCount + last
         let start = blobStart + offsets[bucket]
         let end = blobStart + offsets[bucket + 1]
         guard end > start, end <= data.count else { return }
@@ -89,7 +99,7 @@ final class SwipeDictionary {
     func completions(prefix: [Int], limit: Int) -> [(freq: UInt8, word: String)] {
         guard let first = prefix.first else { return [] }
         var best: [(freq: UInt8, offset: Int, length: Int)] = []
-        for last in 0..<26 {
+        for last in 0..<keyCount {
             forEachEntry(first: first, last: last) { e in
                 guard e.keys.count >= prefix.count else { return }
                 for i in 1..<prefix.count where Int(e.keys[i]) != prefix[i] { return }
@@ -108,7 +118,7 @@ final class SwipeDictionary {
     func hasPrefix(_ prefix: [Int]) -> Bool {
         guard let first = prefix.first else { return false }
         var found = false
-        for last in 0..<26 where !found {
+        for last in 0..<keyCount where !found {
             forEachEntry(first: first, last: last) { e in
                 guard !found, e.keys.count >= prefix.count else { return }
                 for i in 1..<prefix.count where Int(e.keys[i]) != prefix[i] { return }
@@ -120,14 +130,20 @@ final class SwipeDictionary {
 
     /// Folded key indices of a word, or nil if it has a letter no key types.
     static func keys(of word: String) -> [Int]? {
-        // `ł` is not `l` plus a diacritic to Unicode, so folding leaves it.
-        let folded = word.lowercased().replacingOccurrences(of: "ł", with: "l")
-            .folding(options: .diacriticInsensitive, locale: nil)
-        let keys = folded.unicodeScalars.compactMap { u -> Int? in
-            let v = Int(u.value) - 97
-            return (0..<26).contains(v) ? v : nil
+        var keys: [Int] = []
+        for ch in word.lowercased() {
+            // A letter that IS a key (Norwegian å ø æ) stays itself; held
+            // accents fold to their base key. `ł` is not `l` plus a diacritic
+            // to Unicode, so it is folded by hand; ä ö fold to æ ø where those
+            // are keys, as in `build_swipe_dictionary.py`.
+            if let k = Layout.swipeIndex(ch) { keys.append(k); continue }
+            var base = String(ch) == "ł" ? "l"
+                : String(ch).folding(options: .diacriticInsensitive, locale: nil)
+            if Layout.swipeIndex("æ") != nil { base = ch == "ä" ? "æ" : ch == "ö" ? "ø" : base }
+            guard base.count == 1, let b = base.first, let k = Layout.swipeIndex(b) else { return nil }
+            keys.append(k)
         }
-        return keys.count == folded.unicodeScalars.count && !keys.isEmpty ? keys : nil
+        return keys.isEmpty ? nil : keys
     }
 
     /// Whether this exact form (ignoring case) is in the wordlist.

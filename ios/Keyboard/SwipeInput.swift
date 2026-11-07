@@ -286,13 +286,11 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     func learn(from word: String) {
         guard let s = sample else { return }
         sample = nil
-        let folded = word.lowercased().replacingOccurrences(of: "ł", with: "l")
-            .folding(options: .diacriticInsensitive, locale: nil)
-        guard folded.count >= 2,
-              let a = folded.first?.asciiValue, let b = folded.last?.asciiValue,
-              (97...122).contains(a), (97...122).contains(b), s.keyWidth > 0
+        guard let keys = SwipeDictionary.keys(of: word), keys.count >= 2,
+              let a = keys.first, let b = keys.last,
+              a < s.centres.count, b < s.centres.count, s.keyWidth > 0
         else { return }
-        let first = s.centres[Int(a) - 97], last = s.centres[Int(b) - 97]
+        let first = s.centres[a], last = s.centres[b]
         guard first != .zero, last != .zero else { return }
         let measured = Double((first.y + last.y) - (s.start.y + s.end.y)) / 2 / Double(s.keyWidth)
         // One sloppy word must not drag the keyboard around: wild readings are
