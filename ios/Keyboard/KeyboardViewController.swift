@@ -32,6 +32,8 @@ final class KeyboardViewController: UIInputViewController {
     private var letterButtons: [UIButton] = []
     private var popup: UIView?
     private var popupStrip: UIStackView?
+    /// The strip shows the variants mirrored (first one on the right).
+    private var popupOpensLeft = false
     private var variantLabels: [UILabel] = []
     private var selected = 0
 
@@ -278,7 +280,13 @@ final class KeyboardViewController: UIInputViewController {
 
         // Space fires on touch DOWN, like backspace: on lift, a thumb that
         // slid a little lost the press ("space sometimes takes two taps").
-        let space = styledKey(" ")
+        // The space bar names the keyboard that is on (owner 2026-11-07), the
+        // way the system keyboard does: its display name from Settings ->
+        // Keyboards, lowercase (`medžuslovjansky`, `polski`, `češsky`).
+        let space = styledKey(Self.spaceLabel)
+        space.titleLabel?.font = .systemFont(ofSize: 15)
+        space.setTitleColor(.secondaryLabel, for: .normal)
+        space.titleLabel?.lineBreakMode = .byTruncatingTail
         space.backgroundColor = .systemBackground
         space.addTarget(self, action: #selector(tapSpace), for: .touchDown)
         space.addTarget(self, action: #selector(keyDown(_:)), for: .touchDown)
@@ -320,6 +328,11 @@ final class KeyboardViewController: UIInputViewController {
 
     private var bottomRowView: UIView?
     private var topLetterRowView: UIView?
+
+    private static let displayName =
+        (Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "").lowercased()
+    /// Through the script, like every label: `меджусловјанскы` in Cyrillic.
+    private static var spaceLabel: String { Script.out(displayName) }
 
     private func styledKey(_ title: String) -> UIButton {
         let b = UIButton(type: .system)
@@ -798,17 +811,19 @@ final class KeyboardViewController: UIInputViewController {
             }
             return
         }
-        let trimmed = before.trimmingCharacters(in: .whitespaces)
         // An EMPTY context is not proof of an empty field: right after our own
         // edits some hosts briefly report nothing, and that armed shift in the
         // middle of a word (`napiŠ`). Empty counts only when the field is.
-        // A new line starts a new sentence too (log 2026-10-10: ctx "\n", off).
-        let atStart = before.isEmpty ? !textDocumentProxy.hasText
-            : (trimmed.isEmpty || trimmed.last == "\n")
-        let afterStop = trimmed.last.map { ".!?".contains($0) } ?? false
+        // A bare new line is NOT a sentence start (owner 2026-11-07): typing a
+        // list or a word per line got a capital on every line, and deleting a
+        // test mark at the start of a line armed it again each time (log
+        // 17:38, `chciałbym \n\n` -> on). A new line after `.` `!` `?` still is.
+        let lines = before.trimmingCharacters(in: .whitespacesAndNewlines)
+        let atStart = before.isEmpty ? !textDocumentProxy.hasText : lines.isEmpty
+        let afterStop = lines.last.map { ".!?".contains($0) } ?? false
+        let gap = before.last.map { $0 == " " || $0.isNewline } ?? false
         // Only act on a real transition, or every keystroke rebuilds the view.
-        let wanted: ShiftState = (atStart || (afterStop && before.hasSuffix(" ")))
-            ? .on : .off
+        let wanted: ShiftState = (atStart || (afterStop && gap)) ? .on : .off
         if wanted != shift {
             #if DEBUG
             // Why shift switched: the tail the proxy reported at that moment.
@@ -854,6 +869,14 @@ final class KeyboardViewController: UIInputViewController {
         strip.layer.masksToBounds = true
         strip.translatesAutoresizingMaskIntoConstraints = false
 
+        // The first variant sits over the key and the rest run AWAY from the
+        // nearer edge, so a key on the right half opens leftward. Centring the
+        // strip pushed a long one (11 marks on `.`) against the left margin,
+        // and the comma - the first and most used - landed far from the thumb
+        // (owner 2026-11-07). `variantLabels` stays in variant order; only the
+        // strip shows them mirrored.
+        let opensLeft = key.convert(key.bounds, to: view).midX > view.bounds.midX
+        popupOpensLeft = opensLeft
         variantLabels = variants.map { item in
             let l = UILabel()
             // Every surface the user sees goes through the script - the
@@ -864,8 +887,10 @@ final class KeyboardViewController: UIInputViewController {
             l.font = .systemFont(ofSize: 24)
             l.textAlignment = .center
             l.textColor = .label
-            strip.addArrangedSubview(l)
             return l
+        }
+        for l in (opensLeft ? variantLabels.reversed() : variantLabels) {
+            strip.addArrangedSubview(l)
         }
 
         view.addSubview(strip)
@@ -879,7 +904,9 @@ final class KeyboardViewController: UIInputViewController {
         let fitsAbove = key.tag > 0
 
         var constraints = [
-            strip.centerXAnchor.constraint(equalTo: key.centerXAnchor),
+            opensLeft
+                ? strip.trailingAnchor.constraint(equalTo: key.trailingAnchor, constant: 4)
+                : strip.leadingAnchor.constraint(equalTo: key.leadingAnchor, constant: -4),
             strip.heightAnchor.constraint(equalTo: key.heightAnchor, multiplier: 1.15),
             strip.widthAnchor.constraint(greaterThanOrEqualTo: key.widthAnchor),
             strip.widthAnchor.constraint(
@@ -898,7 +925,7 @@ final class KeyboardViewController: UIInputViewController {
                                            constant: 1))
         }
         // The width constraint is the one to give up if the strip would run off
-        // the edge; centring and the edge margins matter more.
+        // the edge; the anchor to the key and the edge margins matter more.
         constraints[3].priority = .defaultHigh
         constraints[0].priority = .defaultHigh
         NSLayoutConstraint.activate(constraints)
@@ -912,7 +939,8 @@ final class KeyboardViewController: UIInputViewController {
     private func indexOfVariant(atX x: CGFloat, count: Int) -> Int {
         guard let strip = popupStrip, count > 0, strip.bounds.width > 0 else { return 0 }
         let slot = strip.bounds.width / CGFloat(count)
-        return min(count - 1, max(0, Int(x / slot)))
+        let i = min(count - 1, max(0, Int(x / slot)))
+        return popupOpensLeft ? count - 1 - i : i
     }
 
     private func highlightSelection() {

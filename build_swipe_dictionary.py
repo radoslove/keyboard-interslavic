@@ -59,6 +59,12 @@ if LANG == "pl":
     # as `l` with a diacritic, so no generic folding would.
     FOLD = {"ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n",
             "ó": "o", "ś": "s", "ź": "z", "ż": "z"}
+if LANG == "cs":
+    # Czech: QWERTY rows (owner 2026-11-01, not Czech QWERTZ), the fifteen
+    # letters with diacritics held on thirteen base keys, as on Android 3.5.31.
+    FOLD = {"á": "a", "č": "c", "ď": "d", "é": "e", "ě": "e", "í": "i",
+            "ň": "n", "ó": "o", "ř": "r", "š": "s", "ť": "t", "ú": "u",
+            "ů": "u", "ý": "y", "ž": "z"}
 if LANG == "en":
     # Plain a-z: a form with any other letter (`café`) cannot be swiped and
     # is left out, as on Android.

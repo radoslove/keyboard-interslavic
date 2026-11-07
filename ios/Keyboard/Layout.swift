@@ -9,7 +9,7 @@ import Foundation
 /// which is the point: one habit across platforms.
 enum Layout {
 
-    /// Which keyboard this extension is: `isv`, `pl` or `en`. One code base, two
+    /// Which keyboard this extension is: `isv`, `pl`, `cs` or `en`. One code base, two
     /// entries in Settings -> Keyboards; the language comes from the
     /// extension's Info.plist (`KeyboardLanguage`), set per target.
     static let language: String =
@@ -26,6 +26,12 @@ enum Layout {
         case "pl":
             return ["a": ["ą"], "c": ["ć"], "e": ["ę"], "l": ["ł"], "n": ["ń"],
                     "o": ["ó"], "s": ["ś"], "z": ["ż", "ź"]]
+        case "cs":
+            // Android `Layout.csOwn` (3.5.31), same order: the order was
+            // measured on the corpus, so it is copied, not re-thought.
+            return ["a": ["á"], "c": ["č"], "d": ["ď"], "e": ["ě", "é"],
+                    "i": ["í"], "n": ["ň"], "o": ["ó"], "r": ["ř"], "s": ["š"],
+                    "t": ["ť"], "u": ["ů", "ú"], "y": ["ý"], "z": ["ž"]]
         case "en":
             return [:]
         default:
@@ -65,10 +71,12 @@ enum Layout {
     static let periodAccents: [String] = ["…", "!", "„", "”", "\"", "'"]
 
     /// Held on `.` of the LETTER layer, where 😀 took the comma's key
-    /// (owner 2026-10-25): the comma comes first, then `?` (not on the
-    /// letters since 3.5.16) and the most used of the old comma hold.
+    /// (owner 2026-10-25): the comma comes first, right over the key, then
+    /// `:` and `;` next to it (owner 2026-11-07: the comma must not sit at
+    /// the far end of the strip), then `?` (not on the letters since 3.5.16)
+    /// and the rest.
     static let periodLetterAccents: [String] =
-        [",", "?"] + periodAccents + [":", ";", "-"]
+        [",", ":", ";", "?"] + periodAccents + ["-"]
 
     /// Held on `,`: the rest of the sentence punctuation.
     static let commaAccents: [String] = [":", ";", "-", "–", "(", ")"]

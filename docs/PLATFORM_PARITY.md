@@ -4,12 +4,15 @@
 gained since the last round is ported here before anything new is started, so the two apps never
 drift into different keyboards. Update the table at the end of the round.
 
-Last checked: 2026-11-05 (iOS 0.4.6 on `iph` · Android MS 3.6.2-test on `a55`).
+Last checked: 2026-11-07 (iOS 0.5.1 on `iph` · Android MS 3.6.2-test on `a55`; no Android commits since 2026-11-05).
 
 ## iOS has, Android does not yet → port to Android
 
-Nothing outstanding: the five rows that stood here were ported in **MS 3.5.31 /
-ISC 0.1.24** (2026-11-01) and moved to *Done in both*.
+| Feature | iOS | Android notes |
+|---|---|---|
+| Hold on `.` of the letter layer: `,` `:` `;` FIRST, then `?` and the rest (owner 2026-11-07: the colon pair right next to the comma, not at the far end) | 0.5.1 (`Layout.periodLetterAccents`) | `Layout.periodLetterHold`, same order verbatim |
+| The hold strip opens AWAY from the nearer edge: first item over the key, a key on the right half opens leftward. Centring pushed the 11-mark `.` strip against the left margin and the comma landed far from the thumb | 0.5.1 (`showPopup`, `popupOpensLeft`) | check how the Android popup places a long strip on the right edge first |
+| A bare new line no longer arms shift; a new line after `.` `!` `?` still does. A word per line got a capital on every line, and deleting a mark at the start of a line re-armed it each time (`iph` log 2026-11-07 17:38) | 0.5.1 (`rearmShiftIfSentenceStart`) | `KeyboardView.rearmShift`: `atStart` = only empty field; `afterStop` across spaces AND new lines |
 
 ## Android has, iOS does not yet → port to iOS
 
@@ -18,9 +21,7 @@ ISC 0.1.24** (2026-11-01) and moved to *Done in both*.
 | **Both glide anchors read the slowest sample within 120 ms of their end**, not the first and last sample. A thumb decelerates onto the letter it means and carries past it, so the extreme samples are the approach and the overshoot - and both anchors are hard gates, so one noisy point decided whether the right word could compete at all. Worth +1 to +3 points of top-1 across the offset sweep, never below baseline. Widening the anchor set instead measured as nothing: the gate was aimed wrong, not too narrow | 3.6.1 (`KeyboardView.anchorPoint`, `speedCurve`) | ⚠ **Ported in 0.4.4 and measured HARMFUL on iOS, switched off in 0.4.5** (`SwipeDecoder.slowAnchors = false`, code kept). 21 real `iph` glides replayed both ways: `pisati` top-1 3/13 → 0/13, `slovo` 8/8 → 3/8, `se`/`to` unchanged. iOS sends no `touchesMoved` while the finger rests, so the deceleration onto the last letter is never sampled and the slowest point near the end is the previous TURN (`slovo` → `suprug`, `doč`). Re-measure only after the end of the glide is sampled (e.g. coalesced touches) - the log carries `ms` since 0.4.4 |
 | **A way into the keyboard's own settings FROM the keyboard**: hold 🌐 for a two-item strip: 🌐 the system keyboard picker first, over the key, and ⚙ settings one slide to the right. Before this the settings were reachable only from the app icon, so changing anything meant leaving what you were typing - and a tester does not necessarily know the keyboard has an app at all (owner, 2026-11-04). Icons, not words: the keyboard surface carries no translated strings | 3.5.42 (`KeyboardView.globeKey`, `ImeService.openSettings`) | iOS has no globe of its own (the system key switches extensions) and an extension cannot just start an activity - it needs its own route into the container app; decide the gesture first |
 | Frequency pulls LINEARLY in the byte for Polish and Czech too, not log-of-a-rank. The byte is already a quantile, so the second log left the whole signal worth ~5 px of path deviation - 5 % of a key - and `semtex` outranked the median of the dictionary | 3.5.39 (`Dictionary.LINEAR_FREQ`) | `SwipeDictionary.swift` scores its own way; check which transform its binary carries before copying the constant |
-| Polish PAST-PERSONAL and CONDITIONAL forms in the wordlist (136 577 added): the endings are agglutinants, so PoliMorf has no composite form and the filter dropped every one - `zrobil` was in, `zrobilem` was not | 3.5.39 (`tools/build_pl_aglutynanty.py`) | rebuild `pl_swipe.bin` from the new `main_pl.combined` |
 | Each app names the keyboard languages in ITS OWN language: the MS app's picker and settings read `medžuskandinavsky poljsky norvežsky anglijsky češsky`, and the sixth is the service's own name (owner 2026-11-01, every adjective verified in medzuslove_canon) | 3.5.34–3.5.35 | one extension per language, so the names live in each `Info.plist` display name plus the list in `App/App.swift` |
-| **Czech** as a language (`cs`: QWERTY rows, á č ď ě é í ň ó ř š ť ú ů ý ž on hold) | 3.5.31 | needs its own extension + `cs_swipe.bin` from `main_cs.combined` (40 959 forms); `foldBase` must fold the Czech letters or every glide over them dies |
 | **Interscandinavian** as a language (`isc`: rows of 11, `å ø æ`) | 3.5.14 | fourth extension, wordlist `main_isc.combined` |
 | **Norwegian bokmål keyboard** (`nb`: `å ø æ` on own keys, rows of 11) | 3.5.8 | ⚠ needs design first: the iOS swipe binary knows 26 keys a–z, so `ø`/`æ` words drop out and `å` folds to `a`; widen to own keys (29), together with `isc` |
 | **App screen in four languages** (MS + EN gloss, English, Polish, Norwegian; follows the phone) | 3.5.8 (`Ui.kt`) | `App/App.swift`: same texts, same keys |
@@ -33,6 +34,8 @@ ISC 0.1.24** (2026-11-01) and moved to *Done in both*.
 
 | Feature | iOS | Android |
 |---|---|---|
+| **Czech** (`cs`: QWERTY rows, á č ď ě é í ň ó ř š ť ú ů ý ž on hold, 40 959 forms; owner hand test on `iph` 2026-11-07: holds and glides `řeka` `město` `děkuji` right) | 0.5.0 (`KeyboardCS` extension, `cs_swipe.bin`, fold in `build_swipe_dictionary.py`) | 3.5.31 |
+| Polish past-personal and conditional forms (548 528 forms; `zrobiłem` right on `iph`; ⚠ `chciałbym` still loses to `chodziłbym`/`chciałem` - its `c-h-c` back-and-forth fits badly, replay score 0.77 vs 0.43) | 0.5.0 (`pl_swipe.bin` rebuilt) | 3.5.39 |
 | Hold on `.` of the letter layer: `:` BEFORE `;` (owner 2026-11-01: the colon is the one he types, so it sits nearer the thumb); same swap in the `,` hold | 0.4.3 code (`periodAccents`/`commaAccents` tails) ⚠ not built yet — needs an Xcode build on `mc` | 3.5.32 |
 | The learned touch offset may go NEGATIVE, floor -0.5: a thumb landing below the key is as real as one above; a 0 floor switched compensation off on the phone that needed it | 0.4.4 (`SwipeInput.learn`; iOS learned the offset since 0.1.4, only the floor was 0) | 3.6.1 (`Lift.MIN`) |
 | A letter tapped after a glide extends that word only if the WORDLIST says it still can; time is just a ceiling. Deciding it on the clock alone glued the next word onto the last one whenever typing was quick (`wyjsc` + `s` -> `wyjscs`, owner 2026-11-04) | 0.4.6 (`SwipeInput.canExtend`, `SwipeDictionary.hasPrefix`; folded-key prefix, user words count) | 3.5.39 (`Dictionary.hasPrefix`) |
