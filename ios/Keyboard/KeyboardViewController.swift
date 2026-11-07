@@ -28,6 +28,8 @@ final class KeyboardViewController: UIInputViewController {
     private var showingSymbols = false
     /// The emoji panel behind 😀, in place of the letter rows.
     private var showingEmoji = false
+    /// The settings panel in place of the letters (hold `123` -> ⚙).
+    private var showingSettings = false
     private var rowsStack: UIStackView!
     private var letterButtons: [UIButton] = []
     private var popup: UIView?
@@ -131,10 +133,12 @@ final class KeyboardViewController: UIInputViewController {
         let rows = showingNumeric
             ? (showingSymbols ? Layout.symbolRows : Layout.numericRows)
             : Layout.letterRows
-        var rowViews: [UIView] = showingEmoji
+        var rowViews: [UIView] = showingSettings
+            ? [settingsPanel()]
+            : showingEmoji
             ? [emojiPanel()]
             : rows.enumerated().map { characterRow($1, row: $0) }
-        topLetterRowView = (showingNumeric || showingEmoji) ? nil : rowViews.first
+        topLetterRowView = (showingNumeric || showingEmoji || showingSettings) ? nil : rowViews.first
         // No digit row above the letters (tried in 0.1.7): the host does not
         // let the keyboard grow, so five rows squeezed every key. Digits live
         // on `123` only.
@@ -144,7 +148,7 @@ final class KeyboardViewController: UIInputViewController {
         stack.axis = .vertical
         stack.distribution = .fillEqually
         stack.spacing = 6
-        if showingEmoji, let bottom = rowViews.last {
+        if showingEmoji || showingSettings, let bottom = rowViews.last {
             // The panel takes the three letter rows, the bottom row stays one.
             stack.distribution = .fill
             bottom.heightAnchor.constraint(equalTo: stack.heightAnchor, multiplier: 0.25,
@@ -243,9 +247,20 @@ final class KeyboardViewController: UIInputViewController {
 
         // The emoji panel has the bottom row of `123`: ABC back, space, and a
         // backspace, since the letter row that holds one is gone.
-        let panel = showingNumeric || showingEmoji
+        let panel = showingNumeric || showingEmoji || showingSettings
         let layerKey = functionKey(panel ? "ABC" : "123",
-                                   action: showingEmoji ? #selector(tapEmojiKey) : #selector(tapLayer))
+                                   action: showingSettings ? #selector(closeSettings)
+                                       : showingEmoji ? #selector(tapEmojiKey) : #selector(tapLayer))
+        if !panel {
+            // Hold `123` for ⚙: the keyboard's own settings, drawn in place of
+            // the letters (owner 2026-11-07). Android holds 🌐 for the same
+            // strip; on iOS 🌐 belongs to the system, and a keyboard may not
+            // open other apps (App Review 4.4.1), so nothing leaves the keyboard.
+            layerKey.tag = 3        // bottom row: the strip goes above the key
+            let hold = UILongPressGestureRecognizer(target: self, action: #selector(holdLayer(_:)))
+            hold.minimumPressDuration = 0.3
+            layerKey.addGestureRecognizer(hold)
+        }
         stack.addArrangedSubview(layerKey)
         weights.append((layerKey, panel ? 1.6 : 1.2))
 
@@ -256,7 +271,7 @@ final class KeyboardViewController: UIInputViewController {
             weights.append((globe, panel ? 1.2 : 0.95))
         }
 
-        var spaceWeight: CGFloat = showingNumeric ? 5.6 : showingEmoji ? 4.2
+        var spaceWeight: CGFloat = showingNumeric ? 5.6 : (showingEmoji || showingSettings) ? 4.2
             : (isv ? 3.45 : 4.65)
         if !panel {
             // Script key: as 🌐 switches the keyboard, this switches the
@@ -295,7 +310,7 @@ final class KeyboardViewController: UIInputViewController {
         stack.addArrangedSubview(space)
         bottomRowView = stack
 
-        if showingEmoji {
+        if showingEmoji || showingSettings {
             let back = styledKey("⌫")
             back.backgroundColor = .tertiarySystemFill
             back.addTarget(self, action: #selector(backspaceDown), for: .touchDown)
@@ -574,6 +589,130 @@ final class KeyboardViewController: UIInputViewController {
         showingNumeric = false
         showingSymbols = false
         buildKeyboard()
+    }
+
+    @objc private func holdLayer(_ g: UILongPressGestureRecognizer) {
+        guard let key = g.view as? UIButton else { return }
+        switch g.state {
+        case .began:
+            showPopup(over: key, variants: ["⚙"])
+            selected = 0
+            highlightSelection()
+        case .ended:
+            dismissPopup()
+            showingSettings = true
+            showingEmoji = false
+            showingNumeric = false
+            showingSymbols = false
+            showSuggestions([])
+            buildKeyboard()
+        case .cancelled, .failed:
+            dismissPopup()
+        default:
+            break
+        }
+    }
+
+    @objc private func closeSettings() {
+        showingSettings = false
+        buildKeyboard()
+        refreshCompletions()
+    }
+
+    /// Theme, script and the words added with `＋`, inside the keyboard. Works
+    /// without Full Access too: then it is the keyboard's own copy, which the
+    /// app cannot see - the keyboard itself never needs the app.
+    private func settingsPanel() -> UIView {
+        let scroll = UIScrollView()
+        scroll.showsVerticalScrollIndicator = true
+        let column = UIStackView()
+        column.axis = .vertical
+        column.spacing = 6
+        column.translatesAutoresizingMaskIntoConstraints = false
+        scroll.addSubview(column)
+        NSLayoutConstraint.activate([
+            column.topAnchor.constraint(equalTo: scroll.contentLayoutGuide.topAnchor, constant: 4),
+            column.bottomAnchor.constraint(equalTo: scroll.contentLayoutGuide.bottomAnchor, constant: -4),
+            column.leadingAnchor.constraint(equalTo: scroll.frameLayoutGuide.leadingAnchor, constant: 2),
+            column.trailingAnchor.constraint(equalTo: scroll.frameLayoutGuide.trailingAnchor, constant: -2),
+        ])
+
+        func header(_ text: String) -> UILabel {
+            let l = UILabel()
+            l.text = Script.out(text)
+            l.font = .systemFont(ofSize: 14, weight: .semibold)
+            l.textColor = .secondaryLabel
+            return l
+        }
+        func choiceRow(_ items: [(String, Bool, () -> Void)]) -> UIView {
+            let row = UIStackView()
+            row.axis = .horizontal
+            row.distribution = .fillEqually
+            row.spacing = 5
+            for (title, on, act) in items {
+                let b = styledKey(title)
+                b.titleLabel?.font = .systemFont(ofSize: 20)
+                if on {
+                    b.backgroundColor = .systemBlue
+                    b.setTitleColor(.white, for: .normal)
+                }
+                b.addAction(UIAction { _ in act() }, for: .touchUpInside)
+                row.addArrangedSubview(b)
+            }
+            row.heightAnchor.constraint(equalToConstant: 40).isActive = true
+            return row
+        }
+
+        column.addArrangedSubview(header("Tema"))
+        let themes: [(String, Shared.Theme)] = [("◐", .auto), ("☀", .light), ("☾", .dark)]
+        column.addArrangedSubview(choiceRow(themes.map { icon, t in
+            (icon, Shared.theme == t, { [weak self] in
+                Shared.theme = t
+                self?.applyTheme()
+                self?.buildKeyboard()
+            })
+        }))
+
+        if Layout.language == "isv" {
+            column.addArrangedSubview(header("Pismo"))
+            let scripts: [(String, Script.Mode)] = [("ABC", .latin), ("АБВ", .cyrillic), ("ⰀⰁⰂ", .glagolitic)]
+            column.addArrangedSubview(choiceRow(scripts.map { label, m in
+                (label, Script.mode == m, { [weak self] in
+                    Shared.store.set(m.rawValue, forKey: "script")
+                    self?.buildKeyboard()
+                })
+            }))
+        }
+
+        column.addArrangedSubview(header("Moje slova"))
+        let words = swipeInput.userWords
+        if words.isEmpty {
+            let l = UILabel()
+            l.text = "—"
+            l.textColor = .secondaryLabel
+            column.addArrangedSubview(l)
+        }
+        for w in words.sorted() {
+            let row = UIStackView()
+            row.axis = .horizontal
+            row.spacing = 8
+            let l = UILabel()
+            l.text = Script.out(w)
+            l.font = .systemFont(ofSize: 18)
+            l.textColor = .label
+            let x = styledKey("✕")
+            x.titleLabel?.font = .systemFont(ofSize: 16)
+            x.widthAnchor.constraint(equalToConstant: 44).isActive = true
+            x.addAction(UIAction { [weak self] _ in
+                self?.swipeInput.removeUserWord(w)
+                self?.buildKeyboard()
+            }, for: .touchUpInside)
+            row.addArrangedSubview(l)
+            row.addArrangedSubview(x)
+            row.heightAnchor.constraint(equalToConstant: 36).isActive = true
+            column.addArrangedSubview(row)
+        }
+        return scroll
     }
 
     /// The panel: lately used first, then the common set, in rows of eight.
@@ -1116,7 +1255,7 @@ extension KeyboardViewController: SwipeHost {
     var swipeCanBegin: Bool {
         // No letters to cross on the numeric layer, and the longpress popup
         // owns the finger while it is up.
-        !showingNumeric && !showingEmoji && popup == nil
+        !showingNumeric && !showingEmoji && !showingSettings && popup == nil
     }
 
     var swipeKeyCentres: ([CGPoint], CGFloat) {

@@ -135,6 +135,13 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         Shared.setUserWords(userWords, Layout.language)
     }
 
+    /// Takes a `＋` word back (the settings panel's ✕); from then on the
+    /// keyboard stops offering it unless the wordlist has it anyway.
+    func removeUserWord(_ word: String) {
+        userWords.removeAll { $0 == word }
+        Shared.setUserWords(userWords, Layout.language)
+    }
+
     private var userWordKeys: [(word: String, keys: [UInt8])] {
         userWords.compactMap { w in SwipeDictionary.keys(of: w).map { (w, $0.map(UInt8.init)) } }
     }

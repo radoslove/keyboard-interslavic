@@ -34,7 +34,7 @@ object Lift {
 
     /** Learned values stay in a band a thumb can actually produce. */
     // A thumb that lands BELOW the key it aims at is just as real as one that
-    // lands above, and `a55` is one: after 195 glides the value sat on this
+    // lands above, and the Android test phone is one: after 195 glides the value sat on this
     // floor with the estimator still pulling down, so compensation was simply
     // switched off on the phone that needed it. Measured in swipe_eval.py: an
     // offset of -0.35 costs 6 points of top-1 while clamped and none when
@@ -52,7 +52,7 @@ object Lift {
      * gap, i.e. the first word counts for half and the tenth for a tenth. The old
      * flat tenth needed dozens of KEPT glides to walk away from a wrong default -
      * and a wrong default is exactly the state in which nothing gets kept
-     * (owner 2026-11-01 on `a55`: the value had crawled 0.35 -> 0.276 and was
+     * (owner 2026-11-01 on the Android test phone: the value had crawled 0.35 -> 0.276 and was
      * still over-compensating, which drags a top-row start down onto the home row:
      * `wyjść` came back as `semtex`, `wysoko` as `do`).
      */

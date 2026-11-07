@@ -25,6 +25,13 @@ TEXT_PATTERNS = {
     'personal home path': re.compile(r'(?:/(?:Users|home)/|[A-Za-z]:[/\\]Users[/\\])[A-Za-z][\w.-]+[/\\]'),
     'private workspace reference': re.compile(r'\b(?:vault_\d+|remote_[v]ault|hardware_[i]nventory\.md|NOW[.]md)\b'),
     'private key material': re.compile(r'-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----'),
+    # The owner's machine and phone names (owner 2026-11-07: they are private).
+    # Bare names that are also ordinary words (mc, hp, host, com) only count in
+    # backticks, the way session notes write them.
+    # Spelled in pieces so this file does not trip its own check; `ubu` is
+    # left out because the English wordlist has it as a word.
+    'private device name': re.compile(r'\b(?:i' r'ph|a5' r'5|a2' r'6|het' r'z|rpi[45]|gal' r'ax|host' r'2)\b'
+                                      r'|`(?:m' r'c|h' r'p|ho' r'st|co' r'm|ol' r'd)`'),
     'credential token': re.compile(r'\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{30,}|glpat-[A-Za-z0-9_-]{16,}|AKIA[0-9A-Z]{16})\b'),
 }
 IPV4 = re.compile(r'(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?![\w.])')
@@ -69,7 +76,16 @@ def findings(path, data):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--staged', action='store_true')
+    parser.add_argument('--message', metavar='FILE',
+                        help='check a commit message file instead (commit-msg hook: --message "$1")')
     args = parser.parse_args()
+    if args.message:
+        issues = findings('COMMIT_MSG', Path(args.message).read_bytes())
+        for line, label in issues:
+            print(f'commit message:{line}: {label}')
+        if not issues:
+            print('PASS: commit message has no known private names, paths or addresses.')
+        return int(bool(issues))
     root = Path(subprocess.check_output(['git', 'rev-parse', '--show-toplevel'], text=True).strip())
     command = ['git', 'ls-files', '-z', '--cached']
     if not args.staged:
@@ -90,7 +106,7 @@ def main():
             print(f'{name}:{line}: {label}')
             failed = True
     if not failed:
-        print(f'PASS: {checked} files checked for known private paths, addresses and credential patterns; prose and binaries still require review.')
+        print(f'PASS: {checked} files checked for known private paths, device names, addresses and credential patterns; prose and binaries still require review.')
     return int(failed)
 
 

@@ -30,6 +30,13 @@ class PublicTreeChecks(unittest.TestCase):
         self.assertFalse(findings('docs/example.md', text))
         self.assertFalse(findings('source.py', b"range = '10.0.0.0/8'\n"))
 
+    def test_device_names(self):
+        for text in ('Hand-tested on ' + 'i' + 'ph', 'installed on `' + 'a5' + '5`', 'built on `' + 'mc`',
+                     'copied to `' + 'host`'):
+            self.assertTrue(findings('docs/example.md', text.encode()), text)
+        for text in ('iPhone 13', 'the build Mac', 'host app', 'graphics', 'hash 1a55b2', 'the mc draft'):
+            self.assertFalse(findings('docs/example.md', text.encode()), text)
+
     def test_fake_credential(self):
         fake = 'gh' + 'p_' + 'x' * 30
         self.assertTrue(findings('example.txt', fake.encode()))

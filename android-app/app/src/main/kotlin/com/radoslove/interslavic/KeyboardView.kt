@@ -735,7 +735,7 @@ class KeyboardView(
         row.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         // A row lines its keys up by text BASELINE by default, so a label that
         // wrapped onto two lines (`ⰀⰁⰂ`, `Medžuslovjansky`, Glagolitic `y` = `ⱐⰹ`)
-        // pushed its key down out of the row (owner 2026-10-14, a55).
+        // pushed its key down out of the row (owner 2026-10-14, Android test phone).
         row.isBaselineAligned = false
         return row
     }

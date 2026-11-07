@@ -12,7 +12,7 @@
      carries it as a MASTER switch above the others, and turning that switch on
      WIPES the explicitly enabled list - the keyboard is left with one language,
      the globe stops cycling and opens the system picker, and the phone ends up
-     on another keyboard. That is real and it happened on `a55`. It is still the
+     on another keyboard. That is real and it happened on the Android test phone. It is still the
      smaller evil. Measured on a fresh install with nothing ticked: Android
      implicitly enables the subtypes that match the PHONE's locales - on a phone
      set to en-US with pl-PL and nb-NO it switched on English, Polish and the
@@ -26,7 +26,7 @@
      invisible in the keyboard picker until the user ticks it (or, over USB,
      adb shell settings put secure enabled_input_methods "<old>;<new id>").
      Cost a round trip 2026-11-01: Czech shipped in 3.5.31 and the owner could
-     not find it on `a55`.
+     not find it on the Android test phone.
      -->
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
     android:supportsSwitchingToNextInputMethod="true">

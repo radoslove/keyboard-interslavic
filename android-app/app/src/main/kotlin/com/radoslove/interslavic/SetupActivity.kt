@@ -55,7 +55,7 @@ class SetupActivity : Activity() {
         // Language of this screen. The heading carries all four names, so it can
         // be found whichever language the screen is in now.
         root.addView(header(Ui.LANG_HEAD))
-        // One per line: four names in a row did not fit a phone (a55: "Norsk" ran
+        // One per line: four names in a row did not fit a phone (on the Android test phone "Norsk" ran
         // off the screen, "Polski" broke in two).
         root.addView(RadioGroup(this).apply {
             for (lang in Ui.ALL) {
