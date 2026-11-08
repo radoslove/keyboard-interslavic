@@ -1,0 +1,16 @@
+Cyrillic and Glagolitic get their own lj and nj keys, and glides catch short, fast words.
+
+- In Cyrillic the two keys in the top-left corner are љ and њ, exactly where
+  the Serbian and Macedonian keyboards have them; in Glagolitic they write ⰾⱐ
+  and ⱀⱐ. You can still glide the two letters separately - both ways find the
+  word. The q, w and x keys, which no non-Latin alphabet here uses, are gone
+  from those two scripts.
+- A glide reads the slowest point of your gesture at each end, so short words
+  and quick flicks stop coming out as something else.
+- Suggestions ignore diacritics while you type - verojetno finds věrojetno -
+  and they appear from the first letter. Rare past-tense forms no longer push
+  the everyday word out of first place.
+- The bottom row follows the iPhone one: the emoji key sits alone to the left
+  of a wider space bar, and the comma waits under the period together with
+  : ; and the rest.
+- The settings screen follows the keyboard's own theme instead of the phone's.
