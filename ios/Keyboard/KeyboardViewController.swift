@@ -197,6 +197,19 @@ final class KeyboardViewController: UIInputViewController {
             stack.addArrangedSubview(shiftKey)
             wide.append(shiftKey)
         }
+        // A script with fewer letters keeps the LATIN key width: Cyrillic and
+        // Glagolitic have no `q w x`, and instead of eight keys stretching over
+        // the whole width, the row gets an empty cell at each end (row 3 grows
+        // shift and backspace for the same reason, just above). The stack is
+        // `fillEqually`, so an empty cell is exactly one key wide, and the
+        // columns of the alphabet stay where the decoder expects them - the
+        // learned touch offset and the pivot cap are in key widths, so a
+        // changed width would silently miscalibrate both (Android
+        // `KeyboardView.spacer`, measured in `docs/script-tables.md`).
+        let pad = showingNumeric || isLastLetterRow || row >= Layout.latinLetterRows.count
+            ? 0
+            : (Layout.latinLetterRows[row].count - chars.count) / 2
+        for _ in 0..<pad { stack.addArrangedSubview(UIView()) }
         for ch in chars {
             let b = characterKey(ch)
             b.tag = row                      // which row a key sits in decides
@@ -207,6 +220,7 @@ final class KeyboardViewController: UIInputViewController {
                 else { first = b }
             }
         }
+        for _ in 0..<pad { stack.addArrangedSubview(UIView()) }
         if isLastRow && showingNumeric {
             let page = functionKey(showingSymbols ? "123" : "#+=", action: #selector(tapSymbols))
             stack.insertArrangedSubview(page, at: 0)
@@ -230,7 +244,7 @@ final class KeyboardViewController: UIInputViewController {
                 // it): 1.5 keys each beside 7 letters under 10, 2 under the
                 // Norwegian 11.
                 let side = showingNumeric ? 1.5
-                    : CGFloat(Layout.letterRows[0].count - chars.count) / 2
+                    : CGFloat(Layout.rowUnits - chars.count) / 2
                 for w in wide {
                     w.widthAnchor.constraint(equalTo: f.widthAnchor, multiplier: side,
                                              constant: 2.5).isActive = true

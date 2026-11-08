@@ -146,8 +146,50 @@ object Layout {
         "zxcvbnm",
     )
 
-    fun letterRows(lang: String): List<String> =
-        if (lang == Lang.NB || lang == Lang.ISC) nbRows else latinRows
+    /** No script but Latin has a letter on `q w x`, and a foreign word inside a
+     *  Cyrillic sentence is written WHOLE in Latin (`Linux`, `WhatsApp`), never
+     *  as three Latin letters inside a Cyrillic word - so the way to it is the
+     *  script key, not a stray key, and the same rule `variants` applies to the
+     *  other foreign letters (`ñ ø ł ą` are hidden there) applies here too.
+     *
+     *  **Both non-Latin scripts keep the first two positions and put the `lj` and
+     *  `nj` keys there** - in Cyrillic `љ` and `њ`, exactly where the Serbian and
+     *  Macedonian standards have them, and in Glagolitic `ⰾⱐ` and `ⱀⱐ` (owner
+     *  2026-11-08, first for Cyrillic - better to have them in plain sight, and it
+     *  is practised elsewhere - then "to elegancko jakby było tak analogicznie" for
+     *  Glagolitic). Glagolitic has no single SIGN for either pair, but a two-sign
+     *  key is nothing new on this keyboard: `y` has stood there as `ⱐⰹ` all along,
+     *  and the key is a shortcut to the digraph, not a claim that it is a letter.
+     *
+     *  The key stays the character `q` inside; what it writes is `Layout.keyText`,
+     *  and the glide decoder reads a route over it as the PAIR `lj`
+     *  (`Dictionary.foldWord`, which also keeps the route over `l`+`j`).
+     *  `x` gets nothing in either script, because `dž` is settled as two letters
+     *  (`дж`, not `џ`), so that one key goes. */
+    private val nonLatinRows: List<String> = listOf(
+        "qwertyuiop",
+        "asdfghjkl",
+        "zcvbnm",
+    )
+
+    fun letterRows(lang: String, script: Script.Mode = Script.Mode.LATIN): List<String> = when {
+        lang == Lang.NB || lang == Lang.ISC -> nbRows
+        script != Script.Mode.LATIN -> nonLatinRows
+        else -> latinRows
+    }
+
+    /** What a letter key WRITES, in Latin - normally its own character, but in
+     *  Cyrillic and Glagolitic `q` and `w` carry the digraphs behind `љ`/`њ` and
+     *  `ⰾⱐ`/`ⱀⱐ`. The keyboard stays Latin inside, so everything downstream
+     *  (dictionary, glide, ranking, the `Script` converter) still sees `lj` and
+     *  `nj`; the converter then writes them in the script in force, with its own
+     *  context rules. */
+    fun keyText(ch: Char, script: Script.Mode): String = when {
+        script == Script.Mode.LATIN -> ch.toString()
+        ch == 'q' -> "lj"
+        ch == 'w' -> "nj"
+        else -> ch.toString()
+    }
 
     /** `123` page - rows 1-2 as on the iOS system keyboard. Row 3 sits between
      *  `#+=` and backspace and runs from the rarest mark to the most used, so `?`

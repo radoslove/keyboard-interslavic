@@ -575,20 +575,41 @@ class KeyboardView(
 
     private fun renderLetters() {
         letterKeyViews.clear()
-        Layout.letterRows(Lang.current(context)).forEachIndexed { index, row ->
+        val lang = Lang.current(context)
+        val script = Script.mode(context)
+        // The Latin rows are what the GRID is calibrated to. Cyrillic and
+        // Glagolitic have no `q w x`, and the keys that stay keep their Latin
+        // WIDTH: the freed space becomes padding at the ends of the row, and in
+        // row 3 shift and backspace grow instead. So everything the decoder
+        // expresses in key widths - the learned touch offset (`Lift`), the pivot
+        // cap, the glide minimum - stays calibrated across a script change, and
+        // no key changes size under the thumb. Measured 2026-11-08: letting the
+        // eight keys of row 1 fill the width instead (the plain Android way)
+        // costs four points of top-1, because the columns of the alphabet stop
+        // lining up with the rows below (`docs/script-tables.md`).
+        val full = Layout.letterRows(lang)
+        // Both non-Latin scripts glide `lj` and `nj` over one key each: `љ`/`њ` in
+        // Cyrillic, `ⰾⱐ`/`ⱀⱐ` in Glagolitic. The route over `l`+`j` stays too.
+        Dictionary.digraphKeys = script != Script.Mode.LATIN
+        Layout.letterRows(lang, script).forEachIndexed { index, row ->
             val rv = makeRow()
+            val pad = (full[index].length - row.length) / 2f
             if (index == 2) {
                 val glyph = if (capsLocked) "⇪" else "⇧"
-                val sk = functionKey(glyph, 1.5f) { onShiftTap() }
+                val sk = functionKey(glyph, 1.5f + pad) { onShiftTap() }
                 when {
                     capsLocked -> sk.setBackgroundColor(cShiftLock)  // locked: stronger
                     shift -> sk.setBackgroundColor(cShiftOne)         // one-shot: light
                 }
                 rv.addView(sk)
+            } else if (pad > 0f) {
+                rv.addView(spacer(pad))
             }
             row.forEach { ch -> rv.addView(letterKey(ch)) }
             if (index == 2) {
-                rv.addView(backspaceKey())
+                rv.addView(backspaceKey(1.5f + pad))
+            } else if (pad > 0f) {
+                rv.addView(spacer(pad))
             }
             addView(rv)
         }
@@ -794,9 +815,17 @@ class KeyboardView(
         return row
     }
 
+    /** The Latin text a letter key writes, with the shift applied: its own
+     *  character, or in Cyrillic the digraph behind `љ` / `њ` (`Layout.keyText`).
+     *  `Lj` titlecases the way `Script.cased` expects, so `Љ` comes out right. */
+    private fun keyText(ch: Char): String {
+        val base = Layout.keyText(ch, Script.mode(context))
+        return if (shift) base.replaceFirstChar { it.uppercaseChar() } else base
+    }
+
     private fun letterKey(ch: Char): TextView {
         // Label in the chosen script; the key itself stays the Latin letter `ch`.
-        val label = Script.out(context, if (shift) ch.uppercaseChar().toString() else ch.toString())
+        val label = Script.out(context, keyText(ch))
         val tv = baseKey(label, 1f)
         val lang = Lang.current(context)
         val latin = Script.mode(context) == Script.Mode.LATIN
@@ -847,7 +876,7 @@ class KeyboardView(
                         if (flickUp) {
                             Layout.longPress(ch, shift, lang)?.let { commit(Script.out(context, it)) }
                         } else {
-                            commit(Script.out(context, if (shift) ch.uppercaseChar().toString() else ch.toString()))
+                            commit(Script.out(context, keyText(ch)))
                         }
                     }
                     true
@@ -927,8 +956,8 @@ class KeyboardView(
      *  A hold that STARTED by wiping a glided word trims it instead: the word
      *  comes back one letter short and loses letters while held - the way to
      *  fix an ending without first tapping space (owner, 2026-10-08). */
-    private fun backspaceKey(): TextView {
-        val tv = baseKey("⌫", 1.5f)
+    private fun backspaceKey(weight: Float = 1.5f): TextView {
+        val tv = baseKey("⌫", weight)
         // The view's own long-press machinery competes with ours for the same
         // hold and buys nothing here.
         tv.isLongClickable = false
@@ -1002,6 +1031,17 @@ class KeyboardView(
             }
         }
         return tv
+    }
+
+    /** Dead space in a letter row, built exactly like a key so the columns of
+     *  the keys beside it land where the Latin grid puts them. Used where a
+     *  script has no letter for a key (Cyrillic, Glagolitic: no `q w x`). */
+    private fun spacer(weight: Float): android.view.View {
+        val v = android.view.View(context)
+        val lp = LayoutParams(0, dp(52), weight)
+        lp.setMargins(dp(1), dp(1), dp(1), dp(1))
+        v.layoutParams = lp
+        return v
     }
 
     private fun baseKey(text: String, weight: Float): TextView {
@@ -2081,8 +2121,8 @@ class KeyboardView(
         val word = liftSampleWord
         if (word.length < 2 || s[4] <= 0f) return
         val centers = computeCenters()
-        val first = centers[Dictionary.foldBase(word.first())] ?: return
-        val last = centers[Dictionary.foldBase(word.last())] ?: return
+        val first = centers[Dictionary.foldFirst(word)] ?: return
+        val last = centers[Dictionary.foldLast(word)] ?: return
         val measured = ((first[1] + last[1]) - (s[1] + s[3])) / 2f / s[4]
         touchLift = Lift.learn(context, measured)
     }
@@ -2218,10 +2258,22 @@ class KeyboardView(
         return len
     }
 
-    /** One key width, taken from the snapshotted centres so no View is read. */
+    /** One key width, taken from the snapshotted centres so no View is read:
+     *  the PITCH of the top letter row, as the median gap between neighbouring
+     *  key centres (median, so a hole in the row cannot skew it).
+     *
+     *  It used to read `centers['q']` and `centers['w']` by name and fall back to
+     *  `dp(36)` when either was missing. From 2026-11-08 Cyrillic and Glagolitic
+     *  have no `q w x`, so that fallback would have fired on every glide in those
+     *  scripts: the keyboard would look and feel identical while the lift
+     *  compensation and the pivot cap were scaled by a width no key has. */
     private fun keyWidth(centers: Map<Char, FloatArray>): Float {
-        val q = centers['q']; val w = centers['w']
-        return if (q != null && w != null) abs(w[0] - q[0]) else dp(36).toFloat()
+        if (centers.isEmpty()) return dp(36).toFloat()
+        val topY = centers.values.minOf { it[1] }
+        val xs = centers.values.filter { it[1] - topY < 1f }.map { it[0] }.sorted()
+        if (xs.size < 2) return dp(36).toFloat()
+        val gaps = (1 until xs.size).map { xs[it] - xs[it - 1] }.sorted()
+        return gaps[gaps.size / 2]
     }
 
     /**

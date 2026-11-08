@@ -107,9 +107,26 @@ enum Layout {
         "!": ["¡"],
     ]
 
-    static let letterRows: [[Character]] = language == "nb"
-        ? [Array("qwertyuiopå"), Array("asdfghjkløæ"), Array("zxcvbnm")]   // Android `nbRows`
-        : [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")]
+    /// Cyrillic and Glagolitic have no letter on `q w x`, so in those scripts the
+    /// three keys are gone (owner 2026-11-08; Android `Layout.noQwxRows`).
+    static var letterRows: [[Character]] { rows(latin: Script.mode == .latin) }
+
+    /// The rows in LATIN - the grid the swipe decoder is calibrated to, and the
+    /// reference the shorter scripts are padded out to.
+    static var latinLetterRows: [[Character]] { rows(latin: true) }
+
+    static func rows(latin: Bool) -> [[Character]] {
+        if language == "nb" {
+            return [Array("qwertyuiopå"), Array("asdfghjkløæ"), Array("zxcvbnm")]  // Android `nbRows`
+        }
+        return latin
+            ? [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")]
+            : [Array("ertyuiop"), Array("asdfghjkl"), Array("zcvbnm")]
+    }
+
+    /// How many key widths a letter row spans. Fixed by the LATIN top row, so
+    /// shift and backspace grow instead of the letters when a script drops keys.
+    static var rowUnits: Int { language == "nb" ? 11 : 10 }
 
     /// The keys a swipe can cross, in the order of the wordlist's key indices:
     /// a-z, then the language's own letter keys (`build_swipe_dictionary.py`).

@@ -296,6 +296,55 @@ object Dictionary {
         else -> c
     }
 
+    /** In Cyrillic and Glagolitic the `q` and `w` keys carry the `lj` and `nj`
+     *  digraphs (`Layout.keyText`: `љ`/`њ`, `ⰾⱐ`/`ⱀⱐ`), so a
+     *  glide over one of them stands for the PAIR `lj` / `nj`, and a word that
+     *  contains the pair is glided over ONE key, not two. Set from the current
+     *  script before decoding; the wordlist itself stays Latin. */
+    @Volatile
+    var digraphKeys: Boolean = false
+
+    /** The key a digraph at [i] folds to, or null if there is no digraph there. */
+    private fun pairKey(w: String, i: Int): Char? {
+        if (!digraphKeys || i + 1 >= w.length) return null
+        if (foldBase(w[i + 1].lowercaseChar()) != 'j') return null
+        return when (foldBase(w[i].lowercaseChar())) {
+            'l' -> 'q'
+            'n' -> 'w'
+            else -> null
+        }
+    }
+
+    /** The sequence of KEYS a word is glided over. */
+    fun foldWord(w: String): String {
+        val sb = StringBuilder(w.length)
+        var i = 0
+        while (i < w.length) {
+            val pair = pairKey(w, i)
+            if (pair != null) { sb.append(pair); i += 2 } else { sb.append(foldBase(w[i])); i++ }
+        }
+        return sb.toString()
+    }
+
+    /** Per-char fold only: the route over `l` and `j`, which are still keys of
+     *  their own. A word with `lj` therefore has TWO routes in Cyrillic - over
+     *  `љ`, or over the two letters - and both have to decode (owner 2026-11-08:
+     *  "zeby lapalo wyrazy i po swipowaniu przez љ albo њ i przez osobno l i j").
+     *  The better route scores; this one costs nothing for a word without a pair,
+     *  because then it equals [foldWord] and is never computed twice. */
+    private fun foldPlain(w: String): String {
+        val sb = StringBuilder(w.length)
+        for (c in w) sb.append(foldBase(c))
+        return sb.toString()
+    }
+
+    /** First and last key of a word, without building the whole folded string -
+     *  these two run over EVERY entry on every decode, so they stay allocation free. */
+    fun foldFirst(w: String): Char = pairKey(w, 0) ?: foldBase(w.first())
+
+    fun foldLast(w: String): Char =
+        if (w.length >= 2) pairKey(w, w.length - 2) ?: foldBase(w.last()) else foldBase(w.last())
+
     /**
      * Geometry glide decoder. The caller (KeyboardView, which has the key
      * positions) passes a [score] function that, for a folded candidate word,
@@ -338,12 +387,24 @@ object Dictionary {
         for (e in entries) {
             val w = e.word
             if (w.length < 2 || w.length > maxLen) continue
-            if (foldBase(w.first()) !in firstKeys) continue
+            // Both gates admit EITHER route of a Cyrillic digraph word: the
+            // glide may have started on `љ` or on `l`. Still allocation free -
+            // these two lines run over every entry on every decode.
+            if (foldFirst(w) !in firstKeys &&
+                (!digraphKeys || foldBase(w.first()) !in firstKeys)) continue
             // Cheap gate before the costly geometry: a glide ends ON its last
             // letter, so a word ending elsewhere cannot be what was drawn.
-            if (lastKeys.isNotEmpty() && foldBase(w.last()) !in lastKeys) continue
-            val folded = buildString { for (c in w) append(foldBase(c)) }
-            val geo = coarse(folded)
+            if (lastKeys.isNotEmpty() && foldLast(w) !in lastKeys &&
+                (!digraphKeys || foldBase(w.last()) !in lastKeys)) continue
+            val folded = foldWord(w)
+            var geo = coarse(folded)
+            if (digraphKeys) {
+                val plain = foldPlain(w)
+                if (plain != folded) {
+                    val alt = coarse(plain)
+                    if (alt > geo) geo = alt
+                }
+            }
             if (geo == Double.NEGATIVE_INFINITY) continue
             val s = geo + freqTerm(e.freq)
             if (s > keptScore[SHORTLIST - 1]) {
@@ -362,8 +423,17 @@ object Dictionary {
         val topScore = DoubleArray(n) { Double.NEGATIVE_INFINITY }
         for (w in kept) {
             if (w == null) continue
-            val folded = buildString { for (c in w) append(foldBase(c)) }
-            val geo = fine(folded)
+            var folded = foldWord(w)
+            var geo = fine(folded)
+            if (digraphKeys) {
+                val plain = foldPlain(w)
+                if (plain != folded) {
+                    val alt = fine(plain)
+                    // The route that fits better is also the one whose doubled
+                    // letters the penalty below should count.
+                    if (alt > geo) { geo = alt; folded = plain }
+                }
+            }
             if (geo == Double.NEGATIVE_INFINITY) continue
             // geo is negative px (0 = letters sit exactly on the path); a small
             // frequency nudge breaks ties, and adaptive usage nudges harder so a

@@ -67,20 +67,39 @@ random.seed(1)
 KEY_W = 108.0
 KEY_H = 150.0
 BOARD_W = KEY_W * 10
-ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"]
+LATIN_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"]
+# SWIPE_SCRIPT picks the keyboard the geometry mirrors (2026-11-08):
+#   latin        what it always was
+#   cyrl, glag   `q` and `w` carry the `lj` / `nj` digraph keys - `љ` and `њ`
+#                on the Serbian/Macedonian positions, `ⰾⱐ` and `ⱀⱐ` in
+#                Glagolitic - so both keys stay where Latin has them and a
+#                glide over one of them counts as the PAIR (`folds` below,
+#                mirroring `Dictionary.foldWord`, which keeps the route over
+#                `l`+`j` as well). `x` has no letter in either script, so that
+#                one key goes and row 3 is padded: the keys that stay keep the
+#                LATIN width, with shift and backspace growing instead, which
+#                is what `Layout.letterRows` + `KeyboardView.spacer` build on
+#                the phone.
+SCRIPT = os.environ.get("SWIPE_SCRIPT", "latin")
+ROWS = LATIN_ROWS if SCRIPT == "latin" else ["qwertyuiop", "asdfghjkl", "zcvbnm"]
+DIGRAPH_KEYS = SCRIPT != "latin"
 
 
 def build_centers():
     c = {}
-    # row 0: 10 keys fill the width
+    units = float(len(LATIN_ROWS[0]))     # a letter row spans ten key widths
+    # row 0: 10 keys fill the width; a shorter row is padded at both ends
+    pad = (len(LATIN_ROWS[0]) - len(ROWS[0])) / 2.0
     for i, ch in enumerate(ROWS[0]):
-        c[ch] = ((i + 0.5) * BOARD_W / 10.0, 0.5 * KEY_H)
-    # row 1: 9 keys fill the width
+        c[ch] = ((pad + i + 0.5) * BOARD_W / units, 0.5 * KEY_H)
+    # row 1: 9 keys fill the width (the same row in every script)
     for i, ch in enumerate(ROWS[1]):
         c[ch] = ((i + 0.5) * BOARD_W / 9.0, 1.5 * KEY_H)
-    # row 2: shift(1.5) + 7 letters + backspace(1.5) = 10 weight
+    # row 2: shift + letters + backspace = the 10 widths of the Latin top row,
+    # so shift(1.5) + 7 + backspace(1.5) in Latin, 2.0 + 6 + 2.0 without `x`
+    side = (len(LATIN_ROWS[0]) - len(ROWS[2])) / 2.0
     for i, ch in enumerate(ROWS[2]):
-        c[ch] = ((1.5 + i + 0.5) * BOARD_W / 10.0, 2.5 * KEY_H)
+        c[ch] = ((side + i + 0.5) * BOARD_W / units, 2.5 * KEY_H)
     return c
 
 
@@ -106,7 +125,25 @@ def fold(ch):
 
 
 def fold_word(w):
-    return "".join(fold(c) for c in w)
+    f = "".join(fold(c) for c in w)
+    # Cyrillic: `lj` and `nj` are ONE key each (`љ` on `q`, `њ` on `w`), so the
+    # route over them is one waypoint, not two - `Dictionary.foldWord` does the
+    # same on the phone.
+    return f.replace("lj", "q").replace("nj", "w") if DIGRAPH_KEYS else f
+
+
+def folds(w):
+    """Every route a word can be glided along.
+
+    One, normally. In Cyrillic a word with `lj`/`nj` has TWO - over the `љ`/`њ`
+    key, or over `l` and `j`, because both are on the board - and the decoder
+    takes whichever fits better (`Dictionary.foldPlain`, 3.6.15).
+    """
+    plain = "".join(fold(c) for c in w)
+    if not DIGRAPH_KEYS:
+        return (plain,)
+    collapsed = plain.replace("lj", "q").replace("nj", "w")
+    return (collapsed,) if collapsed == plain else (collapsed, plain)
 
 
 # ---- synthetic swipe ---------------------------------------------------------
@@ -140,7 +177,7 @@ def _dwell_factors(n, rng):
     return d
 
 
-def synth_path(word, noise=22.0, tremor=3.0, rng=None, lift=0.0):
+def synth_path(word, noise=22.0, tremor=3.0, rng=None, lift=0.0, keys=None):
     """A plausible finger path through the base-letter keys of `word`.
 
     Walks the polyline in fixed TIME steps at a speed that dips near the
@@ -155,7 +192,12 @@ def synth_path(word, noise=22.0, tremor=3.0, rng=None, lift=0.0):
     and every decoder in here reads 15%.
     """
     rng = rng or random
-    keys = [fold(c) for c in word if fold(c) in CENTERS]
+    # `keys` draws a GIVEN key sequence instead of the word's own route. Needed
+    # because `fold_word` folds `lj` onto the `љ` key in Cyrillic, so passing an
+    # unfolded word here cannot express "the finger went over `l` and `j`" - it
+    # gets folded again (paid for 2026-11-08: three variants of a measurement
+    # came out identical because every one of them drew the same gesture).
+    keys = [k for k in (keys if keys is not None else fold_word(word)) if k in CENTERS]
     if len(keys) < 2:
         return None
     aimed = [(CENTERS[k][0] + rng.gauss(0, noise),
@@ -390,15 +432,15 @@ def load_words():
 
 
 def build_buckets(words):
-    """Group words by first base letter; precompute folded form once."""
+    """Group words by the first key of every route they can be glided along."""
     buckets = {}
     for w, fr in words:
-        folded = fold_word(w)
-        if len(folded) < 2 or len(folded) > 24:
-            continue
-        if any(c not in CENTERS for c in folded):
-            continue
-        buckets.setdefault(folded[0], []).append((w, folded, fr))
+        for folded in folds(w):
+            if len(folded) < 2 or len(folded) > 24:
+                continue
+            if any(c not in CENTERS for c in folded):
+                continue
+            buckets.setdefault(folded[0], []).append((w, folded, fr))
     return buckets
 
 
@@ -880,6 +922,78 @@ def replay(rows, mode="pivot"):
     return labelled, hit1, hit3, misses
 
 
+# ---- digraph keys (Cyrillic and Glagolitic): both routes must decode --------------------------
+# The `lj`/`nj` keys on `q` and `w` (`љ` `њ` in Cyrillic, `ⰾⱐ` `ⱀⱐ`
+# in Glagolitic) mean a word with `lj`/`nj` can be glided TWO ways,
+# over the new key or over the two letters, and the owner asked for both to
+# work (2026-11-08). This gate watches that, with the negative control that
+# makes it believable: with only the collapsed route in the dictionary - which
+# is what build 3.6.14 shipped - the two-letter gesture must FAIL. A gate nobody
+# has seen fail looks exactly like a dead one.
+DIGRAPH_WORDS = ["ljudi", "bolje", "denj", "veljmi", "cibulje", "nositelja",
+                 "tečenju", "mljaskavše"]
+DIGRAPH_DRAWS = 6
+DIGRAPH_MIN_TOP3 = 0.75      # both routes, over all draws
+DIGRAPH_CONTROL_MAX = 0.20   # the one-route dictionary on the two-letter gesture
+
+
+def _plain_fold(w):
+    return "".join(fold(c) for c in w)
+
+
+def run_digraph(words):
+    if not DIGRAPH_KEYS:
+        print("digraph gate: only meaningful with SWIPE_SCRIPT=cyrl - skipped")
+        return
+    present = [w for w in DIGRAPH_WORDS if any(x == w for x, _ in words)]
+    missing = [w for w in DIGRAPH_WORDS if w not in present]
+    if missing:
+        print(f"  ⚠ not in the wordlist, skipped: {missing}")
+    both = build_buckets(words)
+    global folds
+    plain_only = None
+    keep = folds
+    try:
+        folds = lambda w: (keep(w)[0],)          # collapsed route only = 3.6.14
+        plain_only = build_buckets(words)
+    finally:
+        folds = keep
+
+    print(f"== digraph keys, {SCRIPT} ({len(present)} words x {DIGRAPH_DRAWS} draws) ==")
+    tally = {"key": [0, 0], "letters": [0, 0], "control": [0, 0]}
+    for w in present:
+        for name, buckets, keys in (
+            ("key", both, fold_word(w)),
+            ("letters", both, _plain_fold(w)),
+            ("control", plain_only, _plain_fold(w)),
+        ):
+            rng = random.Random(7)
+            for _ in range(DIGRAPH_DRAWS):
+                path = synth_path(w, rng=rng, lift=TOUCH_LIFT, keys=keys)
+                top = decode(path, buckets, 3, mode="pivot", lift_comp=TOUCH_LIFT) if path else []
+                if top and top[0] == w:
+                    tally[name][0] += 1
+                if w in top:
+                    tally[name][1] += 1
+    n = len(present) * DIGRAPH_DRAWS
+    ok = True
+    for name, label, limit, worse in (
+        ("key", "glide over the digraph key", DIGRAPH_MIN_TOP3, False),
+        ("letters", "glide over the two letters", DIGRAPH_MIN_TOP3, False),
+        ("control", "CONTROL: one-route dictionary, two-letter glide", DIGRAPH_CONTROL_MAX, True),
+    ):
+        h1, h3 = tally[name]
+        share = h3 / n if n else 0.0
+        good = share <= limit if worse else share >= limit
+        ok = ok and good
+        print(f"  {label:<46} top-1 {h1/n:4.0%}  top-3 {share:4.0%}  "
+              f"{'ok' if good else 'FAIL'}")
+    if not ok:
+        print("  digraph gate FAILED")
+        sys.exit(1)
+    print("  digraph gate ok")
+
+
 def run_real(argv):
     rows = load_gestures()
     if not rows:
@@ -928,6 +1042,9 @@ def main():
         return
     if argv and argv[0] == "lift":
         run_lift(words, buckets, mode)
+        return
+    if argv and argv[0] == "digraph":
+        run_digraph(words)
         return
 
     if argv:
