@@ -310,11 +310,14 @@ class KeyboardView(
             val right = popupLeft + popupCell * items.size
             canvas.drawRoundRect(popupLeft, popupTop, right, popupBottom, r, r, previewBg)
             canvas.drawRoundRect(popupLeft, popupTop, right, popupBottom, r, r, previewBorder)
-            previewTxt.textSize = dp(24).toFloat()
+            // Scaled with the cell: a shrunk cell with full-size glyphs
+            // would overlap its neighbours.
+            previewTxt.textSize = minOf(dp(24).toFloat(), popupCell * 0.62f)
             val fm = previewTxt.fontMetrics
             val baseline = (popupTop + popupBottom) / 2f - (fm.ascent + fm.descent) / 2f
-            for (i in items.indices) {
-                val l = popupLeft + popupCell * i
+            for (slot in popupOrder.indices) {
+                val i = popupOrder[slot]
+                val l = popupLeft + popupCell * slot
                 if (i == popupSel) {
                     canvas.drawRoundRect(l + 2f, popupTop + 2f, l + popupCell - 2f, popupBottom - 2f, r, r, popupSelBg)
                     previewTxt.color = Color.WHITE
@@ -336,23 +339,71 @@ class KeyboardView(
     private var popupBottom = 0f
     private var popupCell = 0f
     private var popupSel = 0
+    /** The strip shows the items mirrored: first one on the right, over a key
+     *  on the right half (iOS 0.5.1). */
+    private var popupMirrored = false
+    /** Which ITEM each slot of the strip holds, left to right. Mirroring and
+     *  the overhanging cell are both just a different order, so drawing and
+     *  hit-testing read the same array and cannot drift apart. */
+    private var popupOrder = IntArray(0)
     private val popupSelBg = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor("#1E88E5"); style = Paint.Style.FILL
     }
 
-    /** Open the popup over [tv]; [fingerX] (in the key's coordinates) picks the first selection. */
-    private fun showPopup(tv: TextView, items: List<String>, fingerX: Float) {
+    /** Open the popup over [tv]; [fingerX] (in the key's coordinates) picks the
+     *  first selection. [mayOverhang] lets ONE cell hang past the key - only the
+     *  mark keys ask for it, so holding a LETTER still lays every variant out on
+     *  one side, the way the thumb learned it. */
+    private fun showPopup(tv: TextView, items: List<String>, fingerX: Float,
+                          mayOverhang: Boolean = false) {
         val row = tv.parent as? android.view.View ?: return
         hideKeyPreview()
         val keyLeft = (row.left + tv.left).toFloat()
         val keyTop = (row.top + tv.top).toFloat()
+        // The first item sits over the key and the rest run AWAY from the nearer
+        // edge, so a key on the right half opens leftward (iOS 0.5.1, owner
+        // 2026-11-07): the `.` strip used to be pushed against the edge and its
+        // first item, the comma, landed far from the thumb.
+        val centre = keyLeft + tv.width / 2f
+        popupMirrored = centre > width / 2f
+        // THE FIRST ITEM MUST BE OVER THE KEY ON EVERY PHONE (owner 2026-11-07:
+        // "zeby sie na innych modelach dobrze pokazywal przecinek nad zawsze").
+        // It is not enough to pick the roomier side: if the strip is wider than
+        // that side, the old code shoved it back and the first cells fell off
+        // the screen - on his phone (1080 px at density 510 = 339 dp) eleven
+        // 38 dp marks asked for 418 dp, so `,` and `:` were not on screen at
+        // all. So the cells SHRINK to the room the chosen side really has.
+        // The first cell is half over the key, hence n - 0.5 cells to fit.
+        val room = (if (popupMirrored) centre else width - centre) - dp(2)
         popupCell = maxOf(tv.width.toFloat(), dp(38).toFloat())
-        val w = popupCell * items.size
-        // The first item sits over the key, the rest run rightward; near the
-        // right edge the strip shifts left instead of leaving the keyboard.
-        var left = keyLeft + tv.width / 2f - popupCell / 2f
+        popupCell = minOf(popupCell, room / (items.size - 0.5f))
+        // A floor, so a long list cannot shrink into unreadable slivers; below
+        // it the strip is clamped again and the first item may slide off the
+        // key - with 8 marks that needs a screen under ~230 dp, which no phone
+        // has.
+        popupCell = maxOf(popupCell, dp(24).toFloat())
+        val n = items.size
+        val w = popupCell * n
+        // ONE cell may hang PAST the key, over whatever is on the other side -
+        // on the `.` key that is the backspace of the row above, and while a
+        // popup is up no other key takes a touch anyway, so the space is free
+        // (owner 2026-11-07: "zeby byl na miejscu znaku kasowania ktory i tak
+        // jest nieaktywny"). The SECOND item goes there, which is why `?` sits
+        // to the right of the comma instead of queueing on its left.
+        val roomPast = (if (popupMirrored) width - (centre + popupCell / 2f) else centre - popupCell / 2f) - dp(2)
+        val overhang = mayOverhang && n >= 2 && roomPast >= popupCell
+        var left = if (popupMirrored) centre + popupCell / 2f - w + (if (overhang) popupCell else 0f)
+                   else centre - popupCell / 2f - (if (overhang) popupCell else 0f)
         left = left.coerceAtMost(width - w - dp(2)).coerceAtLeast(dp(2).toFloat())
         popupLeft = left
+        // Slots left to right. Mirrored and no overhang: items n-1 .. 0, so
+        // item 0 lands over the key. With the overhang item 1 takes the cell
+        // past it; unmirrored is the same picture flipped.
+        popupOrder = IntArray(n) { slot ->
+            val fromKey = if (popupMirrored) n - 1 - slot else slot
+            if (!overhang) fromKey
+            else when (fromKey) { 0 -> 1; 1 -> 0; else -> fromKey }
+        }
         popupBottom = keyTop - dp(2)
         popupTop = popupBottom - dp(52)
         if (popupTop < 0f) { popupTop = 0f; popupBottom = dp(52).toFloat() }   // top row: overlap, stay visible
@@ -363,8 +414,10 @@ class KeyboardView(
     }
 
     private fun popupIndex(x: Float): Int {
-        val n = popupItems?.size ?: return 0
-        return ((x - popupLeft) / popupCell).toInt().coerceIn(0, n - 1)
+        val n = popupOrder.size
+        if (n == 0) return 0
+        val slot = ((x - popupLeft) / popupCell).toInt().coerceIn(0, n - 1)
+        return popupOrder[slot]
     }
 
     /** Finger moved while the popup is up; [x] in the key's coordinates. */
@@ -539,10 +592,9 @@ class KeyboardView(
             }
             addView(rv)
         }
-        // Bottom row: `123`, 🌐, the comma left of space and the period right of
-        // it - the two most used marks, one on each side of the thumb (owner
-        // 2026-10-14, replacing the iOS order `. , space ?`). `?` and `!` live on
-        // the `123` page next to backspace; the two marks hold the rest.
+        // Bottom row: `123`, 🌐, 😀, space, `.`, ⏎ - one mark key, on the right
+        // of space, holding the rest (`,` first). `?` and `!` live on the `123`
+        // page next to backspace.
         val isv = Lang.current(context) == Lang.ISV
         val b = makeRow()
         b.addView(functionKey("123", 1.2f) { symbols = true; symbolsPage2 = false; render() })
@@ -556,14 +608,16 @@ class KeyboardView(
             render()
             refreshSuggestions()
         })
-        // `,` is back on a key of its own, right next to space (owner 2026-11-01:
-        // "przecinek musi byc bardziej pod reka, a dokladnie to kciukiem"). 😀 keeps
-        // its key to its left - it took the comma's place in 3.5.31 (iOS 0.4.2)
-        // and that turned out to be one hop too far for the mark used most.
-        // The comma also stays FIRST in the `.` hold, so nothing lost a gesture.
-        b.addView(functionKey("😀", 0.8f) { emoji = true; symbols = false; render() })
-        b.addView(symbolKey(',', 0.8f, Layout.commaHold))
-        b.addView(spaceKey(if (isv) 2.75f else 3.95f))
+        // Only `.` beside space, on its right; 😀 is the one key on the left
+        // (owner 2026-11-07, after using the iOS row: the comma comes back as
+        // the FIRST item held on `.`, "a obok te pozostale znaki jak wczesniej").
+        // This undoes the 2026-11-01 comma key (92b3ad4) and buys its 0.8 plus
+        // 0.1 off 😀 for the space bar: the weights are now the iOS ones to the
+        // decimal, so the same thumb travel works on both phones. Nothing moved
+        // out of reach - `: ; ( ) -` sit on the `123` page and `–` is held on
+        // its `-`.
+        b.addView(functionKey("😀", 0.9f) { emoji = true; symbols = false; render() })
+        b.addView(spaceKey(if (isv) 3.45f else 4.65f))
         b.addView(symbolKey('.', 0.9f, Layout.periodLetterHold))
         b.addView(functionKey("⏎", 1.4f) { enter() })
         addView(b)
@@ -826,7 +880,7 @@ class KeyboardView(
         tv.isLongClickable = false
         var downX = 0f
         var downY = 0f
-        val longPress = Runnable { showPopup(tv, hold, downX); tv.isPressed = false }
+        val longPress = Runnable { showPopup(tv, hold, downX, mayOverhang = true); tv.isPressed = false }
         tv.setOnTouchListener { _, e ->
             when (e.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
@@ -1160,9 +1214,14 @@ class KeyboardView(
         // for a moment after an edit, and acting on that armed shift in the
         // middle of a word. Empty counts only with the caret at position 0.
         if (before.isEmpty() && selStart > 0) return
-        val trimmed = before.trimEnd(' ')
-        val atStart = trimmed.isEmpty() || trimmed.last() == '\n'
-        val afterStop = (trimmed.lastOrNull() in listOf('.', '!', '?')) && before.endsWith(" ")
+        // A bare new line is NOT a sentence start (iOS 0.5.1, owner 2026-11-07):
+        // a word per line got a capital on every line, and deleting a mark at
+        // the start of a line armed it again each time. A new line after
+        // `.` `!` `?` still is, and so is the empty field.
+        val lines = before.trimEnd(' ', '\n', '\t')
+        val atStart = lines.isEmpty()
+        val gap = before.lastOrNull().let { it == ' ' || it == '\n' }
+        val afterStop = (lines.lastOrNull() in listOf('.', '!', '?')) && gap
         val wanted = atStart || afterStop
         // Only act on a real transition, or every keystroke rebuilds the view.
         if (wanted != shift) {
@@ -1868,7 +1927,16 @@ class KeyboardView(
         // recognition drag; requiring the final letter to sit near where the
         // finger stopped throws out the overwhelming majority for the price of
         // one character lookup.
-        val ends = nearestKeys(anchorPoint(pointList, true, spd), centers, ANCHOR_KEYS).toSet()
+        // The end anchor reads the SLOWEST sample near the end (3.6.1), which is
+        // the right call when the thumb settles on the last letter - but when it
+        // slowed on the TURN before it, the real lift point drops out of the set
+        // and the word that ends there cannot even enter the race. That is how a
+        // glide for `myslim` came back `myslimo` with `myslim` nowhere in the
+        // strip (owner 2026-11-07). So the key under the actual last point is
+        // always in the set as well; it costs one lookup and one more candidate
+        // bucket.
+        val ends = (nearestKeys(anchorPoint(pointList, true, spd), centers, ANCHOR_KEYS) +
+            nearestKeys(pointList.last(), centers, 1)).toSet()
         return Dictionary.decodeSwipeGeo(starts, ends, ks.size + 2, SWIPE_CANDIDATES, coarse, fine) { w ->
             Usage.count(context, w) * USAGE_W_SWIPE - (rejectedStrikes[w] ?: 0) * REJECT_W
         }
@@ -1934,6 +2002,13 @@ class KeyboardView(
     ) {
         if (words.isEmpty()) { clearSlots(); return }
         val ic = service.currentInputConnection ?: return
+        // The aorist and the imperfect go to the BACK of the queue, committed
+        // only when nothing else was decoded (owner 2026-11-08: a glide for
+        // `myslimo` kept coming back `myslihmo` - the extra `h` sits right on
+        // the way from `i` to `m`, so it costs the shape score almost nothing).
+        // Stable, so everything else keeps the decoder's own order.
+        @Suppress("NAME_SHADOWING")
+        val words = words.sortedBy { if (Dictionary.isArchaicPast(it)) 1 else 0 }
         lastSwipeCapitalized = swipeShift
         lastSwipeLocked = swipeCaps
         val best = caseSwipe(words[0], swipeShift, swipeCaps)
@@ -1949,13 +2024,24 @@ class KeyboardView(
         Usage.record(context, best)
         Popularity.record(context, best)
         lastSwipeWord = shownBest          // on-screen form: its length is what gets deleted
-        lastSwipeCandidates = words
+        // A glide cannot tell "I stopped here" from "I carried on": the path for
+        // `myslim` IS the path for `myslimo` up to its last letter. So whenever
+        // the winner has a shorter real word as its beginning, that word gets a
+        // slot right behind it - the owner asked for exactly this ("przynajmniej
+        // podac te krotka podstawowa forme, ktora zostala zrobiona gestem",
+        // 2026-11-07). It is an OFFER, never the committed word: the decoder
+        // still decides what gets typed.
+        val alts = words.toMutableList()
+        Dictionary.bestPrefix(words[0])?.let { short ->
+            if (short !in alts) alts.add(minOf(1, alts.size), short)
+        }
+        lastSwipeCandidates = alts
         rememberLiftSample(rawPts, centers, words[0])
         swipeJustCommitted = true
         swipeCommitAtMs = SystemClock.uptimeMillis()
         pendingSpace = smartSpace
         currentWord = ""
-        showSwipeAlts(words, highlight = 0)   // a wrong guess is one tap from fixed
+        showSwipeAlts(alts, highlight = 0)    // a wrong guess is one tap from fixed
         GestureLog.committed(rawPts, centers, words, best)
         consumeOneShotShift()                 // one-shot capital ends with this word too
     }

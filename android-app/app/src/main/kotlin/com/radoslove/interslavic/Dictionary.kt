@@ -94,42 +94,185 @@ object Dictionary {
     /**
      * Up to [n] words that start with [prefix] (lowercased by the caller),
      * highest frequency first. Empty while the model is still loading.
+     *
+     * DIACRITICS DO NOT HAVE TO BE TYPED (owner 2026-11-07: "czasami nie jestem
+     * pewnym co powinno byc"): `verojetno` finds `věrojetno`, because every
+     * letter is compared through [foldBase] - the same fold the glide decoder
+     * uses, so the two can never disagree about which letters share a key. It
+     * matters more than it sounds: 45 % of the Interslavic forms and 61 % of the
+     * Polish ones carry a mark, and `ě` sorts after every ASCII letter, so a
+     * literal search for `ve` did not even reach `věrojetno` - it broke out at
+     * the first word that was not `ve…` and showed nothing.
+     *
+     * A WORD IS OFFERED FROM THE FIRST LETTER. The old scan stopped after 6 000
+     * entries, which on a one-letter prefix is a slice of the ALPHABET, not of
+     * the likely words: `p` in the Polish list opens 90 663 forms, so everything
+     * from about `pod…` on was invisible until enough letters had been typed to
+     * narrow the range by hand. The budget is now larger than the largest range
+     * any single letter opens (measured: isv `p` 39 260, pl `p` 90 663), so the
+     * ranking really sees every candidate and the ordering - frequency, then the
+     * user's own usage through [boost] - decides what shows.
      */
     fun suggest(prefix: String, n: Int, boost: (String) -> Int = { 0 }): List<String> {
         if (!ready || prefix.isEmpty()) return emptyList()
         val arr = entries
-        val lo = lowerBound(arr, prefix)
-        // Rank by a composite: frequency dominates, but a whole inflected
-        // paradigm shares ONE frequency (the lemma's), so ties are common —
-        // and breaking them alphabetically buried the everyday form (možemo)
-        // under an aorist (možehmo). Prefer the SHORTER form on a tie; the
-        // common present-tense forms are shorter than the aorist/imperfect
-        // ones. (64 > any word length, so frequency still wins outright.)
         val topWords = arrayOfNulls<String>(n)
         val topScore = IntArray(n) { Int.MIN_VALUE }
-        var scanned = 0
-        var i = lo
-        while (i < arr.size && scanned < 6000) {
-            val e = arr[i]
-            if (!e.word.startsWith(prefix)) break
-            // + adaptive usage: words the user actually uses climb the ranking.
-            val score = e.freq * 64 - e.word.length + boost(e.word)
-            if (score > topScore[n - 1]) {
-                var j = n - 1
-                while (j > 0 && topScore[j - 1] < score) {
-                    topScore[j] = topScore[j - 1]
-                    topWords[j] = topWords[j - 1]
-                    j--
+        var budget = SCAN_BUDGET
+        for (start in searchPrefixes(prefix)) {
+            var i = lowerBound(arr, start)
+            while (i < arr.size && budget > 0) {
+                val e = arr[i]
+                if (!e.word.startsWith(start)) break
+                i++
+                budget--
+                if (!foldedStartsWith(e.word, prefix)) continue
+                // Rank by a composite: frequency dominates, but a whole inflected
+                // paradigm shares ONE frequency (the lemma's), so ties are common -
+                // and breaking them alphabetically buried the everyday form (možemo)
+                // under an aorist (možehmo). Prefer the SHORTER form on a tie; the
+                // common present-tense forms are shorter than the aorist/imperfect
+                // ones. (64 > any word length, so frequency still wins outright.)
+                // + adaptive usage: words the user actually uses climb the ranking.
+                var score = e.freq * 64 - e.word.length + boost(e.word)
+                if (score > topScore[n - 1] && isArchaicPast(e.word)) score -= ARCHAIC_PENALTY
+                if (score > topScore[n - 1]) {
+                    var j = n - 1
+                    while (j > 0 && topScore[j - 1] < score) {
+                        topScore[j] = topScore[j - 1]
+                        topWords[j] = topWords[j - 1]
+                        j--
+                    }
+                    topScore[j] = score
+                    topWords[j] = e.word
                 }
-                topScore[j] = score
-                topWords[j] = e.word
             }
-            i++
-            scanned++
         }
         val out = ArrayList<String>(n)
         for (w in topWords) if (w != null) out.add(w)
         return out
+    }
+
+    /** An aorist/imperfect form is ranked as if it were 30 frequency points
+     *  rarer than it is - enough to sink behind its own everyday siblings
+     *  (which share the lemma's frequency), far from enough to hide it when
+     *  nothing else matches the letters. */
+    private const val ARCHAIC_PENALTY = 30 * 64
+
+    /** Larger than the biggest range one letter opens in any of the six lists
+     *  (pl `p` = 90 663), so a short prefix is never cut off alphabetically. */
+    private const val SCAN_BUDGET = 250_000
+
+    /** Does [word] begin with [typed], reading both through [foldBase]? */
+    private fun foldedStartsWith(word: String, typed: String): Boolean {
+        if (word.length < typed.length) return false
+        for (k in typed.indices) if (foldBase(word[k]) != foldBase(typed[k])) return false
+        return true
+    }
+
+    /** Every letter that shares a key with [c], [c] itself first. Built FROM
+     *  [foldBase], so adding a letter to the glide fold adds it to search too. */
+    private val sameKey: Map<Char, String> by lazy {
+        val byBase = HashMap<Char, StringBuilder>()
+        for (c in "abcdefghijklmnopqrstuvwxyzæøčćšśžżźěęéèêąàáłńňóòôíýúůřťďäö") {
+            byBase.getOrPut(foldBase(c)) { StringBuilder() }.append(c)
+        }
+        val out = HashMap<Char, String>()
+        for ((_, b) in byBase) for (c in b) out[c] = b.toString()
+        out
+    }
+
+    /** Literal prefixes to binary-search for, covering the spellings [prefix]
+     *  could have. Only the first letters are expanded - enough to narrow the
+     *  range; the rest of the word is filtered by [foldedStartsWith]. The cap
+     *  keeps a word of nothing but vowels from exploding into hundreds of
+     *  searches (`ee` alone would be 36). */
+    private fun searchPrefixes(prefix: String): List<String> {
+        var out = listOf("")
+        for (k in 0 until minOf(prefix.length, 3)) {
+            val cls = sameKey[prefix[k]] ?: prefix[k].toString()
+            if (out.size * cls.length > 24) break
+            val next = ArrayList<String>(out.size * cls.length)
+            for (p in out) for (c in cls) next.add(p + c)
+            out = next
+        }
+        return if (out.size == 1 && out[0].isEmpty()) listOf(prefix.take(1)) else out
+    }
+
+    /**
+     * The most frequent REAL word that is a proper beginning of [word], at
+     * least [min] letters long, or null. Used after a glide: the path that
+     * draws `myslimo` draws `myslim` on the way, so the shorter form must be
+     * offerable even when the decoder preferred the longer one. Costs one
+     * binary search per length, nothing measurable.
+     */
+    fun bestPrefix(word: String, min: Int = 3): String? {
+        if (!ready || word.length <= min) return null
+        val arr = entries
+        var best: String? = null
+        var bestFreq = -1
+        for (k in min until word.length) {
+            val p = word.substring(0, k)
+            val i = lowerBound(arr, p)
+            if (i < arr.size && arr[i].word == p && arr[i].freq > bestFreq) {
+                bestFreq = arr[i].freq
+                best = p
+            }
+        }
+        return best
+    }
+
+    /**
+     * Endings of the AORIST and IMPERFECT - the two past tenses nobody writes
+     * in everyday Interslavic (owner 2026-11-08: "aoryst moze zostac tylko
+     * dalej w kolejce"). Kept typeable, pushed down the queue.
+     */
+    private val PAST_ENDS = arrayOf(
+        "hmo", "hu", "ste", "sta", "hte", "še", "šę", "h",
+        "ahmo", "ahu", "aste", "aše", "ah",
+        "ěhmo", "ěhu", "ěste", "ěše", "ěh",
+        "jahmo", "jahu", "jaste", "jaše", "jah",
+    )
+
+    /**
+     * Is [word] an aorist or imperfect form? Decided by the ending PLUS the
+     * infinitive it would come from actually existing in this list, because
+     * the ending alone lies: `vyše`, `uspěh`, `duh`, `naših`, `jeste` and
+     * `bogah` all end like a past tense and are ordinary words (measured on
+     * the list, 2026-11-08 - 2 150 of the 19 497 pattern matches are six
+     * letters or shorter and that is where the collisions sit).
+     *
+     * This is why the forms are RANKED DOWN and not deleted: a homograph that
+     * is also someone's aorist still has to be typeable, and the penalty only
+     * reorders it against its own siblings - with nothing else competing for
+     * the same letters it still comes first.
+     *
+     * Called only for a word that is about to enter the top of a ranking, so
+     * the handful of binary searches costs nothing.
+     */
+    fun isArchaicPast(word: String): Boolean {
+        // EIGHT letters, measured: every collision found on the list is seven
+        // or shorter (`vyše` `uspěh` `duh` `naših` `jeste` `bogah` `směhu`
+        // `strahu` `glavah`), because nouns are short and a past tense of a
+        // real verb is long. The threshold keeps 14 569 of the 19 354 pattern
+        // matches - including `myslihmo`, the one that started this - and
+        // leaves the short aorists (`myslih`, `mysliše`) ranked as before,
+        // which is the price of not touching a single everyday word.
+        if (!ready || word.length < 8) return false
+        for (e in PAST_ENDS) {
+            if (!word.endsWith(e)) continue
+            val stem = word.substring(0, word.length - e.length)
+            if (stem.length < 2) continue
+            if (hasWord(stem + "ti") || hasWord(stem + "ći")) return true
+        }
+        return false
+    }
+
+    /** Exact lookup, for [isArchaicPast]. */
+    private fun hasWord(w: String): Boolean {
+        val arr = entries
+        val i = lowerBound(arr, w)
+        return i < arr.size && arr[i].word == w
     }
 
     /** Whether the background load has finished. */

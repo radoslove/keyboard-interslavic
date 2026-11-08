@@ -95,15 +95,27 @@ object Layout {
     /** Held on `.`: punctuation our MS texts actually use. */
     val periodHold = listOf("…", "!", "„", "”", "\"", "'")
 
-    /** Held on `.` of the LETTER layer, where 😀 took the comma's key
-     *  (iOS 0.4.2, owner 2026-10-25): the comma comes FIRST - it is the most
-     *  used mark and it must stay one gesture away - then `?` (off the letters
-     *  since 3.5.16), then the old `.` hold, then the most used of the comma's -
-     *  `:` BEFORE `;` (owner 2026-11-01: it is the one he actually types,
-     *  so it must sit nearer the thumb). */
-    val periodLetterHold = listOf(",", "?") + periodHold + listOf(":", ";", "-")
+    /** Held on `.` of the LETTER layer, in the owner's own order (2026-11-07,
+     *  read off his phone): `,` first and over the key, then `!`, `-`, `'`,
+     *  `"`, and `:` `;` last - plus `?` back in second place, next to the
+     *  comma (owner 2026-11-07, once the comma finally sat over the key): the
+     *  two marks he reaches for most are then the two nearest the thumb.
+     *
+     *  SEVEN marks, not eleven - and that is a measurement, not taste. The
+     *  strip draws one cell per mark, at least 38dp, so eleven asked for 418dp
+     *  on a row 339dp wide (1080px at density 510): the strip was clamped to
+     *  the edge and the first TWO cells, `,` and `:`, ended up off the screen -
+     *  which is why the comma was not where it belonged and `?` sat over the
+     *  key instead.  Seven cells take 266dp and fit.
+     *
+     *  Nothing went out of reach, only off the letters: `?` is in the third row
+     *  of the `123` page, `…` `„` `”` are held on the `.` there (`numericHold`
+     *  keeps `periodHold`), `–` on its `-`. */
+    val periodLetterHold = listOf(",", "?", "!", "-", "'", "\"", ":", ";")
 
-    /** Held on `,`: the rest of the sentence punctuation. */
+    /** Held on `,`: the rest of the sentence punctuation. Unused since the
+     *  comma key left the bottom row (owner 2026-11-07) - kept, not deleted,
+     *  for the day a comma key comes back; iOS keeps its `commaAccents` too. */
     val commaHold = listOf(":", ";", "-", "–", "(", ")")
 
 

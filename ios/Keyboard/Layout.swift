@@ -80,8 +80,12 @@ enum Layout {
     /// `:` and `;` next to it (owner 2026-11-07: the comma must not sit at
     /// the far end of the strip), then `?` (not on the letters since 3.5.16)
     /// and the rest.
+    /// Seven marks, the owner's order (2026-11-07): `,` first and over the key.
+    /// Eleven did not fit the strip on the Android phone - 418dp asked of a
+    /// 339dp row - and the first cells fell off the screen; the rest stay on
+    /// the `123` page. ⚠ Code only: needs an Xcode build on the build Mac.
     static let periodLetterAccents: [String] =
-        [",", ":", ";", "?"] + periodAccents + ["-"]
+        [",", "?", "!", "-", "'", "\"", ":", ";"]
 
     /// Held on `,`: the rest of the sentence punctuation.
     static let commaAccents: [String] = [":", ";", "-", "–", "(", ")"]

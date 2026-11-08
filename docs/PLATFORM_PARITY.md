@@ -26,6 +26,7 @@ Last checked: 2026-11-07 (iOS 0.5.1 on the iPhone 13 · Android MS 3.6.2-test on
 | Languages as system entries (one input-method subtype each, stable `subtypeId`), 🌐 rotates them | 3.5.9–3.5.10 | iOS already: one extension per language |
 | Mark counter ("Znaky": which symbols are typed, exported with the ranking only) | 9a02ea5 (3.5.20, `Symbols.kt`) | ⚠ same wall: without Full Access nothing counted in the keyboard reaches the app or leaves the phone |
 | Theme choice: automatic (follows the phone) / light / dark | f48b96d (3.5.27, `Theme.kt`) | 0.4.0 code done (`Shared.theme`, `applyTheme`); ⚠ works once the App Group `group.com.radoslove.interslavic` is registered on the developer portal |
+| The APP SCREEN follows the keyboard's theme choice, not the phone's mode: window theme `Theme_DeviceDefault` vs `…Light_DarkActionBar`, own text in pairs (body 8.7:1, heading 13.8:1 on `#1B1F22`), and picking a theme calls `recreate()`. Choosing "always dark" and getting a white settings screen was the complaint (owner 2026-11-07) | 3.6.5 (`SetupActivity.dark`, `col()`) | the iOS settings are drawn INSIDE the keyboard since 0.5.3, so they already follow it; `App/App.swift` (the host app) still follows the phone |
 | "My words": the user's added words per language, each removable | 7f0a768 (3.5.29, `UserWords.remove`, `Dictionary.forget`) | 0.4.0 code done (app list, swipe to remove; `Shared.userWords`); ⚠ same App Group condition |
 
 ## Done in both
@@ -49,7 +50,7 @@ Last checked: 2026-11-07 (iOS 0.5.1 on the iPhone 13 · Android MS 3.6.2-test on
 | Learned touch lift: the trail is pushed back down before decoding, and every KEPT glide nudges the value (default 0.35 key widths) | 143bdf2 (0.1.4), 0.4.3 (`adoptLocalLift`) | 3.5.31 (`Lift.kt`, `learnLift`); one value per phone, in `isv_collector` prefs |
 | Shift re-armed at the start of a sentence (field start, new line, `. ! ?` + space); a shift set by hand is left alone | ab921f2 (0.1.6) | 3.5.31 (`rearmShift`, driven by `onSelectionChanged` + `onInputStarted`) |
 | Shift on selected text cycles small → Capital → CAPS → small (this is how an acronym is typed) | 0.4.2 (`cycleCase`) | 3.5.31 (`cycleCase`, selection read via `getSelectedText`) |
-| 😀 key in place of `,`, own panel (lately used first, then a fixed set of 168, rows of eight, ABC back + ⌫); `,` FIRST in the `.` hold, then `?`, the old `.` hold, `; : -` | 0.4.2 (`Emoji.swift`, `Layout.periodLetterAccents`) | 3.5.31 (`Emoji.kt` GENERATED from the Swift list so the order cannot drift, `Layout.periodLetterHold`) |
+| 😀 key left of space with its own panel (lately used first, then a fixed set of 168, rows of eight, ABC back + ⌫), `,` FIRST in the `.` hold, and NO comma key - the only mark key beside space is `.`, on its right. Android had a `,` key back from 2026-11-01 (92b3ad4) and dropped it again on 2026-11-07 after the owner used the iOS row: the space bar is worth more than the second mark key, and nothing moved out of reach (`: ; ( ) -` on the `123` page, `–` held on its `-`). Bottom-row weights now equal to the decimal: 123 1.2 · 🌐 0.95 · ABC 1.2 (isv only) · 😀 0.9 · space 3.45 isv / 4.65 · `.` 0.9 · ⏎ 1.4 | 0.4.2 (`Emoji.swift`, `Layout.periodLetterAccents`) | 3.5.31, comma key out again in 3.6.5 (`Emoji.kt` GENERATED from the Swift list so the order cannot drift, `Layout.periodLetterHold`) |
 | `＋` also for the capitalised FIRST word of a sentence, saved lowercase; a capital mid-sentence (a name) stays out | 0.4.0 (`saveForm`, `sentenceStart`) | 3.5.31 (`saveForm`, `sentenceStart`) |
 | Polish keyboard (`pl`: ą ć ę ł ń ó ś ż ź on hold, own wordlist) | 7801f4b (0.2.1), own extension | 3.5.7: language setting + 🌐 cycles, lazy per-language dictionary |
 | Hold popup with several letters, own first, foreign after, slide to pick | 7801f4b | 3.5.7 (Cyrillic/Glagolitic: own letters only) |
@@ -73,7 +74,7 @@ Last checked: 2026-11-07 (iOS 0.5.1 on the iPhone 13 · Android MS 3.6.2-test on
   `pl — isv`); Android has one keyboard, the languages are ticked in the app and 🌐 cycles them
   (held: the system keyboard picker). Same languages, same layouts, the platform's own way to
   switch.
-- The script key (ABC / АБВ / ⰀⰁⰂ) shows for Interslavic only; Polish is Latin.
+- The script key (ABC / АБВ / ⰀⰁⰂ) shows for Interslavic only; Polish is Latin. Measured 2026-11-07, both platforms guard it with `if isv` (iOS `bottomRow`, Android `renderLetters`), so the Norwegian, Czech, Polish and English rows carry NO ABC key and their space is wider by its 1.2 — this is by design, not a key that was forgotten in a port.
 
 ## Two apps, one code
 

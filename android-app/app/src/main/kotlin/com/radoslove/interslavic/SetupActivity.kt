@@ -32,7 +32,25 @@ class SetupActivity : Activity() {
     private lateinit var status: TextView
     private lateinit var ui: String
 
+    /** The screen follows the SAME choice the keyboard draws by (owner
+     *  2026-11-07: "jak motyw ciemny to tutaj tez by mogl byc"), not the
+     *  phone's mode - picking "always dark" for the keyboard and getting a
+     *  white settings screen was the whole complaint. Read once, so the radio
+     *  below rebuilds the screen with `recreate()`. The system widgets
+     *  (buttons, radios, switches) come from the window theme, our own text
+     *  from the pairs under it. */
+    private var dark = false
+    private fun col(light: String, night: String) =
+        Color.parseColor(if (dark) night else light)
+    private val cBg get() = col("#FAFAFA", "#1B1F22")      // keyboard board colour
+    private val cText get() = col("#1C2529", "#E8EAED")    // 13.8:1 on the dark bg
+    private val cBody get() = col("#37474F", "#B0BEC5")    // 8.7:1
+    private val cGloss get() = col("#78909C", "#90A4AE")   // the EN aid, below the body
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        dark = Theme.isDark(this)
+        setTheme(if (dark) android.R.style.Theme_DeviceDefault
+                 else android.R.style.Theme_DeviceDefault_Light_DarkActionBar)
         super.onCreate(savedInstanceState)
         ui = Ui.current(this)
 
@@ -40,7 +58,7 @@ class SetupActivity : Activity() {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(pad, pad, pad, pad)
-            setBackgroundColor(Color.parseColor("#FAFAFA"))
+            setBackgroundColor(cBg)
         }
 
         // Which build is this? The released app showed its version nowhere at
@@ -151,7 +169,13 @@ class SetupActivity : Activity() {
                     text = labelled(key)
                     textSize = 17f
                     isChecked = value == theme
-                    setOnClickListener { Theme.set(this@SetupActivity, value) }
+                    setOnClickListener {
+                        Theme.set(this@SetupActivity, value)
+                        // The screen is drawn from `dark`, which is read in
+                        // onCreate - without this the keyboard went dark and
+                        // the screen around the radio stayed light.
+                        if (Theme.isDark(this@SetupActivity) != dark) recreate()
+                    }
                 })
             }
         })
@@ -202,6 +226,7 @@ class SetupActivity : Activity() {
         })
 
         val scroll = ScrollView(this).apply {
+            setBackgroundColor(cBg)
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -242,7 +267,7 @@ class SetupActivity : Activity() {
                     addView(TextView(this@SetupActivity).apply {
                         text = w
                         textSize = 17f
-                        setTextColor(Color.parseColor("#1C2529"))
+                        setTextColor(cText)
                         layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
                     })
                     addView(Button(this@SetupActivity).apply {
@@ -331,14 +356,14 @@ class SetupActivity : Activity() {
         // the opposite - it exists to be READ and copied into a bug report, so it
         // gets the body colour at 9.2:1. Measured on a screenshot of the phone,
         // not judged in the editor.
-        setTextColor(Color.parseColor("#37474F"))
+        setTextColor(cBody)
         setPadding(0, 0, 0, 2)
     }
 
     private fun header(t: String) = TextView(this).apply {
         text = t
         textSize = 20f
-        setTextColor(Color.parseColor("#1C2529"))
+        setTextColor(cText)
         setPadding(0, (16 * resources.displayMetrics.density).toInt(), 0, 4)
         gravity = Gravity.START
     }
@@ -346,7 +371,7 @@ class SetupActivity : Activity() {
     private fun body(t: String) = TextView(this).apply {
         text = t
         textSize = 15f
-        setTextColor(Color.parseColor("#37474F"))
+        setTextColor(cBody)
         setPadding(0, 4, 0, 8)
     }
 
@@ -355,7 +380,7 @@ class SetupActivity : Activity() {
     private fun gloss(t: String) = TextView(this).apply {
         text = t
         textSize = 13f
-        setTextColor(Color.parseColor("#78909C"))
+        setTextColor(cGloss)
         setPadding(0, 0, 0, 10)
     }
 
