@@ -1860,7 +1860,13 @@ class KeyboardView(
                 if (start != null && trailLength(pts) < keyWidth(computeCenters()) * MIN_GLIDE_KEYS) {
                     val up = swipeShift || swipeCaps
                     commit(if (up) start.uppercaseChar().toString() else start.toString())
-                } else if (pts.size >= 9) decodeSwipe(pts)    // >= 3 points = a real glide
+                } else if (pts.size >= 9) {
+                    decodeSwipe(pts)                         // >= 3 points = a real glide
+                } else {
+                    // It travelled far enough to be a glide but left too few samples
+                    // to decode: still a gesture that produced nothing.
+                    glideMissed()
+                }
             }
             MotionEvent.ACTION_CANCEL -> {
                 swiping = false
@@ -2035,12 +2041,47 @@ class KeyboardView(
         else -> word
     }
 
+    /**
+     * A glide that produced NOTHING still ends the glide before it.
+     *
+     * The empty-decode branch used to return early, which left every piece of
+     * glide state armed from the word committed EARLIER: the next backspace
+     * wiped that word whole, the strip's `↶` chip and the old alternatives
+     * still offered a word the user had already moved past, and a letter typed
+     * inside the window could extend it. From the user's side the keyboard
+     * pushed back a word from before the gesture (owner 2026-11-09: "po
+     * nieznalezionym swipie jak sie wpisuje jeszcze raz to wpierdala sie wyraz
+     * z przed"). Nothing is deleted here - the previous word stays exactly as
+     * it was typed; it simply stops being "the word just glided".
+     *
+     * The owed space is NOT cleared: it belongs to the word that is standing in
+     * the text, and the next thing typed still has to be separated from it.
+     */
+    private fun glideMissed() {
+        // That earlier glide survived into a whole new gesture, so the user
+        // kept it: it is a real measurement of this thumb, and the log entry
+        // waiting on it is a `kept` one.
+        if (swipeJustCommitted) learnLift()
+        GestureLog.resolve("kept", null)
+        swipeJustCommitted = false
+        lastSwipeWord = ""
+        lastSwipeCandidates = emptyList()
+        liftSample = null
+        currentWord = ""
+        clearUndo()
+        // Deliberately NOT refreshSuggestions(): the cursor sits after the
+        // previous word, so predictions here would be continuations of a word
+        // the user is not typing - and tapping one would replace it. An empty
+        // strip is the honest answer to "nothing was decoded".
+        clearSlots()
+    }
+
     private fun commitSwipeResult(
         words: List<String>,
         rawPts: List<Float> = emptyList(),
         centers: Map<Char, FloatArray> = emptyMap(),
     ) {
-        if (words.isEmpty()) { clearSlots(); return }
+        if (words.isEmpty()) { glideMissed(); return }
         val ic = service.currentInputConnection ?: return
         // The aorist and the imperfect go to the BACK of the queue, committed
         // only when nothing else was decoded (owner 2026-11-08: a glide for
