@@ -1,0 +1,9 @@
+A glide that finds nothing no longer brings back the word before it.
+
+- When a glide matches no word, nothing is typed - and now the keyboard also
+  stops treating the word it typed BEFORE as the one you just swiped. Until
+  now backspace then deleted that whole earlier word in one press, the
+  suggestion bar still offered its alternatives and an undo chip, and the next
+  letter you typed could stick onto it.
+- The space the keyboard owes the next word is kept, so the word standing in
+  the text is still followed by a space when you carry on typing.

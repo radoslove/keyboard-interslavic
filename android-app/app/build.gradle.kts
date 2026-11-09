@@ -30,7 +30,7 @@ val diagnosticsProps = Properties().apply {
 // Two apps are built from this one code (product flavors below), each with its
 // own test number: flavor -> (TEST_BASE, TEST_BUILD, label prefix).
 val TESTS = mapOf(
-    "interslove" to Triple("3.7", 2, "MS test"),
+    "interslove" to Triple("3.8", 1, "MS test"),
     "isc" to Triple("0.1", 36, "ISC test"),
 )
 
@@ -71,8 +71,8 @@ android {
         create("interslove") {
             dimension = "app"
             applicationId = "com.radoslove.interslavic"
-            versionCode = 36
-            versionName = "3.6"
+            versionCode = 37
+            versionName = "3.7"
         }
         create("isc") {
             dimension = "app"
