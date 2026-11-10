@@ -1,109 +1,38 @@
 # Platform parity: iOS ↔ Android
 
-**Rule: the first step of every round on one platform is this table.** Whatever the other platform
-gained since the last round is ported here before anything new is started, so the two apps never
-drift into different keyboards. Update the table at the end of the round.
+The two apps aim to be the same keyboard. This table lists where they still differ.
 
-Last checked: 2026-11-08 (iOS 0.5.1 on the iPhone 13 · Android MS 3.6.16-test installed on the test phone over USB, 2026-11-08 22:25:36; owner hand test of the Cyrillic digraph keys passed on 3.6.15). The iOS tree is at 0.5.5 in code and has not been built since 0.5.1 - every row marked "code, not built" waits for an Xcode build on the build Mac.
+## Android has, iOS does not yet
 
-## iOS has, Android does not yet → port to Android
-
-| Feature | iOS | Android notes |
+| Feature | Android | iOS |
 |---|---|---|
-| Hold on `.` of the letter layer: `,` `:` `;` FIRST, then `?` and the rest (owner 2026-11-07: the colon pair right next to the comma, not at the far end) | 0.5.1 (`Layout.periodLetterAccents`) | `Layout.periodLetterHold`, same order verbatim |
-| The hold strip opens AWAY from the nearer edge: first item over the key, a key on the right half opens leftward. Centring pushed the 11-mark `.` strip against the left margin and the comma landed far from the thumb | 0.5.1 (`showPopup`, `popupOpensLeft`) | check how the Android popup places a long strip on the right edge first |
-| A bare new line no longer arms shift; a new line after `.` `!` `?` still does. A word per line got a capital on every line, and deleting a mark at the start of a line re-armed it each time (iPhone 13 log 2026-11-07 17:38) | 0.5.1 (`rearmShiftIfSentenceStart`) | `KeyboardView.rearmShift`: `atStart` = only empty field; `afterStop` across spaces AND new lines |
+| A glide that decodes to nothing closes the previous glide (no stale word on backspace or in the strip) | 3.7 | 0.5.6, awaiting test |
+| `lj` / `nj` keys on `q` / `w` in Cyrillic and Glagolitic; a digraph word swipes over either route | 3.6 | 0.5.7, awaiting test |
+| Frequency weighted linearly for Polish and Czech | 3.5 | to check |
+| Language names in the app's own language | 3.5 | open |
+| Interscandinavian (`isc`) as a keyboard language | 3.5 | Keyman package only |
+| App screen in four languages | 3.5 | open |
+| Symbol counter | 3.5 | blocked without Full Access |
+| Theme choice (automatic / light / dark) in the host app | 3.5 | in code, needs the App Group |
+| Host app follows the keyboard's theme | 3.6 | in-keyboard settings already do |
+| "My words" list in the app, each removable | 3.5 | in code, needs the App Group |
 
-## Android has, iOS does not yet → port to iOS
+## iOS has, Android does not yet
 
-| Feature | Android commit | iOS notes |
-|---|---|---|
-| **A glide that decodes to nothing CLOSES the glide before it.** The empty-decode branch returned early and left the whole state armed from the word committed earlier: the next backspace wiped that word whole, the `↶` chip and the stale alternatives still offered a word the user had moved past, and a letter typed inside the window could extend it - so after a missed glide the keyboard pushed back a word from before it (owner 2026-11-09). The owed space is kept: it belongs to the word standing in the text | 3.7.1-test (`KeyboardView.glideMissed`, called from the empty decode and from a travelled gesture with too few samples) | **same bug**, `KeyboardViewController.swift` ~1321: `guard let best = candidates.first else { showSuggestions([]); return }` leaves `lastSwipedWord` and `lastCandidates` from the previous glide |
-| **`lj` and `nj` keys on `q` and `w` in BOTH non-Latin scripts**: `љ` `њ` (the Serbian/Macedonian positions) and `ⰾⱐ` `ⱀⱐ`. A glide over one of them counts as the pair, and the route over `l`+`j` keeps working - a digraph word has TWO routes and the better one scores. The key stays the character `q` inside; `Layout.keyText` says what it writes. Measured: top-1 79.0 % (= Latin) against 77.4 % for dropping the key, and with one route only the two-letter gesture returned the word 0 times in 126. `x` has no letter in either script (`dž` = `дж`), so that one key goes and row 3 is padded | 3.6.14-3.6.16 (`Layout.nonLatinRows`, `Layout.keyText`, `Dictionary.digraphKeys`/`foldWord`/`foldPlain`; gate `SWIPE_SCRIPT=cyrl python tools/swipe_eval.py digraph` with its negative control). Owner hand test of Cyrillic passed 2026-11-08 | iOS still drops all three in both scripts (`Layout.rows(latin:)`). ⚠ Not a five-line port: the iOS wordlist is a prebuilt binary of KEY INDICES (`build_swipe_dictionary.py` → `isv_swipe.bin`), so a second route per word needs either the generator or `SwipeDictionary` to carry it |
-| **Both glide anchors read the slowest sample within 120 ms of their end**, not the first and last sample. A thumb decelerates onto the letter it means and carries past it, so the extreme samples are the approach and the overshoot - and both anchors are hard gates, so one noisy point decided whether the right word could compete at all. Worth +1 to +3 points of top-1 across the offset sweep, never below baseline. Widening the anchor set instead measured as nothing: the gate was aimed wrong, not too narrow | 3.6.1 (`KeyboardView.anchorPoint`, `speedCurve`) | ⚠ **Ported in 0.4.4 and measured HARMFUL on iOS, switched off in 0.4.5** (`SwipeDecoder.slowAnchors = false`, code kept). 21 real iPhone 13 glides replayed both ways: `pisati` top-1 3/13 → 0/13, `slovo` 8/8 → 3/8, `se`/`to` unchanged. iOS sends no `touchesMoved` while the finger rests, so the deceleration onto the last letter is never sampled and the slowest point near the end is the previous TURN (`slovo` → `suprug`, `doč`). Re-measure only after the end of the glide is sampled (e.g. coalesced touches) - the log carries `ms` since 0.4.4 |
-| Frequency pulls LINEARLY in the byte for Polish and Czech too, not log-of-a-rank. The byte is already a quantile, so the second log left the whole signal worth ~5 px of path deviation - 5 % of a key - and `semtex` outranked the median of the dictionary | 3.5.39 (`Dictionary.LINEAR_FREQ`) | `SwipeDictionary.swift` scores its own way; check which transform its binary carries before copying the constant |
-| Each app names the keyboard languages in ITS OWN language: the MS app's picker and settings read `medžuskandinavsky poljsky norvežsky anglijsky češsky`, and the sixth is the service's own name (owner 2026-11-01, every adjective verified in medzuslove_canon) | 3.5.34–3.5.35 | one extension per language, so the names live in each `Info.plist` display name plus the list in `App/App.swift` |
-| **Interscandinavian** as a language (`isc`: rows of 11, `å ø æ`) | 3.5.14 | fourth extension, wordlist `main_isc.combined` |
-| **App screen in four languages** (MS + EN gloss, English, Polish, Norwegian; follows the phone) | 3.5.8 (`Ui.kt`) | `App/App.swift`: same texts, same keys |
-| Languages as system entries (one input-method subtype each, stable `subtypeId`), 🌐 rotates them | 3.5.9–3.5.10 | iOS already: one extension per language |
-| Mark counter ("Znaky": which symbols are typed, exported with the ranking only) | 9a02ea5 (3.5.20, `Symbols.kt`) | ⚠ same wall: without Full Access nothing counted in the keyboard reaches the app or leaves the phone |
-| Theme choice: automatic (follows the phone) / light / dark | f48b96d (3.5.27, `Theme.kt`) | 0.4.0 code done (`Shared.theme`, `applyTheme`); ⚠ works once the App Group `group.com.radoslove.interslavic` is registered on the developer portal |
-| The APP SCREEN follows the keyboard's theme choice, not the phone's mode: window theme `Theme_DeviceDefault` vs `…Light_DarkActionBar`, own text in pairs (body 8.7:1, heading 13.8:1 on `#1B1F22`), and picking a theme calls `recreate()`. Choosing "always dark" and getting a white settings screen was the complaint (owner 2026-11-07) | 3.6.5 (`SetupActivity.dark`, `col()`) | the iOS settings are drawn INSIDE the keyboard since 0.5.3, so they already follow it; `App/App.swift` (the host app) still follows the phone |
-| "My words": the user's added words per language, each removable | 7f0a768 (3.5.29, `UserWords.remove`, `Dictionary.forget`) | 0.4.0 code done (app list, swipe to remove; `Shared.userWords`); ⚠ same App Group condition |
-
-## Done in both
-
-| Feature | iOS | Android |
-|---|---|---|
-| **Suggestions do not need diacritics typed**: the strip folds marks to the base letter while you type, so `medved` → `medvěd`, `les` → `lěs`, `zive` → `žive`, `verojetno` → `věrojetno`. Owner hand-test 2026-11-09 (iPhone + Android) | 7801f4b (0.2.1, `SwipeInput.complete`, `.diacriticInsensitive` fold) | 3.6 (`Dictionary.suggest` → `foldedStartsWith` through `foldBase`, the glide decoder's own fold; changelog `36.txt`) |
-| **No `x` key in Cyrillic or Glagolitic** (`q` and `w` carry the digraph keys, row above). The keys that stay keep the LATIN width: the row is padded with an empty cell at each end and shift/⌫ grow in row 3, so the learned touch offset and the pivot cap (both in key widths) stay calibrated across a script change. Decided by the owner 2026-11-08; a foreign word stands in a Cyrillic sentence whole, in Latin (`docs/script-tables.md`) | 0.5.5 code (`Layout.rows(latin:)`, `Layout.rowUnits`, padded `characterRow`) ⚠ not built yet — needs an Xcode build on the build Mac | 3.6.13 (`Layout.noQwxRows`, `KeyboardView.spacer`; `keyWidth` stopped reading `q` and `w` by name) |
-| **Norwegian bokmål keyboard** (`nb`: rows of 11, `å ø æ` on own keys, accents held; 49 191 forms). The iOS swipe file went to format version 2 with the key count in the header (29 keys), so `ø`/`æ` words swipe and the 26-key files stay byte for byte the same. Owner hand test on the iPhone 13, 2026-11-07: works | 0.5.4 (`KeyboardNB`, `Layout.swipeKeys`, `SwipeDictionary.keyCount`) | 3.5.8 |
-| A way into the keyboard's own settings FROM the keyboard. Android: hold 🌐 → 🌐 picker + ⚙. iOS: hold `123` → ⚙, and the settings (theme, script, my words with ✕) are drawn IN the keyboard in place of the letters - 🌐 is the system's, and a keyboard may not open other apps (App Review 4.4.1). Owner hand test on the iPhone 13 2026-11-07: ⚙ shows, a plain tap still opens `123` | 0.5.3 (`holdLayer`, `settingsPanel`, `SwipeInput.removeUserWord`) | 3.5.42 |
-| **Czech** (`cs`: QWERTY rows, á č ď ě é í ň ó ř š ť ú ů ý ž on hold, 40 959 forms; owner hand test on the iPhone 13 2026-11-07: holds and glides `řeka` `město` `děkuji` right) | 0.5.0 (`KeyboardCS` extension, `cs_swipe.bin`, fold in `build_swipe_dictionary.py`) | 3.5.31 |
-| Polish past-personal and conditional forms (548 528 forms; `zrobiłem` right on the iPhone 13; ⚠ `chciałbym` still loses to `chodziłbym`/`chciałem` - its `c-h-c` back-and-forth fits badly, replay score 0.77 vs 0.43) | 0.5.0 (`pl_swipe.bin` rebuilt) | 3.5.39 |
-| Hold on `.` of the letter layer: `:` BEFORE `;` (owner 2026-11-01: the colon is the one he types, so it sits nearer the thumb); same swap in the `,` hold | 0.4.3 code (`periodAccents`/`commaAccents` tails) ⚠ not built yet — needs an Xcode build on the build Mac | 3.5.32 |
-| The learned touch offset may go NEGATIVE, floor -0.5: a thumb landing below the key is as real as one above; a 0 floor switched compensation off on the phone that needed it | 0.4.4 (`SwipeInput.learn`; iOS learned the offset since 0.1.4, only the floor was 0) | 3.6.1 (`Lift.MIN`) |
-| A letter tapped after a glide extends that word only if the WORDLIST says it still can; time is just a ceiling. Deciding it on the clock alone glued the next word onto the last one whenever typing was quick (`wyjsc` + `s` -> `wyjscs`, owner 2026-11-04) | 0.4.6 (`SwipeInput.canExtend`, `SwipeDictionary.hasPrefix`; folded-key prefix, user words count) | 3.5.39 (`Dictionary.hasPrefix`) |
-| Cyrillic and Glagolitic: script key ABC / АБВ / ⰀⰁⰂ next to 🌐, same tables, everything inside stays Latin | 0.4.0 (`Script.swift`, choice kept in the keyboard; measured 2026-11-08 - the file arrived in the 0.4.0 commit, 25.10.2026, this row said 0.3.0) | 14a658f (3.5.6) |
-| Bottom row `123 🌐 [ABC] , space . ⏎` with the Android weights; no `?` on the letters; `123` row 3 `. , ' ! ?`, `¿` `¡` held on `?` `!` | 0.3.0 | 3.5.16–3.5.18 |
-| Digraphs on hold: `d` → `dž`, `l` → `lj`, `n` → `nj` (first in the popup) | 0.3.0 | 3.5.7 |
-| `＋ word` chip in the FIRST strip slot | 0.3.0 | 7f0a768 (3.5.29) |
-| Hand typing is never a glide: a touch within 250 ms of a typed letter is a tap; a second finger = typing; the glide follows only its own finger | 0.3.0 (`lastLetterTapAt`, `SwipeGestureRecognizer.finger`) | 3.5.30 |
-| Instant whole-word wipe after a glide, hold trims the ending | 0.1.4–0.1.6 (`tapBackspace`, `restoreTrimmed`) | 42c9c07 (3.5.3) |
-| English keyboard (`en`: plain a–z, foreign letters on hold, Android's `main_en.combined`) | 0.4.1 (`KeyboardEN` extension, `en_swipe.bin`, 46 693 forms) | 3.5.8 |
-| Learned touch lift: the trail is pushed back down before decoding, and every KEPT glide nudges the value (default 0.35 key widths) | 143bdf2 (0.1.4), 0.4.3 (`adoptLocalLift`) | 3.5.31 (`Lift.kt`, `learnLift`); one value per phone, in `isv_collector` prefs |
-| Shift re-armed at the start of a sentence (field start, new line, `. ! ?` + space); a shift set by hand is left alone | ab921f2 (0.1.6) | 3.5.31 (`rearmShift`, driven by `onSelectionChanged` + `onInputStarted`) |
-| Shift on selected text cycles small → Capital → CAPS → small (this is how an acronym is typed) | 0.4.2 (`cycleCase`) | 3.5.31 (`cycleCase`, selection read via `getSelectedText`) |
-| 😀 key left of space with its own panel (lately used first, then a fixed set of 168, rows of eight, ABC back + ⌫), `,` FIRST in the `.` hold, and NO comma key - the only mark key beside space is `.`, on its right. Android had a `,` key back from 2026-11-01 (92b3ad4) and dropped it again on 2026-11-07 after the owner used the iOS row: the space bar is worth more than the second mark key, and nothing moved out of reach (`: ; ( ) -` on the `123` page, `–` held on its `-`). Bottom-row weights now equal to the decimal: 123 1.2 · 🌐 0.95 · ABC 1.2 (isv only) · 😀 0.9 · space 3.45 isv / 4.65 · `.` 0.9 · ⏎ 1.4 | 0.4.2 (`Emoji.swift`, `Layout.periodLetterAccents`) | 3.5.31, comma key out again in 3.6.5 (`Emoji.kt` GENERATED from the Swift list so the order cannot drift, `Layout.periodLetterHold`) |
-| `＋` also for the capitalised FIRST word of a sentence, saved lowercase; a capital mid-sentence (a name) stays out | 0.4.0 (`saveForm`, `sentenceStart`) | 3.5.31 (`saveForm`, `sentenceStart`) |
-| Polish keyboard (`pl`: ą ć ę ł ń ó ś ż ź on hold, own wordlist) | 7801f4b (0.2.1), own extension | 3.5.7: language setting + 🌐 cycles, lazy per-language dictionary |
-| Hold popup with several letters, own first, foreign after, slide to pick | 7801f4b | 3.5.7 (Cyrillic/Glagolitic: own letters only) |
-| `,` `.` on the letter layer with hold popups | 559a71f (0.1.10) | 3.5.7 (`?` moved to `123` in 3.5.16) |
-| `123` like the system keyboard + `#+=` page, holds on numeric keys | ab921f2, 559a71f | 3.5.7 |
-| No glide starting on the bottom row | 7801f4b | 3.5.7 |
-| No glide starting on the suggestion strip (above the letters) | `swipeCanStart` | 7f0a768 (3.5.29, `lettersTop`) |
-| `＋ word` chip offered again right after the space that finished an unknown word | `refreshCompletions` | 7f0a768 (3.5.29) |
+Nothing open (iOS 0.5.1 changes are in Android 3.6).
 
 ## Deliberate differences
 
-- Doubled-letter penalty (Android `DOUBLE_W`, 3.5.10): not on iOS. The `žže`/`že` tie was broken
-  on Android by the per-word usage boost; iOS has no usage boost, so the tie goes to frequency
-  and `že` already leads. Port it together with a usage boost, if one ever comes.
-- Settings: since 0.4.0 the iOS keyboard ASKS for Full Access (owner 2026-10-25), only for the
-  App Group it shares with the app (own words, theme, script, learned lift). It has no network
-  code. With Full Access off it keeps all of that in its own defaults and works in full; the
-  app then shows nothing.
+- **Languages:** iOS has one keyboard extension per language; Android has one keyboard with
+  languages ticked in the app and 🌐 cycling them.
+- **Settings:** iOS asks for Full Access only to share data with its app (own words, theme,
+  script). It has no network code and works fully without it.
+- **Script key** (ABC / АБВ / ⰀⰁⰂ) shows for Interslavic only, on both platforms.
+- **Slowest-sample glide anchors:** on Android; off on iOS, where the end of a glide is not
+  sampled while the finger rests.
+- **Doubled-letter penalty:** Android only; iOS has no per-word usage boost to pair it with.
 
-- Languages: iOS has one keyboard extension per language (the system list shows `isv` and
-  `pl — isv`); Android has one keyboard, the languages are ticked in the app and 🌐 cycles them
-  (held: the system keyboard picker). Same languages, same layouts, the platform's own way to
-  switch.
-- The script key (ABC / АБВ / ⰀⰁⰂ) shows for Interslavic only; Polish is Latin. Measured 2026-11-07, both platforms guard it with `if isv` (iOS `bottomRow`, Android `renderLetters`), so the Norwegian, Czech, Polish and English rows carry NO ABC key and their space is wider by its 1.2 — this is by design, not a key that was forgotten in a port.
+## Shared
 
-## Two apps, one code
-
-Since 3.5.14 / 0.1.7 `android-app/` builds two apps (product flavors): **Medžuslovjansky** (later Interslove)
-(`interslove`, `com.radoslove.interslavic`, opens in Interslavic) and **Mellomskandinavisk**
-(`isc`, `com.radoslove.interscandinavian`, opens in Interscandinavian). Both offer all five
-languages; per flavor only `src/<flavor>/` differs (`App.kt`, `Ui.kt`, `method.xml`, names).
-The iOS app is one app with one extension per language; Interscandinavian is not an iOS
-extension yet (its iOS side is the Keyman package).
-
-⚠ **The `isc` flavor is PARKED from 2026-11-04** (owner's call): it stays in
-`build.gradle.kts` and nothing is cut, it simply is not built or handed to a phone any
-more. Do not read the two `Ui.kt` as being in step - they already differ by about thirty
-lines, and that gap grows with every settings text added to `interslove` alone.
-Un-parking costs one `assemble`; cutting the flavor out would cost half an hour twice and
-save nothing per round, which is why it is not cut.
-
-This parks the separate APP, not the language: Mellomskandinavisk stays one of the six
-languages of the published app, and its dictionary ships in `src/main/assets`, so both
-flavors carry it anyway.
-
-## Both, shared
-
-- Dictionary format: iOS reads a compact binary (`Resources/<lang>_swipe.bin`), Android parses the
-  text `.combined` into objects. One format for both (the binary) would also keep memory flat when
-  more languages arrive. Android 3.5.7 already loads each language only on first use.
-- The layout tables are copied by hand into `Layout.swift` and `Layout.kt`. A shared table file
-  that generates both would end the porting of data (code still needs porting).
+- Layout tables are kept in step by hand in `Layout.swift` and `Layout.kt`.
+- Dictionary format differs: iOS reads a compact binary, Android parses `.combined` text.
