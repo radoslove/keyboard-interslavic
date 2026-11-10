@@ -101,4 +101,11 @@
         android:imeSubtypeMode="keyboard"
         android:imeSubtypeExtraValue="lang=sr"
         android:subtypeId="5626" />
+    <subtype
+        android:label="@string/subtype_bs"
+        android:languageTag="bs"
+        android:imeSubtypeLocale="bs"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="lang=bs"
+        android:subtypeId="5627" />
 </input-method>

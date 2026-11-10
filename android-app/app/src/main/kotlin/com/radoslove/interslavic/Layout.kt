@@ -200,6 +200,24 @@ object Layout {
         "zcvbnm",
     )
 
+    /** Serbian Cyrillic (JUS I.K1.003). The national layout IS the Latin QWERTZ
+     *  one with `љ` and `њ` on `q` and `w` - the keys this keyboard already drew
+     *  for Interslavic - so the thumb that knows the Serbian Latin keyboard
+     *  knows this one. One position goes - Serbian has no letter on `y` - while
+     *  `x` keeps the place the standard gives `џ`, which is a letter of its own
+     *  and was hard to find under a hold (owner 2026-11-10: "litere џ bylo
+     *  troche trudno znalezc bo jest jako druga nad d"). It works like `љ` and
+     *  `њ`: the key writes the PAIR `dž`, and the route over `d` + `ž` keeps
+     *  working, so a glide has two ways through it.
+     *  `з` sits where QWERTZ puts `z`, in the top row, so `ж` is held there, and
+     *  the remaining marks `ђ ћ ч ш` are holds on their base letter, as every
+     *  mark in this keyboard is (owner 2026-11-10). */
+    private val srCyrillicRows: List<String> = listOf(
+        "qwertzuiop",
+        "asdfghjkl",
+        "xcvbnm",
+    )
+
     /** [latinRows] with `y` and `z` swapped, as on the Czech, Slovak, Slovenian,
      *  Croatian and Serbian keyboards. Only two keys move, so the grid - and with
      *  it everything the decoder measures in key widths - stays the same. */
@@ -215,6 +233,7 @@ object Layout {
         qwertz: Boolean = false,
     ): List<String> = when {
         lang == Lang.NB || lang == Lang.ISC -> nbRows
+        script != Script.Mode.LATIN && lang == Lang.SR -> srCyrillicRows
         script != Script.Mode.LATIN -> nonLatinRows
         qwertz -> qwertzRows
         else -> latinRows
@@ -226,10 +245,14 @@ object Layout {
      *  (dictionary, glide, ranking, the `Script` converter) still sees `lj` and
      *  `nj`; the converter then writes them in the script in force, with its own
      *  context rules. */
-    fun keyText(ch: Char, script: Script.Mode): String = when {
+    fun keyText(ch: Char, script: Script.Mode, lang: String = Lang.ISV): String = when {
         script == Script.Mode.LATIN -> ch.toString()
         ch == 'q' -> "lj"
         ch == 'w' -> "nj"
+        // Serbian only: `џ` is one letter there and has the `x` position in the
+        // national layout. Interslavic writes the same sound `дж`, two letters,
+        // and has no `x` key at all, so nothing changes for it.
+        ch == 'x' && lang == Lang.SR -> "dž"
         else -> ch.toString()
     }
 
@@ -254,7 +277,7 @@ object Layout {
         Lang.CS -> csOwn
         Lang.SK -> skOwn
         Lang.SL -> slOwn
-        Lang.HR, Lang.SR -> hrSrOwn
+        Lang.HR, Lang.SR, Lang.BS -> hrSrOwn
         Lang.NB, Lang.ISC -> nbOwn
         Lang.EN -> emptyMap()
         else -> isvOwn
@@ -294,7 +317,7 @@ object Layout {
 object KeyRows {
 
     /** Languages whose national keyboard is QWERTZ. */
-    val QWERTZ_BY_DEFAULT = setOf(Lang.CS, Lang.SK, Lang.SL, Lang.HR, Lang.SR)
+    val QWERTZ_BY_DEFAULT = setOf(Lang.CS, Lang.SK, Lang.SL, Lang.HR, Lang.SR, Lang.BS)
 
     /** Languages where the choice exists at all. */
     fun offered(lang: String) = lang != Lang.NB && lang != Lang.ISC

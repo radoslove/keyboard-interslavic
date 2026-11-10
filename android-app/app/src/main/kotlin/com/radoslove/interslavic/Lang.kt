@@ -39,6 +39,11 @@ object Lang {
     /** Serbian in LATIN script; the code stays `sr`, the subtype says `sr-Latn`. */
     const val SR = "sr"
 
+    /** Bosnian: the same Latin alphabet as Croatian and Serbian Latin, its own
+     *  wordlist. Latin only here - Cyrillic is co-official in Bosnia but is not
+     *  what the language is typed in. */
+    const val BS = "bs"
+
     /** This app's own language ([App.MAIN]): `isv` in Interslove, `isc` in Mellomskandinavisk. */
     const val MAIN = App.MAIN
 
@@ -98,6 +103,14 @@ object Lang {
         NB -> "Norsk"
         EN -> "English"
         CS -> "Čeština"
+        // Added with the languages themselves (2026-11-10): without a row here
+        // the space bar fell back to the app's own name, so a phone typing
+        // Serbian said "Medžuslovjansky" on the space bar.
+        SK -> "Slovenčina"
+        SL -> "Slovenščina"
+        HR -> "Hrvatski"
+        SR -> "Srpski"
+        BS -> "Bosanski"
         ISV -> "Medžuslovjansky"
         ISC -> "Mellomskandinavisk"
         else -> App.MAIN_NAME

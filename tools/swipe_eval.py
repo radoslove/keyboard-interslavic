@@ -86,8 +86,16 @@ SCRIPT = os.environ.get("SWIPE_SCRIPT", "latin")
 QWERTZ = os.environ.get("SWIPE_ROWS", "qwerty") == "qwertz"
 if QWERTZ:
     LATIN_ROWS = ["qwertzuiop", "asdfghjkl", "yxcvbnm"]
-ROWS = LATIN_ROWS if SCRIPT == "latin" else ["qwertyuiop", "asdfghjkl", "zcvbnm"]
 DIGRAPH_KEYS = SCRIPT != "latin"
+# Serbian Cyrillic (JUS I.K1.003, added 2026-11-10) differs from the Interslavic
+# one in both directions: the national layout is QWERTZ, and `џ` is a LETTER
+# there, which the standard puts on the `x` position - so that key stays and
+# carries the `dž` digraph, exactly as `q` and `w` carry `lj` and `nj`. Only `y`
+# goes. Interslavic writes the same sound `дж`, two letters, and keeps no `x`.
+SR_CYRL = DIGRAPH_KEYS and LANG == "sr"
+ROWS = (LATIN_ROWS if SCRIPT == "latin"
+        else ["qwertzuiop", "asdfghjkl", "xcvbnm"] if SR_CYRL
+        else ["qwertyuiop", "asdfghjkl", "zcvbnm"])
 
 
 def build_centers():
@@ -133,12 +141,24 @@ def fold(ch):
     return _FOLD.get(ch, ch)
 
 
+def _collapse(w):
+    """The route over the digraph KEYS.
+
+    `dž` is matched on the raw letters, before folding, because folding turns
+    `ž` into `z` and `d`+`z` do meet across a prefix (`odzvanjati`), where they
+    are two letters and no `џ`. `Dictionary.pairKey` makes the same distinction
+    on the phone.
+    """
+    s = w.replace("dž", "\x01") if SR_CYRL else w
+    f = "".join(fold(c) for c in s)
+    return f.replace("lj", "q").replace("nj", "w").replace("\x01", "x")
+
+
 def fold_word(w):
-    f = "".join(fold(c) for c in w)
-    # Cyrillic: `lj` and `nj` are ONE key each (`љ` on `q`, `њ` on `w`), so the
-    # route over them is one waypoint, not two - `Dictionary.foldWord` does the
-    # same on the phone.
-    return f.replace("lj", "q").replace("nj", "w") if DIGRAPH_KEYS else f
+    # Cyrillic: `lj` and `nj` are ONE key each (`љ` on `q`, `њ` on `w`), and in
+    # Serbian `dž` is one more (`џ` on `x`), so the route over them is one
+    # waypoint, not two - `Dictionary.foldWord` does the same on the phone.
+    return _collapse(w) if DIGRAPH_KEYS else "".join(fold(c) for c in w)
 
 
 def folds(w):
@@ -151,7 +171,7 @@ def folds(w):
     plain = "".join(fold(c) for c in w)
     if not DIGRAPH_KEYS:
         return (plain,)
-    collapsed = plain.replace("lj", "q").replace("nj", "w")
+    collapsed = _collapse(w)
     return (collapsed,) if collapsed == plain else (collapsed, plain)
 
 
@@ -941,6 +961,10 @@ def replay(rows, mode="pivot"):
 # has seen fail looks exactly like a dead one.
 DIGRAPH_WORDS = ["ljudi", "bolje", "denj", "veljmi", "cibulje", "nositelja",
                  "tečenju", "mljaskavše"]
+# Serbian: the same gate over its own words, with `dž` words carrying the third
+# digraph key. `džep` `džak` `džem` are the ones the owner tests by hand.
+DIGRAPH_WORDS_SR = ["ljudi", "ljubav", "njegov", "konj", "bolje", "nedelja",
+                    "džep", "džak", "džem"]
 DIGRAPH_DRAWS = 6
 DIGRAPH_MIN_TOP3 = 0.75      # both routes, over all draws
 DIGRAPH_CONTROL_MAX = 0.20   # the one-route dictionary on the two-letter gesture
@@ -954,8 +978,9 @@ def run_digraph(words):
     if not DIGRAPH_KEYS:
         print("digraph gate: only meaningful with SWIPE_SCRIPT=cyrl - skipped")
         return
-    present = [w for w in DIGRAPH_WORDS if any(x == w for x, _ in words)]
-    missing = [w for w in DIGRAPH_WORDS if w not in present]
+    wanted = DIGRAPH_WORDS_SR if SR_CYRL else DIGRAPH_WORDS
+    present = [w for w in wanted if any(x == w for x, _ in words)]
+    missing = [w for w in wanted if w not in present]
     if missing:
         print(f"  ⚠ not in the wordlist, skipped: {missing}")
     both = build_buckets(words)

@@ -115,6 +115,18 @@ class ImeService : InputMethodService() {
      * HAS an app simply does not find it. A service is not an activity, so the
      * intent needs its own task, and the keyboard gets out of the way first.
      */
+    /** The keyboard's own settings panel wants to come back to itself after
+     *  a rebuilt view (the colours are read once, when the view is built). */
+    var reopenSettings = false
+
+    /** Rebuild the input view in place. A theme chosen inside the keyboard can
+     *  take effect no other way: [KeyboardView] reads every colour at build
+     *  time, on purpose, so that drawing a key costs nothing. */
+    fun rebuildView(keepSettings: Boolean) {
+        reopenSettings = keepSettings
+        setInputView(onCreateInputView())
+    }
+
     fun openSettings() {
         requestHideSelf(0)
         startActivity(

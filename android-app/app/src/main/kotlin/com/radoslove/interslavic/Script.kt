@@ -33,22 +33,49 @@ object Script {
     private const val PREFS = "isv_collector"
     private const val KEY = "script"
 
-    /** The chosen script; always Latin while another language than Interslavic is typed. */
-    fun mode(context: Context): Mode = if (Lang.current(context) != Lang.ISV) Mode.LATIN else
-        when (context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, "latin")) {
+    /**
+     * The scripts a language offers. Serbian is the second one to get this key
+     * (2026-11-10): Serbs write the same language in both alphabets, the state
+     * standard for the Cyrillic keyboard (JUS I.K1.003) IS the Latin QWERTZ
+     * layout with `љ` and `њ` on `q` and `w` - which this keyboard already drew
+     * for Interslavic - and the two alphabets map one to one, so no second
+     * wordlist is needed. Two modes, not three: Serbian has no Glagolitic.
+     */
+    fun offered(lang: String): List<Mode> = when (lang) {
+        Lang.ISV -> listOf(Mode.LATIN, Mode.CYRILLIC, Mode.GLAGOLITIC)
+        Lang.SR -> listOf(Mode.LATIN, Mode.CYRILLIC)
+        else -> listOf(Mode.LATIN)
+    }
+
+    /** Each language remembers its own script. Interslavic keeps the old key, so
+     *  nobody's chosen alphabet is lost to this change. */
+    private fun prefKey(lang: String) = if (lang == Lang.ISV) KEY else KEY + "_" + lang
+
+    /** The chosen script of the language being typed; Latin for the languages
+     *  that offer nothing else. */
+    fun mode(context: Context): Mode = mode(context, Lang.current(context))
+
+    fun mode(context: Context, lang: String): Mode {
+        val can = offered(lang)
+        if (can.size < 2) return Mode.LATIN
+        val m = when (context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getString(prefKey(lang), "latin")) {
             "cyrillic" -> Mode.CYRILLIC
             "glagolitic" -> Mode.GLAGOLITIC
             else -> Mode.LATIN
         }
+        return if (m in can) m else Mode.LATIN
+    }
 
     fun setMode(context: Context, mode: Mode) {
         context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
-            .putString(KEY, mode.name.lowercase()).apply()
+            .putString(prefKey(Lang.current(context)), mode.name.lowercase()).apply()
     }
 
-    /** Latin -> Cyrillic -> Glagolitic -> Latin; used by the script key next to 🌐. */
+    /** The next script this language has, wrapping round; the script key next to 🌐. */
     fun next(context: Context): Mode {
-        val m = Mode.values()[(mode(context).ordinal + 1) % Mode.values().size]
+        val can = offered(Lang.current(context))
+        val m = can[(can.indexOf(mode(context)) + 1) % can.size]
         setMode(context, m)
         return m
     }
@@ -71,6 +98,31 @@ object Script {
         "t" to "т", "u" to "у", "v" to "в", "y" to "ы", "z" to "з", "ž" to "ж",
     )
 
+    /**
+     * Serbian Cyrillic: the standard, fully reversible pairing of the two
+     * Serbian alphabets. Its own table rather than the Interslavic one, because
+     * the two disagree where it matters: Interslavic has `ě` and `y` (`є`, `ы`),
+     * which Serbian does not, Serbian has `ć` and `đ` (`ћ`, `ђ`), which stand on
+     * their own letters here, and `dž` is ONE letter (`џ`) in Serbian while
+     * Interslavic writes it `дж`.
+     *
+     * ⚠ Open, and the same class of problem as the Interslavic `-nje`: a `d`
+     * that ends a prefix before a `ž` is not `џ` (`nadživeti` is `надживети`,
+     * not `наџивети`). Telling the two apart needs the morpheme boundary, not a
+     * table, so the two-letter rule wins for now - as it does in every other
+     * converter that works letter by letter.
+     */
+    private val CYRILLIC_SR = linkedMapOf(
+        "lj" to "љ", "nj" to "њ", "dž" to "џ",
+        "a" to "а", "b" to "б", "c" to "ц", "č" to "ч", "ć" to "ћ", "d" to "д", "đ" to "ђ",
+        "e" to "е", "f" to "ф", "g" to "г", "h" to "х", "i" to "и", "j" to "ј", "k" to "к",
+        "l" to "л", "m" to "м", "n" to "н", "o" to "о", "p" to "п", "r" to "р", "s" to "с",
+        "š" to "ш", "t" to "т", "u" to "у", "v" to "в", "z" to "з", "ž" to "ж",
+    )
+
+    /** The Cyrillic table of [lang]. */
+    private fun cyrTable(lang: String) = if (lang == Lang.SR) CYRILLIC_SR else CYRILLIC
+
     // ---- Glagolitic (v1): letters + the j rules below ----------------------------
 
     private val GLAG_LETTERS = mapOf(
@@ -83,11 +135,12 @@ object Script {
     private val VOWELS = setOf('a', 'e', 'ě', 'i', 'o', 'u', 'y')
 
     /** Latin text -> the current script. Case follows the source: `Lj` -> `Љ`, `LJUBOV` -> `ЉУБОВ`. */
-    fun out(context: Context, latin: String): String = convert(latin, mode(context))
+    fun out(context: Context, latin: String): String =
+        convert(latin, mode(context), Lang.current(context))
 
-    fun convert(latin: String, m: Mode): String = when {
+    fun convert(latin: String, m: Mode, lang: String = Lang.ISV): String = when {
         latin.isEmpty() || m == Mode.LATIN -> latin
-        m == Mode.CYRILLIC -> cyrillic(latin)
+        m == Mode.CYRILLIC -> cyrillic(latin, cyrTable(lang))
         else -> glagolitic(latin)
     }
 
@@ -99,15 +152,15 @@ object Script {
 
     private fun allCaps(s: String) = s.any { it.isLetter() } && s.none { it.isLowerCase() }
 
-    private fun cyrillic(latin: String): String {
+    private fun cyrillic(latin: String, table: Map<String, String>): String {
         val caps = allCaps(latin)
         val sb = StringBuilder()
         var i = 0
         while (i < latin.length) {
             val two = if (i + 1 < latin.length) latin.substring(i, i + 2) else null
-            val hit2 = two?.let { CYRILLIC[it.lowercase()] }
+            val hit2 = two?.let { table[it.lowercase()] }
             val chunk = if (hit2 != null) two else latin.substring(i, i + 1)
-            val mapped = hit2 ?: CYRILLIC[chunk.lowercase()]
+            val mapped = hit2 ?: table[chunk.lowercase()]
             sb.append(if (mapped == null) chunk else cased(mapped, chunk[0], caps))
             i += chunk.length
         }
@@ -143,8 +196,13 @@ object Script {
 
     // ---- back to Latin (for dictionary lookups) --------------------------------
 
+    private fun reversed(table: Map<String, String>) =
+        table.entries.map { it.value to it.key }.sortedByDescending { it.first.length }
+
+    private val REVERSE_SR = reversed(CYRILLIC_SR)
+
     private val REVERSE: Map<Mode, List<Pair<String, String>>> = mapOf(
-        Mode.CYRILLIC to CYRILLIC.entries.map { it.value to it.key }.sortedByDescending { it.first.length },
+        Mode.CYRILLIC to reversed(CYRILLIC),
         Mode.GLAGOLITIC to (
             listOf("ⱐⰹ" to "y", "ⱝ" to "ja", "ⱓ" to "ju", "ⱖ" to "jo", "ⱐ" to "j", "ⰹ" to "j", "ⰿ" to "m") +
                 GLAG_LETTERS.filterKeys { it != 'y' }.entries.map { it.value to it.key.toString() }
@@ -152,11 +210,12 @@ object Script {
     )
 
     /** Text in the current script -> Latin. Latin passes through. */
-    fun toLatin(context: Context, s: String): String = back(s, mode(context))
+    fun toLatin(context: Context, s: String): String =
+        back(s, mode(context), Lang.current(context))
 
-    fun back(s: String, m: Mode): String {
+    fun back(s: String, m: Mode, lang: String = Lang.ISV): String {
         if (m == Mode.LATIN || s.isEmpty()) return s
-        val rev = REVERSE.getValue(m)
+        val rev = if (m == Mode.CYRILLIC && lang == Lang.SR) REVERSE_SR else REVERSE.getValue(m)
         val sb = StringBuilder()
         var i = 0
         outer@ while (i < s.length) {

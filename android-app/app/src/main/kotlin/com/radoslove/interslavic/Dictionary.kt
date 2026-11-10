@@ -313,10 +313,16 @@ object Dictionary {
     /** The key a digraph at [i] folds to, or null if there is no digraph there. */
     private fun pairKey(w: String, i: Int): Char? {
         if (!digraphKeys || i + 1 >= w.length) return null
-        if (foldBase(w[i + 1].lowercaseChar()) != 'j') return null
-        return when (foldBase(w[i].lowercaseChar())) {
-            'l' -> 'q'
-            'n' -> 'w'
+        val first = w[i].lowercaseChar()
+        val second = w[i + 1].lowercaseChar()
+        return when {
+            second == 'j' && foldBase(first) == 'l' -> 'q'
+            second == 'j' && foldBase(first) == 'n' -> 'w'
+            // Serbian Cyrillic only: `dž` is the single letter `џ` on the `x`
+            // key. The second letter is matched UNFOLDED on purpose - folding
+            // would also catch a plain `z`, and `d` + `z` meet across a prefix
+            // (`odzvanjati`), where they are two letters and no `џ`.
+            second == 'ž' && first == 'd' && current == Lang.SR -> 'x'
             else -> null
         }
     }

@@ -61,6 +61,10 @@ class KeyboardView(
     private var symbolsPage2 = false
     /** The emoji panel, in place of the letter rows (iOS 0.4.2). */
     private var emoji = false
+
+    /** The keyboard's own settings, in place of the letter rows (iOS 0.5.3).
+     *  Opened by the same gesture on both phones: hold `123`, slide to the gear. */
+    private var settingsOpen = false
     private val EMOJI_PER_ROW = 8
 
     private val flickHandler = Handler(Looper.getMainLooper())
@@ -276,6 +280,9 @@ class KeyboardView(
         setPadding(dp(3), dp(6), dp(3), dp(6))
         setWillNotDraw(false)        // a ViewGroup must be told to draw
         trailPaint.strokeWidth = dp(9).toFloat()
+        // A theme chosen in the panel rebuilds the whole view; come back to the
+        // panel, not to the letters, or the choice looks like it closed itself.
+        if (service.reopenSettings) { service.reopenSettings = false; settingsOpen = true }
         render()
     }
 
@@ -484,6 +491,7 @@ class KeyboardView(
         removeAllViews()
         addView(suggestionStrip)
         when {
+            settingsOpen -> renderSettings()
             emoji -> renderEmoji()
             symbols -> renderSymbols()
             else -> renderLetters()
@@ -618,14 +626,17 @@ class KeyboardView(
         // of space, holding the rest (`,` first). `?` and `!` live on the `123`
         // page next to backspace.
         val isv = Lang.current(context) == Lang.ISV
+        // The script key belongs to every language written in more than one
+        // alphabet - Interslavic (three) and Serbian (two) so far.
+        val scripts = Script.offered(Lang.current(context)).size > 1
         val b = makeRow()
-        b.addView(functionKey("123", 1.2f) { symbols = true; symbolsPage2 = false; render() })
+        b.addView(numericKey(1.2f))
         b.addView(globeKey(0.95f))
         // Script key: like 🌐 switches the keyboard, this switches the alphabet,
         // Latin -> Cyrillic -> Glagolitic. It names the current alphabet; the
         // key labels and everything written from now on follow it. Label: ABC / АБВ / ⰀⰁⰂ.
         // Interslavic only - Polish is written in Latin.
-        if (isv) b.addView(functionKey(Script.keyLabel(context), 1.2f) {
+        if (scripts) b.addView(functionKey(Script.keyLabel(context), 1.2f) {
             Script.next(context)
             render()
             refreshSuggestions()
@@ -639,9 +650,173 @@ class KeyboardView(
         // out of reach - `: ; ( ) -` sit on the `123` page and `–` is held on
         // its `-`.
         b.addView(functionKey("😀", 0.9f) { emoji = true; symbols = false; render() })
-        b.addView(spaceKey(if (isv) 3.45f else 4.65f))
+        b.addView(spaceKey(if (scripts) 3.45f else 4.65f))
         b.addView(symbolKey('.', 0.9f, Layout.periodLetterHold))
         b.addView(functionKey("⏎", 1.4f) { enter() })
+        addView(b)
+    }
+
+    /** `123`: tap = the symbol page. HOLD opens a one-item strip with the gear,
+     *  which draws this keyboard's own settings in place of the letters - the
+     *  same gesture as on the iPhone, where the globe belongs to the system and
+     *  a keyboard may not open the picker itself, so `123` had to carry it
+     *  (owner 2026-11-10). Android keeps its own extra route as well: the gear
+     *  held on the GLOBE still opens the app, which is where everything this
+     *  panel does not carry lives - the collector, the mark counter, the test
+     *  build number, the language list. */
+    private fun numericKey(weight: Float): TextView {
+        val gear = "⚙"
+        val tv = baseKey("123", weight)
+        tv.isLongClickable = false
+        var downX = 0f
+        var downY = 0f
+        val longPress = Runnable { showPopup(tv, listOf(gear), downX); tv.isPressed = false }
+        tv.setOnTouchListener { _, e ->
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    downX = e.x; downY = e.y
+                    tv.isPressed = true
+                    flickHandler.postDelayed(longPress, longPressMs)
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (popupItems != null) movePopup(tv, e.x)
+                    else if (abs(e.x - downX) > touchSlop * 2 || abs(e.y - downY) > touchSlop * 2) {
+                        flickHandler.removeCallbacks(longPress)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    flickHandler.removeCallbacks(longPress)
+                    tv.isPressed = false
+                    if (closePopup() == gear) {
+                        settingsOpen = true; symbols = false; emoji = false
+                    } else {
+                        symbols = true; symbolsPage2 = false
+                    }
+                    render()
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    flickHandler.removeCallbacks(longPress)
+                    tv.isPressed = false
+                    closePopup()
+                    true
+                }
+                else -> false
+            }
+        }
+        return tv
+    }
+
+    /**
+     * The keyboard's own settings, drawn in place of the letters - the panel
+     * iOS has carried since 0.5.3, ported here 2026-11-10 so that the same
+     * gesture answers with the same screen on both phones. Same four sections
+     * in the same order: theme, key layout, script (Interslavic only) and the
+     * words added with the `+` chip. Every choice here belongs to the KEYBOARD,
+     * so the panel works although the app is never opened; the headings go
+     * through [Script] like every other surface, so in Cyrillic they read in
+     * Cyrillic.
+     */
+    private fun renderSettings() {
+        letterKeyViews.clear()        // nothing here is a letter key: no glide can start
+        val lang = Lang.current(context)
+        val blue = Color.parseColor("#1E88E5")
+        val scroll = android.widget.ScrollView(context)
+        scroll.isFillViewport = true
+        val column = LinearLayout(context)
+        column.orientation = VERTICAL
+
+        fun header(text: String) {
+            val tv = TextView(context)
+            tv.text = Script.out(context, text)
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            tv.setTextColor(cBorder)
+            tv.setPadding(dp(8), dp(8), dp(8), dp(2))
+            column.addView(tv)
+        }
+
+        fun choices(items: List<Triple<String, Boolean, () -> Unit>>) {
+            val rv = makeRow()
+            for ((label, on, act) in items) {
+                val key = functionKey(label, 1f) { act() }
+                if (on) { key.setBackgroundColor(blue); key.setTextColor(Color.WHITE) }
+                rv.addView(key)
+            }
+            column.addView(rv)
+        }
+
+        header("Tema")
+        choices(listOf(
+            Triple("◐", Theme.choice(context) == Theme.AUTO,
+                { Theme.set(context, Theme.AUTO); service.rebuildView(true) }),
+            Triple("☀", Theme.choice(context) == Theme.LIGHT,
+                { Theme.set(context, Theme.LIGHT); service.rebuildView(true) }),
+            Triple("☾", Theme.choice(context) == Theme.DARK,
+                { Theme.set(context, Theme.DARK); service.rebuildView(true) }),
+        ))
+
+        if (KeyRows.offered(lang)) {
+            header("Razloženje klaviatury")
+            val z = KeyRows.isQwertz(context, lang)
+            choices(listOf(
+                Triple("QWERTY", !z, { KeyRows.set(context, lang, false); render() }),
+                Triple("QWERTZ", z, { KeyRows.set(context, lang, true); render() }),
+            ))
+        }
+
+        val canScripts = Script.offered(lang)
+        if (canScripts.size > 1) {
+            header("Pismo")
+            val m = Script.mode(context)
+            choices(canScripts.map { mode ->
+                val label = when (mode) {
+                    Script.Mode.LATIN -> "ABC"
+                    Script.Mode.CYRILLIC -> "АБВ"
+                    Script.Mode.GLAGOLITIC -> "ⰀⰁⰂ"
+                }
+                Triple(label, m == mode,
+                    { Script.setMode(context, mode); render(); refreshSuggestions() })
+            })
+        }
+
+        header("Moje slova")
+        val words = UserWords.all(context, lang).sorted()
+        if (words.isEmpty()) {
+            val tv = TextView(context)
+            tv.text = "—"
+            tv.setTextColor(cBorder)
+            tv.setPadding(dp(8), dp(4), dp(8), dp(4))
+            column.addView(tv)
+        }
+        for (w in words) {
+            val rv = makeRow()
+            val label = TextView(context)
+            label.text = Script.out(context, w)
+            label.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            label.setTextColor(cText)
+            label.gravity = Gravity.CENTER_VERTICAL
+            label.setPadding(dp(8), 0, dp(8), 0)
+            label.layoutParams = LayoutParams(0, dp(44), 1f)
+            rv.addView(label)
+            rv.addView(functionKey("✕", 0.9f) {
+                UserWords.remove(context, lang, w)
+                Dictionary.use(context, lang)      // `remove` dropped the loaded list
+                render()
+            })
+            column.addView(rv)
+        }
+
+        scroll.addView(column)
+        // Exactly the three letter rows it replaces, as the emoji panel does:
+        // the keyboard must not jump in height when the panel opens.
+        addView(scroll, LayoutParams(LayoutParams.MATCH_PARENT, dp(52) * 3))
+        val b = makeRow()
+        b.addView(functionKey("ABC", 1.6f) { settingsOpen = false; render() })
+        b.addView(globeKey(1.2f))
+        b.addView(spaceKey(4.2f))
+        b.addView(backspaceKey())
         addView(b)
     }
 
@@ -820,7 +995,7 @@ class KeyboardView(
      *  character, or in Cyrillic the digraph behind `љ` / `њ` (`Layout.keyText`).
      *  `Lj` titlecases the way `Script.cased` expects, so `Љ` comes out right. */
     private fun keyText(ch: Char): String {
-        val base = Layout.keyText(ch, Script.mode(context))
+        val base = Layout.keyText(ch, Script.mode(context), Lang.current(context))
         return if (shift) base.replaceFirstChar { it.uppercaseChar() } else base
     }
 
@@ -1860,7 +2035,18 @@ class KeyboardView(
                 // type the key it started on, exactly as the child would have.
                 if (start != null && trailLength(pts) < keyWidth(computeCenters()) * MIN_GLIDE_KEYS) {
                     val up = swipeShift || swipeCaps
-                    commit(if (up) start.uppercaseChar().toString() else start.toString())
+                    // EXACTLY what the key itself writes, which is not the same
+                    // as its Latin character: outside Latin the label and the
+                    // committed text go through `Layout.keyText` (the digraph
+                    // keys `q` `w` `x` carry `lj` `nj` `dž`) and `Script.out`.
+                    // Committing `start` raw typed a LATIN letter whenever a tap
+                    // drifted enough to reach this branch - on the Serbian
+                    // Cyrillic keyboard the `џ` key put an `x` in the text
+                    // (owner 2026-11-10), and the same hole swallowed every
+                    // other letter of both non-Latin scripts.
+                    val base = Layout.keyText(start, Script.mode(context), Lang.current(context))
+                    val cased = if (up) base.replaceFirstChar { it.uppercaseChar() } else base
+                    commit(Script.out(context, cased))
                 } else if (pts.size >= 9) {
                     decodeSwipe(pts)                         // >= 3 points = a real glide
                 } else {
@@ -2163,10 +2349,43 @@ class KeyboardView(
         val word = liftSampleWord
         if (word.length < 2 || s[4] <= 0f) return
         val centers = computeCenters()
-        val first = centers[Dictionary.foldFirst(word)] ?: return
-        val last = centers[Dictionary.foldLast(word)] ?: return
+        // Outside Latin a word with `lj`/`nj` has TWO routes - over the digraph
+        // key (`q`, `w`) or over the two letters - and the decoder accepts
+        // either. Measure against the one the thumb actually drew: take, for
+        // each end, whichever of the two keys lies nearer the point the finger
+        // really touched. `ljudi` drawn from `l` but measured against `q` a row
+        // higher teaches half a row of offset that was never there, and that
+        // error goes into a value the whole keyboard then uses.
+        val first = centers[nearerKey(
+            Dictionary.foldFirst(word), Dictionary.foldBase(word.first()),
+            s[0], s[1], centers,
+        )] ?: return
+        val last = centers[nearerKey(
+            Dictionary.foldLast(word), Dictionary.foldBase(word.last()),
+            s[2], s[3], centers,
+        )] ?: return
         val measured = ((first[1] + last[1]) - (s[1] + s[3])) / 2f / s[4]
         touchLift = Lift.learn(context, measured)
+    }
+
+    /**
+     * Of two keys that could have carried this end of the glide, the one whose
+     * centre lies nearer the point the finger really touched. Equal keys (every
+     * word in Latin, and every word without a digraph at that end) short-circuit,
+     * so this costs nothing in the common case.
+     */
+    private fun nearerKey(
+        a: Char,
+        b: Char,
+        x: Float,
+        y: Float,
+        centers: Map<Char, FloatArray>,
+    ): Char {
+        if (a == b) return a
+        val ca = centers[a] ?: return b
+        val cb = centers[b] ?: return a
+        fun d2(c: FloatArray) = (c[0] - x) * (c[0] - x) + (c[1] - y) * (c[1] - y)
+        return if (d2(cb) < d2(ca)) b else a
     }
 
     /** Put the swipe candidates in the strip as tappable alternatives. */
