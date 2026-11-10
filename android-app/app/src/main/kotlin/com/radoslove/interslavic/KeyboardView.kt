@@ -599,7 +599,7 @@ class KeyboardView(
         val full = Layout.letterRows(lang, qwertz = qwertz)
         // Both non-Latin scripts glide `lj` and `nj` over one key each: `љ`/`њ` in
         // Cyrillic, `ⰾⱐ`/`ⱀⱐ` in Glagolitic. The route over `l`+`j` stays too.
-        Dictionary.digraphKeys = script != Script.Mode.LATIN
+        Dictionary.digraphKeys = script != Script.Mode.LATIN && lang != Lang.MK
         Layout.letterRows(lang, script, qwertz).forEachIndexed { index, row ->
             val rv = makeRow()
             val pad = (full[index].length - row.length) / 2f

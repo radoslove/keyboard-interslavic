@@ -218,6 +218,19 @@ object Layout {
         "xcvbnm",
     )
 
+    /** Macedonian letters on their keys. The same grid as Serbian Cyrillic -
+     *  `љ` `њ` on `q` `w`, `џ` on `x`, no `y` - because the alphabets differ
+     *  only in `ђ ћ` against `ѓ ќ ѕ`, and those are held on `g`, `k` and `z`.
+     *  Unlike Serbian these keys carry ONE character each, not a digraph: the
+     *  wordlist is already written with `ǉ ǌ ǆ` (see Script.CYRILLIC_MK). */
+    private val mkCyrillicRows: List<String> = srCyrillicRows
+
+    /** Macedonian's own letters, held on the key they fold to. */
+    private val mkOwn: Map<Char, List<String>> = mapOf(
+        'g' to listOf("\u01f5"), 'k' to listOf("\u1e31"),
+        'z' to listOf("\u017e", "\u1e91"), 'c' to listOf("\u010d"), 's' to listOf("\u0161"),
+    )
+
     /** [latinRows] with `y` and `z` swapped, as on the Czech, Slovak, Slovenian,
      *  Croatian and Serbian keyboards. Only two keys move, so the grid - and with
      *  it everything the decoder measures in key widths - stays the same. */
@@ -234,6 +247,7 @@ object Layout {
     ): List<String> = when {
         lang == Lang.NB || lang == Lang.ISC -> nbRows
         script != Script.Mode.LATIN && lang == Lang.SR -> srCyrillicRows
+        lang == Lang.MK -> mkCyrillicRows
         script != Script.Mode.LATIN -> nonLatinRows
         qwertz -> qwertzRows
         else -> latinRows
@@ -253,6 +267,11 @@ object Layout {
         // national layout. Interslavic writes the same sound `дж`, two letters,
         // and has no `x` key at all, so nothing changes for it.
         ch == 'x' && lang == Lang.SR -> "dž"
+        // Macedonian: one letter per key, no digraphs - the wordlist carries
+        // `ǉ ǌ ǆ` as single characters.
+        lang == Lang.MK && ch == 'q' -> "\u01c9"
+        lang == Lang.MK && ch == 'w' -> "\u01cc"
+        lang == Lang.MK && ch == 'x' -> "\u01c6"
         else -> ch.toString()
     }
 
@@ -278,6 +297,7 @@ object Layout {
         Lang.SK -> skOwn
         Lang.SL -> slOwn
         Lang.HR, Lang.SR, Lang.BS -> hrSrOwn
+        Lang.MK -> mkOwn
         Lang.NB, Lang.ISC -> nbOwn
         Lang.EN -> emptyMap()
         else -> isvOwn
@@ -320,7 +340,8 @@ object KeyRows {
     val QWERTZ_BY_DEFAULT = setOf(Lang.CS, Lang.SK, Lang.SL, Lang.HR, Lang.SR, Lang.BS)
 
     /** Languages where the choice exists at all. */
-    fun offered(lang: String) = lang != Lang.NB && lang != Lang.ISC
+    fun offered(lang: String) =
+        lang != Lang.NB && lang != Lang.ISC && lang != Lang.MK
 
     private const val PREFS = "isv_collector"
     private fun key(lang: String) = "qwertz_$lang"

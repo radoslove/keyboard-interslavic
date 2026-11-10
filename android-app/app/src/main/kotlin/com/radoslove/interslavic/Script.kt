@@ -44,6 +44,11 @@ object Script {
     fun offered(lang: String): List<Mode> = when (lang) {
         Lang.ISV -> listOf(Mode.LATIN, Mode.CYRILLIC, Mode.GLAGOLITIC)
         Lang.SR -> listOf(Mode.LATIN, Mode.CYRILLIC)
+        // Cyrillic ONLY: there is no Latin Macedonian to offer, so the script
+        // key does not appear and the keyboard opens in Cyrillic. The wordlist
+        // is already in the internal Latin (tools/build_mk_wordlist.py); the
+        // alphabet the user sees is this one.
+        Lang.MK -> listOf(Mode.CYRILLIC)
         else -> listOf(Mode.LATIN)
     }
 
@@ -57,7 +62,8 @@ object Script {
 
     fun mode(context: Context, lang: String): Mode {
         val can = offered(lang)
-        if (can.size < 2) return Mode.LATIN
+        // One script = that script, which for Macedonian is Cyrillic, not Latin.
+        if (can.size < 2) return can.first()
         val m = when (context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getString(prefKey(lang), "latin")) {
             "cyrillic" -> Mode.CYRILLIC
@@ -120,8 +126,34 @@ object Script {
         "š" to "ш", "t" to "т", "u" to "у", "v" to "в", "z" to "з", "ž" to "ж",
     )
 
+    /**
+     * Macedonian: the internal Latin of `tools/build_mk_wordlist.py` back into
+     * Cyrillic. Every letter is ONE character on both sides, which is the whole
+     * point - the usual transliteration writes `љ њ џ` as `lj nj dž`, and
+     * Macedonian spells those sequences as two letters too (`илјада`
+     * "thousand", `волја`, `инјекција`, `надживее`: 49 forms in the 50 000 of
+     * the frequency list), so a pair-based table could not be turned back.
+     * `ǉ ǌ ǆ` fold onto the `q w x` keys, where these letters sit in the
+     * Cyrillic layouts of this family, and `ǵ ḱ ẑ` onto `g k z`, where they are
+     * held.
+     */
+    private val CYRILLIC_MK = linkedMapOf(
+        "a" to "\u0430", "b" to "\u0431", "v" to "\u0432", "g" to "\u0433",
+        "d" to "\u0434", "\u01f5" to "\u0453", "e" to "\u0435", "\u017e" to "\u0436",
+        "z" to "\u0437", "\u1e91" to "\u0455", "i" to "\u0438", "j" to "\u0458",
+        "k" to "\u043a", "l" to "\u043b", "\u01c9" to "\u0459", "m" to "\u043c",
+        "n" to "\u043d", "\u01cc" to "\u045a", "o" to "\u043e", "p" to "\u043f",
+        "r" to "\u0440", "s" to "\u0441", "t" to "\u0442", "\u1e31" to "\u045c",
+        "u" to "\u0443", "f" to "\u0444", "h" to "\u0445", "c" to "\u0446",
+        "\u010d" to "\u0447", "\u01c6" to "\u045f", "\u0161" to "\u0448",
+    )
+
     /** The Cyrillic table of [lang]. */
-    private fun cyrTable(lang: String) = if (lang == Lang.SR) CYRILLIC_SR else CYRILLIC
+    private fun cyrTable(lang: String) = when (lang) {
+        Lang.SR -> CYRILLIC_SR
+        Lang.MK -> CYRILLIC_MK
+        else -> CYRILLIC
+    }
 
     // ---- Glagolitic (v1): letters + the j rules below ----------------------------
 
@@ -200,6 +232,7 @@ object Script {
         table.entries.map { it.value to it.key }.sortedByDescending { it.first.length }
 
     private val REVERSE_SR = reversed(CYRILLIC_SR)
+    private val REVERSE_MK = reversed(CYRILLIC_MK)
 
     private val REVERSE: Map<Mode, List<Pair<String, String>>> = mapOf(
         Mode.CYRILLIC to reversed(CYRILLIC),
@@ -215,7 +248,11 @@ object Script {
 
     fun back(s: String, m: Mode, lang: String = Lang.ISV): String {
         if (m == Mode.LATIN || s.isEmpty()) return s
-        val rev = if (m == Mode.CYRILLIC && lang == Lang.SR) REVERSE_SR else REVERSE.getValue(m)
+        val rev = when {
+            m == Mode.CYRILLIC && lang == Lang.SR -> REVERSE_SR
+            m == Mode.CYRILLIC && lang == Lang.MK -> REVERSE_MK
+            else -> REVERSE.getValue(m)
+        }
         val sb = StringBuilder()
         var i = 0
         outer@ while (i < s.length) {

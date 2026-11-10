@@ -293,6 +293,10 @@ object Dictionary {
         'í' -> 'i'; 'ý' -> 'y'; 'ú', 'ů' -> 'u'; 'ř', 'ŕ' -> 'r'; 'ť' -> 't'; 'ď' -> 'd'
         // Croatian, Serbian: `đ` is not `d` plus a mark to Unicode, like `ł`.
         'đ' -> 'd'
+        // Macedonian's internal Latin (tools/build_mk_wordlist.py): the letters
+        // that have no Latin base fold onto the key they are drawn on - the
+        // digraph keys `q w x` and the holds on `g k z`.
+        'ǉ' -> 'q'; 'ǌ' -> 'w'; 'ǆ' -> 'x'; 'ǵ' -> 'g'; 'ḱ' -> 'k'; 'ẑ' -> 'z'
         // Norwegian: ä and ö are held on æ and ø, which are keys of their own.
         // Everywhere else (Slovak `ä`) they sit on a and o - folding Slovak `ä`
         // onto a key the keyboard does not have took every such word out of the

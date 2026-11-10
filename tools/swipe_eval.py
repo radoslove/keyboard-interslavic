@@ -93,7 +93,15 @@ DIGRAPH_KEYS = SCRIPT != "latin"
 # carries the `dž` digraph, exactly as `q` and `w` carry `lj` and `nj`. Only `y`
 # goes. Interslavic writes the same sound `дж`, two letters, and keeps no `x`.
 SR_CYRL = DIGRAPH_KEYS and LANG == "sr"
-ROWS = (LATIN_ROWS if SCRIPT == "latin"
+# Macedonian is Cyrillic-only, so it needs no SWIPE_SCRIPT: the wordlist is
+# already the internal Latin and the keyboard always draws these rows. The
+# digraph machinery stays OFF - `ǉ ǌ ǆ` are single characters there, and `l`+`j`
+# really is two letters (`илјада`).
+MK = LANG == "mk"
+if MK:
+    DIGRAPH_KEYS = False
+ROWS = (["qwertzuiop", "asdfghjkl", "xcvbnm"] if MK
+        else LATIN_ROWS if SCRIPT == "latin"
         else ["qwertzuiop", "asdfghjkl", "xcvbnm"] if SR_CYRL
         else ["qwertyuiop", "asdfghjkl", "zcvbnm"])
 
@@ -132,7 +140,13 @@ for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê",
                    # Norwegian holds ä ö on its own æ ø keys; everywhere else
                    # (Slovak `ä`) they sit on a and o, as in Dictionary.foldBase.
                    ("ä", "æ" if LANG in ("nb", "isc") else "a"),
-                   ("ö", "ø" if LANG in ("nb", "isc") else "o")]:
+                   ("ö", "ø" if LANG in ("nb", "isc") else "o"),
+                   # Macedonian's internal Latin (tools/build_mk_wordlist.py):
+                   # one character per Cyrillic letter, folded onto the key it
+                   # is drawn on - `ǉ ǌ ǆ` are the `q w x` keys themselves,
+                   # `ǵ ḱ ẑ` are held on `g k z`. Mirrors Dictionary.foldBase.
+                   ("ǉ", "q"), ("ǌ", "w"), ("ǆ", "x"),
+                   ("ǵ", "g"), ("ḱ", "k"), ("ẑ", "z")]:
     for _ch in _src:
         _FOLD[_ch] = _dst
 

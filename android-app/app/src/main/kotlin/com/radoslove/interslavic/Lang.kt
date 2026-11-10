@@ -44,6 +44,12 @@ object Lang {
      *  what the language is typed in. */
     const val BS = "bs"
 
+    /** Macedonian: CYRILLIC only, and the first language here with no Latin
+     *  orthography of its own. Its wordlist is transliterated into the
+     *  keyboard's internal Latin when it is built, so everything inside -
+     *  decoder, ranking, learned offset - works unchanged. */
+    const val MK = "mk"
+
     /** This app's own language ([App.MAIN]): `isv` in Interslove, `isc` in Mellomskandinavisk. */
     const val MAIN = App.MAIN
 
@@ -111,6 +117,7 @@ object Lang {
         HR -> "Hrvatski"
         SR -> "Srpski"
         BS -> "Bosanski"
+        MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"
         ISV -> "Medžuslovjansky"
         ISC -> "Mellomskandinavisk"
         else -> App.MAIN_NAME

@@ -45,7 +45,7 @@ object Ui {
     fun langName(ui: String, lang: String): String {
         val own = when (lang) {
             Lang.ISV -> "Medžuslovjansky"; Lang.ISC -> "Mellomskandinavisk"; Lang.PL -> "Polski"
-            Lang.NB -> "Norsk bokmål"; Lang.CS -> "Čeština"; Lang.SK -> "Slovenčina"; Lang.SL -> "Slovenščina"; Lang.HR -> "Hrvatski"; Lang.SR -> "Srpski"; Lang.BS -> "Bosanski"; else -> "English"
+            Lang.NB -> "Norsk bokmål"; Lang.CS -> "Čeština"; Lang.SK -> "Slovenčina"; Lang.SL -> "Slovenščina"; Lang.HR -> "Hrvatski"; Lang.SR -> "Srpski"; Lang.BS -> "Bosanski"; Lang.MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"; else -> "English"
         }
         val gloss = mapOf(
             Lang.ISV to mapOf("pl" to "międzysłowiański", "nb" to "interslavisk", "en" to "Interslavic"),
@@ -59,6 +59,7 @@ object Ui {
             Lang.HR to mapOf(MS to "hrvatsky", "pl" to "chorwacki", "nb" to "kroatisk", "en" to "Croatian"),
             Lang.SR to mapOf(MS to "srbsky", "pl" to "serbski", "nb" to "serbisk", "en" to "Serbian"),
             Lang.BS to mapOf(MS to "bosnijsky", "pl" to "bośniacki", "nb" to "bosnisk", "en" to "Bosnian"),
+            Lang.MK to mapOf(MS to "makedonsky", "pl" to "macedoński", "nb" to "makedonsk", "en" to "Macedonian"),
         )[lang]?.get(ui)
         return if (gloss == null || gloss == own) own else "$own ($gloss)"
     }
