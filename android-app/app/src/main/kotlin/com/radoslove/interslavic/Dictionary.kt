@@ -291,6 +291,8 @@ object Dictionary {
         // held letter. Missing even one of these kills the glide for every word
         // that contains it - the decoder would look for a key that is not there.
         'í' -> 'i'; 'ý' -> 'y'; 'ú', 'ů' -> 'u'; 'ř', 'ŕ' -> 'r'; 'ť' -> 't'; 'ď' -> 'd'
+        // Croatian, Serbian: `đ` is not `d` plus a mark to Unicode, like `ł`.
+        'đ' -> 'd'
         // Norwegian: ä and ö are held on æ and ø, which are keys of their own.
         // Everywhere else (Slovak `ä`) they sit on a and o - folding Slovak `ä`
         // onto a key the keyboard does not have took every such word out of the

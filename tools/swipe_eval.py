@@ -120,7 +120,7 @@ _FOLD = {}
 for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê", "e"),
                    ("ąàá", "a"), ("łľĺ", "l"), ("ńň", "n"), ("óòô", "o"),
                    ("í", "i"), ("ý", "y"), ("úů", "u"), ("řŕ", "r"),
-                   ("ť", "t"), ("ď", "d"),
+                   ("ť", "t"), ("ďđ", "d"),
                    # Norwegian holds ä ö on its own æ ø keys; everywhere else
                    # (Slovak `ä`) they sit on a and o, as in Dictionary.foldBase.
                    ("ä", "æ" if LANG in ("nb", "isc") else "a"),

@@ -9,4 +9,7 @@
     <string name="subtype_en">English</string>
     <string name="subtype_cs">Čeština</string>
     <string name="subtype_sk">Slovenčina</string>
+    <string name="subtype_sl">Slovenščina</string>
+    <string name="subtype_hr">Hrvatski</string>
+    <string name="subtype_sr">Srpski (latinica)</string>
 </resources>

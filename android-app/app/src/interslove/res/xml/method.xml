@@ -80,4 +80,25 @@
         android:imeSubtypeMode="keyboard"
         android:imeSubtypeExtraValue="lang=sk"
         android:subtypeId="5623" />
+    <subtype
+        android:label="@string/subtype_sl"
+        android:languageTag="sl"
+        android:imeSubtypeLocale="sl"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="lang=sl"
+        android:subtypeId="5624" />
+    <subtype
+        android:label="@string/subtype_hr"
+        android:languageTag="hr"
+        android:imeSubtypeLocale="hr"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="lang=hr"
+        android:subtypeId="5625" />
+    <subtype
+        android:label="@string/subtype_sr"
+        android:languageTag="sr-Latn"
+        android:imeSubtypeLocale="sr"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="lang=sr"
+        android:subtypeId="5626" />
 </input-method>

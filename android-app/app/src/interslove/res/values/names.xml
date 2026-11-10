@@ -15,4 +15,7 @@
     <string name="subtype_en">anglijsky</string>
     <string name="subtype_cs">češsky</string>
     <string name="subtype_sk">slovačsky</string>
+    <string name="subtype_sl">slovenečsky</string>
+    <string name="subtype_hr">hrvatsky</string>
+    <string name="subtype_sr">srbsky</string>
 </resources>

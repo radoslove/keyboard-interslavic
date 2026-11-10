@@ -103,6 +103,18 @@ object Layout {
         'y' to listOf("ý"), 'z' to listOf("ž"),
     )
 
+    /** Slovenian keyboard: only č š ž are its own, each on its base letter. */
+    private val slOwn: Map<Char, List<String>> = mapOf(
+        'c' to listOf("č"), 's' to listOf("š"), 'z' to listOf("ž"),
+    )
+
+    /** Croatian and Serbian (Latin): č ć đ š ž; dž lj nj are two letters each.
+     *  On `c` the order is measured on the two wordlists, weighted by word
+     *  frequency: č (hr 207 263, sr 194 345) before ć (84 218, 107 492). */
+    private val hrSrOwn: Map<Char, List<String>> = mapOf(
+        'c' to listOf("č", "ć"), 'd' to listOf("đ"), 's' to listOf("š"), 'z' to listOf("ž"),
+    )
+
     /** Polish keyboard: the Interslavic letters wait at the end of the popup. */
     private val isvOnPl: Map<Char, List<String>> = mapOf(
         'c' to listOf("č"), 's' to listOf("š"), 'z' to listOf("ž"), 'e' to listOf("ě"),
@@ -241,6 +253,8 @@ object Layout {
         Lang.PL -> plOwn
         Lang.CS -> csOwn
         Lang.SK -> skOwn
+        Lang.SL -> slOwn
+        Lang.HR, Lang.SR -> hrSrOwn
         Lang.NB, Lang.ISC -> nbOwn
         Lang.EN -> emptyMap()
         else -> isvOwn
@@ -280,7 +294,7 @@ object Layout {
 object KeyRows {
 
     /** Languages whose national keyboard is QWERTZ. */
-    val QWERTZ_BY_DEFAULT = setOf(Lang.CS, Lang.SK)
+    val QWERTZ_BY_DEFAULT = setOf(Lang.CS, Lang.SK, Lang.SL, Lang.HR, Lang.SR)
 
     /** Languages where the choice exists at all. */
     fun offered(lang: String) = lang != Lang.NB && lang != Lang.ISC

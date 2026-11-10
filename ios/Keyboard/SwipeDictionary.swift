@@ -137,7 +137,7 @@ final class SwipeDictionary {
             // to Unicode, so it is folded by hand; ä ö fold to æ ø where those
             // are keys, as in `build_swipe_dictionary.py`.
             if let k = Layout.swipeIndex(ch) { keys.append(k); continue }
-            var base = String(ch) == "ł" ? "l"
+            var base = String(ch) == "ł" ? "l" : String(ch) == "đ" ? "d"
                 : String(ch).folding(options: .diacriticInsensitive, locale: nil)
             if Layout.swipeIndex("æ") != nil { base = ch == "ä" ? "æ" : ch == "ö" ? "ø" : base }
             guard base.count == 1, let b = base.first, let k = Layout.swipeIndex(b) else { return nil }

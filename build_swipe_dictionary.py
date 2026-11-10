@@ -75,6 +75,13 @@ if LANG == "sk":
     FOLD = {"á": "a", "ä": "a", "č": "c", "ď": "d", "é": "e", "í": "i",
             "ĺ": "l", "ľ": "l", "ň": "n", "ó": "o", "ô": "o", "ŕ": "r",
             "š": "s", "ť": "t", "ú": "u", "ý": "y", "ž": "z"}
+if LANG == "sl":
+    # Slovenian: only č š ž of its own (Android Layout.slOwn).
+    FOLD = {"č": "c", "š": "s", "ž": "z"}
+if LANG in ("hr", "sr"):
+    # Croatian and Serbian (Latin): č ć đ š ž (Android Layout.hrSrOwn). `đ` is
+    # folded by hand - Unicode does not see it as `d` with a mark.
+    FOLD = {"č": "c", "ć": "c", "đ": "d", "š": "s", "ž": "z"}
 if LANG == "en":
     # Plain a-z: a form with any other letter (`café`) cannot be swiped and
     # is left out, as on Android.

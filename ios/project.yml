@@ -15,7 +15,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "0.5.8"
+    MARKETING_VERSION: "0.5.10"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
@@ -104,13 +104,16 @@ targets:
       - target: KeyboardCS
       - target: KeyboardNB
       - target: KeyboardSK
+      - target: KeyboardSL
+      - target: KeyboardHR
+      - target: KeyboardSR
 
   Keyboard:
     type: app-extension
     platform: iOS
     sources:
       - path: Keyboard
-        excludes: ["Resources/pl_swipe.bin", "Resources/en_swipe.bin", "Resources/cs_swipe.bin", "Resources/nb_swipe.bin", "Resources/sk_swipe.bin"]
+        excludes: ["Resources/pl_swipe.bin", "Resources/en_swipe.bin", "Resources/cs_swipe.bin", "Resources/nb_swipe.bin", "Resources/sk_swipe.bin", "Resources/sl_swipe.bin", "Resources/hr_swipe.bin", "Resources/sr_swipe.bin"]
       - path: Shared
     entitlements:
       path: Keyboard/Keyboard.entitlements
@@ -173,7 +176,7 @@ targets:
       - path: Keyboard
         # Same code, other wordlist. Its own Info.plist is generated below,
         # so the isv one must not be copied in as a resource.
-        excludes: ["Resources/isv_swipe.bin", "Resources/en_swipe.bin", "Resources/cs_swipe.bin", "Resources/nb_swipe.bin", "Resources/sk_swipe.bin", "Info.plist"]
+        excludes: ["Resources/isv_swipe.bin", "Resources/en_swipe.bin", "Resources/cs_swipe.bin", "Resources/nb_swipe.bin", "Resources/sk_swipe.bin", "Resources/sl_swipe.bin", "Resources/hr_swipe.bin", "Resources/sr_swipe.bin", "Info.plist"]
       - path: Shared
     entitlements:
       path: KeyboardPL/KeyboardPL.entitlements
@@ -241,7 +244,7 @@ targets:
       - path: Keyboard
         # Same code, English wordlist (dictionary/main_en.combined, the one
         # Android ships), plain a-z: no own letters on hold, no script key.
-        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Resources/cs_swipe.bin", "Resources/nb_swipe.bin", "Resources/sk_swipe.bin", "Info.plist"]
+        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Resources/cs_swipe.bin", "Resources/nb_swipe.bin", "Resources/sk_swipe.bin", "Resources/sl_swipe.bin", "Resources/hr_swipe.bin", "Resources/sr_swipe.bin", "Info.plist"]
       - path: Shared
     entitlements:
       path: KeyboardEN/KeyboardEN.entitlements
@@ -287,7 +290,7 @@ targets:
         # Same code, Czech wordlist (dictionary/main_cs.combined, 40 959 forms,
         # the one Android ships since 3.5.31), QWERTZ rows by default, the fifteen Czech
         # letters with diacritics on hold of thirteen base keys.
-        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Resources/en_swipe.bin", "Resources/nb_swipe.bin", "Resources/sk_swipe.bin", "Info.plist"]
+        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Resources/en_swipe.bin", "Resources/nb_swipe.bin", "Resources/sk_swipe.bin", "Resources/sl_swipe.bin", "Resources/hr_swipe.bin", "Resources/sr_swipe.bin", "Info.plist"]
       - path: Shared
     entitlements:
       path: KeyboardCS/KeyboardCS.entitlements
@@ -333,7 +336,7 @@ targets:
         # Same code, Slovak wordlist (dictionary/main_sk.combined, 40 474 forms,
         # the one Android ships), QWERTZ rows by default (KeyRows), the
         # seventeen Slovak letters with marks on hold of fourteen base keys.
-        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Resources/en_swipe.bin", "Resources/nb_swipe.bin", "Resources/cs_swipe.bin", "Info.plist"]
+        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Resources/en_swipe.bin", "Resources/nb_swipe.bin", "Resources/cs_swipe.bin", "Resources/sl_swipe.bin", "Resources/hr_swipe.bin", "Resources/sr_swipe.bin", "Info.plist"]
       - path: Shared
     entitlements:
       path: KeyboardSK/KeyboardSK.entitlements
@@ -371,6 +374,144 @@ targets:
             IsASCIICapable: false
             PrefersRightToLeft: false
 
+  KeyboardSL:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Keyboard
+        # Same code, Slovenian wordlist (dictionary/main_sl.combined, 40 725
+        # forms, the one Android ships), QWERTZ rows by default (KeyRows),
+        # č š ž on hold of their base keys.
+        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Resources/en_swipe.bin", "Resources/nb_swipe.bin", "Resources/cs_swipe.bin", "Resources/sk_swipe.bin", "Resources/hr_swipe.bin", "Resources/sr_swipe.bin", "Info.plist"]
+      - path: Shared
+    entitlements:
+      path: KeyboardSL/KeyboardSL.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.radoslove.interslavic]
+    attributes:
+      SystemCapabilities:
+        com.apple.ApplicationGroups.iOS:
+          enabled: 1
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.radoslove.interslavic.slovenian
+      configs:
+        Debug:
+          KEYBOARD_NAME: "sl $(MARKETING_VERSION)"
+        Release:
+          KEYBOARD_NAME: slovenečsky
+    info:
+      path: KeyboardSL/Info.plist
+      properties:
+        CFBundleDisplayName: $(KEYBOARD_NAME)
+        # Without these two XcodeGen writes a literal 1.0 / 1 into the plist, so
+        # MARKETING_VERSION never reached the build and every TestFlight upload
+        # would carry the same build number - the second one is rejected.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        KeyboardLanguage: sl
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController
+          NSExtensionAttributes:
+            # Same four attributes as the isv and pl keyboards (see there).
+            RequestsOpenAccess: true
+            PrimaryLanguage: sl
+            IsASCIICapable: false
+            PrefersRightToLeft: false
+
+  KeyboardHR:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Keyboard
+        # Same code, Croatian wordlist (dictionary/main_hr.combined, 39 689
+        # forms, the one Android ships), QWERTZ rows by default (KeyRows),
+        # č ć đ š ž on hold of their base keys.
+        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Resources/en_swipe.bin", "Resources/cs_swipe.bin", "Resources/nb_swipe.bin", "Resources/sk_swipe.bin", "Resources/sl_swipe.bin", "Resources/sr_swipe.bin", "Info.plist"]
+      - path: Shared
+    entitlements:
+      path: KeyboardHR/KeyboardHR.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.radoslove.interslavic]
+    attributes:
+      SystemCapabilities:
+        com.apple.ApplicationGroups.iOS:
+          enabled: 1
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.radoslove.interslavic.croatian
+      configs:
+        Debug:
+          KEYBOARD_NAME: "hr $(MARKETING_VERSION)"
+        Release:
+          KEYBOARD_NAME: hrvatsky
+    info:
+      path: KeyboardHR/Info.plist
+      properties:
+        CFBundleDisplayName: $(KEYBOARD_NAME)
+        # Without these two XcodeGen writes a literal 1.0 / 1 into the plist, so
+        # MARKETING_VERSION never reached the build and every TestFlight upload
+        # would carry the same build number - the second one is rejected.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        KeyboardLanguage: hr
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController
+          NSExtensionAttributes:
+            # Same four attributes as the isv and pl keyboards (see there).
+            RequestsOpenAccess: true
+            PrimaryLanguage: hr
+            IsASCIICapable: false
+            PrefersRightToLeft: false
+
+  KeyboardSR:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Keyboard
+        # Same code, Serbian LATIN wordlist (dictionary/main_sr.combined,
+        # 39 267 forms, the one Android ships), QWERTZ rows by default
+        # (KeyRows), č ć đ š ž on hold of their base keys.
+        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Resources/en_swipe.bin", "Resources/cs_swipe.bin", "Resources/nb_swipe.bin", "Resources/sk_swipe.bin", "Resources/sl_swipe.bin", "Resources/hr_swipe.bin", "Info.plist"]
+      - path: Shared
+    entitlements:
+      path: KeyboardSR/KeyboardSR.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.radoslove.interslavic]
+    attributes:
+      SystemCapabilities:
+        com.apple.ApplicationGroups.iOS:
+          enabled: 1
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.radoslove.interslavic.serbian
+      configs:
+        Debug:
+          KEYBOARD_NAME: "sr $(MARKETING_VERSION)"
+        Release:
+          KEYBOARD_NAME: srbsky
+    info:
+      path: KeyboardSR/Info.plist
+      properties:
+        CFBundleDisplayName: $(KEYBOARD_NAME)
+        # Without these two XcodeGen writes a literal 1.0 / 1 into the plist, so
+        # MARKETING_VERSION never reached the build and every TestFlight upload
+        # would carry the same build number - the second one is rejected.
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        KeyboardLanguage: sr
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController
+          NSExtensionAttributes:
+            # Same four attributes as the isv and pl keyboards (see there).
+            RequestsOpenAccess: true
+            PrimaryLanguage: sr-Latn
+            IsASCIICapable: false
+            PrefersRightToLeft: false
+
   KeyboardNB:
     type: app-extension
     platform: iOS
@@ -379,7 +520,7 @@ targets:
         # Same code, Norwegian bokmal wordlist (dictionary/main_nb.combined,
         # 49 191 forms), rows of 11 with æ ø å on keys of their own (Android 3.5.8);
         # its swipe file is format version 2 (29 keys).
-        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Resources/en_swipe.bin", "Resources/cs_swipe.bin", "Resources/sk_swipe.bin", "Info.plist"]
+        excludes: ["Resources/isv_swipe.bin", "Resources/pl_swipe.bin", "Resources/en_swipe.bin", "Resources/cs_swipe.bin", "Resources/sk_swipe.bin", "Resources/sl_swipe.bin", "Resources/hr_swipe.bin", "Resources/sr_swipe.bin", "Info.plist"]
       - path: Shared
     entitlements:
       path: KeyboardNB/KeyboardNB.entitlements

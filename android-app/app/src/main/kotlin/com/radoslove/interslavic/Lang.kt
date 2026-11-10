@@ -7,7 +7,8 @@ import android.view.inputmethod.InputMethodSubtype
 
 /**
  * The language the keyboard types: Interslavic (`isv`), Interscandinavian
- * (`isc`), Polish (`pl`), Czech (`cs`), Slovak (`sk`), Norwegian bokmål (`nb`)
+ * (`isc`), Polish (`pl`), Czech (`cs`), Slovak (`sk`), Slovenian (`sl`),
+ * Croatian (`hr`), Serbian in Latin script (`sr`), Norwegian bokmål (`nb`)
  * or English (`en`).
  *
  * iOS lists each language as its own keyboard (`isv 0.2.1`, `pl 0.2.1`,
@@ -33,6 +34,10 @@ object Lang {
     const val EN = "en"
     const val CS = "cs"
     const val SK = "sk"
+    const val SL = "sl"
+    const val HR = "hr"
+    /** Serbian in LATIN script; the code stays `sr`, the subtype says `sr-Latn`. */
+    const val SR = "sr"
 
     /** This app's own language ([App.MAIN]): `isv` in Interslove, `isc` in Mellomskandinavisk. */
     const val MAIN = App.MAIN

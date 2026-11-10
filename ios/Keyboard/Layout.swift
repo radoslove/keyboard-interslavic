@@ -9,7 +9,7 @@ import Foundation
 /// which is the point: one habit across platforms.
 enum Layout {
 
-    /// Which keyboard this extension is: `isv`, `pl`, `cs`, `sk`, `nb` or `en`. One code base, two
+    /// Which keyboard this extension is: `isv`, `pl`, `cs`, `sk`, `sl`, `hr`, `sr` (Latin), `nb` or `en`. One code base, two
     /// entries in Settings -> Keyboards; the language comes from the
     /// extension's Info.plist (`KeyboardLanguage`), set per target.
     static let language: String =
@@ -39,6 +39,12 @@ enum Layout {
                     "i": ["í"], "l": ["ľ", "ĺ"], "n": ["ň"], "o": ["ô", "ó"],
                     "r": ["ŕ"], "s": ["š"], "t": ["ť"], "u": ["ú"], "y": ["ý"],
                     "z": ["ž"]]
+        case "sl":
+            // Android `Layout.slOwn`: č š ž on their base letters.
+            return ["c": ["č"], "s": ["š"], "z": ["ž"]]
+        case "hr", "sr":
+            // Android `Layout.hrSrOwn`: č before ć, measured on both wordlists.
+            return ["c": ["č", "ć"], "d": ["đ"], "s": ["š"], "z": ["ž"]]
         case "en":
             return [:]
         case "nb":
@@ -157,10 +163,10 @@ enum Layout {
 
     /// QWERTY or QWERTZ, chosen per language in the keyboard's settings (Android
     /// `KeyRows`, owner 2026-11-10). The default is the layout of the language's
-    /// own keyboards: QWERTZ for Czech and Slovak. Only `y` and `z` swap, so the
+    /// own keyboards: QWERTZ for Czech, Slovak, Slovenian, Croatian and Serbian. Only `y` and `z` swap, so the
     /// grid stays the same; the decoder reads key centres from the buttons and
     /// the wordlist stores letters, not positions.
-    static let qwertzByDefault: Set<String> = ["cs", "sk"]
+    static let qwertzByDefault: Set<String> = ["cs", "sk", "sl", "hr", "sr"]
     static var qwertzOffered: Bool { language != "nb" }
     static var qwertz: Bool {
         get {
