@@ -696,6 +696,16 @@ final class KeyboardViewController: UIInputViewController {
             })
         }))
 
+        if Layout.qwertzOffered {
+            column.addArrangedSubview(header("Razloženje klaviatury"))
+            column.addArrangedSubview(choiceRow([false, true].map { z in
+                (z ? "QWERTZ" : "QWERTY", Layout.qwertz == z, { [weak self] in
+                    Layout.qwertz = z
+                    self?.buildKeyboard()
+                })
+            }))
+        }
+
         if Layout.language == "isv" {
             column.addArrangedSubview(header("Pismo"))
             let scripts: [(String, Script.Mode)] = [("ABC", .latin), ("АБВ", .cyrillic), ("ⰀⰁⰂ", .glagolitic)]

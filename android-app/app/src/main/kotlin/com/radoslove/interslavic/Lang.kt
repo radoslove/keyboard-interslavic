@@ -7,8 +7,8 @@ import android.view.inputmethod.InputMethodSubtype
 
 /**
  * The language the keyboard types: Interslavic (`isv`), Interscandinavian
- * (`isc`), Polish (`pl`), Czech (`cs`), Norwegian bokmål (`nb`) or
- * English (`en`).
+ * (`isc`), Polish (`pl`), Czech (`cs`), Slovak (`sk`), Norwegian bokmål (`nb`)
+ * or English (`en`).
  *
  * iOS lists each language as its own keyboard (`isv 0.2.1`, `pl 0.2.1`,
  * 7801f4b). The Android equivalent is one input-method SUBTYPE per language
@@ -32,6 +32,7 @@ object Lang {
     const val NB = "nb"
     const val EN = "en"
     const val CS = "cs"
+    const val SK = "sk"
 
     /** This app's own language ([App.MAIN]): `isv` in Interslove, `isc` in Mellomskandinavisk. */
     const val MAIN = App.MAIN

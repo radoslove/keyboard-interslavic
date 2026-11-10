@@ -587,11 +587,12 @@ class KeyboardView(
         // eight keys of row 1 fill the width instead (the plain Android way)
         // costs four points of top-1, because the columns of the alphabet stop
         // lining up with the rows below (`docs/script-tables.md`).
-        val full = Layout.letterRows(lang)
+        val qwertz = KeyRows.isQwertz(context, lang)
+        val full = Layout.letterRows(lang, qwertz = qwertz)
         // Both non-Latin scripts glide `lj` and `nj` over one key each: `љ`/`њ` in
         // Cyrillic, `ⰾⱐ`/`ⱀⱐ` in Glagolitic. The route over `l`+`j` stays too.
         Dictionary.digraphKeys = script != Script.Mode.LATIN
-        Layout.letterRows(lang, script).forEachIndexed { index, row ->
+        Layout.letterRows(lang, script, qwertz).forEachIndexed { index, row ->
             val rv = makeRow()
             val pad = (full[index].length - row.length) / 2f
             if (index == 2) {

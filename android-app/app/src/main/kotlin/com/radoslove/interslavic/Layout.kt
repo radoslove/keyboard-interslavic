@@ -1,5 +1,7 @@
 package com.radoslove.interslavic
 
+import android.content.Context
+
 /**
  * The canonical character table — the same one as `docs/ms-latin-table.md`,
  * `ios/Keyboard/Layout.swift`, `build_keyman.py` and the Android layout XML.
@@ -71,8 +73,8 @@ object Layout {
      * them on the number row, but a phone has no room for a sixth row and the
      * habit `c` held -> `č` is then the same in both languages.
      *
-     * Rows stay QWERTY, not the Czech QWERTZ (owner 2026-11-01): one letter
-     * layout across all six languages, so 🌐 never moves the thumb.
+     * Rows follow [KeyRows]: QWERTZ by default, as on every Czech keyboard
+     * (owner 2026-11-10, reversing the one-layout rule of 2026-11-01).
      *
      * Two keys carry two letters, and the ORDER is measured, not guessed - on
      * `main_cs.combined`, weighted by word frequency: ě (265 564) before é
@@ -85,6 +87,20 @@ object Layout {
         'o' to listOf("ó"), 'r' to listOf("ř"), 's' to listOf("š"),
         't' to listOf("ť"), 'u' to listOf("ů", "ú"), 'y' to listOf("ý"),
         'z' to listOf("ž"),
+    )
+
+    /**
+     * Slovak keyboard: like Czech, every mark on LONGPRESS of its base letter.
+     * Where a key carries two, the order is measured on `main_sk.combined`,
+     * weighted by word frequency: á (419 386) before ä (16 380), ľ (78 351)
+     * before ĺ (1 397), ô (25 172) before ó (20 768).
+     */
+    private val skOwn: Map<Char, List<String>> = mapOf(
+        'a' to listOf("á", "ä"), 'c' to listOf("č"), 'd' to listOf("ď"),
+        'e' to listOf("é"), 'i' to listOf("í"), 'l' to listOf("ľ", "ĺ"),
+        'n' to listOf("ň"), 'o' to listOf("ô", "ó"), 'r' to listOf("ŕ"),
+        's' to listOf("š"), 't' to listOf("ť"), 'u' to listOf("ú"),
+        'y' to listOf("ý"), 'z' to listOf("ž"),
     )
 
     /** Polish keyboard: the Interslavic letters wait at the end of the popup. */
@@ -172,9 +188,23 @@ object Layout {
         "zcvbnm",
     )
 
-    fun letterRows(lang: String, script: Script.Mode = Script.Mode.LATIN): List<String> = when {
+    /** [latinRows] with `y` and `z` swapped, as on the Czech, Slovak, Slovenian,
+     *  Croatian and Serbian keyboards. Only two keys move, so the grid - and with
+     *  it everything the decoder measures in key widths - stays the same. */
+    private val qwertzRows: List<String> = listOf(
+        "qwertzuiop",
+        "asdfghjkl",
+        "yxcvbnm",
+    )
+
+    fun letterRows(
+        lang: String,
+        script: Script.Mode = Script.Mode.LATIN,
+        qwertz: Boolean = false,
+    ): List<String> = when {
         lang == Lang.NB || lang == Lang.ISC -> nbRows
         script != Script.Mode.LATIN -> nonLatinRows
+        qwertz -> qwertzRows
         else -> latinRows
     }
 
@@ -210,6 +240,7 @@ object Layout {
     private fun own(lang: String): Map<Char, List<String>> = when (lang) {
         Lang.PL -> plOwn
         Lang.CS -> csOwn
+        Lang.SK -> skOwn
         Lang.NB, Lang.ISC -> nbOwn
         Lang.EN -> emptyMap()
         else -> isvOwn
@@ -236,5 +267,33 @@ object Layout {
         !uppercase -> s
         s == "ß" -> s
         else -> s.replaceFirstChar { it.uppercaseChar() }
+    }
+}
+
+/**
+ * QWERTY or QWERTZ, chosen per language in the settings (owner 2026-11-10):
+ * "so everyone can type the way they are used to in their own language". The
+ * default is the layout of that language's own keyboards - QWERTZ for Czech and
+ * Slovak (later Slovenian, Croatian, Serbian), QWERTY for the rest. Languages
+ * with their own row of letters (`nb`, `isc`) have no choice to make.
+ */
+object KeyRows {
+
+    /** Languages whose national keyboard is QWERTZ. */
+    val QWERTZ_BY_DEFAULT = setOf(Lang.CS, Lang.SK)
+
+    /** Languages where the choice exists at all. */
+    fun offered(lang: String) = lang != Lang.NB && lang != Lang.ISC
+
+    private const val PREFS = "isv_collector"
+    private fun key(lang: String) = "qwertz_$lang"
+
+    fun isQwertz(context: Context, lang: String): Boolean =
+        offered(lang) && context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            .getBoolean(key(lang), lang in QWERTZ_BY_DEFAULT)
+
+    fun set(context: Context, lang: String, qwertz: Boolean) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+            .putBoolean(key(lang), qwertz).apply()
     }
 }

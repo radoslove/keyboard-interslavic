@@ -73,4 +73,11 @@
         android:imeSubtypeMode="keyboard"
         android:imeSubtypeExtraValue="lang=cs"
         android:subtypeId="5622" />
+    <subtype
+        android:label="@string/subtype_sk"
+        android:languageTag="sk"
+        android:imeSubtypeLocale="sk"
+        android:imeSubtypeMode="keyboard"
+        android:imeSubtypeExtraValue="lang=sk"
+        android:subtypeId="5623" />
 </input-method>

@@ -9,7 +9,7 @@ import Foundation
 /// which is the point: one habit across platforms.
 enum Layout {
 
-    /// Which keyboard this extension is: `isv`, `pl`, `cs`, `nb` or `en`. One code base, two
+    /// Which keyboard this extension is: `isv`, `pl`, `cs`, `sk`, `nb` or `en`. One code base, two
     /// entries in Settings -> Keyboards; the language comes from the
     /// extension's Info.plist (`KeyboardLanguage`), set per target.
     static let language: String =
@@ -32,6 +32,13 @@ enum Layout {
             return ["a": ["á"], "c": ["č"], "d": ["ď"], "e": ["ě", "é"],
                     "i": ["í"], "n": ["ň"], "o": ["ó"], "r": ["ř"], "s": ["š"],
                     "t": ["ť"], "u": ["ů", "ú"], "y": ["ý"], "z": ["ž"]]
+        case "sk":
+            // Android `Layout.skOwn`, same order, measured on the corpus:
+            // á before ä, ľ before ĺ, ô before ó.
+            return ["a": ["á", "ä"], "c": ["č"], "d": ["ď"], "e": ["é"],
+                    "i": ["í"], "l": ["ľ", "ĺ"], "n": ["ň"], "o": ["ô", "ó"],
+                    "r": ["ŕ"], "s": ["š"], "t": ["ť"], "u": ["ú"], "y": ["ý"],
+                    "z": ["ž"]]
         case "en":
             return [:]
         case "nb":
@@ -122,6 +129,9 @@ enum Layout {
         if language == "nb" {
             return [Array("qwertyuiopå"), Array("asdfghjkløæ"), Array("zxcvbnm")]  // Android `nbRows`
         }
+        if latin && qwertz {
+            return [Array("qwertzuiop"), Array("asdfghjkl"), Array("yxcvbnm")]
+        }
         return latin
             ? [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")]
             : [Array("qwertyuiop"), Array("asdfghjkl"), Array("zcvbnm")]
@@ -144,6 +154,22 @@ enum Layout {
     /// Key indices of the two digraph keys in `swipeKeys`.
     static let ljKey = 16   // q
     static let njKey = 22   // w
+
+    /// QWERTY or QWERTZ, chosen per language in the keyboard's settings (Android
+    /// `KeyRows`, owner 2026-11-10). The default is the layout of the language's
+    /// own keyboards: QWERTZ for Czech and Slovak. Only `y` and `z` swap, so the
+    /// grid stays the same; the decoder reads key centres from the buttons and
+    /// the wordlist stores letters, not positions.
+    static let qwertzByDefault: Set<String> = ["cs", "sk"]
+    static var qwertzOffered: Bool { language != "nb" }
+    static var qwertz: Bool {
+        get {
+            guard qwertzOffered else { return false }
+            return Shared.store.object(forKey: "qwertz_" + language) as? Bool
+                ?? qwertzByDefault.contains(language)
+        }
+        set { Shared.store.set(newValue, forKey: "qwertz_" + language) }
+    }
 
     /// How many key widths a letter row spans. Fixed by the LATIN top row, so
     /// shift and backspace grow instead of the letters when a script drops keys.

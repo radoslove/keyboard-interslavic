@@ -45,7 +45,7 @@ object Ui {
     fun langName(ui: String, lang: String): String {
         val own = when (lang) {
             Lang.ISV -> "Medžuslovjansky"; Lang.ISC -> "Mellomskandinavisk"; Lang.PL -> "Polski"
-            Lang.NB -> "Norsk bokmål"; Lang.CS -> "Čeština"; else -> "English"
+            Lang.NB -> "Norsk bokmål"; Lang.CS -> "Čeština"; Lang.SK -> "Slovenčina"; else -> "English"
         }
         val gloss = mapOf(
             Lang.ISV to mapOf("pl" to "międzysłowiański", "nb" to "interslavisk", "en" to "Interslavic"),
@@ -54,6 +54,7 @@ object Ui {
             Lang.NB to mapOf(MS to "norvežsky", "pl" to "norweski", "en" to "Norwegian"),
             Lang.EN to mapOf(MS to "anglijsky", "pl" to "angielski", "nb" to "engelsk"),
             Lang.CS to mapOf(MS to "češsky", "pl" to "czeski", "nb" to "tsjekkisk", "en" to "Czech"),
+            Lang.SK to mapOf(MS to "slovačsky", "pl" to "słowacki", "nb" to "slovakisk", "en" to "Slovak"),
         )[lang]?.get(ui)
         return if (gloss == null || gloss == own) own else "$own ($gloss)"
     }
@@ -177,6 +178,8 @@ object Ui {
         "words_none" to row("Ješče ničto ne jest dodano.", "No words added yet.", "Nie dodano jeszcze słów.", "Ingen ord lagt til ennå."),
         "words_remove" to row("Odstrani", "Remove", "Usuń", "Fjern"),
         "words_removed" to row("Odstranjeno", "Removed", "Usunięto", "Fjernet"),
+        "layout_head" to row("Razloženje klaviatury", "Key layout", "Układ klawiszy", "Tastaturoppsett"),
+        "layout_body" to row("Standardno kako v kraju togo jezyka.", "By default as in that language's country.", "Domyślnie jak w kraju danego języka.", "Som standard som i landet til språket."),
         "theme_head" to row("Tema klaviatury", "Keyboard theme", "Motyw klawiatury", "Tastaturtema"),
         "theme_auto" to row("Avtomatično, kako telefon", "Automatic, as the phone", "Automatycznie, jak telefon", "Automatisk, som telefonen"),
         "theme_light" to row("Světla", "Light", "Jasny", "Lyst"),

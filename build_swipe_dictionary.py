@@ -62,11 +62,19 @@ if LANG == "pl":
     FOLD = {"ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n",
             "ó": "o", "ś": "s", "ź": "z", "ż": "z"}
 if LANG == "cs":
-    # Czech: QWERTY rows (owner 2026-11-01, not Czech QWERTZ), the fifteen
-    # letters with diacritics held on thirteen base keys, as on Android 3.5.31.
+    # Czech: the fifteen letters with diacritics held on thirteen base keys,
+    # as on Android 3.5.31. Rows (QWERTY or QWERTZ) do not matter here: the
+    # file stores LETTER indices, and the keyboard measures where each sits.
     FOLD = {"á": "a", "č": "c", "ď": "d", "é": "e", "ě": "e", "í": "i",
             "ň": "n", "ó": "o", "ř": "r", "š": "s", "ť": "t", "ú": "u",
             "ů": "u", "ý": "y", "ž": "z"}
+if LANG == "sk":
+    # Slovak: seventeen letters with marks on fourteen base keys, as on
+    # Android (Layout.skOwn). `ä` sits on `a` here - on the Norwegian keyboard
+    # it folds to its own `æ` key, which Slovak does not have.
+    FOLD = {"á": "a", "ä": "a", "č": "c", "ď": "d", "é": "e", "í": "i",
+            "ĺ": "l", "ľ": "l", "ň": "n", "ó": "o", "ô": "o", "ŕ": "r",
+            "š": "s", "ť": "t", "ú": "u", "ý": "y", "ž": "z"}
 if LANG == "en":
     # Plain a-z: a form with any other letter (`café`) cannot be swiped and
     # is left out, as on Android.

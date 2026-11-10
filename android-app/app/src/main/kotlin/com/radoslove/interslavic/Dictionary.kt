@@ -286,13 +286,17 @@ object Dictionary {
      *  lift ([Lift]): which KEY the first and last letter of a glided word sat on. */
     fun foldBase(c: Char): Char = when (c) {
         'č', 'ć' -> 'c'; 'š', 'ś' -> 's'; 'ž', 'ż', 'ź' -> 'z'; 'ě', 'ę', 'é', 'è', 'ê' -> 'e'
-        'ą', 'à', 'á' -> 'a'; 'ł' -> 'l'; 'ń', 'ň' -> 'n'; 'ó', 'ò', 'ô' -> 'o'
+        'ą', 'à', 'á' -> 'a'; 'ł', 'ľ', 'ĺ' -> 'l'; 'ń', 'ň' -> 'n'; 'ó', 'ò', 'ô' -> 'o'
         // Czech: the length marks and háčeks sit on their base key, like every other
         // held letter. Missing even one of these kills the glide for every word
         // that contains it - the decoder would look for a key that is not there.
-        'í' -> 'i'; 'ý' -> 'y'; 'ú', 'ů' -> 'u'; 'ř' -> 'r'; 'ť' -> 't'; 'ď' -> 'd'
+        'í' -> 'i'; 'ý' -> 'y'; 'ú', 'ů' -> 'u'; 'ř', 'ŕ' -> 'r'; 'ť' -> 't'; 'ď' -> 'd'
         // Norwegian: ä and ö are held on æ and ø, which are keys of their own.
-        'ä' -> 'æ'; 'ö' -> 'ø'
+        // Everywhere else (Slovak `ä`) they sit on a and o - folding Slovak `ä`
+        // onto a key the keyboard does not have took every such word out of the
+        // glide.
+        'ä' -> if (current == Lang.NB || current == Lang.ISC) 'æ' else 'a'
+        'ö' -> if (current == Lang.NB || current == Lang.ISC) 'ø' else 'o'
         else -> c
     }
 

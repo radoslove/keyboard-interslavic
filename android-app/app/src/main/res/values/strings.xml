@@ -8,4 +8,5 @@
     <string name="subtype_nb">Norsk</string>
     <string name="subtype_en">English</string>
     <string name="subtype_cs">Čeština</string>
+    <string name="subtype_sk">Slovenčina</string>
 </resources>

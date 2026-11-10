@@ -81,6 +81,11 @@ LATIN_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"]
 #                is what `Layout.letterRows` + `KeyboardView.spacer` build on
 #                the phone.
 SCRIPT = os.environ.get("SWIPE_SCRIPT", "latin")
+# SWIPE_ROWS=qwertz swaps `y` and `z`, as the Czech and Slovak keyboards do
+# (KeyRows, owner 2026-11-10). Latin script only; the grid stays the same.
+QWERTZ = os.environ.get("SWIPE_ROWS", "qwerty") == "qwertz"
+if QWERTZ:
+    LATIN_ROWS = ["qwertzuiop", "asdfghjkl", "yxcvbnm"]
 ROWS = LATIN_ROWS if SCRIPT == "latin" else ["qwertyuiop", "asdfghjkl", "zcvbnm"]
 DIGRAPH_KEYS = SCRIPT != "latin"
 
@@ -113,9 +118,13 @@ CENTERS = build_centers()
 # keyboard. If a letter is missing here, the harness lies rather than fails.
 _FOLD = {}
 for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê", "e"),
-                   ("ąàá", "a"), ("ł", "l"), ("ńň", "n"), ("óòô", "o"),
-                   ("í", "i"), ("ý", "y"), ("úů", "u"), ("ř", "r"),
-                   ("ť", "t"), ("ď", "d"), ("ä", "æ"), ("ö", "ø")]:
+                   ("ąàá", "a"), ("łľĺ", "l"), ("ńň", "n"), ("óòô", "o"),
+                   ("í", "i"), ("ý", "y"), ("úů", "u"), ("řŕ", "r"),
+                   ("ť", "t"), ("ď", "d"),
+                   # Norwegian holds ä ö on its own æ ø keys; everywhere else
+                   # (Slovak `ä`) they sit on a and o, as in Dictionary.foldBase.
+                   ("ä", "æ" if LANG in ("nb", "isc") else "a"),
+                   ("ö", "ø" if LANG in ("nb", "isc") else "o")]:
     for _ch in _src:
         _FOLD[_ch] = _dst
 

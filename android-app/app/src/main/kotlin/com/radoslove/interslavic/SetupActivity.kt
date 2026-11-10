@@ -180,6 +180,18 @@ class SetupActivity : Activity() {
             }
         })
 
+        // QWERTY or QWERTZ per language; the default is that language's own
+        // keyboards (owner 2026-11-10). Read when the keyboard next draws.
+        section(root, "layout_head", "layout_body")
+        for (lang in Lang.ALL.filter { KeyRows.offered(it) }) {
+            root.addView(Switch(this).apply {
+                text = "${langName(lang)} · QWERTZ"
+                textSize = 17f
+                isChecked = KeyRows.isQwertz(this@SetupActivity, lang)
+                setOnCheckedChangeListener { _, on -> KeyRows.set(this@SetupActivity, lang, on) }
+            })
+        }
+
         // Which marks are typed how often - the measurement behind key placement.
         section(root, "sym_head", "sym_body")
         symbolsNow = body("")
