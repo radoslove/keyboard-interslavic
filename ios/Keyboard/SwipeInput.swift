@@ -260,12 +260,14 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         sample = nil
         let lift = touchLift
         let mine = userWordKeys
+        let digraph = Script.mode != .latin    // `q` `w` are `lj` `nj` there
         queue.async { [weak self] in
-            let decoder = SwipeDecoder(dictionary: dictionary,
+            var decoder = SwipeDecoder(dictionary: dictionary,
                                        keyCentres: centres,
                                        keyWidth: keyWidth,
                                        touchLift: lift,
                                        userWords: mine)
+            decoder.digraphKeys = digraph
             let words = decoder.decode(path: path, times: times).map(\.word)
             swipeLog.notice("isv-swipe: \(path.count, privacy: .public) points -> \(words.joined(separator: " "), privacy: .public)")
             #if DEBUG
@@ -286,8 +288,23 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     func learn(from word: String) {
         guard let s = sample else { return }
         sample = nil
-        guard let keys = SwipeDictionary.keys(of: word), keys.count >= 2,
-              let a = keys.first, let b = keys.last,
+        guard var keys = SwipeDictionary.keys(of: word), keys.count >= 2 else { return }
+        // In Cyrillic and Glagolitic a word with `lj`/`nj` may have been drawn
+        // over the digraph key: measure against the route whose ends lie nearer
+        // to where the glide began and ended, or `ljudi` drawn from `љ` reads
+        // as a thumb half a row off and drags the learned lift with it.
+        if Script.mode != .latin,
+           let route = keys.map(UInt8.init).withUnsafeBufferPointer({ SwipeDecoder.digraphRoute($0) }) {
+            func gap(_ k: [Int]) -> CGFloat {
+                guard let a = k.first, let b = k.last,
+                      a < s.centres.count, b < s.centres.count else { return .greatestFiniteMagnitude }
+                return hypot(s.centres[a].x - s.start.x, s.centres[a].y - s.start.y)
+                    + hypot(s.centres[b].x - s.end.x, s.centres[b].y - s.end.y)
+            }
+            let alt = route.map(Int.init)
+            if gap(alt) < gap(keys) { keys = alt }
+        }
+        guard let a = keys.first, let b = keys.last,
               a < s.centres.count, b < s.centres.count, s.keyWidth > 0
         else { return }
         let first = s.centres[a], last = s.centres[b]

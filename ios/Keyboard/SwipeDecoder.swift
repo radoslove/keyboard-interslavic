@@ -52,6 +52,34 @@ struct SwipeDecoder {
     /// deliberate act; it should win its shape, not every shape.
     var userWords: [(word: String, keys: [UInt8])] = []
     static let userWordFreq: Double = 140
+    /// Cyrillic and Glagolitic: `q` and `w` are the `lj` and `nj` keys. A word
+    /// with a digraph then has TWO routes - over the one key, or over `l`/`n`
+    /// and `j`, which are still keys of their own - and the better fit scores
+    /// (Android 3.6.14, `Dictionary.digraphKeys`). With one route only, the
+    /// two-letter gesture returned the word 0 times in 126.
+    var digraphKeys = false
+
+    private static let keyJ: UInt8 = 9, keyL: UInt8 = 11, keyN: UInt8 = 13
+    private static let keyQ = UInt8(Layout.ljKey), keyW = UInt8(Layout.njKey)
+
+    /// The route over the digraph keys: `l j` -> `q`, `n j` -> `w`. Nil when
+    /// the word has no digraph, so the caller scores the plain route alone.
+    static func digraphRoute(_ keys: UnsafeBufferPointer<UInt8>) -> [UInt8]? {
+        var out: [UInt8]?
+        var i = 0
+        while i < keys.count {
+            let k = keys[i]
+            if i + 1 < keys.count, keys[i + 1] == keyJ, k == keyL || k == keyN {
+                if out == nil { out = Array(keys[0..<i]) }
+                out!.append(k == keyL ? keyQ : keyW)
+                i += 2
+                continue
+            }
+            out?.append(k)
+            i += 1
+        }
+        return out
+    }
 
     func decode(path rawPath: [CGPoint], times: [Double] = [], limit: Int = 4) -> [Candidate] {
         guard keyWidth > 0, rawPath.count >= 2 else { return [] }
@@ -81,19 +109,46 @@ struct SwipeDecoder {
         var best: [(score: Double, offset: Int, length: Int)] = []
         var worstKept = Double.greatestFiniteMagnitude
 
-        for first in starts {
-            for last in ends {
-                dictionary.forEachEntry(first: first.key, last: last.key) { entry in
-                    guard entry.keys.count <= maxLetters else { return }
-                    guard let ideal = idealPath(for: entry.keys) else { return }
+        /// RMS distance of a word's ideal path from the finger, in key widths;
+        /// with digraph keys on, the better of the word's two routes.
+        func fit(_ keys: UnsafeBufferPointer<UInt8>) -> Double? {
+            func one(_ k: UnsafeBufferPointer<UInt8>) -> Double? {
+                guard let ideal = idealPath(for: k) else { return nil }
+                var sum = 0.0
+                for i in 0..<Self.samples {
+                    let dx = Double(path[i].x - ideal[i].x)
+                    let dy = Double(path[i].y - ideal[i].y)
+                    sum += dx * dx + dy * dy
+                }
+                return (sum / Double(Self.samples)).squareRoot() / Double(keyWidth)
+            }
+            let plain = one(keys)
+            guard digraphKeys, let route = Self.digraphRoute(keys),
+                  let alt = route.withUnsafeBufferPointer({ one($0) })
+            else { return plain }
+            return min(plain ?? alt, alt)
+        }
 
-                    var sum = 0.0
-                    for i in 0..<Self.samples {
-                        let dx = Double(path[i].x - ideal[i].x)
-                        let dy = Double(path[i].y - ideal[i].y)
-                        sum += dx * dx + dy * dy
-                    }
-                    let rms = (sum / Double(Self.samples)).squareRoot() / Double(keyWidth)
+        // A glide that starts on `љ` belongs to a word filed under `l` (the
+        // wordlist is bucketed by its LETTERS), and one that ends on `љ`/`њ`
+        // to a word whose last letter is `j`.
+        var firstKeys = starts.map(\.key), lastKeys = ends.map(\.key)
+        if digraphKeys {
+            if firstKeys.contains(Layout.ljKey) { firstKeys.append(Int(Self.keyL)) }
+            if firstKeys.contains(Layout.njKey) { firstKeys.append(Int(Self.keyN)) }
+            if lastKeys.contains(Layout.ljKey) || lastKeys.contains(Layout.njKey) {
+                lastKeys.append(Int(Self.keyJ))
+            }
+            var seenF = Set<Int>(), seenL = Set<Int>()
+            firstKeys = firstKeys.filter { seenF.insert($0).inserted }
+            lastKeys = lastKeys.filter { seenL.insert($0).inserted }
+        }
+
+        for first in firstKeys {
+            for last in lastKeys {
+                dictionary.forEachEntry(first: first, last: last) { entry in
+                    guard entry.keys.count <= maxLetters else { return }
+                    guard let rms = fit(entry.keys) else { return }
 
                     // Frequency breaks ties between shapes the finger cannot
                     // distinguish anyway. It nudges, it does not decide: a
@@ -113,20 +168,13 @@ struct SwipeDecoder {
 
         // User words: few, so simply scored one by one. A negative offset
         // marks them in `best`: -1 is userWords[0], -2 userWords[1], ...
-        let startKeys = Set(starts.map(\.key)), endKeys = Set(ends.map(\.key))
+        let startKeys = Set(firstKeys), endKeys = Set(lastKeys)
         for (i, extra) in userWords.enumerated() {
             guard let f = extra.keys.first, let l = extra.keys.last,
                   startKeys.contains(Int(f)), endKeys.contains(Int(l)),
                   extra.keys.count <= maxLetters,
-                  let ideal = extra.keys.withUnsafeBufferPointer({ idealPath(for: $0) })
+                  let rms = extra.keys.withUnsafeBufferPointer({ fit($0) })
             else { continue }
-            var sum = 0.0
-            for j in 0..<Self.samples {
-                let dx = Double(path[j].x - ideal[j].x)
-                let dy = Double(path[j].y - ideal[j].y)
-                sum += dx * dx + dy * dy
-            }
-            let rms = (sum / Double(Self.samples)).squareRoot() / Double(keyWidth)
             best.append((rms - Self.freqWeight * (Self.userWordFreq + 1).squareRoot(), -1 - i, 0))
         }
 

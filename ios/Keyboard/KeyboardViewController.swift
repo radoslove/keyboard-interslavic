@@ -198,8 +198,8 @@ final class KeyboardViewController: UIInputViewController {
             wide.append(shiftKey)
         }
         // A script with fewer letters keeps the LATIN key width: Cyrillic and
-        // Glagolitic have no `q w x`, and instead of eight keys stretching over
-        // the whole width, the row gets an empty cell at each end (row 3 grows
+        // Glagolitic have no `x` (`q` `w` are `lj` `nj` there), and instead of
+        // six keys stretching over the row, it gets an empty cell at each end (row 3 grows
         // shift and backspace for the same reason, just above). The stack is
         // `fillEqually`, so an empty cell is exactly one key wide, and the
         // columns of the alphabet stay where the decoder expects them - the
@@ -438,7 +438,9 @@ final class KeyboardViewController: UIInputViewController {
     /// The label in the chosen script; the key itself stays the Latin letter.
     private func title(for ch: Character) -> String {
         guard !showingNumeric, ch.isLetter else { return String(ch) }
-        return Script.out(shift == .off ? String(ch) : ch.uppercased())
+        let latin = Layout.keyText(shift == .off ? ch : Character(ch.uppercased()),
+                                   latin: Script.mode == .latin)
+        return Script.out(latin)
     }
 
     private var isUppercase: Bool { shift != .off }
@@ -447,7 +449,8 @@ final class KeyboardViewController: UIInputViewController {
 
     @objc private func tapCharacter(_ sender: UIButton) {
         guard let id = sender.accessibilityIdentifier, let ch = id.first else { return }
-        insert(isUppercase && ch.isLetter ? ch.uppercased() : String(ch))
+        let typed: Character = isUppercase && ch.isLetter ? Character(ch.uppercased()) : ch
+        insert(showingNumeric ? String(typed) : Layout.keyText(typed, latin: Script.mode == .latin))
         if ch.isLetter { lastLetterTapAt = Date() }
         if shift == .on { shift = .off; refreshTitles() }
     }
@@ -1315,11 +1318,34 @@ extension KeyboardViewController: SwipeHost {
         keys.forEach { $0() }
     }
 
+    /// A glide that produced NOTHING still ends the glide before it (Android
+    /// 3.7, `KeyboardView.glideMissed`). Returning early left the state of the
+    /// word committed EARLIER armed: the next backspace wiped it whole, the
+    /// bar still offered its old alternatives, and a letter typed inside the
+    /// extend window glued onto it. Nothing is deleted - the previous word
+    /// stays as typed, it just stops being "the word just glided".
+    ///
+    /// The owed space is kept: it belongs to the word standing in the text.
+    /// The earlier word was already learned from in `swipeWillDecode`; the
+    /// sample of THIS gesture is dropped, because no word came from it.
+    private func glideMissed() {
+        lastSwipedWord = nil
+        lastCandidates = []
+        swipeSuffix = ""
+        swipeCommittedAt = .distantPast
+        trimAfterWipe = nil
+        completingPrefix = nil
+        swipeInput.forgetSample()
+        // Deliberately not refreshCompletions(): the cursor sits after the
+        // previous word, so completions would continue a word nobody is typing.
+        showSuggestions([])
+    }
+
     func swipeDidFinish(candidates: [String]) {
         decoding = max(0, decoding - 1)
         defer { if decoding == 0 { flushQueuedKeys() } }
         guard let best = candidates.first else {
-            showSuggestions([])
+            glideMissed()
             return
         }
         completingPrefix = nil

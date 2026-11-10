@@ -107,8 +107,11 @@ enum Layout {
         "!": ["¡"],
     ]
 
-    /// Cyrillic and Glagolitic have no letter on `q w x`, so in those scripts the
-    /// three keys are gone (owner 2026-11-08; Android `Layout.noQwxRows`).
+    /// Cyrillic and Glagolitic have no letter on `x`, so in those scripts that
+    /// key is gone, and `q` `w` carry the digraphs `lj` `nj` - `љ` `њ` where the
+    /// Serbian and Macedonian keyboards have them, `ⰾⱐ` `ⱀⱐ` in Glagolitic
+    /// (Android 3.6.14, `Layout.nonLatinRows`). Inside, the keys stay `q` and
+    /// `w`; `keyText` says what they write.
     static var letterRows: [[Character]] { rows(latin: Script.mode == .latin) }
 
     /// The rows in LATIN - the grid the swipe decoder is calibrated to, and the
@@ -121,8 +124,26 @@ enum Layout {
         }
         return latin
             ? [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")]
-            : [Array("ertyuiop"), Array("asdfghjkl"), Array("zcvbnm")]
+            : [Array("qwertyuiop"), Array("asdfghjkl"), Array("zcvbnm")]
     }
+
+    /// What a letter key WRITES, in Latin: its own letter, except `q` and `w`
+    /// outside Latin, which write `lj` and `nj`. Everything downstream (the
+    /// wordlist, the glide, `Script.out`) keeps seeing the two letters.
+    static func keyText(_ ch: Character, latin: Bool) -> String {
+        guard !latin else { return String(ch) }
+        switch ch {
+        case "q": return "lj"
+        case "Q": return "Lj"
+        case "w": return "nj"
+        case "W": return "Nj"
+        default: return String(ch)
+        }
+    }
+
+    /// Key indices of the two digraph keys in `swipeKeys`.
+    static let ljKey = 16   // q
+    static let njKey = 22   // w
 
     /// How many key widths a letter row spans. Fixed by the LATIN top row, so
     /// shift and backspace grow instead of the letters when a script drops keys.
