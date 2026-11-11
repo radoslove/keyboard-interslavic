@@ -18,7 +18,7 @@ enum Layout {
         ("isv", "Medžuslovjansky"), ("pl", "Polski"), ("cs", "češsky"),
         ("sk", "slovačsky"), ("sl", "slovenečsky"), ("hr", "hrvatsky"),
         ("sr", "srbsky"), ("bs", "bosnijsky"), ("mk", "makedonsky"),
-        ("ru", "russky"), ("uk", "ukrajinsky"), ("bg", "bulgarsky"), ("sla", "praslovjansky"), ("nb", "norvežsky"),
+        ("ru", "russky"), ("uk", "ukrajinsky"), ("bg", "bulgarsky"), ("be", "bělorussky"), ("sla", "praslovjansky"), ("nb", "norvežsky"),
         ("en", "English"),
     ]
 
@@ -119,6 +119,11 @@ enum Layout {
             // `bg(phonetic)`, owner 2026-11-11): the keys the phone lacks are
             // held on their Latin match, ш before щ (frequency in the list).
             return ["s": ["š", "ŝ"], "c": ["č"], "u": ["ü"], "i": ["ì"]]
+        case "be":
+            // Belarusian `by(phonetic)` (owner 2026-11-11, Android `beOwn`):
+            // held on their Latin match, ordered by share of running words in
+            // the Leipzig corpora - ў before ю on u, э before ё on e.
+            return ["s": ["š"], "c": ["č"], "u": ["ŭ", "ü"], "e": ["ê", "ë"]]
         case "sla":
             // Proto-Slavic in the Wiktionary notation (tools/build_sla_wordlist.py):
             // `ъ` `ь` have keys of their own (`q` `f`), the rest is held,
@@ -221,7 +226,7 @@ enum Layout {
         // (Android `srCyrillicRows`, `mkCyrillicRows`).
         // Russian, phonetic: its letters take all 26 Latin keys, QWERTY grid.
         // Proto-Slavic too: `ъ` on `q`, `ь` on `f`, every other key its letter.
-        if ["ru", "uk", "bg", "sla"].contains(language) {
+        if ["ru", "uk", "bg", "be", "sla"].contains(language) {
             return [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")]
         }
         if !latin && (language == "sr" || language == "mk") {
@@ -242,7 +247,7 @@ enum Layout {
         guard !latin else { return String(ch) }
         // Russian, phonetic: every key writes its own letter (я on q, ш on w);
         // the Interslavic `lj`/`nj` keys are not part of this layout.
-        if ["ru", "uk", "bg", "sla"].contains(language) { return String(ch) }
+        if ["ru", "uk", "bg", "be", "sla"].contains(language) { return String(ch) }
         // Macedonian: ONE letter per key - the wordlist carries ǉ ǌ ǆ as
         // single characters (Android `keyText`, Lang.MK).
         if language == "mk" {
@@ -282,11 +287,15 @@ enum Layout {
     static let qwertzByDefault: Set<String> = ["cs", "sk", "sl", "hr", "sr", "bs"]
     /// Not for Norwegian (rows of 11) nor Macedonian, which is Cyrillic only
     /// and has its own grid (Android `KeyRows.offered`).
-    static var qwertzOffered: Bool { !["nb", "mk", "ru", "uk", "bg", "sla"].contains(language) }
+    static var qwertzOffered: Bool { !["nb", "mk", "ru", "uk", "bg", "be", "sla"].contains(language) }
 
     /// Languages whose keys each write ONE letter, so the Interslavic digraph
     /// routes (`lj` `nj` over `q` `w`) must stay off.
-    static var singleLetterKeys: Bool { ["mk", "ru", "uk", "bg", "sla"].contains(language) }
+    /// Languages that write an apostrophe INSIDE words (`п'ять`, `сям'я`);
+    /// Android `Lang.APOSTROPHE_IN_WORD`.
+    static var apostropheInWord: Bool { ["uk", "be"].contains(language) }
+
+    static var singleLetterKeys: Bool { ["mk", "ru", "uk", "bg", "be", "sla"].contains(language) }
     static var qwertz: Bool {
         get {
             guard qwertzOffered else { return false }

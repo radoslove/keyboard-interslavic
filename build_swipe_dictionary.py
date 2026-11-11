@@ -109,6 +109,11 @@ if LANG == "bg":
     # measured arrangements, whose held letters never collide.
     FOLD = {"č": "c", "š": "s", "ŝ": "s", "ü": "u", "ì": "i", "ŵ": "w",
             "ḃ": "b", "ä": "a"}
+if LANG == "be":
+    # Belarusian's internal Latin (tools/build_cyrillic_wordlist.py BE_A,
+    # `by(phonetic)`): the held letters fold onto their key (Android
+    # Dictionary.foldBase); the apostrophe (`сям'я`) is skipped as in uk.
+    FOLD = {"š": "s", "č": "c", "ŭ": "u", "ü": "u", "ê": "e", "ë": "e"}
 if LANG == "en":
     # Plain a-z: a form with any other letter (`café`) cannot be swiped and
     # is left out, as on Android.

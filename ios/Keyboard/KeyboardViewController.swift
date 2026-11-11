@@ -477,7 +477,7 @@ final class KeyboardViewController: UIInputViewController {
     /// inside one (`п'ять`, `сім'я`), or completions and own words would break
     /// the word in two at it (owner 2026-11-11).
     private func wordChar(_ c: Character) -> Bool {
-        c.isLetter || (c == "'" && Layout.language == "uk")
+        c.isLetter || (c == "'" && Layout.apostropheInWord)
     }
 
     /// The word right before the cursor, as shown; a leading apostrophe is a
@@ -1037,7 +1037,7 @@ final class KeyboardViewController: UIInputViewController {
         // not find it, and the only case where `＋` is offered for a word the
         // list already has. Kept in Latin, like everything inside.
         let before = textDocumentProxy.documentContextBeforeInput ?? ""
-        let apostrophe = ch == "'" && Layout.language == "uk" && before.last?.isLetter == true
+        let apostrophe = ch == "'" && Layout.apostropheInWord && before.last?.isLetter == true
         if apostrophe {
             // Inside a Ukrainian word: the word goes on, also after a glide.
             tappedWord = (tappedWord ?? Script.toLatin(trailingWord(before))) + latin

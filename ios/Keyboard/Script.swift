@@ -34,7 +34,7 @@ enum Script {
         case "sr": return [.latin, .cyrillic]
         // Proto-Slavic is Latin, but `ъ` `ь` live on `q` `f` inside, so it goes
         // through the same one-mode table as Russian; no script key is shown.
-        case "mk", "ru", "uk", "bg", "sla": return [.cyrillic]
+        case "mk", "ru", "uk", "bg", "be", "sla": return [.cyrillic]
         default: return [.latin]
         }
     }
@@ -150,6 +150,17 @@ enum Script {
         ("q", "я"),
     ]
 
+    /// Belarusian `by(phonetic)` (`tools/build_cyrillic_wordlist.py` BE_A,
+    /// Android `CYRILLIC_BE` verbatim): one character on each side.
+    private static let belarusianPairs: [(String, String)] = [
+        ("a", "а"), ("b", "б"), ("w", "в"), ("g", "г"), ("d", "д"), ("e", "е"),
+        ("ë", "ё"), ("v", "ж"), ("z", "з"), ("i", "і"), ("j", "й"), ("k", "к"),
+        ("l", "л"), ("m", "м"), ("n", "н"), ("o", "о"), ("p", "п"), ("r", "р"),
+        ("s", "с"), ("t", "т"), ("u", "у"), ("ŭ", "ў"), ("f", "ф"), ("h", "х"),
+        ("c", "ц"), ("č", "ч"), ("š", "ш"), ("y", "ы"), ("x", "ь"), ("ê", "э"),
+        ("ü", "ю"), ("q", "я"),
+    ]
+
     /// Proto-Slavic: only the two yers differ from the internal Latin; every
     /// other letter passes through unchanged.
     private static let protoSlavicPairs: [(String, String)] = [("q", "ъ"), ("f", "ь")]
@@ -162,13 +173,14 @@ enum Script {
         case "ru": return russianPairs
         case "uk": return ukrainianPairs
         case "bg": return bulgarianPairs
+        case "be": return belarusianPairs
         case "sla": return protoSlavicPairs
         default: return cyrillicPairs
         }
     }
     /// Built once per language; the language now changes while the keyboard runs.
     private static let maps: [String: [String: String]] = Dictionary(uniqueKeysWithValues:
-        ["isv", "sr", "mk", "ru", "uk", "bg", "sla"].map { ($0, Dictionary(uniqueKeysWithValues: table($0))) })
+        ["isv", "sr", "mk", "ru", "uk", "bg", "be", "sla"].map { ($0, Dictionary(uniqueKeysWithValues: table($0))) })
     private static var cyrillicMap: [String: String] {
         maps[Layout.language] ?? maps["isv"]!
     }
@@ -255,7 +267,7 @@ enum Script {
     // MARK: Back to Latin (for wordlist lookups)
 
     private static let reverses: [String: [(String, String)]] = Dictionary(uniqueKeysWithValues:
-        ["isv", "sr", "mk", "ru", "uk", "bg", "sla"].map { lang in
+        ["isv", "sr", "mk", "ru", "uk", "bg", "be", "sla"].map { lang in
             (lang, table(lang).map { ($0.1, $0.0) }.sorted { $0.0.count > $1.0.count })
         })
     private static var reverseCyrillic: [(String, String)] {
