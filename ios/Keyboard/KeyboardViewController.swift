@@ -872,7 +872,10 @@ final class KeyboardViewController: UIInputViewController {
         // the languages ticked here, 🌐 steps through them. At least one stays.
         column.addArrangedSubview(header("Jezyki"))
         let on = Layout.enabled
-        let langs = Layout.all.map(\.code)
+        // Interslavic first, the rest alphabetically by the code shown, so a
+        // language is easy to find (owner 2026-11-11, variant B).
+        let codes = Layout.all.map(\.code)
+        let langs = codes.filter { $0 == "isv" } + codes.filter { $0 != "isv" }.sorted()
         for start in stride(from: 0, to: langs.count, by: 4) {
             let chunk = langs[start..<min(start + 4, langs.count)]
             column.addArrangedSubview(choiceRow(chunk.map { code in
@@ -1278,18 +1281,22 @@ final class KeyboardViewController: UIInputViewController {
         view.addSubview(strip)
 
         // A keyboard extension is clipped to its own frame - it cannot draw
-        // over the app above it the way the system keyboard does. So a popup
-        // pinned above a TOP ROW key would be laid out off-screen and simply
-        // never appear. Only row 0 has nowhere to go; measuring this in points
-        // was a mistake, because row 1 missed the threshold by a fraction and
-        // dropped below too. The row index is exact and cannot drift.
-        let fitsAbove = key.tag > 0
+        // over the app above it the way the system keyboard does. Rows 1-3
+        // always have a full row above them. Row 0 has only the suggestion
+        // strip, so there the popup goes OVER that strip, lower than elsewhere
+        // but above the finger (owner 2026-11-11: it showed below `u` and `e`,
+        // hidden under the thumb). It drops below the key only when even the
+        // strip is missing (less than `minAbove` points above the key).
+        let minAbove: CGFloat = 28
+        let roomAbove = key.convert(key.bounds, to: view).minY - 3
+        let fitsAbove = key.tag > 0 || roomAbove >= minAbove
 
         var constraints = [
             opensLeft
                 ? strip.trailingAnchor.constraint(equalTo: key.trailingAnchor, constant: 4)
                 : strip.leadingAnchor.constraint(equalTo: key.leadingAnchor, constant: -4),
             strip.heightAnchor.constraint(equalTo: key.heightAnchor, multiplier: 1.15),
+            strip.heightAnchor.constraint(greaterThanOrEqualToConstant: minAbove),
             strip.widthAnchor.constraint(greaterThanOrEqualTo: key.widthAnchor),
             strip.widthAnchor.constraint(
                 equalToConstant: max(CGFloat(variants.count) * 40, 44)),
@@ -1308,8 +1315,11 @@ final class KeyboardViewController: UIInputViewController {
         }
         // The width constraint is the one to give up if the strip would run off
         // the edge; the anchor to the key and the edge margins matter more.
-        constraints[3].priority = .defaultHigh
+        constraints[4].priority = .defaultHigh
         constraints[0].priority = .defaultHigh
+        // On row 0 the strip shrinks to the room left under the frame's top
+        // (the `topAnchor >= view.topAnchor` below) instead of breaking it.
+        constraints[1].priority = .defaultHigh
         NSLayoutConstraint.activate(constraints)
 
         view.bringSubviewToFront(strip)
