@@ -77,11 +77,34 @@ UK_B = {   # homophonic: ш w, и y, ґ g, г h, х x, в v. Held: ч c, ж z, �
 # Five seeds on the same list: A 87.4 % / 97.4 %, B 87.4 % / 98.0 % (top-1 /
 # top-3) - a tie; the owner chose B (2026-11-11). A stays here as measured.
 TABLES["uk"] = UK_B
+# Bulgarian, the two phonetic arrangements of xkeyboard-config, measured
+# against each other (2026-11-11): `bg(phonetic)` - traditional, ЯВЕРТЪ - and
+# `bg(bas_phonetic)` - the new phonetic of BDS 5237:2006. Keys the phone does
+# not have become holds on the nearest Latin match; `ѝ` is held on `и`.
+BG_A = {   # traditional: в w, ъ y, ь x, ж v, х h. Held: ш щ on s, ч c, ю u, ѝ i.
+    "а": "a", "б": "b", "в": "w", "г": "g", "д": "d", "е": "e", "ж": "v",
+    "з": "z", "и": "i", "ѝ": "ì", "й": "j", "к": "k", "л": "l", "м": "m",
+    "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
+    "ф": "f", "х": "h", "ц": "c", "ч": "č", "ш": "š", "щ": "ŝ", "ъ": "y",
+    "ь": "x", "ю": "ü", "я": "q",
+}
+BG_B = {   # BDS 2006: ч q, ш w, ж x, в v, ъ y. Held: я on a, щ w, ь b, ю u, ѝ i.
+    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ж": "x",
+    "з": "z", "и": "i", "ѝ": "ì", "й": "j", "к": "k", "л": "l", "м": "m",
+    "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
+    "ф": "f", "х": "h", "ц": "c", "ч": "q", "ш": "w", "щ": "ŵ", "ъ": "y",
+    "ь": "ḃ", "ю": "ü", "я": "ä",
+}
+# Five seeds on the same list: A 83.8 % / 96.8 %, B 84.4 % / 95.5 % (top-1 /
+# top-3) - a tie; the owner chose A (2026-11-11): in B the frequent `я` is
+# only a hold. B stays here as measured.
+TABLES["bg"] = BG_A
 ONE_LETTER = {
+    "bg": {"а", "в", "е", "и", "ѝ", "о", "с", "у", "я"},
     "ru": {"а", "в", "и", "к", "о", "с", "у", "я"},
     "uk": {"а", "в", "з", "і", "й", "к", "о", "с", "у", "я"},
 }
-NAMES = {"ru": "Russkij", "uk": "Ukrajinsky"}
+NAMES = {"ru": "Russkij", "uk": "Ukrajinsky", "bg": "Bulgarsky"}
 APOSTROPHES = str.maketrans({"ʼ": "'", "’": "'", "`": "'"})
 AFTER_APOSTROPHE = set("яюєї")
 

@@ -100,7 +100,7 @@ SR_CYRL = DIGRAPH_KEYS and LANG == "sr"
 MK = LANG == "mk"
 # Russian, phonetic (ЯШЕРТЫ): Cyrillic-only as well, its letters on all 26 Latin
 # keys, so the rows are the Latin QWERTY ones; no digraph keys.
-RU = LANG in ("ru", "uk")   # Ukrainian: same QWERTY grid, no digraph keys
+RU = LANG in ("ru", "uk", "bg")   # Ukrainian: same QWERTY grid, no digraph keys
 if MK or RU:
     DIGRAPH_KEYS = False
 ROWS = (["qwertzuiop", "asdfghjkl", "xcvbnm"] if MK
@@ -139,7 +139,7 @@ CENTERS = build_centers()
 _FOLD = {}
 for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê", "e"),
                    ("ąàá", "a"), ("łľĺ", "l"), ("ńň", "n"), ("óòôǫ", "o"),
-                   ("í", "i"), ("ý", "y"), ("úů", "u"), ("řŕ", "r"),
+                   ("íì", "i"), ("ý", "y"), ("úů", "u"), ("řŕ", "r"),
                    ("ť", "t"), ("ďđ", "d"),
                    # Norwegian holds ä ö on its own æ ø keys; everywhere else
                    # (Slovak `ä`) they sit on a and o, as in Dictionary.foldBase.

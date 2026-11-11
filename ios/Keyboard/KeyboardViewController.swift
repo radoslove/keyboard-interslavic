@@ -473,6 +473,21 @@ final class KeyboardViewController: UIInputViewController {
 
     private var isUppercase: Bool { shift != .off }
 
+    /// A character of a word: a letter, and in Ukrainian also the apostrophe
+    /// inside one (`п'ять`, `сім'я`), or completions and own words would break
+    /// the word in two at it (owner 2026-11-11).
+    private func wordChar(_ c: Character) -> Bool {
+        c.isLetter || (c == "'" && Layout.language == "uk")
+    }
+
+    /// The word right before the cursor, as shown; a leading apostrophe is a
+    /// quote mark, not part of it.
+    private func trailingWord(_ text: String) -> String {
+        var w = String(text.reversed().prefix { wordChar($0) }.reversed())
+        while w.first == "'" { w.removeFirst() }
+        return w
+    }
+
     // MARK: - Actions
 
     @objc private func tapCharacter(_ sender: UIButton) {
@@ -611,9 +626,9 @@ final class KeyboardViewController: UIInputViewController {
         var i = before.count
         while i > floor, before[i - 1].isWhitespace { i -= 1 }
         if i > floor {
-            let lettersFirst = before[i - 1].isLetter || before[i - 1].isNumber
+            let lettersFirst = wordChar(before[i - 1]) || before[i - 1].isNumber
             while i > floor, !before[i - 1].isWhitespace,
-                  (before[i - 1].isLetter || before[i - 1].isNumber) == lettersFirst { i -= 1 }
+                  (wordChar(before[i - 1]) || before[i - 1].isNumber) == lettersFirst { i -= 1 }
         }
         let count = before.count - i
         lastSwipedWord = nil
@@ -1021,9 +1036,14 @@ final class KeyboardViewController: UIInputViewController {
         // Track a word typed letter by letter: that is the sign a swipe did
         // not find it, and the only case where `＋` is offered for a word the
         // list already has. Kept in Latin, like everything inside.
-        if ch.isLetter && !extendsSwipe {
-            let prev = textDocumentProxy.documentContextBeforeInput?.last
-            tappedWord = (prev?.isLetter == true) ? tappedWord.map { $0 + latin } : latin
+        let before = textDocumentProxy.documentContextBeforeInput ?? ""
+        let apostrophe = ch == "'" && Layout.language == "uk" && before.last?.isLetter == true
+        if apostrophe {
+            // Inside a Ukrainian word: the word goes on, also after a glide.
+            tappedWord = (tappedWord ?? Script.toLatin(trailingWord(before))) + latin
+        } else if ch.isLetter && !extendsSwipe {
+            let prev = before.last
+            tappedWord = (prev.map { wordChar($0) } == true) ? tappedWord.map { $0 + latin } : latin
         } else if ch.isLetter {
             tappedWord = nil
         } else {
@@ -1096,7 +1116,7 @@ final class KeyboardViewController: UIInputViewController {
     /// The text is read in the chosen script and looked up in Latin.
     private func refreshCompletions() {
         let before = textDocumentProxy.documentContextBeforeInput ?? ""
-        let typedShown = String(before.reversed().prefix { $0.isLetter }.reversed())
+        let typedShown = trailingWord(before)
         let typed = Script.toLatin(typedShown)
         barToken += 1
         let token = barToken
@@ -1104,7 +1124,7 @@ final class KeyboardViewController: UIInputViewController {
             completingPrefix = nil
             showSuggestions([])
             guard before.hasSuffix(" ") else { return }
-            let shownWord = String(before.dropLast().reversed().prefix { $0.isLetter }.reversed())
+            let shownWord = trailingWord(String(before.dropLast()))
             let finished = Script.toLatin(shownWord)
             guard let save = Self.saveForm(finished,
                                            after: String(before.dropLast(shownWord.count + 1)))

@@ -49,6 +49,8 @@ keystore.properties
 !/dictionary/sources_sla/README.md
 /dictionary/sources_uk/*
 !/dictionary/sources_uk/README.md
+/dictionary/sources_bg/*
+!/dictionary/sources_bg/README.md
 
 # Odlozone wersje plikow (zasada: nic sie nie kasuje, tylko wersjonuje).
 trash/

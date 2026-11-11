@@ -104,6 +104,11 @@ if LANG == "uk":
     # measured arrangements, whose held letters never collide.
     FOLD = {"ê": "e", "ï": "i", "ü": "u", "č": "c", "š": "s", "ŝ": "s",
             "ĝ": "g", "ž": "z", "ŵ": "w", "ḃ": "b"}
+if LANG == "bg":
+    # Bulgarian's internal Latin (tools/build_cyrillic_wordlist.py); covers both
+    # measured arrangements, whose held letters never collide.
+    FOLD = {"č": "c", "š": "s", "ŝ": "s", "ü": "u", "ì": "i", "ŵ": "w",
+            "ḃ": "b", "ä": "a"}
 if LANG == "en":
     # Plain a-z: a form with any other letter (`café`) cannot be swiped and
     # is left out, as on Android.
