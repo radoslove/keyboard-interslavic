@@ -42,9 +42,8 @@ class ImeService : InputMethodService() {
 
     /** A script or languages chosen in the settings take effect the next time the keyboard opens. */
     override fun onStartInputView(info: android.view.inputmethod.EditorInfo?, restarting: Boolean) {
-        // The system remembers which language (subtype) is active; follow it.
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        Lang.of(imm.currentInputMethodSubtype)?.let { Lang.setCurrent(this, it) }
+        // The language is ours now (Lang.enabled), not the system's subtype.
+        if (Lang.current(this) !in Lang.enabled(this)) Lang.setCurrent(this, Lang.enabled(this).first())
         Dictionary.ensureLoaded(this)
         val langs = Lang.enabled(this) + Lang.current(this)
         if (builtScript != null &&
@@ -72,29 +71,29 @@ class ImeService : InputMethodService() {
         view?.onSelectionChanged(newSelStart, newSelEnd)
     }
 
-    /** The system switched our language (🌐, the picker, or its settings). */
-    override fun onCurrentInputMethodSubtypeChanged(newSubtype: InputMethodSubtype?) {
-        super.onCurrentInputMethodSubtypeChanged(newSubtype)
-        val lang = Lang.of(newSubtype) ?: return
-        if (lang == Lang.current(this) && view != null) return
-        Lang.setCurrent(this, lang)
-        Dictionary.use(this, lang)
-        if (view != null) setInputView(onCreateInputView())
-    }
-
     /**
-     * 🌐 tap: the next ticked language of THIS keyboard, as the system rotates
-     * them. Returns false when there is no other one to go to.
+     * 🌐 tap: the next ticked language, round the list - the keyboard never
+     * leaves for another one on a tap (that once dropped people into the OEM
+     * keyboard with no way back); the system picker is one hold of 🌐 away.
+     * Returns false when there is no other language to go to.
      */
     fun nextLanguage(): Boolean {
         if (Lang.enabled(this).size < 2) return false
-        return if (Build.VERSION.SDK_INT >= 28) {
-            switchToNextInputMethod(true)
-        } else {
-            val token = window?.window?.attributes?.token ?: return false
-            @Suppress("DEPRECATION")
-            (getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager).switchToNextInputMethod(token, true)
-        }
+        return switchToLanguage(Lang.step(this))
+    }
+
+    /**
+     * Straight to ONE ticked language (space bar slide or list, 🌐, the
+     * settings panel). Ours alone since the list moved into the keyboard
+     * (owner 2026-11-11, "jedna klawiatura Interslove"): no subtype, no round
+     * trip through the system - the view is rebuilt here for the new language.
+     */
+    fun switchToLanguage(lang: String): Boolean {
+        if (lang !in Lang.enabled(this)) return false
+        Lang.setCurrent(this, lang)
+        Dictionary.use(this, lang)
+        if (view != null) setInputView(onCreateInputView())
+        return true
     }
 
     /**

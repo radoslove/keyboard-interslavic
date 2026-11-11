@@ -45,7 +45,7 @@ PY = sys.executable
 # Mean top-1 of five_seeds.py, measured 2026-11-11 (iOS 0.6.4, Android 3.8.15).
 FLOORS = {
     "isv": 73.7, "pl": 69.1, "cs": 82.6, "sk": 82.2, "sl": 81.9, "hr": 81.3,
-    "sr": 78.6, "bs": 85.4, "mk": 77.9, "ru": 89.1, "uk": 88.0, "bg": 83.8, "sla": 71.5,
+    "sr": 78.6, "bs": 85.4, "mk": 77.9, "ru": 89.1, "uk": 88.0, "bg": 83.8, "sla": 71.5, "be": 85.0,
     "nb": 71.0, "en": 80.1,
 }
 FLOOR_MARGIN = 4.0

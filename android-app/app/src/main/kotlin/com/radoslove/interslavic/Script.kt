@@ -49,7 +49,10 @@ object Script {
         // is already in the internal Latin (tools/build_mk_wordlist.py); the
         // alphabet the user sees is this one.
         Lang.MK -> listOf(Mode.CYRILLIC)
-        Lang.RU -> listOf(Mode.CYRILLIC)
+        Lang.RU, Lang.UK, Lang.BG, Lang.BE -> listOf(Mode.CYRILLIC)
+        // Proto-Slavic is Latin, but `ъ` `ь` live on `q` `f` inside, so it goes
+        // through the same one-mode table as Russian; no script key is shown.
+        Lang.SLA -> listOf(Mode.CYRILLIC)
         else -> listOf(Mode.LATIN)
     }
 
@@ -166,11 +169,53 @@ object Script {
         "ê" to "э", "ü" to "ю", "q" to "я",
     )
 
+    /** Ukrainian, homophonic (`tools/build_cyrillic_wordlist.py` UK_B; iOS
+     *  `ukrainianPairs`): one character on each side; the apostrophe passes
+     *  through as it is. */
+    private val CYRILLIC_UK = linkedMapOf(
+        "a" to "а", "b" to "б", "v" to "в", "h" to "г", "g" to "ґ", "d" to "д",
+        "e" to "е", "ê" to "є", "ž" to "ж", "z" to "з", "y" to "и", "i" to "і",
+        "ï" to "ї", "j" to "й", "k" to "к", "l" to "л", "m" to "м", "n" to "н",
+        "o" to "о", "p" to "п", "r" to "р", "s" to "с", "t" to "т", "u" to "у",
+        "f" to "ф", "x" to "х", "c" to "ц", "č" to "ч", "w" to "ш", "ŵ" to "щ",
+        "ḃ" to "ь", "ü" to "ю", "q" to "я",
+    )
+
+    /** Bulgarian, traditional phonetic (`tools/build_cyrillic_wordlist.py`
+     *  BG_A; iOS `bulgarianPairs`): one character on each side. */
+    private val CYRILLIC_BG = linkedMapOf(
+        "a" to "а", "b" to "б", "w" to "в", "g" to "г", "d" to "д", "e" to "е",
+        "v" to "ж", "z" to "з", "i" to "и", "ì" to "ѝ", "j" to "й", "k" to "к",
+        "l" to "л", "m" to "м", "n" to "н", "o" to "о", "p" to "п", "r" to "р",
+        "s" to "с", "t" to "т", "u" to "у", "f" to "ф", "h" to "х", "c" to "ц",
+        "č" to "ч", "š" to "ш", "ŝ" to "щ", "y" to "ъ", "x" to "ь", "ü" to "ю",
+        "q" to "я",
+    )
+
+    /** Belarusian, `by(phonetic)` (`tools/build_cyrillic_wordlist.py` BE_A):
+     *  one character on each side; the apostrophe passes through. */
+    private val CYRILLIC_BE = linkedMapOf(
+        "a" to "а", "b" to "б", "w" to "в", "g" to "г", "d" to "д", "e" to "е",
+        "ë" to "ё", "v" to "ж", "z" to "з", "i" to "і", "j" to "й", "k" to "к",
+        "l" to "л", "m" to "м", "n" to "н", "o" to "о", "p" to "п", "r" to "р",
+        "s" to "с", "t" to "т", "u" to "у", "ŭ" to "ў", "f" to "ф", "h" to "х",
+        "c" to "ц", "č" to "ч", "š" to "ш", "y" to "ы", "x" to "ь", "ê" to "э",
+        "ü" to "ю", "q" to "я",
+    )
+
+    /** Proto-Slavic: only the two yers differ from the internal Latin; every
+     *  other letter passes through unchanged (iOS `protoSlavicPairs`). */
+    private val CYRILLIC_SLA = linkedMapOf("q" to "ъ", "f" to "ь")
+
     /** The Cyrillic table of [lang]. */
     private fun cyrTable(lang: String) = when (lang) {
         Lang.SR -> CYRILLIC_SR
         Lang.MK -> CYRILLIC_MK
         Lang.RU -> CYRILLIC_RU
+        Lang.UK -> CYRILLIC_UK
+        Lang.BG -> CYRILLIC_BG
+        Lang.SLA -> CYRILLIC_SLA
+        Lang.BE -> CYRILLIC_BE
         else -> CYRILLIC
     }
 
@@ -253,6 +298,10 @@ object Script {
     private val REVERSE_SR = reversed(CYRILLIC_SR)
     private val REVERSE_MK = reversed(CYRILLIC_MK)
     private val REVERSE_RU = reversed(CYRILLIC_RU)
+    private val REVERSE_UK = reversed(CYRILLIC_UK)
+    private val REVERSE_BG = reversed(CYRILLIC_BG)
+    private val REVERSE_SLA = reversed(CYRILLIC_SLA)
+    private val REVERSE_BE = reversed(CYRILLIC_BE)
 
     private val REVERSE: Map<Mode, List<Pair<String, String>>> = mapOf(
         Mode.CYRILLIC to reversed(CYRILLIC),
@@ -272,6 +321,10 @@ object Script {
             m == Mode.CYRILLIC && lang == Lang.SR -> REVERSE_SR
             m == Mode.CYRILLIC && lang == Lang.MK -> REVERSE_MK
             m == Mode.CYRILLIC && lang == Lang.RU -> REVERSE_RU
+            m == Mode.CYRILLIC && lang == Lang.UK -> REVERSE_UK
+            m == Mode.CYRILLIC && lang == Lang.BG -> REVERSE_BG
+            m == Mode.CYRILLIC && lang == Lang.SLA -> REVERSE_SLA
+            m == Mode.CYRILLIC && lang == Lang.BE -> REVERSE_BE
             else -> REVERSE.getValue(m)
         }
         val sb = StringBuilder()

@@ -30,7 +30,7 @@ val diagnosticsProps = Properties().apply {
 // Two apps are built from this one code (product flavors below), each with its
 // own test number: flavor -> (TEST_BASE, TEST_BUILD, label prefix).
 val TESTS = mapOf(
-    "interslove" to Triple("3.8", 15, "MS test"),
+    "interslove" to Triple("3.8", 20, "MS test"),
     "isc" to Triple("0.1", 36, "ISC test"),
 )
 
@@ -41,7 +41,7 @@ val TESTS = mapOf(
 // "MS test 3.5.N" (owner 2026-11-01: all six names should stay). Test builds
 // therefore label the SERVICE with the language plus the number, and keep the
 // short prefix for app_name, which is what the installer and Settings show.
-val IME_NAMES = mapOf("interslove" to "Medžuslovjansky", "isc" to "Mellomskandinavisk")
+val IME_NAMES = mapOf("interslove" to "Interslove", "isc" to "Mellomskandinavisk")
 
 fun javaString(value: String): String = "\"" + value
     .replace("\\", "\\\\").replace("\"", "\\\"")

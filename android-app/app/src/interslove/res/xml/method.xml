@@ -1,125 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- IME metadata. One subtype per language, so each shows in the system
-     keyboard list and picker the way iOS lists one keyboard per language.
-     The app's own language is on by default (overridesImplicitlyEnabledSubtype);
-     the others are ticked on the system's Languages page (the app's button
-     opens it). Only that one carries the flag, because Android shows NO name
-     for a subtype that has it. subtypeId keeps each identity fixed: without it
-     the system hashes label + extra value, and any change drops what the user
-     ticked. Ids are per app and never reused.
-     ⚠ The flag was removed on 2026-11-04 and put back the same evening, so do
-     not remove it again without reading this. Samsung draws the subtype that
-     carries it as a MASTER switch above the others, and turning that switch on
-     WIPES the explicitly enabled list - the keyboard is left with one language,
-     the globe stops cycling and opens the system picker, and the phone ends up
-     on another keyboard. That is real and it happened on the Android test phone. It is still the
-     smaller evil. Measured on a fresh install with nothing ticked: Android
-     implicitly enables the subtypes that match the PHONE's locales - on a phone
-     set to en-US with pl-PL and nb-NO it switched on English, Polish and the
-     nb-tagged subtype, and left Czech off because the phone has no Czech locale.
-     No phone is ever set to `isv`, so without this flag the app's own language
-     is the one language a new user does NOT get. The nameless row the flag
-     causes is not a defect in a RELEASE build: the row shows ime_name, which
-     reads Medzuslovjansky there, and only carries a number in test builds.
-     A language added by a LATER build is NOT switched on by itself on a phone
-     that already has the app: the new subtype arrives unticked, so it is
-     invisible in the keyboard picker until the user ticks it (or, over USB,
-     adb shell settings put secure enabled_input_methods "<old>;<new id>").
-     Cost a round trip 2026-11-01: Czech shipped in 3.5.31 and the owner could
-     not find it on the Android test phone.
+<!-- IME metadata. ONE keyboard in the system, "Interslove" (owner 2026-11-11,
+     parity with iOS 0.6.3); its languages are ticked inside the keyboard and
+     the app (Lang.enabled) and switched there, not by the system.
+
+     From 3.5.9 to 3.8.16 every language was a subtype of its own here (ids
+     5617-5629 and 5640-5642 - never reuse them). At sixteen languages the
+     system list was long, and a language added by a later build arrived
+     unticked and invisible. Those old ticks cannot be read back (Lang.migrate).
+
+     The one subtype left keeps overridesImplicitlyEnabledSubtype: no phone is
+     ever set to `isv`, so without the flag Android would enable nothing of
+     ours on a fresh install (measured 2026-11-04). With one subtype there is
+     no list left for Samsung's master switch to wipe - the trouble the flag
+     caused while there were several. Its row shows ime_name. Its id stays
+     5617 so the system keeps the keyboard switched on across the update.
      -->
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
     android:supportsSwitchingToNextInputMethod="true">
     <subtype
-        android:label="@string/subtype_isv"
+        android:label="@string/ime_name"
         android:languageTag="isv"
         android:imeSubtypeLocale="isv"
         android:imeSubtypeMode="keyboard"
         android:imeSubtypeExtraValue="lang=isv"
         android:subtypeId="5617"
         android:overridesImplicitlyEnabledSubtype="true" />
-    <subtype
-        android:label="@string/subtype_isc"
-        android:languageTag="nb"
-        android:imeSubtypeLocale="nb"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=isc"
-        android:subtypeId="5621" />
-    <subtype
-        android:label="@string/subtype_pl"
-        android:languageTag="pl"
-        android:imeSubtypeLocale="pl"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=pl"
-        android:subtypeId="5618" />
-    <subtype
-        android:label="@string/subtype_nb"
-        android:languageTag="nb"
-        android:imeSubtypeLocale="nb"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=nb"
-        android:subtypeId="5619" />
-    <subtype
-        android:label="@string/subtype_en"
-        android:languageTag="en"
-        android:imeSubtypeLocale="en_US"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=en"
-        android:subtypeId="5620" />
-    <subtype
-        android:label="@string/subtype_cs"
-        android:languageTag="cs"
-        android:imeSubtypeLocale="cs"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=cs"
-        android:subtypeId="5622" />
-    <subtype
-        android:label="@string/subtype_sk"
-        android:languageTag="sk"
-        android:imeSubtypeLocale="sk"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=sk"
-        android:subtypeId="5623" />
-    <subtype
-        android:label="@string/subtype_sl"
-        android:languageTag="sl"
-        android:imeSubtypeLocale="sl"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=sl"
-        android:subtypeId="5624" />
-    <subtype
-        android:label="@string/subtype_hr"
-        android:languageTag="hr"
-        android:imeSubtypeLocale="hr"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=hr"
-        android:subtypeId="5625" />
-    <subtype
-        android:label="@string/subtype_sr"
-        android:languageTag="sr-Latn"
-        android:imeSubtypeLocale="sr"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=sr"
-        android:subtypeId="5626" />
-    <subtype
-        android:label="@string/subtype_bs"
-        android:languageTag="bs"
-        android:imeSubtypeLocale="bs"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=bs"
-        android:subtypeId="5627" />
-    <subtype
-        android:label="@string/subtype_mk"
-        android:languageTag="mk"
-        android:imeSubtypeLocale="mk"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=mk"
-        android:subtypeId="5628" />
-    <subtype
-        android:label="@string/subtype_ru"
-        android:languageTag="ru"
-        android:imeSubtypeLocale="ru"
-        android:imeSubtypeMode="keyboard"
-        android:imeSubtypeExtraValue="lang=ru"
-        android:subtypeId="5629" />
 </input-method>

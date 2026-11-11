@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -93,23 +94,27 @@ class SetupActivity : Activity() {
         root.addView(body(t("intro")))
         glossOf("intro")?.let { root.addView(gloss(it)) }
 
-        // Languages, as on iOS where each one is its own keyboard (7801f4b):
-        // on Android they are the keyboard's entries in the SYSTEM list, ticked
-        // on the system's Languages page - this screen shows them and opens it.
+        // Languages: ticked HERE (and in the keyboard's own panel), one
+        // keyboard in the system (owner 2026-11-11, parity with iOS 0.6.3).
+        // At least one stays ticked.
         section(root, "langs_head", "langs_body")
         langsNow = body("")
         root.addView(langsNow)
-        root.addView(Button(this).apply {
-            text = button("btn_langs")
-            setOnClickListener {
-                val imi = Lang.imi(this@SetupActivity)
-                val i = Intent(android.provider.Settings.ACTION_INPUT_METHOD_SUBTYPE_SETTINGS)
-                if (imi != null) i.putExtra(android.provider.Settings.EXTRA_INPUT_METHOD_ID, imi.id)
-                // Not yet a keyboard at all: the list where it is switched on.
-                try { startActivity(if (imi != null) i else Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) }
-                catch (_: Exception) { startActivity(Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)) }
+        langBoxes.clear()
+        for (lang in Lang.ALL) {
+            val box = CheckBox(this).apply {
+                text = langName(lang)
+                textSize = 17f
+                setOnClickListener {
+                    val on = Lang.enabled(this@SetupActivity).toMutableList()
+                    if (isChecked) on.add(lang) else if (on.size > 1) on.remove(lang)
+                    Lang.setEnabled(this@SetupActivity, on)
+                    refreshLangs()
+                }
             }
-        })
+            langBoxes[lang] = box
+            root.addView(box)
+        }
 
         val hasScripts = Lang.ISV in Lang.ALL
         if (hasScripts) section(root, "script_head", "script_body")
@@ -251,7 +256,7 @@ class SetupActivity : Activity() {
     override fun onResume() {
         super.onResume()
         refreshStatus()
-        langsNow.text = "${t("langs_now")}: " + Lang.enabled(this).joinToString(", ") { langName(it) }
+        refreshLangs()
         refreshWords()
         val top = Symbols.top(this, 15)
         symbolsNow.text = if (top.isEmpty()) t("sym_none")
@@ -260,6 +265,14 @@ class SetupActivity : Activity() {
     }
 
     private lateinit var langsNow: TextView
+    private val langBoxes = LinkedHashMap<String, android.widget.CheckBox>()
+
+    /** The ticks as the keyboard has them - its own panel may have changed them. */
+    private fun refreshLangs() {
+        val on = Lang.enabled(this)
+        langsNow.text = "${t("langs_now")}: " + on.joinToString(", ") { langName(it) }
+        for ((lang, box) in langBoxes) box.isChecked = lang in on
+    }
     private lateinit var symbolsNow: TextView
     private lateinit var wordsBox: LinearLayout
 

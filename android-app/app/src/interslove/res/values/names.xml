@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Medžuslovjansky</string>
-    <string name="ime_name">Medžuslovjansky</string>
+    <!-- One keyboard, named as on iOS (owner 2026-11-11: "jedna klawiatura Interslove"). -->
+    <string name="app_name">Interslove</string>
+    <string name="ime_name">Interslove</string>
 
     <!-- The system keyboard list, in THIS app's language (owner 2026-11-01:
          "medžuskandinavsky, poljsky, češsky, norvežsky i anglijsky"). Every
@@ -21,4 +22,7 @@
     <string name="subtype_bs">bosnijsky</string>
     <string name="subtype_mk">makedonsky</string>
     <string name="subtype_ru">russky</string>
+    <string name="subtype_uk">ukrajinsky</string>
+    <string name="subtype_bg">bulgarsky</string>
+    <string name="subtype_sla">praslovjansky</string>
 </resources>

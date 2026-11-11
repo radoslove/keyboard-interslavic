@@ -11,13 +11,18 @@ import android.view.inputmethod.InputMethodSubtype
  * Croatian (`hr`), Serbian in Latin script (`sr`), Norwegian bokmål (`nb`)
  * or English (`en`).
  *
- * iOS lists each language as its own keyboard (`isv 0.2.1`, `pl 0.2.1`,
- * 7801f4b). The Android equivalent is one input-method SUBTYPE per language
- * (res/xml/method.xml): they appear in the system keyboard list and picker, the
- * system's own Languages page ticks them on and off, and 🌐 steps through the
- * ticked ones. So the SYSTEM is the one place languages are chosen - 3.5.8 kept
- * its own list inside the app, which the system list never showed (owner
- * 2026-10-14: "all ticked at install, still no Polish").
+ * ONE keyboard in the system, the languages chosen INSIDE it (owner
+ * 2026-11-11, parity with iOS 0.6.3): "jedna klawiatura Interslove". From
+ * 3.5.9 to 3.8.16 every language was its own input-method subtype ticked on
+ * the system's Languages page - at sixteen languages that list was long, and a
+ * language added by a later build arrived unticked and invisible (Russian,
+ * Ukrainian, Bulgarian and Proto-Slavic on the test phone, 2026-11-11). The
+ * list lives in this keyboard's preferences now ([enabled]), ticked in the
+ * in-keyboard settings panel and in the app; space and 🌐 switch between the
+ * ticked ones without the system. The 3.5.8 trouble ("all ticked at install,
+ * still no Polish", 2026-10-14) came from TWO lists, ours and the system's;
+ * there is one again, so it cannot come back. On the first start the ticks
+ * the system had are adopted once ([migrate]), so nobody loses a language.
  *
  * Each language loads its dictionary only the first time it is used.
  * Per language: layout ([Layout]), dictionary ([Dictionary]), the user's own
@@ -56,6 +61,35 @@ object Lang {
      *  internal Latin of tools/build_cyrillic_wordlist.py, like Macedonian's. */
     const val RU = "ru"
 
+    /** Ukrainian: Cyrillic only, on the HOMOPHONIC layout (xkeyboard-config
+     *  `ua(homophonic)`, owner 2026-11-11): я q, ш w, и y, і i, ґ g, г h, х x,
+     *  ц c, в v, the rest held. The apostrophe inside a word (`п'ять`) is part
+     *  of the word but never part of a glide. Internal Latin like Russian's. */
+    const val UK = "uk"
+
+    /** Bulgarian: Cyrillic only, on the traditional phonetic layout ЯВЕРТЪ
+     *  (xkeyboard-config `bg(phonetic)`, owner 2026-11-11): я q, в w, ъ y, ь x,
+     *  ж v, х h, ц c; ш щ held on s, ч c, ю u, ѝ i. */
+    const val BG = "bg"
+
+    /** Proto-Slavic in the Wiktionary notation (tools/build_sla_wordlist.py):
+     *  Latin letters, but the yers `ъ` `ь` have keys of their own (`q` `f`), so
+     *  it goes through the same one-mode Cyrillic table as Russian. */
+    const val SLA = "sla"
+
+    /** Belarusian: Cyrillic only, official orthography, on the published
+     *  phonetic layout xkeyboard-config `by(phonetic)` (owner 2026-11-11): я q,
+     *  в w, ы y, і i, х h, ь x, ж v; ш ч ў ю э ё held. Like Ukrainian, the
+     *  apostrophe inside a word (`сям'я`) is part of it. */
+    const val BE = "be"
+
+    /** Languages whose every key writes ONE letter, so the Interslavic digraph
+     *  keys and routes (`lj` `nj` over `q` `w`) stay off (iOS `singleLetterKeys`). */
+    val SINGLE_LETTER_KEYS = setOf(MK, RU, UK, BG, SLA, BE)
+
+    /** Languages that write an apostrophe INSIDE words (`п'ять`, `сям'я`). */
+    val APOSTROPHE_IN_WORD = setOf(UK, BE)
+
     /** This app's own language ([App.MAIN]): `isv` in Interslove, `isc` in Mellomskandinavisk. */
     const val MAIN = App.MAIN
 
@@ -78,21 +112,76 @@ object Lang {
         return imm.inputMethodList.firstOrNull { it.packageName == context.packageName }
     }
 
-    /** The languages ticked in the system keyboard settings, in [ALL] order; never empty. */
+    /** NOT `languages`: 3.5.8 kept its own list under that name as a STRING
+     *  SET, and phones that had 3.5.8 still carry it - reading it as a string
+     *  threw on every keyboard open in 3.8.17 (the test phone, 2026-11-11; Samsung then
+     *  offered "Clear cache"). That old set is stale and is not read. */
+    private const val KEY_ENABLED = "enabled_langs"
+
+    /** The ticked languages, in [ALL] order; never empty. */
     fun enabled(context: Context): List<String> {
-        val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        val on = imi(context)?.let { imm.getEnabledInputMethodSubtypeList(it, true) }
-            .orEmpty().mapNotNull { of(it) }
+        val stored = try { prefs(context).getString(KEY_ENABLED, null) } catch (_: ClassCastException) { null }
+            ?: return migrate(context)
+        val on = stored.split(',').toSet()
         return ALL.filter { it in on }.ifEmpty { listOf(MAIN) }
     }
 
-    /** The language now typed: the one the system last switched us to. */
+    /** Tick [langs]; at least one always stays (the caller keeps the last one). */
+    fun setEnabled(context: Context, langs: Collection<String>) {
+        val list = ALL.filter { it in langs }.ifEmpty { listOf(MAIN) }
+        prefs(context).edit().putString(KEY_ENABLED, list.joinToString(",")).apply()
+        if (current(context) !in list) setCurrent(context, list.first())
+    }
+
+    /**
+     * First start with the list inside: the app's own language plus EVERY
+     * language set on the phone that this keyboard has (Settings → languages,
+     * all of them, not only the first).
+     *
+     * The old system ticks of 3.5.9-3.8.16 CANNOT be read back - measured on
+     * the test phone 2026-11-11: the subtypes are gone from method.xml, so the
+     * IME API lists only `isv`, and the raw setting `enabled_input_methods`,
+     * which still names them by id, throws SecurityException for an app with
+     * targetSdkVersion above 33 ("only readable to apps with targetSdkVersion
+     * lower than or equal to: 33"). The phone's languages are what Android
+     * itself switched on implicitly back then, so this is the nearest guess;
+     * anything else is one tap in the panel.
+     */
+    private fun migrate(context: Context): List<String> {
+        val start = listOf(MAIN) + phoneLangs()
+        setEnabled(context, start)
+        return ALL.filter { it in start }.ifEmpty { listOf(MAIN) }
+    }
+
+    /** The phone's languages, in its own order, mapped to ours. */
+    fun phoneLangs(): List<String> {
+        val list = android.os.LocaleList.getDefault()
+        return (0 until list.size()).mapNotNull { fromLocale(list[it].language) }
+            .filter { it in ALL }.distinct()
+    }
+
+    private fun fromLocale(code: String): String? = when (code) {
+        "pl" -> PL; "cs" -> CS; "sk" -> SK; "sl" -> SL; "hr" -> HR
+        "sr" -> SR; "bs" -> BS; "mk" -> MK; "ru" -> RU; "uk" -> UK; "bg" -> BG; "be" -> BE
+        "nb", "no", "nn" -> NB
+        "en" -> EN
+        else -> null
+    }
+
+    /** The language now typed; always one of the ticked ones. */
     fun current(context: Context): String =
         prefs(context).getString(KEY_CURRENT, MAIN)?.takeIf { it in ALL } ?: MAIN
 
-    /** Called by the service whenever the system reports the active subtype. */
+    /** Set by the space bar, 🌐 and the settings - no longer by the system. */
     fun setCurrent(context: Context, lang: String) {
         prefs(context).edit().putString(KEY_CURRENT, lang).apply()
+    }
+
+    /** The ticked language after (or, [back], before) the current one, round the list. */
+    fun step(context: Context, back: Boolean = false): String {
+        val on = enabled(context)
+        val i = on.indexOf(current(context)).coerceAtLeast(0)
+        return on[(i + if (back) on.size - 1 else 1) % on.size]
     }
 
     /** The project's own language is typed: only then do the collector and the
@@ -125,6 +214,11 @@ object Lang {
         BS -> "Bosanski"
         MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"
         RU -> "Русский"
+        UK -> "Українська"
+        BG -> "Български"
+        BE -> "Беларуская"
+        // No living speaker to name it in its own tongue: the Interslavic name.
+        SLA -> "Praslovjansky"
         ISV -> "Medžuslovjansky"
         ISC -> "Mellomskandinavisk"
         else -> App.MAIN_NAME

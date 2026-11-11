@@ -239,6 +239,39 @@ object Layout {
         'b' to listOf("\u1e03", "\u1e05"), 'u' to listOf("\u00fc"),
     )
 
+    /** Ukrainian homophonic (xkeyboard-config `ua(homophonic)`, owner
+     *  2026-11-11; iOS 0.6.5): the letters the phone lacks are held on their
+     *  Latin match - \u0447 c, \u0436 z, \u044e u, \u0449 w, \u0454 e, \u0457 i, \u044c b. The apostrophe
+     *  (`\u043f'\u044f\u0442\u044c`) has no key: the glide skips it, a tap takes it from the
+     *  strip under `.`. */
+    private val ukOwn: Map<Char, List<String>> = mapOf(
+        'c' to listOf("\u010d"), 'z' to listOf("\u017e"), 'u' to listOf("\u00fc"), 'w' to listOf("\u0175"),
+        'e' to listOf("\u00ea"), 'i' to listOf("\u00ef"), 'b' to listOf("\u1e03"),
+    )
+
+    /** Bulgarian traditional phonetic \u042f\u0412\u0415\u0420\u0422\u042a (xkeyboard-config `bg(phonetic)`,
+     *  owner 2026-11-11; iOS 0.6.6): held on their Latin match, \u0448 before \u0449
+     *  (frequency in the list). */
+    private val bgOwn: Map<Char, List<String>> = mapOf(
+        's' to listOf("\u0161", "\u015d"), 'c' to listOf("\u010d"), 'u' to listOf("\u00fc"), 'i' to listOf("\u00ec"),
+    )
+
+    /** Belarusian `by(phonetic)` (owner 2026-11-11): held on their Latin
+     *  match, ordered by share of running words in the Leipzig corpora -
+     *  ў (13.9 %) before ю (3.5 %) on u, э (7.2 %) before ё (2.2 %) on e. */
+    private val beOwn: Map<Char, List<String>> = mapOf(
+        's' to listOf("š"), 'c' to listOf("č"), 'u' to listOf("ŭ", "ü"), 'e' to listOf("ê", "ë"),
+    )
+
+    /** Proto-Slavic in the Wiktionary notation (iOS 0.6.5): `\u044a` `\u044c` have keys of
+     *  their own (`q` `f`), the rest is held, ordered by frequency in the list:
+     *  \u011b before \u0119, \u0161 before \u015b. */
+    private val slaOwn: Map<Char, List<String>> = mapOf(
+        'e' to listOf("\u011b", "\u0119"), 'o' to listOf("\u01eb"), 'c' to listOf("\u010d"), 's' to listOf("\u0161", "\u015b"),
+        'z' to listOf("\u017e"), 'l' to listOf("\u013e"), 'n' to listOf("\u0148"), 'r' to listOf("\u0159"),
+        't' to listOf("\u0165"), 'd' to listOf("\u010f"),
+    )
+
     /** [latinRows] with `y` and `z` swapped, as on the Czech, Slovak, Slovenian,
      *  Croatian and Serbian keyboards. Only two keys move, so the grid - and with
      *  it everything the decoder measures in key widths - stays the same. */
@@ -256,7 +289,10 @@ object Layout {
         lang == Lang.NB || lang == Lang.ISC -> nbRows
         script != Script.Mode.LATIN && lang == Lang.SR -> srCyrillicRows
         lang == Lang.MK -> mkCyrillicRows
-        lang == Lang.RU -> latinRows
+        // Russian, Ukrainian, Bulgarian: their letters take all 26 Latin keys;
+        // Proto-Slavic: `ъ` on `q`, `ь` on `f`, every other key its letter.
+        lang == Lang.RU || lang == Lang.UK || lang == Lang.BG || lang == Lang.SLA ||
+            lang == Lang.BE -> latinRows
         script != Script.Mode.LATIN -> nonLatinRows
         qwertz -> qwertzRows
         else -> latinRows
@@ -272,7 +308,9 @@ object Layout {
         script == Script.Mode.LATIN -> ch.toString()
         // Russian, phonetic: every key writes its own letter (я on q, ш on w);
         // the Interslavic `lj`/`nj` keys are not part of this layout.
-        lang == Lang.RU -> ch.toString()
+        // Ukrainian, Bulgarian and Proto-Slavic likewise.
+        lang == Lang.RU || lang == Lang.UK || lang == Lang.BG || lang == Lang.SLA ||
+            lang == Lang.BE -> ch.toString()
         ch == 'q' -> "lj"
         ch == 'w' -> "nj"
         // Serbian only: `џ` is one letter there and has the `x` position in the
@@ -311,6 +349,10 @@ object Layout {
         Lang.HR, Lang.SR, Lang.BS -> hrSrOwn
         Lang.MK -> mkOwn
         Lang.RU -> ruOwn
+        Lang.UK -> ukOwn
+        Lang.BG -> bgOwn
+        Lang.SLA -> slaOwn
+        Lang.BE -> beOwn
         Lang.NB, Lang.ISC -> nbOwn
         Lang.EN -> emptyMap()
         else -> isvOwn
@@ -354,7 +396,7 @@ object KeyRows {
 
     /** Languages where the choice exists at all. */
     fun offered(lang: String) =
-        lang != Lang.NB && lang != Lang.ISC && lang != Lang.MK && lang != Lang.RU
+        lang != Lang.NB && lang != Lang.ISC && lang !in Lang.SINGLE_LETTER_KEYS
 
     private const val PREFS = "isv_collector"
     private fun key(lang: String) = "qwertz_$lang"

@@ -100,7 +100,7 @@ SR_CYRL = DIGRAPH_KEYS and LANG == "sr"
 MK = LANG == "mk"
 # Russian, phonetic (ЯШЕРТЫ): Cyrillic-only as well, its letters on all 26 Latin
 # keys, so the rows are the Latin QWERTY ones; no digraph keys.
-RU = LANG in ("ru", "uk", "bg")   # Ukrainian: same QWERTY grid, no digraph keys
+RU = LANG in ("ru", "uk", "bg", "be")   # Ukrainian, Bulgarian, Belarusian: same QWERTY grid, no digraph keys
 if MK or RU:
     DIGRAPH_KEYS = False
 ROWS = (["qwertzuiop", "asdfghjkl", "xcvbnm"] if MK
@@ -155,7 +155,9 @@ for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê",
                    # ё on e, щ on w, ь ъ on b, ю on u (э `ê`, ж `ž` above).
                    ("ë", "e"), ("ŵ", "w"), ("ḃḅ", "b"), ("ü", "u"),
                    # Ukrainian's internal Latin: ŝ on s, ĝ on g, ï on i.
-                   ("ŝ", "s"), ("ĝ", "g"), ("ï", "i")]:
+                   ("ŝ", "s"), ("ĝ", "g"), ("ï", "i"),
+                   # Belarusian ў (u-short) `ŭ`, held on u.
+                   ("ŭ", "u")]:
     for _ch in _src:
         _FOLD[_ch] = _dst
 # The Ukrainian apostrophe is written but never drawn: it folds to nothing.

@@ -45,7 +45,7 @@ object Ui {
     fun langName(ui: String, lang: String): String {
         val own = when (lang) {
             Lang.ISV -> "Medžuslovjansky"; Lang.ISC -> "Mellomskandinavisk"; Lang.PL -> "Polski"
-            Lang.NB -> "Norsk bokmål"; Lang.CS -> "Čeština"; Lang.SK -> "Slovenčina"; Lang.SL -> "Slovenščina"; Lang.HR -> "Hrvatski"; Lang.SR -> "Srpski"; Lang.BS -> "Bosanski"; Lang.MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"; Lang.RU -> "Русский"; else -> "English"
+            Lang.NB -> "Norsk bokmål"; Lang.CS -> "Čeština"; Lang.SK -> "Slovenčina"; Lang.SL -> "Slovenščina"; Lang.HR -> "Hrvatski"; Lang.SR -> "Srpski"; Lang.BS -> "Bosanski"; Lang.MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"; Lang.RU -> "Русский"; Lang.UK -> "Українська"; Lang.BG -> "Български"; Lang.BE -> "Беларуская"; Lang.SLA -> "Praslovjansky"; else -> "English"
         }
         val gloss = mapOf(
             Lang.ISV to mapOf("pl" to "międzysłowiański", "nb" to "interslavisk", "en" to "Interslavic"),
@@ -61,6 +61,10 @@ object Ui {
             Lang.BS to mapOf(MS to "bosnijsky", "pl" to "bośniacki", "nb" to "bosnisk", "en" to "Bosnian"),
             Lang.MK to mapOf(MS to "makedonsky", "pl" to "macedoński", "nb" to "makedonsk", "en" to "Macedonian"),
             Lang.RU to mapOf(MS to "russky", "pl" to "rosyjski", "nb" to "russisk", "en" to "Russian"),
+            Lang.UK to mapOf(MS to "ukrajinsky", "pl" to "ukraiński", "nb" to "ukrainsk", "en" to "Ukrainian"),
+            Lang.BG to mapOf(MS to "bulgarsky", "pl" to "bułgarski", "nb" to "bulgarsk", "en" to "Bulgarian"),
+            Lang.BE to mapOf(MS to "bělorussky", "pl" to "białoruski", "nb" to "belarusisk", "en" to "Belarusian"),
+            Lang.SLA to mapOf("pl" to "prasłowiański", "nb" to "urslavisk", "en" to "Proto-Slavic"),
         )[lang]?.get(ui)
         return if (gloss == null || gloss == own) own else "$own ($gloss)"
     }
@@ -95,18 +99,19 @@ object Ui {
         "langs_head" to row("Jezyky klaviatury", "Keyboard languages", "Języki klawiatury", "Tastaturspråk"),
         "langs_body" to row(
             "Izberi jezyky:",
-            "Each language is its own entry in the phone's keyboard list. Interslavic is " +
-                "on; add the others with the button below. 🌐 switches between them (held, it opens the " +
-                "keyboard list). A language's dictionary loads only once you use it. " +
-                "Cyrillic and Glagolitic are for Interslavic.",
-            "Każdy język to osobna pozycja na systemowej liście klawiatur. Międzysłowiański " +
-                "jest włączony, pozostałe dodasz przyciskiem poniżej. 🌐 przełącza między nimi " +
-                "(przytrzymany otwiera listę klawiatur). Słownik języka wczytuje się dopiero " +
-                "przy pierwszym użyciu. Cyrylica i głagolica są dla międzysłowiańskiego.",
-            "Hvert språk er en egen oppføring i telefonens tastaturliste. Interslavisk er " +
-                "på; legg til de andre med knappen nedenfor. 🌐 bytter mellom dem (holdt inne åpner den " +
-                "tastaturlisten). Ordboka for et språk lastes først når du bruker det. " +
-                "Kyrillisk og glagolittisk gjelder interslavisk.",
+            "One keyboard, Interslove; tick its languages here or in the keyboard " +
+                "itself (hold 123, then ⚙). Slide on the space bar or tap 🌐 to switch; hold the space " +
+                "bar for the list (held, 🌐 opens the phone's keyboard list). A language's dictionary " +
+                "loads only once you use it. Cyrillic and Glagolitic are for Interslavic.",
+            "Jedna klawiatura, Interslove; języki zaznaczasz tutaj albo w samej klawiaturze " +
+                "(przytrzymaj 123, potem ⚙). Przełączasz przesunięciem po spacji albo 🌐; " +
+                "przytrzymana spacja pokazuje listę (przytrzymany 🌐 otwiera listę klawiatur " +
+                "telefonu). Słownik języka wczytuje się dopiero przy pierwszym użyciu. " +
+                "Cyrylica i głagolica są dla międzysłowiańskiego.",
+            "Ett tastatur, Interslove; kryss av språkene her eller i selve tastaturet " +
+                "(hold 123, så ⚙). Skyv på mellomromstasten eller trykk 🌐 for å bytte; hold " +
+                "mellomromstasten for listen (holdt inne åpner 🌐 telefonens tastaturliste). Ordboka " +
+                "for et språk lastes først når du bruker det. Kyrillisk og glagolittisk gjelder interslavisk.",
         ),
         "langs_now" to row(null, "On now", "Włączone teraz", "På nå"),
         "btn_langs" to row("Izberi jezyky", "Choose languages", "Wybierz języki", "Velg språk"),

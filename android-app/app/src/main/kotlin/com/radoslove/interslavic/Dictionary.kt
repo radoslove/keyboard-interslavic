@@ -174,7 +174,7 @@ object Dictionary {
      *  [foldBase], so adding a letter to the glide fold adds it to search too. */
     private val sameKey: Map<Char, String> by lazy {
         val byBase = HashMap<Char, StringBuilder>()
-        for (c in "abcdefghijklmnopqrstuvwxyzæøčćšśžżźěęéèêąàáłńňóòôíýúůřťďäö") {
+        for (c in "abcdefghijklmnopqrstuvwxyzæøčćšśžżźěęéèêąàáłńňóòôíýúůřťďäöëŵḃḅüïìŝǫĝľŭ") {
             byBase.getOrPut(foldBase(c)) { StringBuilder() }.append(c)
         }
         val out = HashMap<Char, String>()
@@ -300,6 +300,12 @@ object Dictionary {
         // Russian's internal Latin (tools/build_cyrillic_wordlist.py): ё on e,
         // щ on w, ь ъ on b, ю on u (э `ê` and ж `ž` are folded above).
         'ë' -> 'e'; 'ŵ' -> 'w'; 'ḃ', 'ḅ' -> 'b'; 'ü' -> 'u'
+        // Ukrainian ї `ï` on i, Bulgarian щ `ŝ` on s and ѝ `ì` on i, Proto-Slavic
+        // `ǫ` on o (tools/swipe_eval.py folds the same; without `ǫ` Proto-Slavic
+        // measured 65.8 % instead of 71.5 %). `ĝ` for a Ukrainian ґ variant.
+        'ï', 'ì' -> 'i'; 'ŝ' -> 's'; 'ǫ' -> 'o'; 'ĝ' -> 'g'
+        // Belarusian ў `ŭ`, held on u.
+        'ŭ' -> 'u'
         // Norwegian: ä and ö are held on æ and ø, which are keys of their own.
         // Everywhere else (Slovak `ä`) they sit on a and o - folding Slovak `ä`
         // onto a key the keyboard does not have took every such word out of the
@@ -339,6 +345,8 @@ object Dictionary {
         val sb = StringBuilder(w.length)
         var i = 0
         while (i < w.length) {
+            // The Ukrainian apostrophe (`п'ять`) is written, never drawn.
+            if (w[i] == '\'') { i++; continue }
             val pair = pairKey(w, i)
             if (pair != null) { sb.append(pair); i += 2 } else { sb.append(foldBase(w[i])); i++ }
         }
@@ -353,7 +361,7 @@ object Dictionary {
      *  because then it equals [foldWord] and is never computed twice. */
     private fun foldPlain(w: String): String {
         val sb = StringBuilder(w.length)
-        for (c in w) sb.append(foldBase(c))
+        for (c in w) if (c != '\'') sb.append(foldBase(c))
         return sb.toString()
     }
 

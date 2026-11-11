@@ -99,12 +99,59 @@ BG_B = {   # BDS 2006: ч q, ш w, ж x, в v, ъ y. Held: я on a, щ w, ь b, 
 # top-3) - a tie; the owner chose A (2026-11-11): in B the frequent `я` is
 # only a hold. B stays here as measured.
 TABLES["bg"] = BG_A
+# Belarusian (2026-11-11), official orthography of 2008 - the one the
+# hunspell and both Leipzig corpora use. No щ ъ и; ў (u-short) stands in
+# about 13 % of running words, so where it sits matters. Three arrangements:
+BE_A = {   # xkeyboard-config `by(phonetic)` = ru(phonetic) ЯВЕРТЫ with і on i,
+           # ў in place of щ. Held: ш on s, ч c, ў ю on u, э ё on e.
+    "а": "a", "б": "b", "в": "w", "г": "g", "д": "d", "е": "e", "ё": "ë",
+    "ж": "v", "з": "z", "і": "i", "й": "j", "к": "k", "л": "l", "м": "m",
+    "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
+    "ў": "ŭ", "ф": "f", "х": "h", "ц": "c", "ч": "č", "ш": "š", "ы": "y",
+    "ь": "x", "э": "ê", "ю": "ü", "я": "q", "'": "'",
+}
+BE_B = {   # our Russian ЯШЕРТЫ with і on i. Held: ё э on e, ж z, ь b, ю ў on u.
+    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "ë",
+    "ж": "ž", "з": "z", "і": "i", "й": "j", "к": "k", "л": "l", "м": "m",
+    "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
+    "ў": "ŭ", "ф": "f", "х": "x", "ц": "c", "ч": "h", "ш": "w", "ы": "y",
+    "ь": "ḃ", "э": "ê", "ю": "ü", "я": "q", "'": "'",
+}
+BE_C = dict(BE_B, **{"ў": "w", "ш": "š"})   # B with ў on w (sounds like it), ш held on s
+TABLES["be"] = BE_A
 ONE_LETTER = {
     "bg": {"а", "в", "е", "и", "ѝ", "о", "с", "у", "я"},
     "ru": {"а", "в", "и", "к", "о", "с", "у", "я"},
     "uk": {"а", "в", "з", "і", "й", "к", "о", "с", "у", "я"},
+    "be": {"а", "з", "і", "й", "о", "у", "ў", "я"},
 }
-NAMES = {"ru": "Russkij", "uk": "Ukrajinsky", "bg": "Bulgarsky"}
+NAMES = {"ru": "Russkij", "uk": "Ukrajinsky", "bg": "Bulgarsky", "be": "Bělorussky"}
+SOURCE_NOTE = {"be": "Leipzig Corpora Collection CC BY 4.0"}
+
+
+def leipzig_counts(src):
+    """Belarusian has no FrequencyWords list: word counts from the Leipzig
+    corpora in sources_be (`*-words.txt`: id, word, count). Each corpus is
+    scaled to the same total, so the 300K Wikipedia sample does not drown the
+    100K news one; case and apostrophe variants are merged."""
+    per = []
+    for p in sorted(src.glob("*/*-words.txt")):
+        c = {}
+        for line in p.open(encoding="utf-8"):
+            x = line.rstrip("\n").split("\t")
+            if len(x) >= 3 and x[2].isdigit():
+                w = x[1].lower().translate(APOSTROPHES)
+                c[w] = c.get(w, 0) + int(x[2])
+        per.append(c)
+    if not per:
+        return None
+    top = max(sum(c.values()) for c in per)
+    total = {}
+    for c in per:
+        k = top / sum(c.values())
+        for w, n in c.items():
+            total[w] = total.get(w, 0) + n * k
+    return {w: round(n) for w, n in total.items()}
 APOSTROPHES = str.maketrans({"ʼ": "'", "’": "'", "`": "'"})
 AFTER_APOSTROPHE = set("яюєї")
 
@@ -112,13 +159,18 @@ AFTER_APOSTROPHE = set("яюєї")
 def main():
     lang = sys.argv[1] if len(sys.argv) > 1 else ""
     if lang not in TABLES:
-        sys.exit(f"usage: build_cyrillic_wordlist.py {{{','.join(TABLES)}}}")
+        sys.exit(f"usage: build_cyrillic_wordlist.py {{{','.join(TABLES)}}} [variant]")
     table, one = TABLES[lang], ONE_LETTER[lang]
+    # Measuring arrangements: `be B` builds the list for BE_B, written to
+    # main_be.combined like the default - rebuild with the chosen one after.
+    if len(sys.argv) > 2:
+        table = globals()[f"{lang.upper()}_{sys.argv[2]}"]
     assert len(set(table.values())) == len(table), "transliteration must be one to one"
     src = ROOT / f"dictionary/sources_{lang}"
     freq, hunspell = src / f"{lang}_50k.txt", src / lang
     out_path = ROOT / f"dictionary/main_{lang}.combined"
-    for p in (freq, ISV, Path(str(hunspell) + ".dic"), Path(str(hunspell) + ".aff")):
+    leipzig = leipzig_counts(src) if lang == "be" else None
+    for p in ((ISV,) if leipzig else (freq, ISV)) + (Path(str(hunspell) + ".dic"), Path(str(hunspell) + ".aff")):
         if not p.exists():
             sys.exit(f"missing input: {p}\n(see {src}/README.md)")
     try:
@@ -129,13 +181,18 @@ def main():
     letters = set(table)
 
     counts = {}
-    for line in freq.open(encoding="utf-8"):
-        parts = line.split()
-        if len(parts) == 2:
-            counts.setdefault(parts[0].lower().translate(APOSTROPHES), int(parts[1]))
+    if leipzig:
+        # Top 50 000, like the FrequencyWords lists of the other languages.
+        counts = dict(sorted(leipzig.items(), key=lambda r: -r[1])[:50000])
+    else:
+        for line in freq.open(encoding="utf-8"):
+            parts = line.split()
+            if len(parts) == 2:
+                counts.setdefault(parts[0].lower().translate(APOSTROPHES), int(parts[1]))
     rows = list(counts.items())
     recovered = 0
-    if "'" in table:
+    # Belarusian keeps its apostrophe inside the corpus tokens - nothing to recover.
+    if "'" in table and not leipzig:
         # stem before the apostrophe + the first letter after it, from the .dic
         stems = set()
         for l in Path(str(hunspell) + ".dic").open(encoding="utf-8"):
@@ -183,13 +240,14 @@ def main():
         sys.exit("no forms survived the filter - check the hunspell files")
     with out_path.open("w", encoding="utf-8", newline="\n") as out:
         out.write(f"dictionary=main:{lang},locale={lang},description={NAMES[lang]} "
-                  f"(FrequencyWords CC BY-SA 4.0 + hunspell {lang}; internal Latin),version=1\n")
+                  f"({SOURCE_NOTE.get(lang, 'FrequencyWords CC BY-SA 4.0')} + hunspell {lang}; "
+                  f"internal Latin),version=1\n")
         for rank, form in enumerate(words):
             f = isv[min(k - 1, rank * k // n)]
             out.write(f"word={form},f={max(1, min(255, f))}\n")
     print(f"{n} forms -> {out_path}")
     print(f"dropped: {unknown} hunspell does not know, {other} not pure Cyrillic / stray single letters")
-    if "'" in table:
+    if "'" in table and not leipzig:
         print(f"recovered {recovered} forms split at the apostrophe; "
               f"{sum(1 for w in words if chr(39) in w)} forms with an apostrophe in the list")
 

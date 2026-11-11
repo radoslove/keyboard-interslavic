@@ -189,6 +189,19 @@ class KeyboardView(
     // word and pushed a space in front of it.
     private val ATTACH_PUNCT = ".,!?:;\u2026'\u2019\u201D\")]".toSet()
 
+    /** A character of a word: a letter, and in Ukrainian also the apostrophe
+     *  inside one (`\u043F'\u044F\u0442\u044C`, `\u0441\u0456\u043C'\u044F`), or completions, `\uFF0B` and backspace by
+     *  word would break the word in two at it (iOS 0.6.6, owner 2026-11-11). */
+    private fun wordChar(c: Char, lang: String = Lang.current(context)): Boolean =
+        c.isLetter() || (c == '\'' && lang in Lang.APOSTROPHE_IN_WORD)
+
+    /** The word right before the cursor, as shown; a leading apostrophe is a
+     *  quote mark, not part of it (iOS `trailingWord`). */
+    private fun trailingWord(text: String): String {
+        val lang = Lang.current(context)
+        return text.takeLastWhile { wordChar(it, lang) }.trimStart('\'')
+    }
+
     /** Smart space (default) owes the space to the NEXT thing typed, so
      *  punctuation lands tight against the word. Classic mode instead puts the
      *  space in immediately after a committed word, which is what people who
@@ -333,6 +346,83 @@ class KeyboardView(
             }
             previewTxt.color = cText
         }
+        langItems?.let { items ->
+            val r = dp(10).toFloat()
+            val cols = (items.size + langRows - 1) / langRows
+            val right = langLeft + langColW * cols
+            val bottom = langTop + langRowH * langRows
+            canvas.drawRoundRect(langLeft, langTop, right, bottom, r, r, previewBg)
+            canvas.drawRoundRect(langLeft, langTop, right, bottom, r, r, previewBorder)
+            val base = minOf(dp(19).toFloat(), langRowH * 0.48f)
+            for (i in items.indices) {
+                val l = langLeft + langColW * (i / langRows)
+                val t = langTop + langRowH * (i % langRows)
+                if (i == langSel) {
+                    canvas.drawRoundRect(l + 2f, t + 2f, l + langColW - 2f, t + langRowH - 2f, r, r, popupSelBg)
+                    previewTxt.color = Color.WHITE
+                } else previewTxt.color = cText
+                // Full names, shrunk to the cell if one is too long for it.
+                val label = Lang.label(items[i])
+                previewTxt.textSize = base
+                val room = langColW - dp(12)
+                val wide = previewTxt.measureText(label)
+                if (wide > room) previewTxt.textSize = base * room / wide
+                val fm = previewTxt.fontMetrics
+                canvas.drawText(label, l + langColW / 2f, t + langRowH / 2f - (fm.ascent + fm.descent) / 2f, previewTxt)
+            }
+            previewTxt.color = cText
+        }
+    }
+
+    // Hold on SPACE (iOS 0.6.3, owner 2026-11-11): the ticked languages as a
+    // VERTICAL list of full names over the space bar - a horizontal strip of
+    // codes was hard to notice. The keyboard cannot draw above its own top, so
+    // when the rows do not fit above the space bar the list breaks into columns.
+    private var langItems: List<String>? = null
+    private var langLeft = 0f
+    private var langTop = 0f
+    private var langRowH = 0f
+    private var langColW = 0f
+    private var langRows = 1
+    private var langSel = 0
+
+    private fun showLangList(tv: TextView, langs: List<String>) {
+        val row = tv.parent as? android.view.View ?: return
+        hideKeyPreview()
+        val keyTop = (row.top + tv.top).toFloat()
+        val centre = row.left + tv.left + tv.width / 2f
+        val n = langs.size
+        langRowH = dp(40).toFloat()
+        val maxRows = maxOf(1, ((keyTop - dp(6)) / langRowH).toInt())
+        val cols = (n + maxRows - 1) / maxRows
+        langRows = (n + cols - 1) / cols
+        langColW = minOf(dp(170).toFloat(), (width - dp(4)).toFloat() / cols)
+        val w = langColW * cols
+        langLeft = (centre - w / 2f).coerceAtMost(width - w - dp(2)).coerceAtLeast(dp(2).toFloat())
+        langTop = (keyTop - dp(4) - langRowH * langRows).coerceAtLeast(0f)
+        langItems = langs
+        langSel = langs.indexOf(Lang.current(context)).coerceAtLeast(0)
+        invalidate()
+    }
+
+    /** The cell under the finger - the nearest one when it strays outside the
+     *  list, so the pick does not need to be precise. [x] [y] in the key's
+     *  coordinates. */
+    private fun moveLangList(tv: TextView, x: Float, y: Float) {
+        val items = langItems ?: return
+        val row = tv.parent as? android.view.View ?: return
+        val cols = (items.size + langRows - 1) / langRows
+        val col = ((row.left + tv.left + x - langLeft) / langColW).toInt().coerceIn(0, cols - 1)
+        val r = ((row.top + tv.top + y - langTop) / langRowH).toInt().coerceIn(0, langRows - 1)
+        val i = minOf(col * langRows + r, items.size - 1)
+        if (i != langSel) { langSel = i; invalidate() }
+    }
+
+    private fun closeLangList(): String? {
+        val items = langItems ?: return null
+        langItems = null
+        invalidate()
+        return items.getOrNull(langSel)
     }
 
     // Hold popup, as on iOS (7801f4b): every letter or mark the key holds, the
@@ -599,7 +689,8 @@ class KeyboardView(
         val full = Layout.letterRows(lang, qwertz = qwertz)
         // Both non-Latin scripts glide `lj` and `nj` over one key each: `љ`/`њ` in
         // Cyrillic, `ⰾⱐ`/`ⱀⱐ` in Glagolitic. The route over `l`+`j` stays too.
-        Dictionary.digraphKeys = script != Script.Mode.LATIN && lang != Lang.MK && lang != Lang.RU
+        // Not where every key writes ONE letter (mk ru uk bg sla, iOS `singleLetterKeys`).
+        Dictionary.digraphKeys = script != Script.Mode.LATIN && lang !in Lang.SINGLE_LETTER_KEYS
         Layout.letterRows(lang, script, qwertz).forEachIndexed { index, row ->
             val rv = makeRow()
             val pad = (full[index].length - row.length) / 2f
@@ -747,6 +838,25 @@ class KeyboardView(
             column.addView(rv)
         }
 
+        // Languages (owner 2026-11-11, iOS 0.6.3): one keyboard in the system,
+        // the languages ticked HERE, four codes to a row; at least one stays.
+        // A language just ticked becomes the one typed, as on iOS.
+        header("Jezyky")
+        val on = Lang.enabled(context)
+        Lang.ALL.chunked(4).forEach { chunk ->
+            choices(chunk.map { code ->
+                Triple(code, code in on, {
+                    val next = on.toMutableList()
+                    val adding = code !in next
+                    if (adding) next.add(code) else if (next.size > 1) next.remove(code)
+                    Lang.setEnabled(context, next)
+                    if (adding) Lang.setCurrent(context, code)
+                    Dictionary.use(context, Lang.current(context))
+                    service.rebuildView(true)
+                })
+            })
+        }
+
         header("Tema")
         choices(listOf(
             Triple("◐", Theme.choice(context) == Theme.AUTO,
@@ -887,8 +997,88 @@ class KeyboardView(
             if (android.os.Build.VERSION.SDK_INT >= 26) {
                 tv.setAutoSizeTextTypeUniformWithConfiguration(9, 14, 1, TypedValue.COMPLEX_UNIT_SP)
             } else tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+            switchesLanguages(tv)
         }
         return tv
+    }
+
+    /**
+     * With more than one language ticked the space bar also switches them
+     * (iOS 0.6.3, owner 2026-11-11): slide right = the next ticked language,
+     * left = the previous, round the list (never out to the system - that stays
+     * 🌐's job); HOLD = the vertical list, slide onto one and lift. So the space
+     * is typed on LIFT, inside or outside the key - a thumb that slid a little
+     * still gets its space - and a recognised gesture types nothing.
+     */
+    private fun switchesLanguages(tv: TextView) {
+        tv.setOnClickListener(null)
+        tv.isLongClickable = false
+        var downX = 0f
+        var downY = 0f
+        var moved = false
+        val hold = Runnable {
+            showLangList(tv, Lang.enabled(context))
+            tv.isPressed = false
+        }
+        tv.setOnTouchListener { _, e ->
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    downX = e.x; downY = e.y; moved = false
+                    tv.isPressed = true
+                    // This view watches the whole keyboard for glides; without
+                    // this the slide would be taken from the space bar.
+                    (tv.parent as? android.view.ViewGroup)?.requestDisallowInterceptTouchEvent(true)
+                    flickHandler.postDelayed(hold, 400L)   // iOS minimumPressDuration 0.4 s
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (langItems != null) moveLangList(tv, e.x, e.y)
+                    else if (!moved && (abs(e.x - downX) > touchSlop * 2 || abs(e.y - downY) > touchSlop * 2)) {
+                        moved = true
+                        flickHandler.removeCallbacks(hold)
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    flickHandler.removeCallbacks(hold)
+                    tv.isPressed = false
+                    (tv.parent as? android.view.ViewGroup)?.requestDisallowInterceptTouchEvent(false)
+                    val listed = langItems != null
+                    val pick = closeLangList()
+                    val on = Lang.enabled(context)
+                    val now = Lang.current(context)
+                    val dx = e.x - downX
+                    when {
+                        listed -> if (pick != null && pick != now) switchLanguage(pick)
+                        abs(dx) >= dp(30) && on.size > 1 -> {
+                            val i = on.indexOf(now).coerceAtLeast(0)
+                            switchLanguage(on[(i + if (dx > 0) 1 else on.size - 1) % on.size])
+                        }
+                        else -> commit(" ")
+                    }
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    flickHandler.removeCallbacks(hold)
+                    tv.isPressed = false
+                    closeLangList()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    /** The glide state of the word before belongs to the old language and is
+     *  closed (iOS `switchLanguage`); the system then rebuilds the view. */
+    private fun switchLanguage(lang: String) {
+        feedback()
+        pendingSpace = false
+        swipeJustCommitted = false
+        lastSwipeWord = ""
+        trimAfterWipe = ""
+        clearUndo()
+        service.switchToLanguage(lang)
     }
 
     /** 🌐: tap = the next ticked language (Gboard's habit), or the system
@@ -1277,11 +1467,21 @@ class KeyboardView(
             )
         if (extendingGlide) pendingSpace = false
 
+        // Ukrainian: an apostrophe right after a letter is INSIDE the word
+        // (`п'ять`), also right after a glide - the owed space is dropped and
+        // the word goes on (iOS 0.6.6). A leading one stays a quote mark.
+        val lang = Lang.current(context)
+        val apostropheInWord = s == "'" && lang in Lang.APOSTROPHE_IN_WORD &&
+            service.currentInputConnection?.getTextBeforeCursor(1, 0)
+                ?.lastOrNull()?.isLetter() == true
+        if (apostropheInWord) pendingSpace = false
+
         // A glide the user KEPT is a measurement of their own thumb: the word
         // stood in the text until a space or a mark closed it. A letter means
         // the word is being EXTENDED, so the text no longer holds the word that
         // was decoded and the gesture says nothing about where the thumb sits.
-        if (swipeJustCommitted && !extendingGlide && s.isNotEmpty() && !s[0].isLetter()) {
+        if (swipeJustCommitted && !extendingGlide && !apostropheInWord &&
+            s.isNotEmpty() && !s[0].isLetter()) {
             learnLift()
         }
         recased = null       // any other key ends a shift-key re-casing run
@@ -1296,7 +1496,9 @@ class KeyboardView(
         // Adaptive ranking: count a hand-typed known word when a terminator lands.
         if (!c0.isLetter()) {
             val before = ic.getTextBeforeCursor(48, 0)?.toString().orEmpty()
-            val w = Script.toLatin(context, before.takeLastWhile { it.isLetter() }).lowercase()
+            // A Ukrainian apostrophe is not a terminator: `п'` is half a word.
+            val w = if (apostropheInWord) ""
+                else Script.toLatin(context, trailingWord(before)).lowercase()
             if (w.length >= 2 && Dictionary.contains(w)) {
                 Usage.record(context, w)
                 Popularity.record(context, w)
@@ -1477,7 +1679,7 @@ class KeyboardView(
         if (arm) undoArmed = true
         if (restoreRank) undoRestoreRank = true
         val trimmed = undoText.trim()
-        undoWord = trimmed.takeLastWhile { it.isLetter() }
+        undoWord = trailingWord(trimmed)
         undoMore = trimmed.any { it.isWhitespace() }
         if (undoWord.isEmpty()) undoArmed = false   // a stray mark is not a word
     }
@@ -1644,9 +1846,12 @@ class KeyboardView(
         var i = before.length
         while (i > floor && before[i - 1].isWhitespace()) i--
         if (i > floor) {
-            val lettersFirst = before[i - 1].isLetterOrDigit()
+            // `wordChar`: a Ukrainian `п'ять` goes as one word, not two and a mark.
+            val lang = Lang.current(context)
+            fun inWord(c: Char) = wordChar(c, lang) || c.isDigit()
+            val lettersFirst = inWord(before[i - 1])
             while (i > floor && !before[i - 1].isWhitespace() &&
-                   before[i - 1].isLetterOrDigit() == lettersFirst) i--
+                   inWord(before[i - 1]) == lettersFirst) i--
         }
         val del = before.length - i
         if (del > 0) {
@@ -1736,7 +1941,7 @@ class KeyboardView(
     private fun refreshSuggestions() {
         val before = service.currentInputConnection
             ?.getTextBeforeCursor(48, 0)?.toString().orEmpty()
-        val word = before.takeLastWhile { it.isLetter() }
+        val word = trailingWord(before)
         currentWord = word
         clearSlots()
         // The undo chip takes the front slot: a word that has just vanished is
@@ -1747,7 +1952,7 @@ class KeyboardView(
             // more - that is when the eye notices nothing was suggested (as on
             // iOS, refreshCompletions). Without this the chip vanished with the space.
             if (before.endsWith(" ")) {
-                val finished = before.dropLast(1).takeLastWhile { it.isLetter() }
+                val finished = trailingWord(before.dropLast(1))
                 val ahead = before.dropLast(1 + finished.length)
                 saveForm(finished, ahead)?.let {
                     setSlot(first, "＋ ${Script.out(context, it)}", it, save = true)

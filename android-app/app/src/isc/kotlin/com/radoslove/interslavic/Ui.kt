@@ -80,16 +80,15 @@ object Ui {
         ),
         "langs_head" to row("Tastaturspråk", "Keyboard languages", "Języki klawiatury"),
         "langs_body" to row(
-            "Hvert språk er en egen oppføring i telefonens tastaturliste. Mellomskandinavisk " +
-                "er på; legg til de andre med knappen nedenfor. 🌐 bytter mellom dem (holdt " +
-                "inne åpner den tastaturlisten). Ordboka for et språk lastes først når du bruker det.",
-            "Each language is its own entry in the phone's keyboard list. Interscandinavian " +
-                "is on; add the others with the button below. 🌐 switches between them (held, " +
-                "it opens the keyboard list). A language's dictionary loads only once you use it.",
-            "Każdy język to osobna pozycja na systemowej liście klawiatur. Międzyskandynawski " +
-                "jest włączony, pozostałe dodasz przyciskiem poniżej. 🌐 przełącza między nimi " +
-                "(przytrzymany otwiera listę klawiatur). Słownik języka wczytuje się dopiero " +
-                "przy pierwszym użyciu.",
+            "Kryss av språkene her eller i selve tastaturet (hold 123, så ⚙). Skyv på " +
+                "mellomromstasten eller trykk 🌐 for å bytte (holdt inne åpner 🌐 telefonens " +
+                "tastaturliste). Ordboka for et språk lastes først når du bruker det.",
+            "Tick the languages here or in the keyboard itself (hold 123, then ⚙). Slide on " +
+                "the space bar or tap 🌐 to switch (held, 🌐 opens the phone's keyboard list). " +
+                "A language's dictionary loads only once you use it.",
+            "Języki zaznaczasz tutaj albo w samej klawiaturze (przytrzymaj 123, potem ⚙). " +
+                "Przełączasz przesunięciem po spacji albo 🌐 (przytrzymany 🌐 otwiera listę " +
+                "klawiatur telefonu). Słownik języka wczytuje się dopiero przy pierwszym użyciu.",
         ),
         "langs_now" to row("På nå", "On now", "Włączone teraz"),
         "btn_langs" to row("Velg språk", "Choose languages", "Wybierz języki"),
