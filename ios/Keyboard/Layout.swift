@@ -18,7 +18,8 @@ enum Layout {
         ("isv", "Medžuslovjansky"), ("pl", "Polski"), ("cs", "češsky"),
         ("sk", "slovačsky"), ("sl", "slovenečsky"), ("hr", "hrvatsky"),
         ("sr", "srbsky"), ("bs", "bosnijsky"), ("mk", "makedonsky"),
-        ("ru", "russky"), ("nb", "norvežsky"), ("en", "English"),
+        ("ru", "russky"), ("uk", "ukrajinsky"), ("sla", "praslovjansky"), ("nb", "norvežsky"),
+        ("en", "English"),
     ]
 
     static func name(_ code: String) -> String { all.first { $0.code == code }?.name ?? code }
@@ -45,7 +46,8 @@ enum Layout {
     }
 
     /// The language being typed now: `isv`, `pl`, `cs`, `sk`, `sl`, `hr`, `sr`
-    /// (Latin + Cyrillic), `bs`, `mk` and `ru` (Cyrillic only), `nb` or `en`.
+    /// (Latin + Cyrillic), `bs`, `mk` and `ru` (Cyrillic only), `sla`
+    /// (Proto-Slavic), `nb` or `en`.
     /// Read on every letter of a glide, so it is kept in memory and only
     /// written through to the store; `forgetLanguage()` after the list changes.
     static var language: String {
@@ -105,6 +107,20 @@ enum Layout {
             // Android `Layout.ruOwn`, ordered by frequency mass in the wordlist:
             // ё before э, ь before ъ.
             return ["e": ["ë", "ê"], "w": ["ŵ"], "z": ["ž"], "b": ["ḃ", "ḅ"], "u": ["ü"]]
+        case "uk":
+            // Ukrainian homophonic (xkeyboard-config `ua(homophonic)`, owner
+            // 2026-11-11): the keys the phone lacks are held on their Latin
+            // match. The apostrophe (`п'ять`) has no key - the glide skips it,
+            // and a tap takes it from the strip under `.`.
+            return ["c": ["č"], "z": ["ž"], "u": ["ü"], "w": ["ŵ"], "e": ["ê"],
+                    "i": ["ï"], "b": ["ḃ"]]
+        case "sla":
+            // Proto-Slavic in the Wiktionary notation (tools/build_sla_wordlist.py):
+            // `ъ` `ь` have keys of their own (`q` `f`), the rest is held,
+            // ordered by frequency in the list: ě before ę.
+            return ["e": ["ě", "ę"], "o": ["ǫ"], "c": ["č"], "s": ["š", "ś"],
+                    "z": ["ž"], "l": ["ľ"], "n": ["ň"], "r": ["ř"], "t": ["ť"],
+                    "d": ["ď"]]
         case "en":
             return [:]
         case "nb":
@@ -199,7 +215,8 @@ enum Layout {
         // with `љ` `њ` on `q` `w` and `џ` on the `x` position; no `y`
         // (Android `srCyrillicRows`, `mkCyrillicRows`).
         // Russian, phonetic: its letters take all 26 Latin keys, QWERTY grid.
-        if language == "ru" {
+        // Proto-Slavic too: `ъ` on `q`, `ь` on `f`, every other key its letter.
+        if ["ru", "uk", "sla"].contains(language) {
             return [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")]
         }
         if !latin && (language == "sr" || language == "mk") {
@@ -220,7 +237,7 @@ enum Layout {
         guard !latin else { return String(ch) }
         // Russian, phonetic: every key writes its own letter (я on q, ш on w);
         // the Interslavic `lj`/`nj` keys are not part of this layout.
-        if language == "ru" { return String(ch) }
+        if ["ru", "uk", "sla"].contains(language) { return String(ch) }
         // Macedonian: ONE letter per key - the wordlist carries ǉ ǌ ǆ as
         // single characters (Android `keyText`, Lang.MK).
         if language == "mk" {
@@ -260,7 +277,11 @@ enum Layout {
     static let qwertzByDefault: Set<String> = ["cs", "sk", "sl", "hr", "sr", "bs"]
     /// Not for Norwegian (rows of 11) nor Macedonian, which is Cyrillic only
     /// and has its own grid (Android `KeyRows.offered`).
-    static var qwertzOffered: Bool { language != "nb" && language != "mk" && language != "ru" }
+    static var qwertzOffered: Bool { !["nb", "mk", "ru", "uk", "sla"].contains(language) }
+
+    /// Languages whose keys each write ONE letter, so the Interslavic digraph
+    /// routes (`lj` `nj` over `q` `w`) must stay off.
+    static var singleLetterKeys: Bool { ["mk", "ru", "uk", "sla"].contains(language) }
     static var qwertz: Bool {
         get {
             guard qwertzOffered else { return false }

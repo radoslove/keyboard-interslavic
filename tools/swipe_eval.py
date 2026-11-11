@@ -100,7 +100,7 @@ SR_CYRL = DIGRAPH_KEYS and LANG == "sr"
 MK = LANG == "mk"
 # Russian, phonetic (ЯШЕРТЫ): Cyrillic-only as well, its letters on all 26 Latin
 # keys, so the rows are the Latin QWERTY ones; no digraph keys.
-RU = LANG == "ru"
+RU = LANG in ("ru", "uk")   # Ukrainian: same QWERTY grid, no digraph keys
 if MK or RU:
     DIGRAPH_KEYS = False
 ROWS = (["qwertzuiop", "asdfghjkl", "xcvbnm"] if MK
@@ -138,7 +138,7 @@ CENTERS = build_centers()
 # keyboard. If a letter is missing here, the harness lies rather than fails.
 _FOLD = {}
 for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê", "e"),
-                   ("ąàá", "a"), ("łľĺ", "l"), ("ńň", "n"), ("óòô", "o"),
+                   ("ąàá", "a"), ("łľĺ", "l"), ("ńň", "n"), ("óòôǫ", "o"),
                    ("í", "i"), ("ý", "y"), ("úů", "u"), ("řŕ", "r"),
                    ("ť", "t"), ("ďđ", "d"),
                    # Norwegian holds ä ö on its own æ ø keys; everywhere else
@@ -153,9 +153,13 @@ for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê",
                    ("ǵ", "g"), ("ḱ", "k"), ("ẑ", "z"),
                    # Russian's internal Latin (tools/build_cyrillic_wordlist.py):
                    # ё on e, щ on w, ь ъ on b, ю on u (э `ê`, ж `ž` above).
-                   ("ë", "e"), ("ŵ", "w"), ("ḃḅ", "b"), ("ü", "u")]:
+                   ("ë", "e"), ("ŵ", "w"), ("ḃḅ", "b"), ("ü", "u"),
+                   # Ukrainian's internal Latin: ŝ on s, ĝ on g, ï on i.
+                   ("ŝ", "s"), ("ĝ", "g"), ("ï", "i")]:
     for _ch in _src:
         _FOLD[_ch] = _dst
+# The Ukrainian apostrophe is written but never drawn: it folds to nothing.
+_FOLD["'"] = ""
 
 
 def fold(ch):

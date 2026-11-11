@@ -24,6 +24,16 @@ on a neighbour, and their internal letter is a Latin letter with a mark that
 folds onto that key - which is what lets the glide treat them like every held
 letter of the Latin languages.
 
+Ukrainian writes an APOSTROPHE inside words (`п'ять`, `м'ясо`, `сім'я`).
+It stays in the word - the keyboard writes it - but has no key: the glide
+skips it, so `п'ять` is drawn as `пять` (build_swipe_dictionary.py, the
+harness and both apps fold it to nothing). FrequencyWords splits every such
+word at the apostrophe (the 2018 uk list holds `п` and `ять`, never `п'ять`),
+so those forms are recovered: a stem before the apostrophe taken from the
+hunspell .dic, glued to a list word that starts with я ю є ї, kept if
+hunspell accepts the whole, counted as the RARER of its two halves (a
+tail that is itself a word, `є` or `я`, gives a twentieth of that).
+
 ⚠ Forms in MIXED alphabets (a Cyrillic word with a Latin `e` inside, identical
 on screen) are dropped: a form must be pure Cyrillic.
 """
@@ -46,10 +56,34 @@ TABLES = {
         "ы": "y", "ь": "ḃ", "э": "ê", "ю": "ü", "я": "q",
     },
 }
+# Ukrainian, two published phonetic arrangements, measured against each other
+# (2026-11-11) - xkeyboard-config `ua(phonetic)` (ЯВЕРТИ) and `ua(homophonic)`
+# (after the national transliteration). Keys the phone does not have
+# (`[ ] ; ' \ - =`) become holds on the nearest Latin match.
+UK_A = {   # ЯВЕРТИ: в w, и y, г g, х h, ь x, ж v. Held: ш щ on s, ч c, ґ g, ю u, ї i, є e.
+    "а": "a", "б": "b", "в": "w", "г": "g", "ґ": "ĝ", "д": "d", "е": "e", "є": "ê",
+    "ж": "v", "з": "z", "и": "y", "і": "i", "ї": "ï", "й": "j", "к": "k", "л": "l",
+    "м": "m", "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
+    "ф": "f", "х": "h", "ц": "c", "ч": "č", "ш": "š", "щ": "ŝ", "ь": "x", "ю": "ü",
+    "я": "q", "'": "'",
+}
+UK_B = {   # homophonic: ш w, и y, ґ g, г h, х x, в v. Held: ч c, ж z, ю u, щ w, є e, ї i, ь b.
+    "а": "a", "б": "b", "в": "v", "г": "h", "ґ": "g", "д": "d", "е": "e", "є": "ê",
+    "ж": "ž", "з": "z", "и": "y", "і": "i", "ї": "ï", "й": "j", "к": "k", "л": "l",
+    "м": "m", "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
+    "ф": "f", "х": "x", "ц": "c", "ч": "č", "ш": "w", "щ": "ŵ", "ь": "ḃ", "ю": "ü",
+    "я": "q", "'": "'",
+}
+# Five seeds on the same list: A 87.4 % / 97.4 %, B 87.4 % / 98.0 % (top-1 /
+# top-3) - a tie; the owner chose B (2026-11-11). A stays here as measured.
+TABLES["uk"] = UK_B
 ONE_LETTER = {
     "ru": {"а", "в", "и", "к", "о", "с", "у", "я"},
+    "uk": {"а", "в", "з", "і", "й", "к", "о", "с", "у", "я"},
 }
-NAMES = {"ru": "Russkij"}
+NAMES = {"ru": "Russkij", "uk": "Ukrajinsky"}
+APOSTROPHES = str.maketrans({"ʼ": "'", "’": "'", "`": "'"})
+AFTER_APOSTROPHE = set("яюєї")
 
 
 def main():
@@ -71,12 +105,40 @@ def main():
     hun = Dictionary.from_files(str(hunspell))
     letters = set(table)
 
-    words, seen, unknown, other = [], set(), 0, 0
+    counts = {}
     for line in freq.open(encoding="utf-8"):
         parts = line.split()
-        if len(parts) != 2:
-            continue
-        word, count = parts[0].lower(), int(parts[1])
+        if len(parts) == 2:
+            counts.setdefault(parts[0].lower().translate(APOSTROPHES), int(parts[1]))
+    rows = list(counts.items())
+    recovered = 0
+    if "'" in table:
+        # stem before the apostrophe + the first letter after it, from the .dic
+        stems = set()
+        for l in Path(str(hunspell) + ".dic").open(encoding="utf-8"):
+            w = l.split("/")[0].strip().translate(APOSTROPHES)
+            if "'" in w and w.islower():
+                head, _, tail = w.partition("'")
+                if tail:
+                    stems.add((head, tail[0]))
+        tails = [(w, c) for w, c in rows if w[:1] in AFTER_APOSTROPHE and c >= MIN_COUNT]
+        for head, first in sorted(stems):   # sorted: the same list on every build
+            hc = counts.get(head)
+            if not hc:
+                continue
+            for tail, tc in tails:
+                if tail[0] != first:
+                    continue
+                cand = head + "'" + tail
+                if cand not in counts and hun.lookup(cand):
+                    # A tail that is a word of its own (`є` = is, `я` = I) was
+                    # counted mostly as that word, not as the end of `п'є`.
+                    counts[cand] = max(MIN_COUNT, min(hc, tc) // (20 if hun.lookup(tail) else 1))
+                    recovered += 1
+        rows = sorted(counts.items(), key=lambda r: -r[1])
+
+    words, seen, unknown, other = [], set(), 0, 0
+    for word, count in rows:
         if count < MIN_COUNT:
             break                      # the file is sorted by count
         if not set(word) <= letters or (len(word) == 1 and word not in one):
@@ -104,6 +166,9 @@ def main():
             out.write(f"word={form},f={max(1, min(255, f))}\n")
     print(f"{n} forms -> {out_path}")
     print(f"dropped: {unknown} hunspell does not know, {other} not pure Cyrillic / stray single letters")
+    if "'" in table:
+        print(f"recovered {recovered} forms split at the apostrophe; "
+              f"{sum(1 for w in words if chr(39) in w)} forms with an apostrophe in the list")
 
 
 if __name__ == "__main__":

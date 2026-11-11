@@ -132,6 +132,8 @@ final class SwipeDictionary {
     static func keys(of word: String) -> [Int]? {
         var keys: [Int] = []
         for ch in word.lowercased() {
+            // The Ukrainian apostrophe (`п'ять`) is written, never drawn.
+            if ch == "'" { continue }
             // A letter that IS a key (Norwegian å ø æ) stays itself; held
             // accents fold to their base key. `ł` is not `l` plus a diacritic
             // to Unicode, so it is folded by hand; ä ö fold to æ ø where those

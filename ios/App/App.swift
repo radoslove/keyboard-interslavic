@@ -22,7 +22,7 @@ struct SetupView: View {
     private let languages = [("isv", "Medžuslovjansky"), ("pl", "Polski"), ("cs", "češsky"),
                              ("sk", "slovačsky"), ("sl", "slovenečsky"),
                              ("hr", "hrvatsky"), ("sr", "srbsky"), ("bs", "bosnijsky"),
-                             ("mk", "makedonsky"), ("ru", "russky"),
+                             ("mk", "makedonsky"), ("ru", "russky"), ("uk", "ukrajinsky"), ("sla", "praslovjansky"),
                              ("nb", "norvežsky"), ("en", "English")]
 
     private func reload() {

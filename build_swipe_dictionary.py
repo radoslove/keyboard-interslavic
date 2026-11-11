@@ -94,6 +94,16 @@ if LANG == "ru":
     # Russian's internal Latin (tools/build_cyrillic_wordlist.py, phonetic
     # layout): the held letters fold onto their key (Android Dictionary.foldBase).
     FOLD = {"ë": "e", "ê": "e", "ŵ": "w", "ž": "z", "ḃ": "b", "ḅ": "b", "ü": "u"}
+if LANG == "sla":
+    # Proto-Slavic (tools/build_sla_wordlist.py): the list is in internal Latin,
+    # `ъ` `ь` already on their keys `q` `f`; the held letters fold to their base.
+    FOLD = {"č": "c", "ď": "d", "ě": "e", "ę": "e", "ľ": "l", "ň": "n",
+            "ǫ": "o", "ř": "r", "š": "s", "ś": "s", "ť": "t", "ž": "z"}
+if LANG == "uk":
+    # Ukrainian's internal Latin (tools/build_cyrillic_wordlist.py); covers both
+    # measured arrangements, whose held letters never collide.
+    FOLD = {"ê": "e", "ï": "i", "ü": "u", "č": "c", "š": "s", "ŝ": "s",
+            "ĝ": "g", "ž": "z", "ŵ": "w", "ḃ": "b"}
 if LANG == "en":
     # Plain a-z: a form with any other letter (`café`) cannot be swiped and
     # is left out, as on Android.
@@ -113,6 +123,8 @@ def fold(word):
     """Display form -> key letters, or None if it cannot be typed on the layout."""
     out = []
     for ch in word.lower():
+        if ch == "'":
+            continue               # Ukrainian apostrophe: written, never drawn
         ch = FOLD.get(ch, ch)
         if ch not in INDEX:
             return None

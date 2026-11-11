@@ -244,8 +244,25 @@ def main():
             per_list[name] = sum(
                 1 for line in read("android-app/app/src/main/assets/" + name).splitlines()
                 if line.lstrip().startswith("word="))
-    check(len(per_list) == 6, "the app no longer ships six dictionaries",
-          "found %s" % sorted(per_list))
+    # The count of lists grew with every language (six until 2026-11-10,
+    # thirteen by 2026-11-11), so the gate no longer pins a number. What must
+    # hold instead: every list the app ships, except isc (built in its own
+    # repo), is byte-identical to its source in dictionary/ - a stale copy
+    # in the assets is the drift this check exists for. A list in dictionary/
+    # that the app does not ship yet is a pending port, reported, not failed.
+    check(len(per_list) > 0, "the app ships no dictionaries at all")
+    for name in sorted(per_list):
+        if name == "main_isc.combined":
+            continue
+        src = os.path.join(HERE, "dictionary", name)
+        check(os.path.exists(src), "%s ships in the app but has no source in dictionary/" % name)
+        if os.path.exists(src):
+            check(read("dictionary/" + name) == read("android-app/app/src/main/assets/" + name),
+                  "%s in the app assets differs from dictionary/" % name)
+    pending = sorted(n for n in os.listdir(os.path.join(HERE, "dictionary"))
+                     if n.startswith("main_") and n.endswith(".combined") and n not in per_list)
+    if pending:
+        print("note: not shipped by the Android app yet: %s" % ", ".join(pending))
     total = sum(per_list.values())
     shipped = set(per_list.values()) | {
         total,
