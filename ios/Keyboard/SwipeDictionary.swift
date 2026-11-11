@@ -137,8 +137,11 @@ final class SwipeDictionary {
             // to Unicode, so it is folded by hand; ä ö fold to æ ø where those
             // are keys, as in `build_swipe_dictionary.py`.
             if let k = Layout.swipeIndex(ch) { keys.append(k); continue }
-            var base = String(ch) == "ł" ? "l" : String(ch) == "đ" ? "d"
-                : String(ch).folding(options: .diacriticInsensitive, locale: nil)
+            // Macedonian's internal Latin: ǉ ǌ ǆ are single letters on the
+            // digraph keys, which Unicode does not decompose (Android foldBase).
+            let byHand: [Character: String] = ["ł": "l", "đ": "d", "ǉ": "q", "ǌ": "w", "ǆ": "x"]
+            var base = byHand[ch]
+                ?? String(ch).folding(options: .diacriticInsensitive, locale: nil)
             if Layout.swipeIndex("æ") != nil { base = ch == "ä" ? "æ" : ch == "ö" ? "ø" : base }
             guard base.count == 1, let b = base.first, let k = Layout.swipeIndex(b) else { return nil }
             keys.append(k)

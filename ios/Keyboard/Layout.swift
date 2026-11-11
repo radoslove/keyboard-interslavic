@@ -9,7 +9,7 @@ import Foundation
 /// which is the point: one habit across platforms.
 enum Layout {
 
-    /// Which keyboard this extension is: `isv`, `pl`, `cs`, `sk`, `sl`, `hr`, `sr` (Latin), `nb` or `en`. One code base, two
+    /// Which keyboard this extension is: `isv`, `pl`, `cs`, `sk`, `sl`, `hr`, `sr` (Latin + Cyrillic), `bs`, `mk` (Cyrillic only), `nb` or `en`. One code base, two
     /// entries in Settings -> Keyboards; the language comes from the
     /// extension's Info.plist (`KeyboardLanguage`), set per target.
     static let language: String =
@@ -42,9 +42,13 @@ enum Layout {
         case "sl":
             // Android `Layout.slOwn`: č š ž on their base letters.
             return ["c": ["č"], "s": ["š"], "z": ["ž"]]
-        case "hr", "sr":
+        case "hr", "sr", "bs":
             // Android `Layout.hrSrOwn`: č before ć, measured on both wordlists.
             return ["c": ["č", "ć"], "d": ["đ"], "s": ["š"], "z": ["ž"]]
+        case "mk":
+            // Android `Layout.mkOwn`: the internal Latin of the wordlist, held
+            // on the key it folds to; `Script.out` writes ѓ ќ ж ѕ ч ш.
+            return ["g": ["ǵ"], "k": ["ḱ"], "z": ["ž", "ẑ"], "c": ["č"], "s": ["š"]]
         case "en":
             return [:]
         case "nb":
@@ -135,6 +139,12 @@ enum Layout {
         if language == "nb" {
             return [Array("qwertyuiopå"), Array("asdfghjkløæ"), Array("zxcvbnm")]  // Android `nbRows`
         }
+        // Serbian Cyrillic (JUS I.K1.003) and Macedonian: the Latin QWERTZ grid
+        // with `љ` `њ` on `q` `w` and `џ` on the `x` position; no `y`
+        // (Android `srCyrillicRows`, `mkCyrillicRows`).
+        if !latin && (language == "sr" || language == "mk") {
+            return [Array("qwertzuiop"), Array("asdfghjkl"), Array("xcvbnm")]
+        }
         if latin && qwertz {
             return [Array("qwertzuiop"), Array("asdfghjkl"), Array("yxcvbnm")]
         }
@@ -148,11 +158,28 @@ enum Layout {
     /// wordlist, the glide, `Script.out`) keeps seeing the two letters.
     static func keyText(_ ch: Character, latin: Bool) -> String {
         guard !latin else { return String(ch) }
+        // Macedonian: ONE letter per key - the wordlist carries ǉ ǌ ǆ as
+        // single characters (Android `keyText`, Lang.MK).
+        if language == "mk" {
+            switch ch {
+            case "q": return "ǉ"
+            case "Q": return "Ǉ"
+            case "w": return "ǌ"
+            case "W": return "Ǌ"
+            case "x": return "ǆ"
+            case "X": return "Ǆ"
+            default: return String(ch)
+            }
+        }
         switch ch {
         case "q": return "lj"
         case "Q": return "Lj"
         case "w": return "nj"
         case "W": return "Nj"
+        // Serbian only: `џ` is one letter with the `x` position in the national
+        // layout; the key writes the pair `dž`, like `љ` and `њ`.
+        case "x" where language == "sr": return "dž"
+        case "X" where language == "sr": return "Dž"
         default: return String(ch)
         }
     }
@@ -160,14 +187,17 @@ enum Layout {
     /// Key indices of the two digraph keys in `swipeKeys`.
     static let ljKey = 16   // q
     static let njKey = 22   // w
+    static let dzhKey = 23  // x - Serbian Cyrillic `џ`
 
     /// QWERTY or QWERTZ, chosen per language in the keyboard's settings (Android
     /// `KeyRows`, owner 2026-11-10). The default is the layout of the language's
     /// own keyboards: QWERTZ for Czech, Slovak, Slovenian, Croatian and Serbian. Only `y` and `z` swap, so the
     /// grid stays the same; the decoder reads key centres from the buttons and
     /// the wordlist stores letters, not positions.
-    static let qwertzByDefault: Set<String> = ["cs", "sk", "sl", "hr", "sr"]
-    static var qwertzOffered: Bool { language != "nb" }
+    static let qwertzByDefault: Set<String> = ["cs", "sk", "sl", "hr", "sr", "bs"]
+    /// Not for Norwegian (rows of 11) nor Macedonian, which is Cyrillic only
+    /// and has its own grid (Android `KeyRows.offered`).
+    static var qwertzOffered: Bool { language != "nb" && language != "mk" }
     static var qwertz: Bool {
         get {
             guard qwertzOffered else { return false }

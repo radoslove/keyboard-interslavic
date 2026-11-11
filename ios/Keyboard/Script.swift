@@ -24,27 +24,53 @@ enum Script {
 
     enum Mode: String, CaseIterable { case latin, cyrillic, glagolitic }
 
-    private static let key = "script"
-
-    /// The chosen script; always Latin on a keyboard that is not Interslavic.
-    static var mode: Mode {
-        guard Layout.language == "isv" else { return .latin }
-        return Mode(rawValue: Shared.store.string(forKey: key) ?? "") ?? .latin
+    /// The scripts a language offers (Android `Script.offered`, 3.8.8-3.8.11).
+    /// Serbian is written in both alphabets, one to one, so it gets the script
+    /// key with two modes and keeps ONE Latin wordlist; Macedonian has no Latin
+    /// orthography, so it offers Cyrillic alone and opens in it.
+    static func offered(_ lang: String) -> [Mode] {
+        switch lang {
+        case "isv": return [.latin, .cyrillic, .glagolitic]
+        case "sr": return [.latin, .cyrillic]
+        case "mk": return [.cyrillic]
+        default: return [.latin]
+        }
     }
 
-    /// Latin -> Cyrillic -> Glagolitic -> Latin; the script key next to 🌐.
+    /// The modes of THIS keyboard's language.
+    static var modes: [Mode] { offered(Layout.language) }
+
+    /// Each language remembers its own script; Interslavic keeps the old key,
+    /// so nobody's chosen alphabet is lost to the change.
+    private static var key: String {
+        Layout.language == "isv" ? "script" : "script_" + Layout.language
+    }
+
+    /// The chosen script of this keyboard's language.
+    static var mode: Mode {
+        let can = modes
+        if can.count < 2 { return can[0] }      // Macedonian: Cyrillic, not Latin
+        let m = Mode(rawValue: Shared.store.string(forKey: key) ?? "") ?? .latin
+        return can.contains(m) ? m : .latin
+    }
+
+    static func set(_ m: Mode) { Shared.store.set(m.rawValue, forKey: key) }
+
+    /// The next script this language has, wrapping round; the script key next to 🌐.
     @discardableResult
     static func next() -> Mode {
-        let all = Mode.allCases
-        let m = all[(all.firstIndex(of: mode)! + 1) % all.count]
-        Shared.store.set(m.rawValue, forKey: key)
+        let can = modes
+        let m = can[((can.firstIndex(of: mode) ?? 0) + 1) % can.count]
+        set(m)
         return m
     }
 
     /// The first three letters of the current alphabet - the same convention
     /// as `ABC` on `123` and the ABC/АБВ switch of Serbian keyboards.
-    static var keyLabel: String {
-        switch mode {
+    static var keyLabel: String { label(mode) }
+
+    static func label(_ m: Mode) -> String {
+        switch m {
         case .latin: return "ABC"
         case .cyrillic: return "АБВ"
         case .glagolitic: return "ⰀⰁⰂ"
@@ -60,7 +86,42 @@ enum Script {
         ("m", "м"), ("n", "н"), ("o", "о"), ("p", "п"), ("r", "р"), ("s", "с"), ("š", "ш"),
         ("t", "т"), ("u", "у"), ("v", "в"), ("y", "ы"), ("z", "з"), ("ž", "ж"),
     ]
-    private static let cyrillic = Dictionary(uniqueKeysWithValues: cyrillicPairs)
+
+    /// Serbian Cyrillic: the standard, fully reversible pairing of the two
+    /// Serbian alphabets (Android `CYRILLIC_SR`). Not the Interslavic table:
+    /// Serbian has no `ě`/`y`, has `ć` `đ` as letters, and `dž` is ONE letter.
+    /// ⚠ A `d` ending a prefix before `ž` (`nadživeti` = `надживети`) comes out
+    /// as `џ` - that needs the morpheme boundary, not a table; same on Android.
+    private static let serbianPairs: [(String, String)] = [
+        ("lj", "љ"), ("nj", "њ"), ("dž", "џ"),
+        ("a", "а"), ("b", "б"), ("c", "ц"), ("č", "ч"), ("ć", "ћ"), ("d", "д"), ("đ", "ђ"),
+        ("e", "е"), ("f", "ф"), ("g", "г"), ("h", "х"), ("i", "и"), ("j", "ј"), ("k", "к"),
+        ("l", "л"), ("m", "м"), ("n", "н"), ("o", "о"), ("p", "п"), ("r", "р"), ("s", "с"),
+        ("š", "ш"), ("t", "т"), ("u", "у"), ("v", "в"), ("z", "з"), ("ž", "ж"),
+    ]
+
+    /// Macedonian: the internal Latin of `tools/build_mk_wordlist.py` back into
+    /// Cyrillic, one character on each side (Android `CYRILLIC_MK`). `ǉ ǌ ǆ`
+    /// rather than `lj nj dž`, because Macedonian also spells those sequences
+    /// as two letters (`илјада`), so a pair table could not be turned back.
+    private static let macedonianPairs: [(String, String)] = [
+        ("a", "а"), ("b", "б"), ("v", "в"), ("g", "г"), ("d", "д"), ("ǵ", "ѓ"),
+        ("e", "е"), ("ž", "ж"), ("z", "з"), ("ẑ", "ѕ"), ("i", "и"), ("j", "ј"),
+        ("k", "к"), ("l", "л"), ("ǉ", "љ"), ("m", "м"), ("n", "н"), ("ǌ", "њ"),
+        ("o", "о"), ("p", "п"), ("r", "р"), ("s", "с"), ("t", "т"), ("ḱ", "ќ"),
+        ("u", "у"), ("f", "ф"), ("h", "х"), ("c", "ц"), ("č", "ч"), ("ǆ", "џ"),
+        ("š", "ш"),
+    ]
+
+    /// The Cyrillic table of this keyboard's language.
+    private static let cyrillicTable: [(String, String)] = {
+        switch Layout.language {
+        case "sr": return serbianPairs
+        case "mk": return macedonianPairs
+        default: return cyrillicPairs
+        }
+    }()
+    private static let cyrillicMap = Dictionary(uniqueKeysWithValues: cyrillicTable)
 
     // MARK: Glagolitic (v1) - letters + the j rules
 
@@ -100,12 +161,12 @@ enum Script {
         while i < chars.count {
             if i + 1 < chars.count {
                 let two = String(chars[i...i + 1])
-                if let hit = cyrillic[two.lowercased()] {
+                if let hit = cyrillicMap[two.lowercased()] {
                     out += cased(hit, chars[i], caps); i += 2; continue
                 }
             }
             let one = String(chars[i])
-            out += cyrillic[one.lowercased()].map { cased($0, chars[i], caps) } ?? one
+            out += cyrillicMap[one.lowercased()].map { cased($0, chars[i], caps) } ?? one
             i += 1
         }
         return out
@@ -144,7 +205,7 @@ enum Script {
     // MARK: Back to Latin (for wordlist lookups)
 
     private static let reverseCyrillic: [(String, String)] =
-        cyrillicPairs.map { ($0.1, $0.0) }.sorted { $0.0.count > $1.0.count }
+        cyrillicTable.map { ($0.1, $0.0) }.sorted { $0.0.count > $1.0.count }
 
     private static let reverseGlagolitic: [(String, String)] =
         ([("ⱐⰹ", "y"), ("ⱝ", "ja"), ("ⱓ", "ju"), ("ⱖ", "jo"), ("ⱐ", "j"), ("ⰹ", "j"), ("ⰿ", "m")]

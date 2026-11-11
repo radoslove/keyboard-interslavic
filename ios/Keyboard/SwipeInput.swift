@@ -260,7 +260,10 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         sample = nil
         let lift = touchLift
         let mine = userWordKeys
-        let digraph = Script.mode != .latin    // `q` `w` are `lj` `nj` there
+        // `q` `w` are `lj` `nj` outside Latin; in Serbian Cyrillic `x` is `dž`.
+        // Macedonian has single letters on those keys, so no digraph routes.
+        let digraph = Script.mode != .latin && Layout.language != "mk"
+        let dzh = digraph && Layout.language == "sr"
         queue.async { [weak self] in
             var decoder = SwipeDecoder(dictionary: dictionary,
                                        keyCentres: centres,
@@ -268,6 +271,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
                                        touchLift: lift,
                                        userWords: mine)
             decoder.digraphKeys = digraph
+            decoder.dzhKey = dzh
             let words = decoder.decode(path: path, times: times).map(\.word)
             swipeLog.notice("isv-swipe: \(path.count, privacy: .public) points -> \(words.joined(separator: " "), privacy: .public)")
             #if DEBUG
@@ -293,8 +297,11 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         // over the digraph key: measure against the route whose ends lie nearer
         // to where the glide began and ended, or `ljudi` drawn from `љ` reads
         // as a thumb half a row off and drags the learned lift with it.
-        if Script.mode != .latin,
-           let route = keys.map(UInt8.init).withUnsafeBufferPointer({ SwipeDecoder.digraphRoute($0) }) {
+        let dzh = Layout.language == "sr" && word.lowercased().contains("dž")
+        if Script.mode != .latin, Layout.language != "mk",
+           let route = keys.map(UInt8.init).withUnsafeBufferPointer({
+               SwipeDecoder.digraphRoute($0, dzh: dzh)
+           }) {
             func gap(_ k: [Int]) -> CGFloat {
                 guard let a = k.first, let b = k.last,
                       a < s.centres.count, b < s.centres.count else { return .greatestFiniteMagnitude }

@@ -78,10 +78,18 @@ if LANG == "sk":
 if LANG == "sl":
     # Slovenian: only č š ž of its own (Android Layout.slOwn).
     FOLD = {"č": "c", "š": "s", "ž": "z"}
-if LANG in ("hr", "sr"):
-    # Croatian and Serbian (Latin): č ć đ š ž (Android Layout.hrSrOwn). `đ` is
-    # folded by hand - Unicode does not see it as `d` with a mark.
+if LANG in ("hr", "sr", "bs"):
+    # Croatian, Serbian (Latin) and Bosnian: č ć đ š ž (Android Layout.hrSrOwn).
+    # `đ` is folded by hand - Unicode does not see it as `d` with a mark.
     FOLD = {"č": "c", "ć": "c", "đ": "d", "š": "s", "ž": "z"}
+if LANG == "mk":
+    # Macedonian: the wordlist is already in the keyboard's internal Latin
+    # (tools/build_mk_wordlist.py, one character per Cyrillic letter). The
+    # letters with no Latin base fold onto the key they are drawn on - the
+    # digraph keys q w x for ǉ ǌ ǆ, holds on g k z for ǵ ḱ ẑ (Android
+    # Dictionary.foldBase).
+    FOLD = {"ǉ": "q", "ǌ": "w", "ǆ": "x", "ǵ": "g", "ḱ": "k", "ẑ": "z",
+            "č": "c", "š": "s", "ž": "z"}
 if LANG == "en":
     # Plain a-z: a form with any other letter (`café`) cannot be swiped and
     # is left out, as on Android.

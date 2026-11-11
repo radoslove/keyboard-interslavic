@@ -69,9 +69,10 @@ final class KeyboardViewController: UIInputViewController {
     /// held back: a quick space used to land BEFORE the word and look missed.
     private var decoding = 0
     private var queuedKeys: [() -> Void] = []
-    /// The word a backspace press has just wiped; if the press is held, it
-    /// comes back one letter short and keeps trimming.
-    private var trimAfterWipe: String?
+    /// After ⌫ took the last letter of a glided word: the stem left standing
+    /// and that glide's guesses; a hold that outlasts 0.45 s wipes the stem
+    /// and offers the guesses.
+    private var trimAfterWipe: (stem: String, guesses: [String])?
     private var wipedSuffix = ""
     /// No space after these: `(jedino`, `„dobro`.
     private static let openers: Set<Character> = ["(", "[", "{", "„", "‚", "«", "‹", "¿", "¡", "\n"]
@@ -129,6 +130,7 @@ final class KeyboardViewController: UIInputViewController {
     private func buildKeyboard() {
         rowsStack?.removeFromSuperview()
         letterButtons.removeAll()
+        noGlideKeys.removeAll()
 
         let rows = showingNumeric
             ? (showingSymbols ? Layout.symbolRows : Layout.numericRows)
@@ -196,6 +198,7 @@ final class KeyboardViewController: UIInputViewController {
             }
             stack.addArrangedSubview(shiftKey)
             wide.append(shiftKey)
+            noGlideKeys.append(shiftKey)
         }
         // A script with fewer letters keeps the LATIN key width: Cyrillic and
         // Glagolitic have no `x` (`q` `w` are `lj` `nj` there), and instead of
@@ -238,6 +241,7 @@ final class KeyboardViewController: UIInputViewController {
                            for: [.touchUpInside, .touchUpOutside, .touchCancel])
             stack.addArrangedSubview(back)
             wide.append(back)
+            noGlideKeys.append(back)
             if let f = first {
                 // Shift + letters + backspace = the width of the top row, so
                 // every letter keeps the same width (swipe geometry depends on
@@ -263,7 +267,9 @@ final class KeyboardViewController: UIInputViewController {
         // Widths as shares of the row, the weights of the Android row
         // (KeyboardView.kt), so both phones put each key in the same place.
         var weights: [(UIView, CGFloat)] = []
-        let isv = Layout.language == "isv"
+        // A language with more than one alphabet carries the script key, and
+        // its space is narrower by the key's 1.2 (Interslavic, Serbian).
+        let scripts = Script.modes.count > 1
 
         // The emoji panel has the bottom row of `123`: ABC back, space, and a
         // backspace, since the letter row that holds one is gone.
@@ -292,12 +298,12 @@ final class KeyboardViewController: UIInputViewController {
         }
 
         var spaceWeight: CGFloat = showingNumeric ? 5.6 : (showingEmoji || showingSettings) ? 4.2
-            : (isv ? 3.45 : 4.65)
+            : (scripts ? 3.45 : 4.65)
         if !panel {
             // Script key: as 🌐 switches the keyboard, this switches the
             // alphabet, Latin -> Cyrillic -> Glagolitic, and names the current
-            // one (ABC / АБВ / ⰀⰁⰂ). Interslavic only.
-            if isv {
+            // one (ABC / АБВ / ⰀⰁⰂ). Interslavic and Serbian (Android `Script.offered`).
+            if scripts {
                 let script = functionKey(Script.keyLabel, action: #selector(tapScript))
                 script.titleLabel?.adjustsFontSizeToFitWidth = true
                 script.titleLabel?.minimumScaleFactor = 0.5
@@ -362,6 +368,11 @@ final class KeyboardViewController: UIInputViewController {
     // MARK: - Keys
 
     private var bottomRowView: UIView?
+    /// Shift and backspace sit in the third letter row, but a glide may not
+    /// START on them: a thumb held on ⌫ drifts, the recogniser took the drift
+    /// for a glide and cancelled the button - the hold stopped deleting
+    /// (a tester's report, 2026-11-11).
+    private var noGlideKeys: [UIView] = []
     private var topLetterRowView: UIView?
 
     private static let displayName =
@@ -506,31 +517,102 @@ final class KeyboardViewController: UIInputViewController {
     /// Fires on touch DOWN, like the system keyboard: waiting for the lift is
     /// what made backspace feel like it "doesn't catch". Holding repeats.
     ///
-    /// A hold that began by wiping a swiped word TRIMS it instead: the word
-    /// comes back one letter short and loses letters while held, slowly enough
-    /// to stop on the right one. That is the one-gesture way to fix an ending
-    /// (owner, 2026-10-08: space-then-backspace was too much fiddling).
+    /// Right after a glide (owner 2026-11-11, after a tester's report): a TAP
+    /// takes ONE letter - the stem is usually right and only the ending needs
+    /// fixing - and HOLDING takes the rest of the word at once and offers the
+    /// other guesses. This replaces "tap wipes the word, hold trims it", and with
+    /// it the space-then-backspace trick for fixing an ending.
     @objc private func backspaceDown() {
         recased = nil
-        if decoding > 0 { queuedKeys.append { [weak self] in self?.tapBackspace() }; return }
+        if decoding > 0 { queuedKeys.append { [weak self] in self?.pressBackspace() }; return }
+        pressBackspace()
+        backspaceRepeat?.invalidate()
+        backspaceRepeat = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+            guard let self else { return }
+            // Held: whole words, one after another, at the pace of Android
+            // (`KeyboardView` ⌫ repeat: 500 ms, then 260 ms ramping by 15 ms to a
+            // 200 ms floor; owner 2026-11-11). After a glide the first step is
+            // the rest of that word, with its other guesses.
+            var more = true
+            if let hold = self.trimAfterWipe {
+                self.trimAfterWipe = nil
+                self.wipeStem(hold)
+            } else {
+                more = self.deleteWordBack()
+            }
+            if more { self.repeatWords(after: 0.26) }
+        }
+    }
+
+    private func repeatWords(after interval: TimeInterval) {
+        backspaceRepeat = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [weak self] _ in
+            guard let self, self.deleteWordBack() else { return }
+            self.repeatWords(after: max(0.2, interval - 0.015))
+        }
+    }
+
+    /// One press of ⌫: after a glide the word loses its last letter and stays
+    /// as typed text (remembered in `trimAfterWipe` for a hold); otherwise one
+    /// character goes, as always.
+    private func pressBackspace() {
         let before = lastSwipedWord
         tapBackspace()
-        trimAfterWipe = (before != nil && lastSwipedWord == nil && !lastCandidates.isEmpty) ? before : nil
-        backspaceRepeat?.invalidate()
-        backspaceRepeat = Timer.scheduledTimer(withTimeInterval: 0.45, repeats: false) { [weak self] _ in
-            guard let self else { return }
-            if let word = self.trimAfterWipe {
-                self.trimAfterWipe = nil
-                self.restoreTrimmed(word)
-                self.backspaceRepeat = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { _ in
-                    self.tapBackspace()
-                }
-            } else {
-                self.backspaceRepeat = Timer.scheduledTimer(withTimeInterval: 0.08, repeats: true) { _ in
-                    self.tapBackspace()
-                }
-            }
+        trimAfterWipe = nil
+        guard let word = before, lastSwipedWord == nil else { return }
+        let guesses = lastCandidates
+        restoreTrimmed(word)
+        let stem = Script.out(String(Script.toLatin(word).dropLast()))
+        trimAfterWipe = (stem, guesses)
+    }
+
+    /// The rest of a word whose ending a tap took: delete the stem if it still
+    /// stands before the cursor, and offer the other guesses of that glide.
+    private func wipeStem(_ hold: (stem: String, guesses: [String])) {
+        let stem = hold.stem
+        if !stem.isEmpty, (textDocumentProxy.documentContextBeforeInput ?? "").hasSuffix(stem) {
+            for _ in 0..<stem.count { textDocumentProxy.deleteBackward() }
         }
+        tappedWord = nil
+        completingPrefix = nil
+        lastCandidates = hold.guesses
+        showSuggestions(lastCandidates, current: nil)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        rearmShiftIfSentenceStart()
+    }
+
+    /// One step of a held ⌫ (Android `deleteWordBackward`): the run before the
+    /// cursor - letters and digits, or a run of marks - with the spaces after
+    /// it. A step stops at the start of a line; the next one takes the line
+    /// break, and a hold that goes on carries on into the line above (owner
+    /// 2026-11-11; this reverses the old stop at the line).
+    /// Returns whether there is anything left to delete.
+    @discardableResult
+    private func deleteWordBack() -> Bool {
+        let before = Array(textDocumentProxy.documentContextBeforeInput ?? "")
+        if before.isEmpty { return false }
+        let floor = (before.lastIndex(of: "\n") ?? -1) + 1
+        var i = before.count
+        while i > floor, before[i - 1].isWhitespace { i -= 1 }
+        if i > floor {
+            let lettersFirst = before[i - 1].isLetter || before[i - 1].isNumber
+            while i > floor, !before[i - 1].isWhitespace,
+                  (before[i - 1].isLetter || before[i - 1].isNumber) == lettersFirst { i -= 1 }
+        }
+        let count = before.count - i
+        lastSwipedWord = nil
+        swipeSuffix = ""
+        pendingSpace = false
+        tappedWord = nil
+        completingPrefix = nil
+        lastCandidates = []
+        defer { rearmShiftIfSentenceStart(); refreshCompletions() }
+        if count > 0 {
+            for _ in 0..<count { textDocumentProxy.deleteBackward() }
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            return i > 0
+        }
+        if floor > 0 { textDocumentProxy.deleteBackward() }   // the line break, then the line above
+        return floor > 1
     }
 
     @objc private func backspaceUp() {
@@ -706,12 +788,11 @@ final class KeyboardViewController: UIInputViewController {
             }))
         }
 
-        if Layout.language == "isv" {
+        if Script.modes.count > 1 {
             column.addArrangedSubview(header("Pismo"))
-            let scripts: [(String, Script.Mode)] = [("ABC", .latin), ("АБВ", .cyrillic), ("ⰀⰁⰂ", .glagolitic)]
-            column.addArrangedSubview(choiceRow(scripts.map { label, m in
-                (label, Script.mode == m, { [weak self] in
-                    Shared.store.set(m.rawValue, forKey: "script")
+            column.addArrangedSubview(choiceRow(Script.modes.map { m in
+                (Script.label(m), Script.mode == m, { [weak self] in
+                    Script.set(m)
                     self?.buildKeyboard()
                 })
             }))
@@ -1277,6 +1358,7 @@ extension KeyboardViewController: SwipeHost {
         // the next tap, even if the finger rolls. What is typed by hand stays
         // as typed - nothing gets decoded over it.
         if Date().timeIntervalSince(lastLetterTapAt) < Self.tapRun { return false }
+        for k in noGlideKeys where k.convert(k.bounds, to: view).contains(point) { return false }
         guard let bottom = bottomRowView else { return true }
         // Nor above the letters (the suggestion bar).
         if let top = topLetterRowView, point.y < top.convert(top.bounds, to: view).minY - 3 {

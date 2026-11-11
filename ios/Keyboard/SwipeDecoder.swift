@@ -58,13 +58,30 @@ struct SwipeDecoder {
     /// (Android 3.6.14, `Dictionary.digraphKeys`). With one route only, the
     /// two-letter gesture returned the word 0 times in 126.
     var digraphKeys = false
+    /// Serbian Cyrillic: `x` is the `џ` key, so `d ž` has a third route over it
+    /// (Android 3.8.8, `Dictionary.pairKey`). The file stores FOLDED keys, where
+    /// `dž` and `dz` are both `d z` - so the pair counts only when the word
+    /// itself has `dž`, read from its bytes; `nadzor`, `podzemlje` (24 forms)
+    /// are two letters and no `џ`.
+    var dzhKey = false
 
-    private static let keyJ: UInt8 = 9, keyL: UInt8 = 11, keyN: UInt8 = 13
+    private static let keyD: UInt8 = 3, keyJ: UInt8 = 9, keyL: UInt8 = 11, keyN: UInt8 = 13
+    private static let keyZ: UInt8 = 25
     private static let keyQ = UInt8(Layout.ljKey), keyW = UInt8(Layout.njKey)
+    private static let keyX = UInt8(Layout.dzhKey)
 
-    /// The route over the digraph keys: `l j` -> `q`, `n j` -> `w`. Nil when
-    /// the word has no digraph, so the caller scores the plain route alone.
-    static func digraphRoute(_ keys: UnsafeBufferPointer<UInt8>) -> [UInt8]? {
+    /// Whether the folded keys hold a `d z` at all - the cheap test before the
+    /// word's bytes are read.
+    static func hasDZ(_ keys: UnsafeBufferPointer<UInt8>) -> Bool {
+        guard keys.count >= 2 else { return false }
+        for i in 0..<keys.count - 1 where keys[i] == keyD && keys[i + 1] == keyZ { return true }
+        return false
+    }
+
+    /// The route over the digraph keys: `l j` -> `q`, `n j` -> `w`, and with
+    /// `dzh` also `d z` -> `x`. Nil when the word has no digraph, so the caller
+    /// scores the plain route alone.
+    static func digraphRoute(_ keys: UnsafeBufferPointer<UInt8>, dzh: Bool = false) -> [UInt8]? {
         var out: [UInt8]?
         var i = 0
         while i < keys.count {
@@ -72,6 +89,12 @@ struct SwipeDecoder {
             if i + 1 < keys.count, keys[i + 1] == keyJ, k == keyL || k == keyN {
                 if out == nil { out = Array(keys[0..<i]) }
                 out!.append(k == keyL ? keyQ : keyW)
+                i += 2
+                continue
+            }
+            if dzh, i + 1 < keys.count, k == keyD, keys[i + 1] == keyZ {
+                if out == nil { out = Array(keys[0..<i]) }
+                out!.append(keyX)
                 i += 2
                 continue
             }
@@ -111,7 +134,7 @@ struct SwipeDecoder {
 
         /// RMS distance of a word's ideal path from the finger, in key widths;
         /// with digraph keys on, the better of the word's two routes.
-        func fit(_ keys: UnsafeBufferPointer<UInt8>) -> Double? {
+        func fit(_ keys: UnsafeBufferPointer<UInt8>, dzh: Bool = false) -> Double? {
             func one(_ k: UnsafeBufferPointer<UInt8>) -> Double? {
                 guard let ideal = idealPath(for: k) else { return nil }
                 var sum = 0.0
@@ -123,7 +146,7 @@ struct SwipeDecoder {
                 return (sum / Double(Self.samples)).squareRoot() / Double(keyWidth)
             }
             let plain = one(keys)
-            guard digraphKeys, let route = Self.digraphRoute(keys),
+            guard digraphKeys, let route = Self.digraphRoute(keys, dzh: dzh),
                   let alt = route.withUnsafeBufferPointer({ one($0) })
             else { return plain }
             return min(plain ?? alt, alt)
@@ -139,6 +162,9 @@ struct SwipeDecoder {
             if lastKeys.contains(Layout.ljKey) || lastKeys.contains(Layout.njKey) {
                 lastKeys.append(Int(Self.keyJ))
             }
+            // `џ` is filed under `d` at the start and under `ž` (= `z`) at the end.
+            if dzhKey, firstKeys.contains(Layout.dzhKey) { firstKeys.append(Int(Self.keyD)) }
+            if dzhKey, lastKeys.contains(Layout.dzhKey) { lastKeys.append(Int(Self.keyZ)) }
             var seenF = Set<Int>(), seenL = Set<Int>()
             firstKeys = firstKeys.filter { seenF.insert($0).inserted }
             lastKeys = lastKeys.filter { seenL.insert($0).inserted }
@@ -148,7 +174,10 @@ struct SwipeDecoder {
             for last in lastKeys {
                 dictionary.forEachEntry(first: first, last: last) { entry in
                     guard entry.keys.count <= maxLetters else { return }
-                    guard let rms = fit(entry.keys) else { return }
+                    let dzh = dzhKey && Self.hasDZ(entry.keys)
+                        && dictionary.word(at: entry.wordOffset, length: entry.wordLength)
+                            .lowercased().contains("dž")
+                    guard let rms = fit(entry.keys, dzh: dzh) else { return }
 
                     // Frequency breaks ties between shapes the finger cannot
                     // distinguish anyway. It nudges, it does not decide: a
@@ -173,7 +202,9 @@ struct SwipeDecoder {
             guard let f = extra.keys.first, let l = extra.keys.last,
                   startKeys.contains(Int(f)), endKeys.contains(Int(l)),
                   extra.keys.count <= maxLetters,
-                  let rms = extra.keys.withUnsafeBufferPointer({ fit($0) })
+                  let rms = extra.keys.withUnsafeBufferPointer({
+                      fit($0, dzh: dzhKey && extra.word.lowercased().contains("dž"))
+                  })
             else { continue }
             best.append((rms - Self.freqWeight * (Self.userWordFreq + 1).squareRoot(), -1 - i, 0))
         }

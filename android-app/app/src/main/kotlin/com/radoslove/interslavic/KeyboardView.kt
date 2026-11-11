@@ -1139,29 +1139,28 @@ class KeyboardView(
         tv.isLongClickable = false
         val repeat = object : Runnable {
             override fun run() {
+                // Held right after a glide (iOS 0.5.14, owner 2026-11-11): the tap
+                // already took the last letter, so the first held step takes the
+                // rest of that word and offers the glide's other guesses; then
+                // whole words, as for any held backspace.
                 if (trimAfterWipe.isNotEmpty()) {
-                    val back = trimAfterWipe.trimEnd().dropLast(1)
+                    val stem = trimAfterWipe
                     trimAfterWipe = ""
-                    trimming = true
                     val ic = service.currentInputConnection
-                    if (ic != null && back.isNotEmpty()) {
-                        ic.commitText(back, 1)
-                        afterSelfEdit(back.length)
+                    val before = ic?.getTextBeforeCursor(stem.length, 0)?.toString().orEmpty()
+                    if (ic != null && before == stem) {
+                        ic.deleteSurroundingText(stem.length, 0)
+                        afterSelfEdit(-stem.length)
                     }
                     clearUndo()
-                    refreshSuggestions()
+                    if (lastSwipeCandidates.isNotEmpty()) {
+                        showSwipeAlts(lastSwipeCandidates, highlight = -1)
+                    } else refreshSuggestions()
                     feedback()
-                    flickHandler.postDelayed(this, 300L)
+                    flickHandler.postDelayed(this, backspaceInterval)
                     return
                 }
-                if (trimming) {
-                    // Letters, slowly enough to stop on the one that is wrong.
-                    backspace()
-                    flickHandler.postDelayed(this, 180L)
-                    return
-                }
-                // deleteWordBackward decides whether it is safe to carry on: it
-                // refuses to cross a line break, and stops the repeat there.
+                // deleteWordBackward says whether anything is left to delete.
                 val more = deleteWordBackward()
                 feedback()
                 if (!more) return
@@ -1186,7 +1185,22 @@ class KeyboardView(
                     lastWipeRemoved = ""
                     trimming = false
                     backspace()                       // a tap is still one character
-                    trimAfterWipe = lastWipeRemoved
+                    trimAfterWipe = ""
+                    // Right after a glide `backspace()` took the whole word; a TAP
+                    // means "fix the ending" (owner 2026-11-11, parity with iOS
+                    // 0.5.14), so it comes straight back one letter short. A hold
+                    // then takes the stem as well (see `repeat`).
+                    val stem = lastWipeRemoved.trimEnd().dropLast(1)
+                    if (lastWipeRemoved.isNotEmpty() && stem.isNotEmpty()) {
+                        val ic = service.currentInputConnection
+                        if (ic != null) {
+                            ic.commitText(stem, 1)
+                            afterSelfEdit(stem.length)
+                            trimAfterWipe = stem
+                        }
+                        clearUndo()
+                        refreshSuggestions()
+                    }
                     backspaceInterval = 260L
                     flickHandler.postDelayed(repeat, 500L)   // then whole words; 350 ms fired on ordinary taps
                     true
@@ -1620,11 +1634,11 @@ class KeyboardView(
         val before = ic.getTextBeforeCursor(400, 0)?.toString().orEmpty()
         if (before.isEmpty()) return false
 
-        // A HELD backspace never crosses a line break. Speed is not really the
-        // problem - the problem is that a fast repeat walked out of the line
-        // being edited and into finished paragraphs above it, and a greeting
-        // typed ten minutes ago vanished. The line is a natural place to make
-        // the thumb stop and look; crossing it has to be a deliberate new press.
+        // A step stops at the start of a line; the next one takes the line break
+        // and a hold that goes on carries on into the line above (owner
+        // 2026-11-11). This reverses the earlier rule that a
+        // held backspace never crossed a line break; the pause at each break is
+        // what is left of it - the word pace (200 ms floor) is the guard now.
         val floor = before.lastIndexOf('\n') + 1
 
         var i = before.length
@@ -1646,17 +1660,16 @@ class KeyboardView(
             lastSwipeWord = ""
             pendingSpace = false
             refreshSuggestions()
-            // Nothing left on this line? Stop rather than roll into the one above.
-            return i > floor
+            return i > 0
         }
-        // Cursor sits right after the line break: take the break itself, and stop.
+        // Cursor sits right after the line break: take the break, then go on above.
         if (floor > 0) {
             clearUndo()
             ic.deleteSurroundingText(1, 0)
             afterSelfEdit(-1)
             refreshSuggestions()
         }
-        return false
+        return floor > 1
     }
 
     // ---- Prediction bar (M2) --------------------------------------------
