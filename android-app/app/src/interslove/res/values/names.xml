@@ -20,4 +20,5 @@
     <string name="subtype_sr">srbsky</string>
     <string name="subtype_bs">bosnijsky</string>
     <string name="subtype_mk">makedonsky</string>
+    <string name="subtype_ru">russky</string>
 </resources>

@@ -231,6 +231,14 @@ object Layout {
         'z' to listOf("\u017e", "\u1e91"), 'c' to listOf("\u010d"), 's' to listOf("\u0161"),
     )
 
+    /** Russian, phonetic: the letters on their Latin keys need all 26 of them,
+     *  so the grid is the Latin QWERTY one; the held letters, in order of
+     *  frequency in the wordlist. */
+    private val ruOwn: Map<Char, List<String>> = mapOf(
+        'e' to listOf("\u00eb", "\u00ea"), 'w' to listOf("\u0175"), 'z' to listOf("\u017e"),
+        'b' to listOf("\u1e03", "\u1e05"), 'u' to listOf("\u00fc"),
+    )
+
     /** [latinRows] with `y` and `z` swapped, as on the Czech, Slovak, Slovenian,
      *  Croatian and Serbian keyboards. Only two keys move, so the grid - and with
      *  it everything the decoder measures in key widths - stays the same. */
@@ -248,6 +256,7 @@ object Layout {
         lang == Lang.NB || lang == Lang.ISC -> nbRows
         script != Script.Mode.LATIN && lang == Lang.SR -> srCyrillicRows
         lang == Lang.MK -> mkCyrillicRows
+        lang == Lang.RU -> latinRows
         script != Script.Mode.LATIN -> nonLatinRows
         qwertz -> qwertzRows
         else -> latinRows
@@ -261,6 +270,9 @@ object Layout {
      *  context rules. */
     fun keyText(ch: Char, script: Script.Mode, lang: String = Lang.ISV): String = when {
         script == Script.Mode.LATIN -> ch.toString()
+        // Russian, phonetic: every key writes its own letter (я on q, ш on w);
+        // the Interslavic `lj`/`nj` keys are not part of this layout.
+        lang == Lang.RU -> ch.toString()
         ch == 'q' -> "lj"
         ch == 'w' -> "nj"
         // Serbian only: `џ` is one letter there and has the `x` position in the
@@ -298,6 +310,7 @@ object Layout {
         Lang.SL -> slOwn
         Lang.HR, Lang.SR, Lang.BS -> hrSrOwn
         Lang.MK -> mkOwn
+        Lang.RU -> ruOwn
         Lang.NB, Lang.ISC -> nbOwn
         Lang.EN -> emptyMap()
         else -> isvOwn
@@ -341,7 +354,7 @@ object KeyRows {
 
     /** Languages where the choice exists at all. */
     fun offered(lang: String) =
-        lang != Lang.NB && lang != Lang.ISC && lang != Lang.MK
+        lang != Lang.NB && lang != Lang.ISC && lang != Lang.MK && lang != Lang.RU
 
     private const val PREFS = "isv_collector"
     private fun key(lang: String) = "qwertz_$lang"

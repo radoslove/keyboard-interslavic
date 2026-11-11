@@ -50,6 +50,12 @@ object Lang {
      *  decoder, ranking, learned offset - works unchanged. */
     const val MK = "mk"
 
+    /** Russian: Cyrillic only, on the PHONETIC layout (owner 2026-11-11), the
+     *  arrangement Russian users know as ЯШЕРТЫ - every letter on the Latin key
+     *  that sounds or looks like it, the rest held. Its wordlist is in the
+     *  internal Latin of tools/build_cyrillic_wordlist.py, like Macedonian's. */
+    const val RU = "ru"
+
     /** This app's own language ([App.MAIN]): `isv` in Interslove, `isc` in Mellomskandinavisk. */
     const val MAIN = App.MAIN
 
@@ -118,6 +124,7 @@ object Lang {
         SR -> "Srpski"
         BS -> "Bosanski"
         MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"
+        RU -> "Русский"
         ISV -> "Medžuslovjansky"
         ISC -> "Mellomskandinavisk"
         else -> App.MAIN_NAME

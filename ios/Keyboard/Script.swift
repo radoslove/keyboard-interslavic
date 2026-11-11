@@ -32,7 +32,7 @@ enum Script {
         switch lang {
         case "isv": return [.latin, .cyrillic, .glagolitic]
         case "sr": return [.latin, .cyrillic]
-        case "mk": return [.cyrillic]
+        case "mk", "ru": return [.cyrillic]
         default: return [.latin]
         }
     }
@@ -113,11 +113,25 @@ enum Script {
         ("š", "ш"),
     ]
 
+    /// Russian on the phonetic layout (Android `CYRILLIC_RU`): the internal Latin
+    /// of `tools/build_cyrillic_wordlist.py`, one character on each side. A key's
+    /// letter is what it writes (я q, ш w, ы y, ч h, х x, ц c, й j); the held
+    /// letters carry a mark that folds onto their key.
+    private static let russianPairs: [(String, String)] = [
+        ("a", "а"), ("b", "б"), ("v", "в"), ("g", "г"), ("d", "д"), ("e", "е"),
+        ("ë", "ё"), ("ž", "ж"), ("z", "з"), ("i", "и"), ("j", "й"), ("k", "к"),
+        ("l", "л"), ("m", "м"), ("n", "н"), ("o", "о"), ("p", "п"), ("r", "р"),
+        ("s", "с"), ("t", "т"), ("u", "у"), ("f", "ф"), ("x", "х"), ("c", "ц"),
+        ("h", "ч"), ("w", "ш"), ("ŵ", "щ"), ("ḅ", "ъ"), ("y", "ы"), ("ḃ", "ь"),
+        ("ê", "э"), ("ü", "ю"), ("q", "я"),
+    ]
+
     /// The Cyrillic table of this keyboard's language.
     private static let cyrillicTable: [(String, String)] = {
         switch Layout.language {
         case "sr": return serbianPairs
         case "mk": return macedonianPairs
+        case "ru": return russianPairs
         default: return cyrillicPairs
         }
     }()

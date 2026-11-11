@@ -297,6 +297,9 @@ object Dictionary {
         // that have no Latin base fold onto the key they are drawn on - the
         // digraph keys `q w x` and the holds on `g k z`.
         'ǉ' -> 'q'; 'ǌ' -> 'w'; 'ǆ' -> 'x'; 'ǵ' -> 'g'; 'ḱ' -> 'k'; 'ẑ' -> 'z'
+        // Russian's internal Latin (tools/build_cyrillic_wordlist.py): ё on e,
+        // щ on w, ь ъ on b, ю on u (э `ê` and ж `ž` are folded above).
+        'ë' -> 'e'; 'ŵ' -> 'w'; 'ḃ', 'ḅ' -> 'b'; 'ü' -> 'u'
         // Norwegian: ä and ö are held on æ and ø, which are keys of their own.
         // Everywhere else (Slovak `ä`) they sit on a and o - folding Slovak `ä`
         // onto a key the keyboard does not have took every such word out of the

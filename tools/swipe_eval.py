@@ -98,9 +98,13 @@ SR_CYRL = DIGRAPH_KEYS and LANG == "sr"
 # digraph machinery stays OFF - `ǉ ǌ ǆ` are single characters there, and `l`+`j`
 # really is two letters (`илјада`).
 MK = LANG == "mk"
-if MK:
+# Russian, phonetic (ЯШЕРТЫ): Cyrillic-only as well, its letters on all 26 Latin
+# keys, so the rows are the Latin QWERTY ones; no digraph keys.
+RU = LANG == "ru"
+if MK or RU:
     DIGRAPH_KEYS = False
 ROWS = (["qwertzuiop", "asdfghjkl", "xcvbnm"] if MK
+        else ["qwertyuiop", "asdfghjkl", "zxcvbnm"] if RU
         else LATIN_ROWS if SCRIPT == "latin"
         else ["qwertzuiop", "asdfghjkl", "xcvbnm"] if SR_CYRL
         else ["qwertyuiop", "asdfghjkl", "zcvbnm"])
@@ -146,7 +150,10 @@ for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê",
                    # is drawn on - `ǉ ǌ ǆ` are the `q w x` keys themselves,
                    # `ǵ ḱ ẑ` are held on `g k z`. Mirrors Dictionary.foldBase.
                    ("ǉ", "q"), ("ǌ", "w"), ("ǆ", "x"),
-                   ("ǵ", "g"), ("ḱ", "k"), ("ẑ", "z")]:
+                   ("ǵ", "g"), ("ḱ", "k"), ("ẑ", "z"),
+                   # Russian's internal Latin (tools/build_cyrillic_wordlist.py):
+                   # ё on e, щ on w, ь ъ on b, ю on u (э `ê`, ж `ž` above).
+                   ("ë", "e"), ("ŵ", "w"), ("ḃḅ", "b"), ("ü", "u")]:
     for _ch in _src:
         _FOLD[_ch] = _dst
 

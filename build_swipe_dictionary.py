@@ -90,6 +90,10 @@ if LANG == "mk":
     # Dictionary.foldBase).
     FOLD = {"ǉ": "q", "ǌ": "w", "ǆ": "x", "ǵ": "g", "ḱ": "k", "ẑ": "z",
             "č": "c", "š": "s", "ž": "z"}
+if LANG == "ru":
+    # Russian's internal Latin (tools/build_cyrillic_wordlist.py, phonetic
+    # layout): the held letters fold onto their key (Android Dictionary.foldBase).
+    FOLD = {"ë": "e", "ê": "e", "ŵ": "w", "ž": "z", "ḃ": "b", "ḅ": "b", "ü": "u"}
 if LANG == "en":
     # Plain a-z: a form with any other letter (`café`) cannot be swiped and
     # is left out, as on Android.

@@ -262,7 +262,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         let mine = userWordKeys
         // `q` `w` are `lj` `nj` outside Latin; in Serbian Cyrillic `x` is `dž`.
         // Macedonian has single letters on those keys, so no digraph routes.
-        let digraph = Script.mode != .latin && Layout.language != "mk"
+        let digraph = Script.mode != .latin && Layout.language != "mk" && Layout.language != "ru"
         let dzh = digraph && Layout.language == "sr"
         queue.async { [weak self] in
             var decoder = SwipeDecoder(dictionary: dictionary,
@@ -298,7 +298,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         // to where the glide began and ended, or `ljudi` drawn from `љ` reads
         // as a thumb half a row off and drags the learned lift with it.
         let dzh = Layout.language == "sr" && word.lowercased().contains("dž")
-        if Script.mode != .latin, Layout.language != "mk",
+        if Script.mode != .latin, Layout.language != "mk", Layout.language != "ru",
            let route = keys.map(UInt8.init).withUnsafeBufferPointer({
                SwipeDecoder.digraphRoute($0, dzh: dzh)
            }) {

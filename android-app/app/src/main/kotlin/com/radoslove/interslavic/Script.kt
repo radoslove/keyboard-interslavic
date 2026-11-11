@@ -49,6 +49,7 @@ object Script {
         // is already in the internal Latin (tools/build_mk_wordlist.py); the
         // alphabet the user sees is this one.
         Lang.MK -> listOf(Mode.CYRILLIC)
+        Lang.RU -> listOf(Mode.CYRILLIC)
         else -> listOf(Mode.LATIN)
     }
 
@@ -148,10 +149,28 @@ object Script {
         "\u010d" to "\u0447", "\u01c6" to "\u045f", "\u0161" to "\u0448",
     )
 
+    /**
+     * Russian on the phonetic layout: the internal Latin of
+     * `tools/build_cyrillic_wordlist.py` back into Cyrillic, one character on
+     * each side. The letter of a key is the letter it writes (я on q, ш on w,
+     * ы on y, ч on h, х on x, ц on c, й on j); the held ones carry a mark that
+     * folds onto their key: ё ë and э ê on e, щ ŵ on w, ж ž on z, ь ḃ and ъ ḅ
+     * on b, ю ü on u.
+     */
+    private val CYRILLIC_RU = linkedMapOf(
+        "a" to "а", "b" to "б", "v" to "в", "g" to "г", "d" to "д", "e" to "е",
+        "ë" to "ё", "ž" to "ж", "z" to "з", "i" to "и", "j" to "й", "k" to "к",
+        "l" to "л", "m" to "м", "n" to "н", "o" to "о", "p" to "п", "r" to "р",
+        "s" to "с", "t" to "т", "u" to "у", "f" to "ф", "x" to "х", "c" to "ц",
+        "h" to "ч", "w" to "ш", "ŵ" to "щ", "ḅ" to "ъ", "y" to "ы", "ḃ" to "ь",
+        "ê" to "э", "ü" to "ю", "q" to "я",
+    )
+
     /** The Cyrillic table of [lang]. */
     private fun cyrTable(lang: String) = when (lang) {
         Lang.SR -> CYRILLIC_SR
         Lang.MK -> CYRILLIC_MK
+        Lang.RU -> CYRILLIC_RU
         else -> CYRILLIC
     }
 
@@ -233,6 +252,7 @@ object Script {
 
     private val REVERSE_SR = reversed(CYRILLIC_SR)
     private val REVERSE_MK = reversed(CYRILLIC_MK)
+    private val REVERSE_RU = reversed(CYRILLIC_RU)
 
     private val REVERSE: Map<Mode, List<Pair<String, String>>> = mapOf(
         Mode.CYRILLIC to reversed(CYRILLIC),
@@ -251,6 +271,7 @@ object Script {
         val rev = when {
             m == Mode.CYRILLIC && lang == Lang.SR -> REVERSE_SR
             m == Mode.CYRILLIC && lang == Lang.MK -> REVERSE_MK
+            m == Mode.CYRILLIC && lang == Lang.RU -> REVERSE_RU
             else -> REVERSE.getValue(m)
         }
         val sb = StringBuilder()

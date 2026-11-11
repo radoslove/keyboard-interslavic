@@ -14,7 +14,7 @@ object App {
     const val MAIN = "isv"
 
     /** Every language this keyboard offers, in the order of method.xml. */
-    val LANGS = listOf("isv", "isc", "pl", "nb", "en", "cs", "sk", "sl", "hr", "sr", "bs", "mk")
+    val LANGS = listOf("isv", "isc", "pl", "nb", "en", "cs", "sk", "sl", "hr", "sr", "bs", "mk", "ru")
 
     /** The main language's name in itself, in exports. */
     const val MAIN_NAME = "Medžuslovjansky"
