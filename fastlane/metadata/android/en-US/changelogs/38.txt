@@ -1,0 +1,15 @@
+One keyboard, Interslove, with seventeen languages chosen inside it.
+
+- The phone's keyboard list shows ONE entry, Interslove. Tick the languages in
+  the keyboard itself (hold 123, then the gear) or in the app; slide on the
+  space bar or tap the globe to switch, hold the space bar for the list.
+- New languages: Slovak, Slovenian, Croatian, Serbian (Latin and Cyrillic),
+  Bosnian, Macedonian, Russian, Ukrainian, Belarusian, Bulgarian and
+  Proto-Slavic, each with its own wordlist for swipe and suggestions.
+- QWERTY or QWERTZ per language, defaulting to that language's own keyboards.
+- The keyboard's settings - languages, theme, layout, script, your own words -
+  are drawn inside the keyboard.
+- Backspace: a tap takes one letter, also right after a swipe; holding it
+  takes whole words and carries on into the line above.
+- Ukrainian and Belarusian keep the apostrophe inside a word (п'ять, сям'я);
+  the swipe skips it.
