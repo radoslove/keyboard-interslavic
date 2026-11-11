@@ -48,3 +48,5 @@ keystore.properties
 
 # Odlozone wersje plikow (zasada: nic sie nie kasuje, tylko wersjonuje).
 trash/
+# Xcode DerivedData of command-line device builds (xcodebuild -derivedDataPath ios/build/dd)
+/ios/build/

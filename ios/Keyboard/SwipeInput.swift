@@ -126,6 +126,15 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     /// and can remove one.
     private(set) var userWords: [String] = Shared.userWords(Layout.language)
 
+    /// The language changed (🌐 or the settings): its own words and its list.
+    /// The learned thumb offset stays - it belongs to the thumb, not the language.
+    func languageChanged() {
+        userWords = Shared.userWords(Layout.language)
+        sample = nil
+        dictionary = nil
+        loadDictionary()
+    }
+
     /// Saves a word the wordlist lacks (`napiše`, `koležanka`). From then on
     /// it completes and can be swiped. Never leaves the phone.
     func addUserWord(_ word: String) {
@@ -185,18 +194,28 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
 
     private func loadDictionary() {
         // Mapped, so this is cheap - but it is still file I/O and it still
-        // happens while the user is looking at the keyboard.
+        // happens while the user is looking at the keyboard. Each language's
+        // file is mapped once and kept: switching back costs nothing, and a
+        // mapped file costs only the pages a glide has touched.
+        let lang = Layout.language
+        if let kept = loaded[lang] { dictionary = kept; return }
         queue.async { [weak self] in
-            guard let url = Bundle.main.url(forResource: Layout.language + "_swipe",
+            guard let url = Bundle.main.url(forResource: lang + "_swipe",
                                             withExtension: "bin") else {
-                swipeLog.error("isv-swipe: isv_swipe.bin NOT in bundle")
+                swipeLog.error("isv-swipe: \(lang, privacy: .public)_swipe.bin NOT in bundle")
                 return
             }
             let dict = SwipeDictionary(url: url)
-            swipeLog.notice("isv-swipe: dictionary \(dict?.count ?? -1, privacy: .public) forms")
-            DispatchQueue.main.async { self?.dictionary = dict }
+            swipeLog.notice("isv-swipe: \(lang, privacy: .public) dictionary \(dict?.count ?? -1, privacy: .public) forms")
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if let dict { self.loaded[lang] = dict }
+                // A switch made while this one loaded wins.
+                if Layout.language == lang { self.dictionary = dict }
+            }
         }
     }
+    private var loaded: [String: SwipeDictionary] = [:]
 
     // MARK: - Gesture
 

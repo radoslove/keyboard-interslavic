@@ -329,7 +329,24 @@ final class KeyboardViewController: UIInputViewController {
         space.setTitleColor(.secondaryLabel, for: .normal)
         space.titleLabel?.lineBreakMode = .byTruncatingTail
         space.backgroundColor = .systemBackground
-        space.addTarget(self, action: #selector(tapSpace), for: .touchDown)
+        // With more than one language ticked, the space bar also switches them
+        // (owner 2026-11-11): slide right = next, left = previous, hold = a
+        // strip of the ticked languages to slide onto. So the space is typed on
+        // LIFT now - inside or outside the key, so a thumb that slid a little
+        // still gets its space - and a recognised gesture cancels it.
+        space.addTarget(self, action: #selector(tapSpace), for: [.touchUpInside, .touchUpOutside])
+        if Layout.enabled.count > 1 && !panel {
+            // Bottom row: the strip opens ABOVE the key. Without the tag
+            // `showPopup` took it for the top row and laid the strip out below
+            // the space bar, outside the keyboard's frame - invisible.
+            space.tag = 3
+            let hold = UILongPressGestureRecognizer(target: self, action: #selector(holdSpace(_:)))
+            hold.minimumPressDuration = 0.4
+            space.addGestureRecognizer(hold)
+            let slide = UIPanGestureRecognizer(target: self, action: #selector(slideSpace(_:)))
+            slide.require(toFail: hold)
+            space.addGestureRecognizer(slide)
+        }
         space.addTarget(self, action: #selector(keyDown(_:)), for: .touchDown)
         space.addTarget(self, action: #selector(keyUp(_:)),
                         for: [.touchUpInside, .touchUpOutside, .touchCancel])
@@ -375,10 +392,10 @@ final class KeyboardViewController: UIInputViewController {
     private var noGlideKeys: [UIView] = []
     private var topLetterRowView: UIView?
 
-    private static let displayName =
-        (Bundle.main.object(forInfoDictionaryKey: "CFBundleDisplayName") as? String ?? "").lowercased()
-    /// Through the script, like every label: `меджусловјанскы` in Cyrillic.
-    private static var spaceLabel: String { Script.out(displayName) }
+    /// The language being typed, lowercase, through the script like every
+    /// label (`меджусловјанскы` in Cyrillic). One extension types every
+    /// language now, so this - not the system's list - says which one is on.
+    private static var spaceLabel: String { Script.out(Layout.name(Layout.language).lowercased()) }
 
     private func styledKey(_ title: String) -> UIButton {
         let b = UIButton(type: .system)
@@ -676,7 +693,75 @@ final class KeyboardViewController: UIInputViewController {
     }
     @objc private func tapSpace() { insert(" ") }
     @objc private func tapReturn() { insert("\n") }
-    @objc private func tapNextKeyboard() { advanceToNextInputMode() }
+    /// Slide on space: right = next ticked language, left = previous, round
+    /// the list (never out to the system - that stays 🌐's job). A short slide
+    /// is still a space.
+    @objc private func slideSpace(_ g: UIPanGestureRecognizer) {
+        guard g.state == .ended else { return }
+        let dx = g.translation(in: view).x
+        let on = Layout.enabled
+        guard abs(dx) >= 30, on.count > 1, let i = on.firstIndex(of: Layout.language) else {
+            insert(" ")
+            return
+        }
+        switchLanguage(to: on[(i + (dx > 0 ? 1 : on.count - 1)) % on.count])
+    }
+
+    /// Hold space: the ticked languages in a strip, slide onto one and lift.
+    @objc private func holdSpace(_ g: UILongPressGestureRecognizer) {
+        guard let key = g.view as? UIButton else { return }
+        let on = Layout.enabled
+        switch g.state {
+        case .began:
+            showLanguageList(over: key, langs: on)
+            selected = on.firstIndex(of: Layout.language) ?? 0
+            highlightSelection()
+        case .changed:
+            selected = languageIndex(at: g.location(in: view))
+            highlightSelection()
+        case .ended:
+            let pick = on.indices.contains(selected) ? on[selected] : Layout.language
+            dismissPopup()
+            if pick != Layout.language { switchLanguage(to: pick) }
+        case .cancelled, .failed:
+            dismissPopup()
+        default:
+            break
+        }
+    }
+
+    /// 🌐 steps through the ticked languages, as on Android; after the last
+    /// one it hands over to the next keyboard of the system, as Apple requires
+    /// of this key - and the first language is the one waiting on the way back.
+    @objc private func tapNextKeyboard() {
+        let on = Layout.enabled
+        if let i = on.firstIndex(of: Layout.language), i + 1 < on.count {
+            switchLanguage(to: on[i + 1])
+        } else {
+            if on.count > 1 { switchLanguage(to: on[0], rebuild: false) }
+            advanceToNextInputMode()
+        }
+    }
+
+    /// Everything that hangs on the language: its list, its own words, its
+    /// letters and script; the glide state of the word before belongs to the
+    /// old language and is closed.
+    private func switchLanguage(to lang: String, rebuild: Bool = true) {
+        Layout.language = lang
+        lastSwipedWord = nil
+        lastCandidates = []
+        swipeSuffix = ""
+        pendingSpace = false
+        tappedWord = nil
+        completingPrefix = nil
+        trimAfterWipe = nil
+        Shared.adoptLocalWords(lang)
+        swipeInput.languageChanged()
+        guard rebuild else { return }
+        buildKeyboard()
+        showSuggestions([])
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
 
     @objc private func tapScript() {
         Script.next()
@@ -766,6 +851,30 @@ final class KeyboardViewController: UIInputViewController {
             }
             row.heightAnchor.constraint(equalToConstant: 40).isActive = true
             return row
+        }
+
+        // Languages (owner 2026-11-11): one keyboard in the system's list,
+        // the languages ticked here, 🌐 steps through them. At least one stays.
+        column.addArrangedSubview(header("Jezyki"))
+        let on = Layout.enabled
+        let langs = Layout.all.map(\.code)
+        for start in stride(from: 0, to: langs.count, by: 4) {
+            let chunk = langs[start..<min(start + 4, langs.count)]
+            column.addArrangedSubview(choiceRow(chunk.map { code in
+                (code, on.contains(code), { [weak self] in
+                    guard let self else { return }
+                    var next = Layout.enabled
+                    if next.contains(code) {
+                        guard next.count > 1 else { return }
+                        next.removeAll { $0 == code }
+                    } else {
+                        next.append(code)
+                    }
+                    Layout.enabled = next
+                    Layout.forgetLanguage()
+                    self.switchLanguage(to: next.contains(code) ? code : Layout.language)
+                })
+            }))
         }
 
         column.addArrangedSubview(header("Tema"))
@@ -1107,7 +1216,7 @@ final class KeyboardViewController: UIInputViewController {
 
     // MARK: - Longpress popup
 
-    private func showPopup(over key: UIButton, variants: [String]) {
+    private func showPopup(over key: UIButton, variants: [String], raw: Bool = false) {
         dismissPopup()
 
         // One label per variant so a finger slide can pick between them.
@@ -1134,7 +1243,7 @@ final class KeyboardViewController: UIInputViewController {
             let l = UILabel()
             // Every surface the user sees goes through the script - the
             // Android popup once skipped it and Cyrillic `з` held showed `з`.
-            l.text = Script.out(item)
+            l.text = raw ? item : Script.out(item)
             l.adjustsFontSizeToFitWidth = true
             l.minimumScaleFactor = 0.6
             l.font = .systemFont(ofSize: 24)
@@ -1187,6 +1296,78 @@ final class KeyboardViewController: UIInputViewController {
         view.layoutIfNeeded()
         popupStrip = strip
         popup = strip
+    }
+
+    /// Hold on space: the ticked languages as a VERTICAL list of full names
+    /// over the space bar (owner 2026-11-11: a horizontal strip of codes was
+    /// hard to notice). The keyboard is clipped to its own frame, so when the
+    /// rows would not fit above the space bar the list breaks into columns.
+    private func showLanguageList(over key: UIButton, langs: [String]) {
+        dismissPopup()
+        let rowH: CGFloat = 40, colW: CGFloat = 170
+        let keyFrame = key.convert(key.bounds, to: view)
+        let maxRows = max(1, Int((keyFrame.minY - 6) / rowH))
+        let cols = (langs.count + maxRows - 1) / maxRows
+        let rows = (langs.count + cols - 1) / cols
+
+        let grid = UIStackView()
+        grid.axis = .horizontal
+        grid.distribution = .fillEqually
+        grid.backgroundColor = .systemBackground
+        grid.layer.cornerRadius = 10
+        grid.layer.borderWidth = 1
+        grid.layer.borderColor = UIColor.separator.cgColor
+        grid.layer.masksToBounds = true
+        grid.translatesAutoresizingMaskIntoConstraints = false
+
+        variantLabels = langs.map { code in
+            let l = UILabel()
+            l.text = "  " + Layout.name(code)
+            l.font = .systemFont(ofSize: 19)
+            l.adjustsFontSizeToFitWidth = true
+            l.minimumScaleFactor = 0.6
+            l.textColor = .label
+            return l
+        }
+        for c in 0..<cols {
+            let column = UIStackView()
+            column.axis = .vertical
+            column.distribution = .fillEqually
+            for r in 0..<rows {
+                let i = c * rows + r
+                column.addArrangedSubview(i < variantLabels.count ? variantLabels[i] : UIView())
+            }
+            grid.addArrangedSubview(column)
+        }
+        view.addSubview(grid)
+        let centre = grid.centerXAnchor.constraint(equalTo: key.centerXAnchor)
+        centre.priority = .defaultHigh
+        NSLayoutConstraint.activate([
+            grid.bottomAnchor.constraint(equalTo: key.topAnchor, constant: -4),
+            grid.heightAnchor.constraint(equalToConstant: CGFloat(rows) * rowH),
+            grid.widthAnchor.constraint(equalToConstant: min(CGFloat(cols) * colW, view.bounds.width - 4)),
+            centre,
+            grid.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 2),
+            grid.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -2),
+        ])
+        view.bringSubviewToFront(grid)
+        view.layoutIfNeeded()
+        popupStrip = grid
+        popup = grid
+    }
+
+    /// The row the finger is over - the nearest one when it strays outside
+    /// the list, so the pick does not need to be precise.
+    private func languageIndex(at point: CGPoint) -> Int {
+        var best = selected, bestD = CGFloat.greatestFiniteMagnitude
+        for (i, l) in variantLabels.enumerated() {
+            let f = l.convert(l.bounds, to: view)
+            let dx = max(0, max(f.minX - point.x, point.x - f.maxX))
+            let dy = max(0, max(f.minY - point.y, point.y - f.maxY))
+            let d = dx * dx + dy * dy
+            if d < bestD { bestD = d; best = i }
+        }
+        return best
     }
 
     private func indexOfVariant(atX x: CGFloat, count: Int) -> Int {

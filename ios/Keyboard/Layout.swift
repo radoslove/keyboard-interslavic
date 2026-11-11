@@ -9,11 +9,61 @@ import Foundation
 /// which is the point: one habit across platforms.
 enum Layout {
 
-    /// Which keyboard this extension is: `isv`, `pl`, `cs`, `sk`, `sl`, `hr`, `sr` (Latin + Cyrillic), `bs`, `mk` (Cyrillic only), `nb` or `en`. One code base, two
-    /// entries in Settings -> Keyboards; the language comes from the
-    /// extension's Info.plist (`KeyboardLanguage`), set per target.
-    static let language: String =
-        Bundle.main.object(forInfoDictionaryKey: "KeyboardLanguage") as? String ?? "isv"
+    /// Every language of the keyboard, in the order of the list, with the name
+    /// the space bar shows. ONE keyboard extension carries them all (owner
+    /// 2026-11-11): the system's globe list had grown to a dozen entries and the
+    /// last ones fell below its edge. The user ticks the languages in the
+    /// keyboard's settings and 🌐 steps through them, as on Android.
+    static let all: [(code: String, name: String)] = [
+        ("isv", "Medžuslovjansky"), ("pl", "Polski"), ("cs", "češsky"),
+        ("sk", "slovačsky"), ("sl", "slovenečsky"), ("hr", "hrvatsky"),
+        ("sr", "srbsky"), ("bs", "bosnijsky"), ("mk", "makedonsky"),
+        ("ru", "russky"), ("nb", "norvežsky"), ("en", "English"),
+    ]
+
+    static func name(_ code: String) -> String { all.first { $0.code == code }?.name ?? code }
+
+    /// The ticked languages, in list order; never empty. First run: Interslavic
+    /// plus the phone's own language if the keyboard has it.
+    static var enabled: [String] {
+        get {
+            if let saved = Shared.store.stringArray(forKey: "languages") {
+                let known = all.map(\.code).filter { saved.contains($0) }
+                if !known.isEmpty { return known }
+            }
+            var first = ["isv"]
+            if let phone = Locale.preferredLanguages.first?.prefix(2).lowercased(),
+               phone != "isv", all.contains(where: { $0.code == phone }) {
+                first.append(String(phone))
+            }
+            return first
+        }
+        set {
+            let ordered = all.map(\.code).filter { newValue.contains($0) }
+            Shared.store.set(ordered.isEmpty ? ["isv"] : ordered, forKey: "languages")
+        }
+    }
+
+    /// The language being typed now: `isv`, `pl`, `cs`, `sk`, `sl`, `hr`, `sr`
+    /// (Latin + Cyrillic), `bs`, `mk` and `ru` (Cyrillic only), `nb` or `en`.
+    /// Read on every letter of a glide, so it is kept in memory and only
+    /// written through to the store; `forgetLanguage()` after the list changes.
+    static var language: String {
+        get {
+            if let c = current { return c }
+            let on = enabled
+            let saved = Shared.store.string(forKey: "language") ?? ""
+            let c = on.contains(saved) ? saved : on[0]
+            current = c
+            return c
+        }
+        set {
+            current = newValue
+            Shared.store.set(newValue, forKey: "language")
+        }
+    }
+    private static var current: String?
+    static func forgetLanguage() { current = nil }
 
     /// base letter -> the letters of THIS keyboard's language reached by
     /// holding it; they come first in the popup. The three Interslavic
@@ -21,7 +71,9 @@ enum Layout {
     /// `android/isv_latin.xml`.
     /// English has none of its own; its popups hold only the foreign
     /// letters (Android `Lang.EN -> emptyMap()`).
-    static let accents: [Character: [String]] = {
+    static var accents: [Character: [String]] { accents(for: language) }
+
+    static func accents(for language: String) -> [Character: [String]] {
         switch language {
         case "pl":
             return ["a": ["ą"], "c": ["ć"], "e": ["ę"], "l": ["ł"], "n": ["ń"],
@@ -64,7 +116,7 @@ enum Layout {
             return ["c": ["č"], "s": ["š"], "z": ["ž"], "e": ["ě"],
                     "d": ["dž"], "l": ["lj"], "n": ["nj"]]
         }
-    }()
+    }
 
     /// Letters of OTHER languages, after the Interslavic one in the same
     /// popup (owner 2026-10-10: `mañana` in a letter meant switching
@@ -224,13 +276,18 @@ enum Layout {
 
     /// The keys a swipe can cross, in the order of the wordlist's key indices:
     /// a-z, then the language's own letter keys (`build_swipe_dictionary.py`).
-    static let swipeKeys: [Character] =
-        Array("abcdefghijklmnopqrstuvwxyz") + (language == "nb" ? Array("åøæ") : [])
+    static var swipeKeys: [Character] { language == "nb" ? nbKeys : latinKeys }
+    private static let latinKeys = Array("abcdefghijklmnopqrstuvwxyz")
+    private static let nbKeys = latinKeys + Array("åøæ")
 
     /// Index of a key letter in `swipeKeys`, nil for anything else.
-    static func swipeIndex(_ ch: Character) -> Int? { swipeKeyIndex[ch] }
-    private static let swipeKeyIndex: [Character: Int] =
-        Dictionary(uniqueKeysWithValues: swipeKeys.enumerated().map { ($1, $0) })
+    static func swipeIndex(_ ch: Character) -> Int? {
+        (language == "nb" ? nbIndex : latinIndex)[ch]
+    }
+    private static let latinIndex: [Character: Int] =
+        Dictionary(uniqueKeysWithValues: latinKeys.enumerated().map { ($1, $0) })
+    private static let nbIndex: [Character: Int] =
+        Dictionary(uniqueKeysWithValues: nbKeys.enumerated().map { ($1, $0) })
 
     /// `123` - rows 1-2 as on the system keyboard. Row 3 sits between `#+=`
     /// and backspace and runs from the rarest mark to the most used, so `?`

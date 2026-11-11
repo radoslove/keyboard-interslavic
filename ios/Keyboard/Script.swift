@@ -127,15 +127,20 @@ enum Script {
     ]
 
     /// The Cyrillic table of this keyboard's language.
-    private static let cyrillicTable: [(String, String)] = {
-        switch Layout.language {
+    private static func table(_ lang: String) -> [(String, String)] {
+        switch lang {
         case "sr": return serbianPairs
         case "mk": return macedonianPairs
         case "ru": return russianPairs
         default: return cyrillicPairs
         }
-    }()
-    private static let cyrillicMap = Dictionary(uniqueKeysWithValues: cyrillicTable)
+    }
+    /// Built once per language; the language now changes while the keyboard runs.
+    private static let maps: [String: [String: String]] = Dictionary(uniqueKeysWithValues:
+        ["isv", "sr", "mk", "ru"].map { ($0, Dictionary(uniqueKeysWithValues: table($0))) })
+    private static var cyrillicMap: [String: String] {
+        maps[Layout.language] ?? maps["isv"]!
+    }
 
     // MARK: Glagolitic (v1) - letters + the j rules
 
@@ -218,8 +223,13 @@ enum Script {
 
     // MARK: Back to Latin (for wordlist lookups)
 
-    private static let reverseCyrillic: [(String, String)] =
-        cyrillicTable.map { ($0.1, $0.0) }.sorted { $0.0.count > $1.0.count }
+    private static let reverses: [String: [(String, String)]] = Dictionary(uniqueKeysWithValues:
+        ["isv", "sr", "mk", "ru"].map { lang in
+            (lang, table(lang).map { ($0.1, $0.0) }.sorted { $0.0.count > $1.0.count })
+        })
+    private static var reverseCyrillic: [(String, String)] {
+        reverses[Layout.language] ?? reverses["isv"]!
+    }
 
     private static let reverseGlagolitic: [(String, String)] =
         ([("ⱐⰹ", "y"), ("ⱝ", "ja"), ("ⱓ", "ju"), ("ⱖ", "jo"), ("ⱐ", "j"), ("ⰹ", "j"), ("ⰿ", "m")]

@@ -20,12 +20,11 @@ enum Shared {
         fullAccess ? (UserDefaults(suiteName: group) ?? .standard) : .standard
     }
 
-    /// The `＋` words of one language, lowercase. In the group one list per
-    /// language; in a keyboard's own defaults (no Full Access) the extension
-    /// already is the language, and the key stays what it always was.
-    static func userWordsKey(_ language: String) -> String {
-        fullAccess ? "userWords." + language : "userWords"
-    }
+    /// The `＋` words of one language, lowercase, one list per language - also
+    /// in the keyboard's own defaults now that one extension types them all.
+    /// The old Interslavic list without Full Access (`userWords`) is adopted by
+    /// `adoptLocalWords`.
+    static func userWordsKey(_ language: String) -> String { "userWords." + language }
 
     static func userWords(_ language: String) -> [String] {
         store.stringArray(forKey: userWordsKey(language)) ?? []
@@ -40,8 +39,18 @@ enum Shared {
     /// The old copy stays where it was; adopted once, so a word removed in the
     /// app does not come back from it.
     static func adoptLocalWords(_ language: String) {
-        guard fullAccess, let group = UserDefaults(suiteName: group) else { return }
         let mine = UserDefaults.standard
+        guard fullAccess, let group = UserDefaults(suiteName: group) else {
+            // No Full Access: the pre-0.6 key of this (the Interslavic)
+            // extension becomes its per-language key, once.
+            if !mine.bool(forKey: "userWordsRenamed"), let old = mine.stringArray(forKey: "userWords") {
+                mine.set(true, forKey: "userWordsRenamed")
+                var all = mine.stringArray(forKey: "userWords." + language) ?? []
+                for w in old where !all.contains(w) { all.append(w) }
+                mine.set(all, forKey: "userWords." + language)
+            }
+            return
+        }
         guard !mine.bool(forKey: "userWordsAdopted") else { return }
         mine.set(true, forKey: "userWordsAdopted")
         let local = mine.stringArray(forKey: "userWords") ?? []
