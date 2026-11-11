@@ -335,17 +335,22 @@ final class KeyboardViewController: UIInputViewController {
         // LIFT now - inside or outside the key, so a thumb that slid a little
         // still gets its space - and a recognised gesture cancels it.
         space.addTarget(self, action: #selector(tapSpace), for: [.touchUpInside, .touchUpOutside])
-        if Layout.enabled.count > 1 && !panel {
+        if !panel {
             // Bottom row: the strip opens ABOVE the key. Without the tag
             // `showPopup` took it for the top row and laid the strip out below
             // the space bar, outside the keyboard's frame - invisible.
             space.tag = 3
+            // The hold works with ONE language too: its list ends with ⚙,
+            // the way to the settings that is easier to find than holding
+            // `123` (owner 2026-11-11). Sliding needs two languages.
             let hold = UILongPressGestureRecognizer(target: self, action: #selector(holdSpace(_:)))
             hold.minimumPressDuration = 0.4
             space.addGestureRecognizer(hold)
-            let slide = UIPanGestureRecognizer(target: self, action: #selector(slideSpace(_:)))
-            slide.require(toFail: hold)
-            space.addGestureRecognizer(slide)
+            if Layout.enabled.count > 1 {
+                let slide = UIPanGestureRecognizer(target: self, action: #selector(slideSpace(_:)))
+                slide.require(toFail: hold)
+                space.addGestureRecognizer(slide)
+            }
         }
         space.addTarget(self, action: #selector(keyDown(_:)), for: .touchDown)
         space.addTarget(self, action: #selector(keyUp(_:)),
@@ -722,10 +727,11 @@ final class KeyboardViewController: UIInputViewController {
         switchLanguage(to: on[(i + (dx > 0 ? 1 : on.count - 1)) % on.count])
     }
 
-    /// Hold space: the ticked languages in a strip, slide onto one and lift.
+    /// Hold space: the ticked languages in a list, slide onto one and lift;
+    /// the last row, ⚙, opens the keyboard's settings.
     @objc private func holdSpace(_ g: UILongPressGestureRecognizer) {
         guard let key = g.view as? UIButton else { return }
-        let on = Layout.enabled
+        let on = Layout.enabled + [Self.settingsRow]
         switch g.state {
         case .began:
             showLanguageList(over: key, langs: on)
@@ -737,7 +743,8 @@ final class KeyboardViewController: UIInputViewController {
         case .ended:
             let pick = on.indices.contains(selected) ? on[selected] : Layout.language
             dismissPopup()
-            if pick != Layout.language { switchLanguage(to: pick) }
+            if pick == Self.settingsRow { openSettings() }
+            else if pick != Layout.language { switchLanguage(to: pick) }
         case .cancelled, .failed:
             dismissPopup()
         default:
@@ -805,17 +812,24 @@ final class KeyboardViewController: UIInputViewController {
             highlightSelection()
         case .ended:
             dismissPopup()
-            showingSettings = true
-            showingEmoji = false
-            showingNumeric = false
-            showingSymbols = false
-            showSuggestions([])
-            buildKeyboard()
+            openSettings()
         case .cancelled, .failed:
             dismissPopup()
         default:
             break
         }
+    }
+
+    /// The last row of the space-bar list; `Layout.name` shows it as is.
+    private static let settingsRow = "⚙"
+
+    private func openSettings() {
+        showingSettings = true
+        showingEmoji = false
+        showingNumeric = false
+        showingSymbols = false
+        showSuggestions([])
+        buildKeyboard()
     }
 
     @objc private func closeSettings() {
