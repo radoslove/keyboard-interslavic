@@ -362,7 +362,7 @@ class KeyboardView(
                     previewTxt.color = Color.WHITE
                 } else previewTxt.color = cText
                 // Full names, shrunk to the cell if one is too long for it.
-                val label = Lang.label(items[i])
+                val label = if (items[i] == LANG_GEAR) "⚙" else Lang.label(items[i])
                 previewTxt.textSize = base
                 val room = langColW - dp(12)
                 val wide = previewTxt.measureText(label)
@@ -379,6 +379,9 @@ class KeyboardView(
     // codes was hard to notice. The keyboard cannot draw above its own top, so
     // when the rows do not fit above the space bar the list breaks into columns.
     private var langItems: List<String>? = null
+    /** Last row of the space-bar list (owner 2026-11-11, iOS 0.6.10: "more
+     *  intuitive than looking under 123"): lifting on it opens the panel. */
+    private val LANG_GEAR = " gear"
     private var langLeft = 0f
     private var langTop = 0f
     private var langRowH = 0f
@@ -841,9 +844,11 @@ class KeyboardView(
         // Languages (owner 2026-11-11, iOS 0.6.3): one keyboard in the system,
         // the languages ticked HERE, four codes to a row; at least one stays.
         // A language just ticked becomes the one typed, as on iOS.
-        header("Jezyky")
+        header("Jezyki")
         val on = Lang.enabled(context)
-        Lang.ALL.chunked(4).forEach { chunk ->
+        // isv first, the rest by code (owner 2026-11-11, iOS 0.6.9: "hard to find");
+        // only the panel is sorted - the space bar and 🌐 keep Lang.ALL order.
+        (listOf(Lang.ISV) + Lang.ALL.filter { it != Lang.ISV }.sorted()).chunked(4).forEach { chunk ->
             choices(chunk.map { code ->
                 Triple(code, code in on, {
                     val next = on.toMutableList()
@@ -997,8 +1002,10 @@ class KeyboardView(
             if (android.os.Build.VERSION.SDK_INT >= 26) {
                 tv.setAutoSizeTextTypeUniformWithConfiguration(9, 14, 1, TypedValue.COMPLEX_UNIT_SP)
             } else tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-            switchesLanguages(tv)
         }
+        // The hold list ends with ⚙, so it is offered with ONE language too
+        // (iOS 0.6.10); sliding between languages still needs two.
+        switchesLanguages(tv)
         return tv
     }
 
@@ -1017,7 +1024,7 @@ class KeyboardView(
         var downY = 0f
         var moved = false
         val hold = Runnable {
-            showLangList(tv, Lang.enabled(context))
+            showLangList(tv, Lang.enabled(context) + LANG_GEAR)
             tv.isPressed = false
         }
         tv.setOnTouchListener { _, e ->
@@ -1049,6 +1056,11 @@ class KeyboardView(
                     val now = Lang.current(context)
                     val dx = e.x - downX
                     when {
+                        listed && pick == LANG_GEAR -> {
+                            // The keyboard's own panel, as from 123's hold (iOS openSettings).
+                            settingsOpen = true; symbols = false; emoji = false
+                            render()
+                        }
                         listed -> if (pick != null && pick != now) switchLanguage(pick)
                         abs(dx) >= dp(30) && on.size > 1 -> {
                             val i = on.indexOf(now).coerceAtLeast(0)

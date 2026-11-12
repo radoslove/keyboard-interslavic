@@ -71,34 +71,34 @@ object Ui {
 
     /** [key] in [lang]; `ms` falls back to English for the few keys it lacks. */
     fun t(lang: String, key: String): String =
-        TEXT[key]?.let { it[lang] ?: it["en"] } ?: key
+        (TEXT[key]?.let { it[lang] ?: it["en"] } ?: key)
+            .replace("{n}", (Lang.ALL.size - 1).toString())
 
     /** The English gloss under an MS paragraph, or null outside `ms`. */
-    fun gloss(lang: String, key: String): String? = if (lang == MS) TEXT[key]?.get("en") else null
+    fun gloss(lang: String, key: String): String? =
+        if (lang == MS) TEXT[key]?.get("en")?.replace("{n}", (Lang.ALL.size - 1).toString()) else null
 
     private fun row(ms: String?, en: String, pl: String, nb: String) =
         buildMap { if (ms != null) put(MS, ms); put("en", en); put("pl", pl); put("nb", nb) }
 
     private val TEXT: Map<String, Map<String, String>> = mapOf(
         "title" to row("Medžuslovjansky", "Interslavic keyboard", "Klawiatura międzysłowiańska", "Interslavisk tastatur"),
+        // No list of the other languages here (owner 2026-11-12): it went stale
+        // (5 of 17 until 3.9.2), and the panel below shows them all anyway.
         "intro" to row(
             "Medžuslovjanska klaviatura. Standardne bukvy (č š ž ě) na dolgom " +
-                "pritisku i mahu vgoru; pas prědloženij iz slovnika. Takože jezyky: " +
-                "medžuskandinavsky, poljsky, češsky, norvežsky i anglijsky.",
+                "pritisku i mahu vgoru; pas prědloženij iz slovnika.",
             "Interslavic keyboard. Standard letters (č š ž ě) on long-press and " +
-                "an upward flick; a suggestion bar from the dictionary. Also Interscandinavian, " +
-                "Polish, Czech, Norwegian and English.",
+                "an upward flick; a suggestion bar from the dictionary.",
             "Klawiatura międzysłowiańska. Litery č š ž ě pod przytrzymaniem i ruchem " +
-                "w górę, podpowiedzi ze słownika. Można też pisać po międzyskandynawsku, polsku, " +
-                "czesku, norwesku i angielsku.",
-            "Interslavisk tastatur. Bokstavene č š ž ě ligger under langt trykk og et " +
-                "sveip oppover, med forslag fra ordboka. Du kan også skrive mellomskandinavisk, " +
-                "norsk, polsk, tsjekkisk og engelsk.",
+                "w górę, podpowiedzi ze słownika.",
+            "Interslavisk tastatur. Bokstavene č š ž ě får du med langt trykk eller " +
+                "sveip oppover, og ordboka gir ordforslag.",
         ),
         "ui_lang" to row(null, "Language of this screen", "Język tego ekranu", "Språk på denne skjermen"),
-        "langs_head" to row("Jezyky klaviatury", "Keyboard languages", "Języki klawiatury", "Tastaturspråk"),
+        "langs_head" to row("Jezyki klaviatury", "Keyboard languages", "Języki klawiatury", "Tastaturspråk"),
         "langs_body" to row(
-            "Izberi jezyky:",
+            "Izberi jezyki:",
             "One keyboard, Interslove; tick its languages here or in the keyboard " +
                 "itself (hold 123, then ⚙). Slide on the space bar or tap 🌐 to switch; hold the space " +
                 "bar for the list (held, 🌐 opens the phone's keyboard list). A language's dictionary " +
@@ -114,7 +114,7 @@ object Ui {
                 "for et språk lastes først når du bruker det. Kyrillisk og glagolittisk gjelder interslavisk.",
         ),
         "langs_now" to row(null, "On now", "Włączone teraz", "På nå"),
-        "btn_langs" to row("Izberi jezyky", "Choose languages", "Wybierz języki", "Velg språk"),
+        "btn_langs" to row("Izberi jezyki", "Choose languages", "Wybierz języki", "Velg språk"),
         "script_head" to row("Latinica, kirilica ili glagolica", "Latin, Cyrillic or Glagolitic",
             "Łacinka, cyrylica czy głagolica", "Latinsk, kyrillisk eller glagolittisk"),
         "script_body" to row(

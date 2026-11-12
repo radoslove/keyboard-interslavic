@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The one folder whose files may be handed to a mail app: the batch about
+     to be attached (SetupActivity.exportBatch). Nothing else is shared. -->
+<paths>
+    <cache-path name="batches" path="batches/" />
+</paths>

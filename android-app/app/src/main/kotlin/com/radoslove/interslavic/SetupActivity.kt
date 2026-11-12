@@ -71,25 +71,6 @@ class SetupActivity : Activity() {
         // "is this the test build or the published one?".
         root.addView(buildLine())
 
-        // Language of this screen. The heading carries all four names, so it can
-        // be found whichever language the screen is in now.
-        root.addView(header(Ui.LANG_HEAD))
-        // One per line: four names in a row did not fit a phone (on the Android test phone "Norsk" ran
-        // off the screen, "Polski" broke in two).
-        root.addView(RadioGroup(this).apply {
-            for (lang in Ui.ALL) {
-                addView(RadioButton(this@SetupActivity).apply {
-                    id = android.view.View.generateViewId()
-                    text = Ui.NAMES.getValue(lang)
-                    textSize = 17f
-                    isChecked = lang == ui
-                    setOnClickListener {
-                        if (lang != ui) { Ui.set(this@SetupActivity, lang); recreate() }
-                    }
-                })
-            }
-        })
-
         section(root, "title", null)
         root.addView(body(t("intro")))
         glossOf("intro")?.let { root.addView(gloss(it)) }
@@ -343,18 +324,47 @@ class SetupActivity : Activity() {
             "id: ${Collector.contributorId(this)}"
     }
 
+    private val BATCH_MAILBOX = "interslove.keyboard@gmail.com"
+
     private fun exportBatch() {
         if (Collector.pendingCount(this) == 0 && Popularity.pendingCount(this) == 0) {
             toast(t("t_empty"))
             return
         }
         val json = Collector.exportBatchJson(this)
-        val send = Intent(Intent.ACTION_SEND).apply {
+        // To one fixed mailbox, read on the server side, which loads the batch
+        // into the database (owner 2026-11-12, by mail and not over HTTPS: the
+        // app gets no INTERNET permission, the user sends from their own mail
+        // app, and the mail itself is the notice that something came in).
+        // Subject, a one-line body and the batch as a .json ATTACHMENT, all
+        // filled in (owner 3.9.6: Gmail left the subject empty - ACTION_SENDTO
+        // drops the extras). ACTION_SEND, one intent per mail app, so the
+        // choice still offers only mail apps.
+        val dir = java.io.File(cacheDir, "batches").apply { mkdirs() }
+        dir.listFiles()?.forEach { it.delete() }   // only the batch being sent
+        val stamp = java.text.SimpleDateFormat("yyMMdd_HHmm", java.util.Locale.ROOT).format(java.util.Date())
+        val file = java.io.File(dir, "interslove_${Collector.contributorId(this)}_$stamp.json")
+        file.writeText(json, Charsets.UTF_8)
+        val uri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.batches", file)
+        val subject = t("sub_batch") + " · " + Collector.contributorId(this) + " · " + stamp
+        fun sendVia(pkg: String?) = Intent(Intent.ACTION_SEND).apply {
             type = "application/json"
-            putExtra(Intent.EXTRA_SUBJECT, t("sub_batch"))
-            putExtra(Intent.EXTRA_TEXT, json)
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(BATCH_MAILBOX))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, "${App.MAIN_NAME} ${BuildConfig.VERSION_NAME} · ${file.name}")
+            putExtra(Intent.EXTRA_STREAM, uri)
+            clipData = android.content.ClipData.newRawUri(file.name, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            if (pkg != null) setPackage(pkg)
         }
-        startActivity(Intent.createChooser(send, t("chooser")))
+        val mailApps = packageManager.queryIntentActivities(
+            Intent(Intent.ACTION_SENDTO, android.net.Uri.parse("mailto:")), 0
+        ).map { it.activityInfo.packageName }.distinct()
+        val chooser = if (mailApps.isEmpty()) Intent.createChooser(sendVia(null), t("chooser"))
+        else Intent.createChooser(sendVia(mailApps.first()), t("chooser")).apply {
+            putExtra(Intent.EXTRA_INITIAL_INTENTS, mailApps.drop(1).map { sendVia(it) }.toTypedArray())
+        }
+        startActivity(chooser)
     }
 
     private fun exportQueue() {
