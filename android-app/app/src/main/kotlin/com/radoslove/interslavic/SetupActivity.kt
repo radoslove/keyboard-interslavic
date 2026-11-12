@@ -19,8 +19,8 @@ import android.widget.Toast
 /**
  * The container app (android_PLAN.md M3). Its whole job is the collection
  * consent surface the keyboard cannot show itself: an opt-in switch (default
- * OFF), the pending count, and a deliberate export. Everything here is on-device
- * — the export hands the owner a file; it does not send anything anywhere.
+ * OFF), the pending count, and one deliberate send: the batch goes out only as
+ * a mail the user sends from their own mail app — this app never touches the network.
  *
  * Every text comes from [Ui], in the language chosen at the top: Interslavic
  * with an English gloss (the original), or English, Polish or Norwegian alone.
@@ -211,10 +211,6 @@ class SetupActivity : Activity() {
             setOnClickListener { exportBatch() }
         })
         root.addView(Button(this).apply {
-            text = button("btn_export")
-            setOnClickListener { exportQueue() }
-        })
-        root.addView(Button(this).apply {
             text = labelled("btn_clear")
             setOnClickListener {
                 Collector.clear(this@SetupActivity)
@@ -365,20 +361,6 @@ class SetupActivity : Activity() {
             putExtra(Intent.EXTRA_INITIAL_INTENTS, mailApps.drop(1).map { sendVia(it) }.toTypedArray())
         }
         startActivity(chooser)
-    }
-
-    private fun exportQueue() {
-        val text = Collector.exportInboxText(this)
-        if (text.isBlank()) {
-            toast(t("t_empty"))
-            return
-        }
-        val send = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(Intent.EXTRA_SUBJECT, t("sub_review"))
-            putExtra(Intent.EXTRA_TEXT, text)
-        }
-        startActivity(Intent.createChooser(send, t("chooser")))
     }
 
     /** `<version> · com.radoslove.interslavic.debug` - the two facts every

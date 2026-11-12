@@ -26,9 +26,12 @@ object Ui {
     private const val PREFS = "isv_collector"
     private const val KEY = "ui_language"
 
+    /** The screen follows the PHONE's language (owner 2026-11-12, variant a):
+     *  pl / nb / en have their own text, any other language gets Interslavic,
+     *  which a Czech or a Slovak reads better than English. A choice saved by
+     *  the old four-language picker (removed in 3.9.7) is ignored - nothing
+     *  could change it any more, so it pinned the screen to one language. */
     fun current(context: Context): String {
-        val saved = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null)
-        if (saved != null && saved in ALL) return saved
         return when (Lang.deviceLang()) {
             Lang.PL -> "pl"
             Lang.NB -> "nb"
@@ -134,18 +137,19 @@ object Ui {
         "collect_body" to row(
             "Kogda je vključeno, klaviatura lokalno zapisyvaje slova, ktoryh nema v " +
                 "slovniku, da by pozdněje šli do prěgleda (nikogda ne avtomatično " +
-                "popravjene). Ničto se ne posyla — izvoz je fajl, ktory sam prědaješ " +
-                "dalje. Standardno izključeno.",
+                "popravjene). Ničto se ne posyla avtomatično — slova idut dalje jedino v " +
+                "grupě, ktoru sam pošlješ iz svojej pošty. Standardno izključeno.",
             "When on, the keyboard saves Interslavic words NOT in the dictionary LOCALLY, " +
-                "to later go to review (never auto-corrected). Nothing is sent — the " +
-                "export is a file you pass on yourself. Off by default.",
+                "to later go to review (never auto-corrected). Nothing leaves on its own — the " +
+                "words go out only in a batch you send yourself from your mail app. Off by default.",
             "Gdy włączone, klawiatura zapisuje LOKALNIE słowa międzysłowiańskie, których " +
                 "nie ma w słowniku, żeby później trafiły do przeglądu (nigdy nie są " +
-                "poprawiane automatycznie). Nic nie jest wysyłane — eksport to plik, który " +
-                "sam przekazujesz dalej. Domyślnie wyłączone.",
+                "poprawiane automatycznie). Nic nie wychodzi samo — słowa trafiają dalej tylko " +
+                "w paczce, którą sam wysyłasz ze swojej poczty. Domyślnie wyłączone.",
             "Når dette er på, lagrer tastaturet LOKALT interslaviske ord som ikke står i " +
                 "ordboka, slik at de kan gjennomgås senere (de rettes aldri automatisk). " +
-                "Ingenting sendes — eksporten er en fil du selv sender videre. Av som standard.",
+                "Ingenting sendes automatisk — ordene går bare videre i pakken du selv sender " +
+                "fra e-postappen din. Av som standard.",
         ),
         "collect_sw" to row("Sbiraj nove slova", "Collect new words", "Zbieraj nowe słowa", "Samle nye ord"),
         "pop_head" to row("Poredok popularnosti (opcionalno)", "Popularity ranking (optional)",
@@ -154,24 +158,24 @@ object Ui {
             "Kogda je vključeno, slova, ktore potvrdiš pri pisanju — svajpom, " +
                 "izborom iz pasa, dokončenjem znanogo slova — sut lokalno čisljene za " +
                 "spis najpopularnějših medžuslovjanskih slov. Psevdonimno " +
-                "(identifikator telefona niže), bez personalnyh danyh. Ničto ne odhodi " +
-                "avtomatično — do bazy dojde jedino pri tvojem izvozu. Standardno " +
+                "(identifikator telefona niže), bez personalnyh danyh. Ničto se ne posyla " +
+                "avtomatično — do bazy dojde jedino v grupě, ktoru sam pošlješ. Standardno " +
                 "izključeno.",
             "When on, Interslavic words you CONFIRM while typing — swipe, picking from the " +
                 "bar, finishing a known word — are counted LOCALLY to feed a ranking " +
                 "of the most popular Interslavic words. Pseudonymously (device id " +
                 "below), no personal data. Nothing leaves automatically — it reaches " +
-                "the database only on your export. Off by default.",
+                "the database only in a batch you send yourself. Off by default.",
             "Gdy włączone, słowa międzysłowiańskie, które ZATWIERDZASZ przy pisaniu — " +
                 "swipe'em, wyborem z paska, dokończeniem znanego słowa — są liczone " +
                 "LOKALNIE do rankingu najpopularniejszych słów. Pseudonimowo (identyfikator " +
                 "urządzenia niżej), bez danych osobowych. Nic nie wychodzi samo — trafia do " +
-                "bazy tylko przy Twoim eksporcie. Domyślnie wyłączone.",
+                "bazy tylko w paczce, którą sam wyślesz. Domyślnie wyłączone.",
             "Når dette er på, telles interslaviske ord du BEKREFTER mens du skriver — med " +
                 "sveip, valg fra linjen eller ved å fullføre et kjent ord — LOKALT til en " +
                 "rangering av de mest brukte ordene. Pseudonymt (enhets-ID nedenfor), uten " +
                 "personopplysninger. Ingenting sendes automatisk — det når databasen bare " +
-                "når du eksporterer. Av som standard.",
+                "i pakken du selv sender. Av som standard.",
         ),
         "pop_sw" to row("Vklad do poredka popularnosti", "Contribute to the popularity ranking",
             "Dokładaj do rankingu popularności", "Bidra til popularitetsrangeringen"),
@@ -200,13 +204,13 @@ object Ui {
             null,
             "How often you type each mark (? , . „ € and the rest), counted on this phone only, " +
                 "without the text around it. It decides where the keys go: the more used, the " +
-                "nearer the thumb. Shared only in the export, and only with the ranking on.",
+                "nearer the thumb. Shared only in the batch you send, and only with the ranking on.",
             "Jak często wpisujesz każdy znak (? , . „ € i reszta), liczone tylko na tym telefonie, " +
                 "bez tekstu dookoła. Na tej podstawie układamy klawisze: im częściej używany, tym " +
-                "bliżej kciuka. Wychodzi tylko w eksporcie i tylko przy włączonym rankingu.",
+                "bliżej kciuka. Wychodzi tylko w paczce, którą wysyłasz, i tylko przy włączonym rankingu.",
             "Hvor ofte du skriver hvert tegn (? , . „ € og resten), telt bare på denne telefonen, " +
                 "uten teksten rundt. Det avgjør hvor tastene står: jo mer brukt, jo nærmere tommelen. " +
-                "Deles bare i eksporten, og bare med rangeringen på.",
+                "Deles bare i pakken du sender, og bare med rangeringen slått på.",
         ),
         "sym_none" to row(null, "Nothing counted yet.", "Jeszcze nic nie policzono.", "Ingenting telt ennå."),
         "sound_head" to row("Zvuk i vibracija (opcionalno)", "Sound and vibration (optional)",
