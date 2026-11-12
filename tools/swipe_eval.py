@@ -605,6 +605,8 @@ def anchor_keys(path, at_end, speeds=None):
 RESAMPLE_N = 32
 DWELL_N = 28           # mirrors KeyboardView.DWELL_N
 ANCHOR_KEYS = 3        # mirrors KeyboardView.ANCHOR_KEYS
+END_SOFT = float(os.environ.get("SWIPE_END_SOFT", "0"))         # px; mirrors KeyboardView.END_SOFT
+END_SOFT_REACH = float(os.environ.get("SWIPE_END_REACH", "1.8"))  # key widths from the lift point
 FREQ_W = 3.5           # mirrors Dictionary.FREQ_W
 FREQ_LIN = 0.15        # mirrors Dictionary.FREQ_LIN
 DOUBLE_W = 10.0        # mirrors Dictionary.DOUBLE_W
@@ -657,6 +659,12 @@ def decode(path, buckets, n=3, mode="pivot", lift_comp=0.0):
     spd = speed_curve(path) if ANCHOR_MODE == "slow" else None
     starts = set(anchor_keys(path, False, spd)) or {ks[0]}
     ends = set(anchor_keys(path, True, spd))
+    # Soft end (2026-11-12, `here` glided as `h-e-r` + a short retreat): a word
+    # whose last letter sits one key past the end anchors is no longer thrown
+    # out, it pays END_SOFT px. Its shape had beaten the winner (-40 vs -54) and
+    # the hard gate still never let it compete. 0 = the old hard gate.
+    ends_soft = (set(nearest_keys(path[-1], 6, reach=KEY_W * END_SOFT_REACH)) - ends
+                 if END_SOFT else set())
 
     rp = resample(path, RESAMPLE_N) if use_arc else index_resample(path, DWELL_N)
     if rp is None:
@@ -669,8 +677,11 @@ def decode(path, buckets, n=3, mode="pivot", lift_comp=0.0):
         for w, folded, fr in buckets.get(first, ()):
             if len(folded) > hi:
                 continue
+            end_pen = 0.0
             if ends and folded[-1] not in ends:
-                continue
+                if folded[-1] not in ends_soft:
+                    continue
+                end_pen = END_SOFT
             if use_arc:
                 ideal = resample([CENTERS[c] for c in folded], RESAMPLE_N)
             else:
@@ -678,7 +689,7 @@ def decode(path, buckets, n=3, mode="pivot", lift_comp=0.0):
                 ideal = index_resample(raw, DWELL_N) if raw else None
             if ideal is None:
                 continue
-            score = -shape_dist(rp, ideal) + freq_term(fr) - doubles(folded) * DOUBLE_W
+            score = -shape_dist(rp, ideal) + freq_term(fr) - doubles(folded) * DOUBLE_W - end_pen
             if pivots:
                 pen = pivot_penalty(pivots, folded)
                 if pen is not None:

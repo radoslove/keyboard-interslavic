@@ -35,10 +35,19 @@ def rejected_nb():
         return {r["form"] for r in csv.DictReader(f) if r["status"] == "unknown"}
 
 
+def rejected_en():
+    """Subtitle forms that are not English words (names, noise); see build_en_filter.py."""
+    path = os.path.join(DICT, "sources_en", "en_rejected.txt")
+    if not os.path.exists(path):
+        return set()
+    with open(path, encoding="utf-8") as f:
+        return {line.strip() for line in f if line.strip()}
+
+
 def main(lang):
     src, letters, name = LANGS[lang]
     ok = re.compile(letters)
-    bad = rejected_nb() if lang == "nb" else set()
+    bad = {"nb": rejected_nb, "en": rejected_en}[lang]()
     counts = []
     with open(os.path.join(DICT, src), encoding="utf-8") as f:
         for line in f:
@@ -59,7 +68,7 @@ def main(lang):
                 f"(FrequencyWords CC BY-SA 4.0),date={int(time.time())},version=54\n")
         for w, n in sorted(freq.items(), key=lambda t: (-t[1], t[0])):
             f.write(f" word={w},f={n}\n")
-    print(f"{out}: {len(freq):,} words ({len(bad):,} rejected by Bokmålsordboka)")
+    print(f"{out}: {len(freq):,} words ({len(bad):,} forms on the reject list)")
 
 
 if __name__ == "__main__":

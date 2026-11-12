@@ -79,6 +79,7 @@ object Dictionary {
             }
             list.sortBy { it.word }
             arr = list.toTypedArray()
+            startIndexFor(arr)   // here, off the UI thread, not on the first glide
         } catch (_: Throwable) {
             // A missing/broken asset just means no predictions — never crash typing.
         }
@@ -391,6 +392,54 @@ object Dictionary {
      * that fit the path about equally well. Accents/digraphs match on their base
      * letters; the real accented word is returned.
      */
+    /**
+     * Entry indices grouped by the key a word starts on (both routes of a
+     * digraph word), built once per list. PASS 1 used to walk EVERY entry on
+     * every decode - 548 530 Polish forms - and the decode time grew with the
+     * list: 21 ms median in English (32 k), 53 ms in Interslavic (248 k), 219 ms
+     * in Polish with 552 ms at the 90th percentile (gesture log, owner 2026-11-12:
+     * "polski dalej mieli"). Only the 2-3 start keys' buckets can pass the first
+     * gate anyway, so walking them in index order gives the same candidates in
+     * the same order.
+     */
+    private class StartIndex(val list: Array<Entry>, val digraphs: Boolean, val byKey: Map<Char, IntArray>)
+    /** One per loaded list (arrays hash by identity), so switching languages
+     *  with the space bar never rebuilds; built on the load thread. */
+    private val startIndexes = java.util.Collections.synchronizedMap(HashMap<Array<Entry>, StartIndex>())
+
+    private fun startIndexFor(arr: Array<Entry>): StartIndex {
+        val have = startIndexes[arr]
+        if (have != null && have.digraphs == digraphKeys) return have
+        val tmp = HashMap<Char, ArrayList<Int>>()
+        for (i in arr.indices) {
+            val w = arr[i].word
+            if (w.isEmpty()) continue
+            val a = foldFirst(w)
+            tmp.getOrPut(a) { ArrayList() }.add(i)
+            val b = foldBase(w.first())
+            if (b != a) tmp.getOrPut(b) { ArrayList() }.add(i)
+        }
+        val built = StartIndex(arr, digraphKeys, tmp.mapValues { it.value.toIntArray() })
+        startIndexes[arr] = built
+        return built
+    }
+
+    /** Indices of every entry starting on one of [keys], ascending, without repeats. */
+    private fun candidatesFor(arr: Array<Entry>, keys: Set<Char>): IntArray {
+        val idx = startIndexFor(arr)
+        val parts = keys.mapNotNull { idx.byKey[it] }
+        if (parts.size == 1) return parts[0]
+        var total = 0
+        for (q in parts) total += q.size
+        val out = IntArray(total)
+        var k = 0
+        for (q in parts) { System.arraycopy(q, 0, out, k, q.size); k += q.size }
+        out.sort()
+        var u = 0
+        for (i in out.indices) if (i == 0 || out[i] != out[i - 1]) out[u++] = out[i]
+        return out.copyOf(u)
+    }
+
     fun decodeSwipeGeo(
         firstKeys: Set<Char>,
         lastKeys: Set<Char>,
@@ -399,8 +448,21 @@ object Dictionary {
         coarse: (String) -> Double,
         fine: (String) -> Double,
         boost: (String) -> Double = { 0.0 },
+        softLastKeys: Set<Char> = emptySet(),
+        softLastPen: Double = 0.0,
     ): List<String> {
         if (!ready) return emptyList()
+        // A word whose last letter is one key past where the finger stopped is
+        // not thrown out but pays [softLastPen] px (2026-11-12: a glide for
+        // `here` ended on `r` after a short retreat; its shape beat `her`, and
+        // the hard gate never let it compete). Same test in both passes.
+        fun endPen(w: String): Double {
+            if (lastKeys.isEmpty() || foldLast(w) in lastKeys ||
+                (digraphKeys && foldBase(w.last()) in lastKeys)) return 0.0
+            return if (foldLast(w) in softLastKeys ||
+                (digraphKeys && foldBase(w.last()) in softLastKeys)) softLastPen
+            else Double.NEGATIVE_INFINITY
+        }
 
         // PASS 1 - cheap. Every word that survives the letter gates gets a
         // low-resolution shape comparison. This is where the volume is: a glide
@@ -411,7 +473,9 @@ object Dictionary {
         // exactly the lag felt on a slower phone.
         val kept = arrayOfNulls<String>(SHORTLIST)
         val keptScore = DoubleArray(SHORTLIST) { Double.NEGATIVE_INFINITY }
-        for (e in entries) {
+        val arr = entries
+        for (ix in candidatesFor(arr, firstKeys)) {
+            val e = arr[ix]
             val w = e.word
             if (w.length < 2 || w.length > maxLen) continue
             // Both gates admit EITHER route of a Cyrillic digraph word: the
@@ -421,8 +485,8 @@ object Dictionary {
                 (!digraphKeys || foldBase(w.first()) !in firstKeys)) continue
             // Cheap gate before the costly geometry: a glide ends ON its last
             // letter, so a word ending elsewhere cannot be what was drawn.
-            if (lastKeys.isNotEmpty() && foldLast(w) !in lastKeys &&
-                (!digraphKeys || foldBase(w.last()) !in lastKeys)) continue
+            val ep = endPen(w)
+            if (ep == Double.NEGATIVE_INFINITY) continue
             val folded = foldWord(w)
             var geo = coarse(folded)
             if (digraphKeys) {
@@ -433,7 +497,7 @@ object Dictionary {
                 }
             }
             if (geo == Double.NEGATIVE_INFINITY) continue
-            val s = geo + freqTerm(e.freq)
+            val s = geo + freqTerm(e.freq) - ep
             if (s > keptScore[SHORTLIST - 1]) {
                 var j = SHORTLIST - 1
                 while (j > 0 && keptScore[j - 1] < s) {
@@ -467,7 +531,7 @@ object Dictionary {
             // word you keep swiping wins the near-ties geometry cannot resolve.
             val freq = freqOf(w)
             val s = geo + freqTerm(freq) + boost(w) -
-                doubles(folded) * DOUBLE_W
+                doubles(folded) * DOUBLE_W - endPen(w)
             if (s > topScore[n - 1]) {
                 var j = n - 1
                 while (j > 0 && topScore[j - 1] < s) {
@@ -547,7 +611,7 @@ object Dictionary {
      *  user word was removed in the settings. */
     @Synchronized
     fun forget(lang: String) {
-        loaded.remove(lang)
+        loaded.remove(lang)?.let { startIndexes.remove(it) }
         if (current == lang) { ready = false; entries = emptyArray() }
     }
 
@@ -564,6 +628,7 @@ object Dictionary {
         @Suppress("UNCHECKED_CAST")
         entries = out as Array<Entry>
         loaded[current] = entries
+        startIndexes.remove(arr)   // the old list is gone; the new one indexes on its first glide
     }
 
     /**
@@ -590,6 +655,14 @@ object Dictionary {
         val arr = entries
         val i = lowerBound(arr, word)
         return i < arr.size && arr[i].word == word
+    }
+
+    /** Frequency of an exact word, or -1 when the list does not have it. */
+    fun frequency(word: String): Int {
+        if (!ready) return -1
+        val arr = entries
+        val i = lowerBound(arr, word)
+        return if (i < arr.size && arr[i].word == word) arr[i].freq else -1
     }
 
     /** First index whose word is >= prefix (binary search). */

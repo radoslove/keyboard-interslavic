@@ -154,6 +154,8 @@ class KeyboardView(
      *  so a letter typed after a Norwegian glide extends it for longer (isc 0.1.3). */
     private val SWIPE_WIPE_WINDOW_MS: Long
         get() = if (Lang.current(context) in setOf(Lang.NB, Lang.ISC)) 2500L else 1200L
+    /** How long after a glide a letter may still complete a MORE frequent word. */
+    private val LATE_EXTEND_MS = 8000L
     /** What the last whole-word wipe took out; read by a held backspace. */
     private var lastWipeRemoved = ""
     /** Set when a backspace press began with a wipe: holding trims instead. */
@@ -219,6 +221,9 @@ class KeyboardView(
     // the thousands of words whose route goes nowhere near the finger.
     private val COARSE_RESAMPLE = 8
     private val SWIPE_CANDIDATES = SLOTS   // the strip scrolls, so every candidate is reachable
+    /** Soft end gate (mirrors swipe_eval END_SOFT / END_SOFT_REACH, 2026-11-12). */
+    private val END_SOFT = 20.0
+    private val END_SOFT_REACH = 1.8f
     private val ANCHOR_KEYS = 3       // start-key candidates; 1 hid `pisati` behind `ležati`
     private val ANCHOR_MS = 120f      // how far back from each end anchorPoint looks
     // Velocity minima (see velocityPivots). Tuned in tools/swipe_eval.py against
@@ -1472,10 +1477,19 @@ class KeyboardView(
         // rare one. Price: extending into a word the list does NOT know gets a
         // space instead; adding it once with the + chip fixes it for good,
         // because UserWords is part of the list this asks.
-        val extendingGlide = swipeJustCommitted && s.isNotEmpty() && s[0].isLetter() &&
-            SystemClock.uptimeMillis() - swipeCommitAtMs <= SWIPE_WIPE_WINDOW_MS &&
-            Dictionary.hasPrefix(
-                (Script.toLatin(context, lastSwipeWord) + Script.toLatin(context, s)).lowercase()
+        // Past the window, one more case still extends: the letter COMPLETES a
+        // word that is more frequent than the glided one (`her` + `e` = `here`,
+        // owner 2026-11-12: picked `her`, paused, tapped `e`, got `her e`).
+        // A whole, MORE common word guards the frequent case the window exists
+        // for - the next word starting right after a glide - because `her` + `s`
+        // (`hers`) or `the` + `y` (`they`) is a rarer word and keeps its space.
+        val sinceGlide = SystemClock.uptimeMillis() - swipeCommitAtMs
+        val glidedLatin = Script.toLatin(context, lastSwipeWord).lowercase()
+        val joinedLatin = (glidedLatin + Script.toLatin(context, s)).lowercase()
+        val extendingGlide = swipeJustCommitted && s.isNotEmpty() && s[0].isLetter() && (
+            (sinceGlide <= SWIPE_WIPE_WINDOW_MS && Dictionary.hasPrefix(joinedLatin)) ||
+                (sinceGlide <= LATE_EXTEND_MS &&
+                    Dictionary.frequency(joinedLatin) > Dictionary.frequency(glidedLatin).coerceAtLeast(0))
             )
         if (extendingGlide) pendingSpace = false
 
@@ -2400,9 +2414,13 @@ class KeyboardView(
         // bucket.
         val ends = (nearestKeys(anchorPoint(pointList, true, spd), centers, ANCHOR_KEYS) +
             nearestKeys(pointList.last(), centers, 1)).toSet()
-        return Dictionary.decodeSwipeGeo(starts, ends, ks.size + 2, SWIPE_CANDIDATES, coarse, fine) { w ->
-            Usage.count(context, w) * USAGE_W_SWIPE - (rejectedStrikes[w] ?: 0) * REJECT_W
-        }
+        // One key further out than [ends], for the soft end gate (see Dictionary.decodeSwipeGeo).
+        val softEnds = nearestKeys(pointList.last(), centers, 6, END_SOFT_REACH).toSet() - ends
+        return Dictionary.decodeSwipeGeo(
+            starts, ends, ks.size + 2, SWIPE_CANDIDATES, coarse, fine,
+            { w -> Usage.count(context, w) * USAGE_W_SWIPE - (rejectedStrikes[w] ?: 0) * REJECT_W },
+            softEnds, END_SOFT,
+        )
     }
 
     /**
@@ -2442,9 +2460,14 @@ class KeyboardView(
         // keyboard (the dwell decode is heavier); the commit is posted back.
         val centers = computeCenters()
         decodeHandler.removeCallbacksAndMessages(null)   // drop any pending preview
+        val liftedAt = SystemClock.uptimeMillis()
         decodeHandler.post {
             val words = decodeCandidates(rawPts, centers)
-            post { commitSwipeResult(words, rawPts, centers) }
+            // From the finger leaving the glass to a decoded list: what the user
+            // waits through (queue + decode). Logged with the gesture so "it
+            // grinds in Polish" becomes a number per language (owner 2026-11-12).
+            val decodeMs = (SystemClock.uptimeMillis() - liftedAt).toInt()
+            post { commitSwipeResult(words, rawPts, centers, decodeMs) }
         }
     }
 
@@ -2497,6 +2520,7 @@ class KeyboardView(
         words: List<String>,
         rawPts: List<Float> = emptyList(),
         centers: Map<Char, FloatArray> = emptyMap(),
+        decodeMs: Int = -1,
     ) {
         if (words.isEmpty()) { glideMissed(); return }
         val ic = service.currentInputConnection ?: return
@@ -2540,7 +2564,7 @@ class KeyboardView(
         pendingSpace = smartSpace
         currentWord = ""
         showSwipeAlts(alts, highlight = 0)    // a wrong guess is one tap from fixed
-        GestureLog.committed(rawPts, centers, words, best)
+        GestureLog.committed(rawPts, centers, words, best, decodeMs, Lang.current(context))
         consumeOneShotShift()                 // one-shot capital ends with this word too
     }
 
@@ -3000,11 +3024,12 @@ class KeyboardView(
         p: FloatArray,
         centers: Map<Char, FloatArray>,
         limit: Int,
+        reachKeys: Float = 1.3f,
     ): List<Char> {
         if (centers.isEmpty()) return emptyList()
         // A key's own width, taken from the live layout rather than assumed.
         val w = letterKeyViews.firstOrNull()?.second?.width?.toFloat() ?: return emptyList()
-        val reach = w * 1.3f
+        val reach = w * reachKeys
         return centers.entries
             .map { it.key to dist2(p, it.value) }
             .filter { it.second <= reach }

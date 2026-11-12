@@ -50,6 +50,8 @@ object GestureLog {
         val keys: String,
         val candidates: String,
         val committed: String,
+        val decodeMs: Int,
+        val lang: String,
     )
 
     private var pending: Pending? = null
@@ -68,6 +70,8 @@ object GestureLog {
         centers: Map<Char, FloatArray>,
         candidates: List<String>,
         committed: String,
+        decodeMs: Int = -1,
+        lang: String = "",
     ) {
         if (!enabled) return
         flush("kept", null)
@@ -91,7 +95,7 @@ object GestureLog {
         }
         keys.append('}')
         val cands = candidates.joinToString(",", "[", "]") { quote(it) }
-        pending = Pending(trail.toString(), keys.toString(), cands, committed)
+        pending = Pending(trail.toString(), keys.toString(), cands, committed, decodeMs, lang)
     }
 
     /** The user said what they actually wanted, or threw the guess away. */
@@ -103,10 +107,15 @@ object GestureLog {
     private fun flush(outcome: String, chosen: String?) {
         val p = pending ?: return
         pending = null
-        val payload = """{"device":${quote(device)},"trail":${p.trail},"keys":${p.keys},""" +
+        // The language rides in `device` ("model|lang"): the table has no column
+        // for it, and a gesture means nothing without knowing which dictionary
+        // decoded it. `decode_ms` only when measured (older sinks lack the column).
+        val dev = if (p.lang.isEmpty()) device else "$device|${p.lang}"
+        val ms = if (p.decodeMs >= 0) ""","decode_ms":${p.decodeMs}""" else ""
+        val payload = """{"device":${quote(dev)},"trail":${p.trail},"keys":${p.keys},""" +
             """"candidates":${p.candidates},"committed":${quote(p.committed)},""" +
             """"chosen":${if (chosen == null) "null" else quote(chosen)},""" +
-            """"outcome":${quote(outcome)}}"""
+            """"outcome":${quote(outcome)}$ms}"""
         // Off the main thread and never joined: unlike a crash report there is
         // no deadline here, and typing must not wait on the network.
         Thread {
