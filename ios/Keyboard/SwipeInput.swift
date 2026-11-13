@@ -283,6 +283,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         // Macedonian has single letters on those keys, so no digraph routes.
         let digraph = Script.mode != .latin && !Layout.singleLetterKeys
         let dzh = digraph && Layout.language == "sr"
+        let lang = Layout.language, script = "\(Script.mode)"
         queue.async { [weak self] in
             var decoder = SwipeDecoder(dictionary: dictionary,
                                        keyCentres: centres,
@@ -291,10 +292,25 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
                                        userWords: mine)
             decoder.digraphKeys = digraph
             decoder.dzhKey = dzh
-            let words = decoder.decode(path: path, times: times).map(\.word)
+            let started = CFAbsoluteTimeGetCurrent()
+            let found = decoder.decode(path: path, times: times)
+            let decodeMs = (CFAbsoluteTimeGetCurrent() - started) * 1000
+            let words = Self.strip(found, dictionary)
             swipeLog.notice("isv-swipe: \(path.count, privacy: .public) points -> \(words.joined(separator: " "), privacy: .public)")
+            let row: [String: Any] = [
+                "t": Date().timeIntervalSince1970,
+                "lang": lang, "script": script,
+                "kw": Double(keyWidth),
+                "keys": centres.map { [Double($0.x), Double($0.y)] },
+                "path": path.map { [Double($0.x), Double($0.y)] },
+                "ms": times.map { $0 - (times.first ?? 0) },
+                "words": words,
+                "lift": lift,
+                "decode_ms": (decodeMs * 10).rounded() / 10,
+            ]
+            Shared.appendGesture(row)
             #if DEBUG
-            GestureFile.append(path: path, times: times, centres: centres, keyWidth: keyWidth, words: words, lift: lift)
+            GestureFile.write(row)
             #endif
             DispatchQueue.main.async {
                 self?.sample = (path.first!, path.last!, centres, keyWidth)
@@ -348,6 +364,40 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         Shared.store.set(touchLift, forKey: "touchLift")
     }
 
+    /// Alternatives scoring more than this behind the winner (key widths) are
+    /// shapes the finger did not draw (`ide` -> `otče`, `osě`, owner
+    /// 2026-11-13). Measured on noisy synthetic glides, 300 most frequent
+    /// forms: at 0.25 the right word, when it came 2nd/3rd, is still shown
+    /// 95 % (isv) / 99 % (pl) / 98 % (en), and 63-67 % of the noise goes.
+    static let alternativeMargin = 0.25
+    /// A far shape may still fill a slot if it is a COMMON word (owner: "better
+    /// further off, but with sense"). Byte = frequency quantile.
+    static let farAlternativeFreq: UInt8 = 150
+
+    /// What the strip shows after a glide: the winner, close alternatives, then
+    /// longer forms of the winner, most frequent first (`ide` -> `idemo`,
+    /// `idete`, owner 2026-11-13), then far alternatives only if common.
+    static func strip(_ found: [SwipeDecoder.Candidate], _ dictionary: SwipeDictionary,
+                      size: Int = 4) -> [String] {
+        guard let best = found.first else { return [] }
+        var out = [best.word]
+        func add(_ w: String) {
+            if out.count < size, !out.contains(where: { $0.lowercased() == w.lowercased() }) { out.append(w) }
+        }
+        for c in found.dropFirst() where c.score - best.score <= alternativeMargin { add(c.word) }
+        let lower = best.word.lowercased()
+        if let keys = SwipeDictionary.keys(of: lower) {
+            for hit in dictionary.completions(prefix: keys, limit: size * 2) {
+                let w = hit.word
+                if w.count > best.word.count, w.lowercased().hasPrefix(lower) { add(w) }
+            }
+        }
+        for c in found.dropFirst() where c.score - best.score > alternativeMargin {
+            if (dictionary.frequency(of: c.word) ?? 0) >= farAlternativeFreq { add(c.word) }
+        }
+        return out
+    }
+
     /// The word did not come from this gesture (a completion was tapped, or it
     /// was trimmed by hand), so the gesture says nothing about the thumb.
     func forgetSample() { sample = nil }
@@ -360,6 +410,27 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         if userWords.contains(where: { $0.lowercased().hasPrefix(lower) }) { return true }
         guard let dictionary, let keys = SwipeDictionary.keys(of: lower) else { return false }
         return dictionary.hasPrefix(keys)
+    }
+
+    /// Does tapping a letter after a glide complete a word MORE frequent than
+    /// the glided one (`her` + `e` = `here`)? Asked past the wipe window, up to
+    /// `lateExtendWindow` (Android 3.9.13, `LATE_EXTEND_MS`): `her` + `s`
+    /// (`hers`) and `the` + `y` (`they`) are rarer, so they keep the space.
+    /// The user's own words count as `SwipeDecoder.userWordFreq`.
+    func completesCommonerWord(glided: String, joined: String) -> Bool {
+        func freq(_ w: String) -> Double {
+            let lower = w.lowercased()
+            if userWords.contains(where: { $0.lowercased() == lower }) { return SwipeDecoder.userWordFreq }
+            return dictionary?.frequency(of: lower).map(Double.init) ?? -1
+        }
+        return freq(joined) > max(freq(glided), 0)
+    }
+
+    /// In the wordlist or the user's own words (exact form, ignoring case).
+    func isKnown(_ word: String) -> Bool {
+        let lower = word.lowercased()
+        if userWords.contains(where: { $0.lowercased() == lower }) { return true }
+        return dictionary?.contains(lower) ?? true
     }
 
     /// Words starting with what is being typed by taps. Diacritics fold to
@@ -456,7 +527,7 @@ enum GestureFile {
         write(row)
     }
 
-    private static func write(_ row: [String: Any]) {
+    static func write(_ row: [String: Any]) {
         guard let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         else { return }
         guard var line = try? JSONSerialization.data(withJSONObject: row) else { return }

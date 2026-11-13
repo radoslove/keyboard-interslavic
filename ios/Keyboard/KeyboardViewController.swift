@@ -51,6 +51,9 @@ final class KeyboardViewController: UIInputViewController {
     /// Mirrors the Android keyboard (SWIPE_WIPE_WINDOW_MS).
     private var swipeCommittedAt = Date.distantPast
     private static let wipeWindow: TimeInterval = 1.2
+    /// How long after a glide a letter may still complete a MORE frequent
+    /// word (Android `LATE_EXTEND_MS`).
+    private static let lateExtendWindow: TimeInterval = 8
     /// Smart space: a swiped word gets its space BEFORE it, never after, and
     /// owes one to whatever comes next. A trailing space doubled up with the
     /// space bar habit (`Kako  se`) and sat between a word and its punctuation.
@@ -1036,12 +1039,21 @@ final class KeyboardViewController: UIInputViewController {
         // one whenever the user typed quickly (`wyjsc` + `s` -> `wyjscs`), and
         // that is the common case (Android 3.5.39). Price: extending into a
         // word the list does not know gets a space; `＋` once fixes it for good.
-        let extendsSwipe = ch.isLetter && insideWipeWindow
-            && lastSwipedWord.map { swipeInput.canExtend(Script.toLatin($0) + latin) } == true
+        // Past the window, one more case still extends, up to 8 s: the letter
+        // completes a word MORE frequent than the glided one (`her` + `e` =
+        // `here`; Android 3.9.13). `hers`, `they` are rarer and keep the space.
+        let sinceGlide = Date().timeIntervalSince(swipeCommittedAt)
+        let extendsSwipe = ch.isLetter && lastSwipedWord.map { word -> Bool in
+            let glided = Script.toLatin(word)
+            if sinceGlide <= Self.wipeWindow && swipeInput.canExtend(glided + latin) { return true }
+            return sinceGlide <= Self.lateExtendWindow
+                && swipeInput.completesCommonerWord(glided: glided, joined: glided + latin)
+        } == true
         // Anything but a letter extending a swiped word means the word was
         // kept: that gesture now tells us where this thumb lands.
         if let kept = lastSwipedWord, !extendsSwipe {
             swipeInput.learn(from: Script.toLatin(kept))
+            wordKept(Script.toLatin(kept))
         }
         if pendingSpace {
             // A letter right after a swipe extends that word (`pisem` + `s`);
@@ -1065,6 +1077,7 @@ final class KeyboardViewController: UIInputViewController {
             tappedWord = nil
         } else {
             lastTappedWord = tappedWord
+            if let finished = tappedWord { wordTyped(finished) }
             tappedWord = nil
         }
         lastSwipedWord = nil
@@ -1115,6 +1128,29 @@ final class KeyboardViewController: UIInputViewController {
     /// `master` typed fast was decoded as `mastet` (owner 2026-10-15).
     private var lastLetterTapAt = Date.distantPast
     private static let tapRun: TimeInterval = 0.25
+
+    /// A glided or picked word stood in the text until something closed it:
+    /// the user CONFIRMED it. Counts for the popularity ranking (opt-in,
+    /// Interslavic only) and labels the gesture in the log with what was kept.
+    private func wordKept(_ latin: String) {
+        let w = latin.lowercased()
+        Shared.appendGesture(["kind": "kept", "word": w, "lang": Layout.language,
+                              "t": Date().timeIntervalSince1970])
+        guard Layout.language == "isv", Shared.collectUsageOn,
+              w.count >= 2, w.allSatisfy(\.isLetter) else { return }
+        Shared.bump(Shared.usageKey, w)
+    }
+
+    /// A word typed letter by letter was finished by a space or a mark. A word
+    /// the list does not know goes to the review queue (opt-in, Interslavic
+    /// only; Android `Collector.record`): 3+ letters, lowercase start - a
+    /// capital is usually a name - letters only.
+    private func wordTyped(_ latin: String) {
+        guard Layout.language == "isv", Shared.collectNewOn, latin.count >= 3,
+              let first = latin.first, first.isLowercase,
+              latin.allSatisfy(\.isLetter), !swipeInput.isKnown(latin) else { return }
+        Shared.bump(Shared.newWordsKey, latin.lowercased())
+    }
 
     /// The word being typed by taps, nil once a swipe or a suggestion touched it.
     private var tappedWord: String?
@@ -1617,7 +1653,10 @@ extension KeyboardViewController: SwipeHost {
 
     func swipeWillDecode() {
         // Two swipes in a row: the first word was kept.
-        if let kept = lastSwipedWord { swipeInput.learn(from: kept) }
+        if let kept = lastSwipedWord {
+            swipeInput.learn(from: kept)
+            wordKept(Script.toLatin(kept))
+        }
         decoding += 1
         // Never strand the keys: if a decode somehow never reports back, let
         // them through after a second anyway.

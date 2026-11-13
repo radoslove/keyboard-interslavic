@@ -64,6 +64,18 @@ struct SwipeDecoder {
     /// itself has `dž`, read from its bytes; `nadzor`, `podzemlje` (24 forms)
     /// are two letters and no `џ`.
     var dzhKey = false
+    /// Soft end gate (Android 3.9.13, `END_SOFT`): a word whose LAST letter lies
+    /// past the end keys - one key beyond where the finger lifted (`here`
+    /// drawn to `r`) - is not thrown out but pays `softEndPenalty` (key widths,
+    /// the unit of `rms`). Reach `softEndReach` against the hard 1.4 / 4 keys.
+    /// Measured 2026-11-13 on this decoder (synthetic glides, 300 most frequent
+    /// forms, two runs each): full glides unchanged within noise in isv/pl/en;
+    /// a glide cut halfway along its last stroke top-3 +4..+7 points. `here`
+    /// lifted on `r` still loses to `her` - on iOS `e` is already inside the
+    /// hard radius, so that one is shape + frequency, not the gate.
+    var softEnd = true
+    var softEndPenalty: Double = 0.2
+    static let softEndReach: Double = 1.8
 
     private static let keyD: UInt8 = 3, keyJ: UInt8 = 9, keyL: UInt8 = 11, keyN: UInt8 = 13
     private static let keyZ: UInt8 = 25
@@ -120,7 +132,8 @@ struct SwipeDecoder {
         // end, not from the end samples themselves (Android 3.6.0-3.6.2).
         let shifted = rawPath.map { CGPoint(x: $0.x, y: $0.y + lift) }
         let starts = nearestKeys(to: Self.anchorPoint(shifted, times: times, atEnd: false))
-        let ends = nearestKeys(to: Self.anchorPoint(shifted, times: times, atEnd: true))
+        let endPoint = Self.anchorPoint(shifted, times: times, atEnd: true)
+        let ends = nearestKeys(to: endPoint)
         guard !starts.isEmpty, !ends.isEmpty else { return [] }
 
         // A gesture cannot spell more letters than it had room to cross, and a
@@ -156,6 +169,15 @@ struct SwipeDecoder {
         // wordlist is bucketed by its LETTERS), and one that ends on `љ`/`њ`
         // to a word whose last letter is `j`.
         var firstKeys = starts.map(\.key), lastKeys = ends.map(\.key)
+        var softLast: [Int: Double] = [:]
+        if softEnd {
+            let hard = Set(lastKeys)
+            for hit in nearestKeys(to: endPoint, radius: Self.softEndReach, limit: 8)
+            where !hard.contains(hit.key) {
+                softLast[hit.key] = softEndPenalty
+                lastKeys.append(hit.key)
+            }
+        }
         if digraphKeys {
             if firstKeys.contains(Layout.ljKey) { firstKeys.append(Int(Self.keyL)) }
             if firstKeys.contains(Layout.njKey) { firstKeys.append(Int(Self.keyN)) }
@@ -172,6 +194,7 @@ struct SwipeDecoder {
 
         for first in firstKeys {
             for last in lastKeys {
+                let endPen = softLast[last] ?? 0
                 dictionary.forEachEntry(first: first, last: last) { entry in
                     guard entry.keys.count <= maxLetters else { return }
                     let dzh = dzhKey && Self.hasDZ(entry.keys)
@@ -182,7 +205,7 @@ struct SwipeDecoder {
                     // Frequency breaks ties between shapes the finger cannot
                     // distinguish anyway. It nudges, it does not decide: a
                     // common word still loses to a clearly better fit.
-                    let score = rms - Self.freqWeight * (Double(entry.freq) + 1).squareRoot()
+                    let score = rms - Self.freqWeight * (Double(entry.freq) + 1).squareRoot() + endPen
                     guard best.count < limit * 4 || score < worstKept else { return }
 
                     best.append((score, entry.wordOffset, entry.wordLength))
@@ -206,7 +229,8 @@ struct SwipeDecoder {
                       fit($0, dzh: dzhKey && extra.word.lowercased().contains("dž"))
                   })
             else { continue }
-            best.append((rms - Self.freqWeight * (Self.userWordFreq + 1).squareRoot(), -1 - i, 0))
+            best.append((rms - Self.freqWeight * (Self.userWordFreq + 1).squareRoot()
+                         + (softLast[Int(l)] ?? 0), -1 - i, 0))
         }
 
         best.sort { $0.score < $1.score }
@@ -302,8 +326,9 @@ struct SwipeDecoder {
 
     // MARK: - Geometry
 
-    private func nearestKeys(to point: CGPoint) -> [(key: Int, distance: Double)] {
-        let limit = Self.endpointRadius * Double(keyWidth)
+    private func nearestKeys(to point: CGPoint, radius: Double = SwipeDecoder.endpointRadius,
+                             limit count: Int = 4) -> [(key: Int, distance: Double)] {
+        let limit = radius * Double(keyWidth)
         var hits: [(key: Int, distance: Double)] = []
         for (index, centre) in keyCentres.enumerated() where centre != .zero {
             let d = Self.distance(point, centre)
@@ -312,7 +337,7 @@ struct SwipeDecoder {
         hits.sort { $0.distance < $1.distance }
         // Four is already forgiving; more only adds buckets full of words the
         // finger never went near.
-        return Array(hits.prefix(4))
+        return Array(hits.prefix(count))
     }
 
     private func idealPath(for keys: UnsafeBufferPointer<UInt8>) -> [CGPoint]? {

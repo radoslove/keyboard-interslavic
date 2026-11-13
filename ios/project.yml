@@ -15,7 +15,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "0.6.10"
+    MARKETING_VERSION: "0.6.11"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
@@ -37,7 +37,9 @@ settings:
     Debug:
       KEYBOARD_NAME: "Interslove $(MARKETING_VERSION)"
     Release:
-      KEYBOARD_NAME: Interslove
+      # Release too (owner 2026-11-13): a user sees in the globe list which
+      # version they have, and so that a newer one exists - as on Android.
+      KEYBOARD_NAME: "Interslove $(MARKETING_VERSION)"
 
 targets:
   InterslavicKeyboard:
@@ -76,6 +78,11 @@ targets:
         # 2026-11-07); the KEYBOARDS keep their language names, and the space
         # bar shows which one is on.
         CFBundleDisplayName: Interslove
+        # The screen's languages (tools/ui_texts.json). Declaring them gives
+        # Settings -> Interslove -> Language, so the screen language can be
+        # picked without changing the whole phone (owner 2026-11-13).
+        CFBundleLocalizations: [en, pl, nb, cs, sk, sl, hr, sr-Latn, sr, bs, mk, ru, uk, bg, be]
+        CFBundleAllowMixedLocalizations: true
         # Without these two XcodeGen writes a literal 1.0 / 1 into the plist, so
         # MARKETING_VERSION never reached the build and every TestFlight upload
         # would carry the same build number - the second one is rejected.

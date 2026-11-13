@@ -1,0 +1,1608 @@
+{
+ "_doc": "Texts of the app settings screen, iOS and Android, ONE source. Edit here, then run tools/build_ui_texts.py (iOS) / --android (Android). isv = Interslavic (Android key \"ms\"); sr = Serbian Latin, sr-Cyrl is generated from it. A missing language falls back to en.",
+ "languages": [
+  "isv",
+  "en",
+  "pl",
+  "nb",
+  "cs",
+  "sk",
+  "sl",
+  "hr",
+  "sr",
+  "bs",
+  "mk",
+  "ru",
+  "uk",
+  "bg",
+  "be"
+ ],
+ "texts": {
+  "btn_batch": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Pošli do bazy (grupa JSON)",
+   "en": "Send to the database (JSON batch)",
+   "pl": "Wyślij do bazy (paczka JSON)",
+   "nb": "Send til databasen (JSON-pakke)",
+   "cs": "Odeslat do databáze (balíček JSON)",
+   "sk": "Odoslať do databázy (balík JSON)",
+   "sl": "Pošlji v bazo (paket JSON)",
+   "hr": "Pošalji u bazu (JSON paket)",
+   "sr": "Pošalji u bazu (JSON paket)",
+   "bs": "Pošalji u bazu (JSON paket)",
+   "mk": "Испрати во базата (JSON пакет)",
+   "ru": "Отправить в базу (пакет JSON)",
+   "uk": "Надіслати до бази (пакет JSON)",
+   "bg": "Изпрати в базата (пакет JSON)",
+   "be": "Адправіць у базу (пакет JSON)"
+  },
+  "btn_clear": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Očisti red",
+   "en": "Clear the queue",
+   "pl": "Wyczyść kolejkę",
+   "nb": "Tøm køen",
+   "cs": "Vymazat frontu",
+   "sk": "Vymazať front",
+   "sl": "Počisti čakalno vrsto",
+   "hr": "Očisti red čekanja",
+   "sr": "Isprazni red čekanja",
+   "bs": "Isprazni red čekanja",
+   "mk": "Исчисти ја редицата",
+   "ru": "Очистить очередь",
+   "uk": "Очистити чергу",
+   "bg": "Изчисти опашката",
+   "be": "Ачысціць чаргу"
+  },
+  "btn_export": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Izvezi do prěgleda (spis)",
+   "en": "Export for review (list)",
+   "pl": "Eksportuj do przeglądu (lista)",
+   "nb": "Eksporter til gjennomgang (liste)",
+   "cs": "Exportovat ke kontrole (seznam)",
+   "sk": "Exportovať na kontrolu (zoznam)",
+   "sl": "Izvozi za pregled (seznam)",
+   "hr": "Izvezi za pregled (popis)",
+   "sr": "Izvezi za pregled (lista)",
+   "bs": "Izvezi za pregled (lista)",
+   "mk": "Извези за преглед (листа)",
+   "ru": "Экспорт на проверку (список)",
+   "uk": "Експорт на перевірку (список)",
+   "bg": "Експорт за преглед (списък)",
+   "be": "Экспарт на праверку (спіс)"
+  },
+  "btn_langs": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Izberi jezyki",
+   "en": "Choose languages",
+   "pl": "Wybierz języki",
+   "nb": "Velg språk",
+   "cs": "Vybrat jazyky",
+   "sk": "Vybrať jazyky",
+   "sl": "Izberi jezike",
+   "hr": "Odaberi jezike",
+   "sr": "Izaberi jezike",
+   "bs": "Odaberi jezike",
+   "mk": "Избери јазици",
+   "ru": "Выбрать языки",
+   "uk": "Вибрати мови",
+   "bg": "Избери езици",
+   "be": "Выбраць мовы"
+  },
+  "capitals": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Velike litery: najprvo Shift, potom drži.",
+   "en": "For capitals: Shift first, then hold.",
+   "pl": "Wielkie litery: najpierw Shift, potem przytrzymaj.",
+   "nb": "Store bokstaver: trykk først på Skift, hold så inne bokstaven.",
+   "cs": "Velká písmena: nejdřív Shift, pak podrž.",
+   "sk": "Veľké písmená: najprv Shift, potom podrž.",
+   "sl": "Za velike črke: najprej Shift, nato pridrži.",
+   "hr": "Za velika slova: najprije Shift, zatim zadrži.",
+   "sr": "Za velika slova: prvo Šift, pa zadrži.",
+   "bs": "Za velika slova: prvo Shift, pa zadrži.",
+   "mk": "За големи букви: прво Shift, потоа задржи.",
+   "ru": "Заглавные: сначала Shift, потом удерживай.",
+   "uk": "Великі літери: спершу Shift, потім утримуй.",
+   "bg": "Главни букви: първо Shift, после задръж.",
+   "be": "Вялікія літары: спачатку Shift, потым утрымлівай."
+  },
+  "chooser": {
+   "platforms": [
+    "android"
+   ],
+   "en": "Send",
+   "pl": "Wyślij",
+   "nb": "Send",
+   "cs": "Odeslat",
+   "sk": "Odoslať",
+   "sl": "Pošlji",
+   "hr": "Pošalji",
+   "sr": "Pošalji",
+   "bs": "Pošalji",
+   "mk": "Испрати",
+   "ru": "Отправить",
+   "uk": "Надіслати",
+   "bg": "Изпрати",
+   "be": "Адправіць"
+  },
+  "collect_body": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Kogda je vključeno, klaviatura lokalno zapisyvaje slova, ktoryh nema v slovniku, da by pozdněje šli do prěgleda (nikogda ne avtomatično popravjene). Ničto se ne posyla avtomatično — slova idut dalje jedino v grupě, ktoru sam pošlješ iz svojej pošty. Standardno izključeno.",
+   "en": "When on, the keyboard saves Interslavic words NOT in the dictionary LOCALLY, to later go to review (never auto-corrected). Nothing leaves on its own — the words go out only in a batch you send yourself from your mail app. Off by default.",
+   "pl": "Gdy włączone, klawiatura zapisuje LOKALNIE słowa międzysłowiańskie, których nie ma w słowniku, żeby później trafiły do przeglądu (nigdy nie są poprawiane automatycznie). Nic nie wychodzi samo — słowa trafiają dalej tylko w paczce, którą sam wysyłasz ze swojej poczty. Domyślnie wyłączone.",
+   "nb": "Når dette er på, lagrer tastaturet LOKALT interslaviske ord som ikke står i ordboka, slik at de kan gjennomgås senere (de rettes aldri automatisk). Ingenting sendes automatisk — ordene går bare videre i pakken du selv sender fra e-postappen din. Av som standard.",
+   "cs": "Když je zapnuto, klávesnice ukládá LOKÁLNĚ mezislovanská slova, která NEJSOU ve slovníku, aby později šla ke kontrole (nikdy se automaticky neopravují). Nic neodchází samo — slova odejdou jen v balíčku, který sám odešleš ze své poštovní aplikace. Ve výchozím stavu vypnuto.",
+   "sk": "Keď je zapnuté, klávesnica ukladá LOKÁLNE medzislovanské slová, ktoré NIE SÚ v slovníku, aby neskôr išli na kontrolu (nikdy sa automaticky neopravujú). Nič neodchádza samo — slová odídu len v balíku, ktorý sám odošleš zo svojej poštovej aplikácie. Predvolene vypnuté.",
+   "sl": "Ko je vklopljeno, tipkovnica LOKALNO shranjuje medslovanske besede, ki jih NI v slovarju, da gredo pozneje v pregled (nikoli se ne popravijo samodejno). Nič ne odide samo od sebe — besede odidejo le v paketu, ki ga sam pošlješ iz svoje e-poštne aplikacije. Privzeto izklopljeno.",
+   "hr": "Kad je uključeno, tipkovnica LOKALNO sprema međuslavenske riječi kojih NEMA u rječniku kako bi kasnije otišle na pregled (nikad se ne ispravljaju automatski). Ništa ne odlazi samo od sebe — riječi odlaze samo u paketu koji sam pošalješ iz svoje aplikacije za e-poštu. Prema zadanim postavkama isključeno.",
+   "sr": "Kad je uključeno, tastatura LOKALNO čuva međuslovenske reči kojih NEMA u rečniku, da bi kasnije išle na pregled (nikad se ne ispravljaju automatski). Ništa ne odlazi samo od sebe — reči idu dalje samo u paketu koji sam pošalješ iz svoje aplikacije za poštu. Podrazumevano isključeno.",
+   "bs": "Kad je uključeno, tastatura LOKALNO sprema međuslavenske riječi kojih NEMA u rječniku, da bi kasnije išle na pregled (nikad se ne ispravljaju automatski). Ništa ne odlazi samo od sebe — riječi idu dalje samo u paketu koji sam pošalješ iz svoje aplikacije za poštu. Zadano isključeno.",
+   "mk": "Кога е вклучено, тастатурата ЛОКАЛНО ги зачувува меѓусловенските зборови што ги НЕМА во речникот, за подоцна да одат на преглед (никогаш не се поправаат автоматски). Ништо не заминува само од себе — зборовите одат понатаму само во пакет што сам го испраќаш од својата апликација за пошта. Стандардно исклучено.",
+   "ru": "Если включено, клавиатура ЛОКАЛЬНО сохраняет межславянские слова, которых НЕТ в словаре, чтобы позже передать их на проверку (они никогда не исправляются автоматически). Ничто не отправляется само по себе — слова уходят только пакетом, который ты сам отправляешь из своей почты. По умолчанию выключено.",
+   "uk": "Якщо ввімкнено, клавіатура ЛОКАЛЬНО зберігає міжсловʼянські слова, яких НЕМАЄ в словнику, щоб згодом передати їх на перевірку (вони ніколи не виправляються автоматично). Ніщо не надсилається саме собою — слова йдуть далі лише пакетом, який ти сам надсилаєш зі своєї пошти. Типово вимкнено.",
+   "bg": "Когато е включено, клавиатурата запазва ЛОКАЛНО междуславянските думи, които НЕ са в речника, за да бъдат прегледани по-късно (никога не се поправят автоматично). Нищо не се изпраща автоматично — думите излизат само в пакет, който сам изпращаш от пощата си. По подразбиране е изключено.",
+   "be": "Калі ўключана, клавіятура ЛАКАЛЬНА захоўвае міжславянскія словы, якіх НЯМА ў слоўніку, каб пазней перадаць іх на праверку (яны ніколі не выпраўляюцца аўтаматычна). Нішто не адпраўляецца само па сабе — словы ідуць далей толькі пакетам, які ты сам адпраўляеш са сваёй пошты. Па змаўчанні выключана."
+  },
+  "collect_head": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Sbiranje novyh slov (opcionalno)",
+   "en": "Collecting new words (optional)",
+   "pl": "Zbieranie nowych słów (opcjonalnie)",
+   "nb": "Innsamling av nye ord (valgfritt)",
+   "cs": "Sbírání nových slov (volitelné)",
+   "sk": "Zbieranie nových slov (voliteľné)",
+   "sl": "Zbiranje novih besed (neobvezno)",
+   "hr": "Prikupljanje novih riječi (neobavezno)",
+   "sr": "Prikupljanje novih reči (opciono)",
+   "bs": "Prikupljanje novih riječi (opcionalno)",
+   "mk": "Собирање нови зборови (опционално)",
+   "ru": "Сбор новых слов (необязательно)",
+   "uk": "Збирання нових слів (необовʼязково)",
+   "bg": "Събиране на нови думи (по избор)",
+   "be": "Збор новых слоў (неабавязкова)"
+  },
+  "collect_sw": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Sbiraj nove slova",
+   "en": "Collect new words",
+   "pl": "Zbieraj nowe słowa",
+   "nb": "Samle nye ord",
+   "cs": "Sbírat nová slova",
+   "sk": "Zbierať nové slová",
+   "sl": "Zbiraj nove besede",
+   "hr": "Prikupljaj nove riječi",
+   "sr": "Prikupljaj nove reči",
+   "bs": "Prikupljaj nove riječi",
+   "mk": "Собирај нови зборови",
+   "ru": "Собирать новые слова",
+   "uk": "Збирати нові слова",
+   "bg": "Събирай нови думи",
+   "be": "Збіраць новыя словы"
+  },
+  "hold": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "drži",
+   "en": "hold",
+   "pl": "przytrzymaj",
+   "nb": "hold",
+   "cs": "podrž",
+   "sk": "podrž",
+   "sl": "pridrži",
+   "hr": "zadrži",
+   "sr": "zadrži",
+   "bs": "zadrži",
+   "mk": "задржи",
+   "ru": "удерживай",
+   "uk": "утримуй",
+   "bg": "задръж",
+   "be": "утрымлівай"
+  },
+  "intro": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Medžuslovjanska klaviatura. Standardne bukvy (č š ž ě) na dolgom pritisku i mahu vgoru; pas prědloženij iz slovnika.",
+   "en": "Interslavic keyboard. Standard letters (č š ž ě) on long-press and an upward flick; a suggestion bar from the dictionary.",
+   "pl": "Klawiatura międzysłowiańska. Litery č š ž ě pod przytrzymaniem i ruchem w górę, podpowiedzi ze słownika.",
+   "nb": "Interslavisk tastatur. Bokstavene č š ž ě får du med langt trykk eller sveip oppover, og ordboka gir ordforslag.",
+   "cs": "Mezislovanská klávesnice. Standardní písmena (č š ž ě) podržením a tahem nahoru; lišta návrhů ze slovníku.",
+   "sk": "Medzislovanská klávesnica. Štandardné písmená (č š ž ě) podržaním a potiahnutím nahor; lišta návrhov zo slovníka.",
+   "sl": "Medslovanska tipkovnica. Standardne črke (č š ž ě) z dolgim pritiskom in potegom navzgor; vrstica predlogov iz slovarja.",
+   "hr": "Međuslavenska tipkovnica. Standardna slova (č š ž ě) dugim pritiskom i potezom prema gore; traka prijedloga iz rječnika.",
+   "sr": "Međuslovenska tastatura. Standardna slova (č š ž ě) na dugi pritisak i pokret nagore; traka s predlozima iz rečnika.",
+   "bs": "Međuslavenska tastatura. Standardna slova (č š ž ě) na dugi pritisak i pokret prema gore; traka s prijedlozima iz rječnika.",
+   "mk": "Меѓусловенска тастатура. Стандардните букви (č š ž ě) со долго притискање и лизгање нагоре; лента со предлози од речникот.",
+   "ru": "Межславянская клавиатура. Стандартные буквы (č š ž ě) — долгим нажатием и движением вверх; панель подсказок из словаря.",
+   "uk": "Міжсловʼянська клавіатура. Стандартні літери (č š ž ě) — довгим натисканням і рухом угору; панель підказок зі словника.",
+   "bg": "Междуславянска клавиатура. Стандартните букви (č š ž ě) — с продължително натискане и движение нагоре; лента с предложения от речника.",
+   "be": "Міжславянская клавіятура. Стандартныя літары (č š ž ě) — доўгім націскам і рухам уверх; панэль падказак са слоўніка."
+  },
+  "ios_words_body": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Slova dodane čipom ＋ v pasu prědloženij. Odstrani slovo i klaviatura go prěstane prědlagati.",
+   "en": "Words you added with the ＋ chip. Swipe one left to remove it.",
+   "pl": "Słowa dodane przyciskiem ＋ na pasku podpowiedzi. Przesuń słowo w lewo, żeby je usunąć — klawiatura przestanie je podpowiadać.",
+   "nb": "Ord du har lagt til med ＋-knappen i forslagslinjen. Sveip et ord mot venstre for å fjerne det, så slutter tastaturet å foreslå det.",
+   "cs": "Slova přidaná tlačítkem ＋. Slovo odstraníš přejetím doleva.",
+   "sk": "Slová pridané tlačidlom ＋. Slovo odstrániš potiahnutím doľava.",
+   "sl": "Besede, dodane z gumbom ＋. Besedo odstraniš s potegom v levo.",
+   "hr": "Riječi dodane gumbom ＋. Riječ ukloniš povlačenjem ulijevo.",
+   "sr": "Reči dodate čipom ＋. Prevuci reč ulevo da je ukloniš.",
+   "bs": "Riječi dodane čipom ＋. Prevuci riječ ulijevo da je ukloniš.",
+   "mk": "Зборови додадени со копчето ＋. Лизни го зборот налево за да го отстраниш.",
+   "ru": "Слова, добавленные кнопкой ＋. Смахни слово влево, чтобы удалить его.",
+   "uk": "Слова, додані кнопкою ＋. Посунь слово вліво, щоб видалити його.",
+   "bg": "Думи, добавени с бутона ＋. Плъзни дума наляво, за да я премахнеш.",
+   "be": "Словы, дададзеныя кнопкай ＋. Правядзі па слове ўлева, каб выдаліць яго."
+  },
+  "langs_body": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Izberi jezyki:",
+   "en": "One keyboard, Interslove; tick its languages here or in the keyboard itself (hold 123, then ⚙). Slide on the space bar or tap 🌐 to switch; hold the space bar for the list (held, 🌐 opens the phone's keyboard list). A language's dictionary loads only once you use it. Cyrillic and Glagolitic are for Interslavic.",
+   "pl": "Jedna klawiatura, Interslove; języki zaznaczasz tutaj albo w samej klawiaturze (przytrzymaj 123, potem ⚙). Przełączasz przesunięciem po spacji albo 🌐; przytrzymana spacja pokazuje listę (przytrzymany 🌐 otwiera listę klawiatur telefonu). Słownik języka wczytuje się dopiero przy pierwszym użyciu. Cyrylica i głagolica są dla międzysłowiańskiego.",
+   "nb": "Ett tastatur, Interslove; kryss av språkene her eller i selve tastaturet (hold 123, så ⚙). Skyv på mellomromstasten eller trykk 🌐 for å bytte; hold mellomromstasten for listen (holdt inne åpner 🌐 telefonens tastaturliste). Ordboka for et språk lastes først når du bruker det. Kyrillisk og glagolittisk gjelder interslavisk.",
+   "cs": "Jedna klávesnice, Interslove; jazyky zaškrtni tady nebo přímo v klávesnici (podrž 123, pak ⚙). Přepínáš přejetím po mezerníku nebo klepnutím na 🌐; podržený mezerník ukáže seznam (podržená klávesa 🌐 otevře seznam klávesnic telefonu). Slovník jazyka se načte, až ho poprvé použiješ. Cyrilice a hlaholice jsou pro mezislovanštinu.",
+   "sk": "Jedna klávesnica, Interslove; jazyky označ tu alebo priamo v klávesnici (podrž 123, potom ⚙). Prepínaš posunutím po medzerníku alebo ťuknutím na 🌐; podržaný medzerník ukáže zoznam (podržaný 🌐 otvorí zoznam klávesníc telefónu). Slovník jazyka sa načíta, až keď ho prvýkrát použiješ. Cyrilika a hlaholika sú pre medzislovančinu.",
+   "sl": "Ena tipkovnica, Interslove; jezike označi tukaj ali kar v tipkovnici (pridrži 123, nato ⚙). Preklapljaš s potegom po preslednici ali s pritiskom na 🌐; pridržana preslednica pokaže seznam (pridržan 🌐 odpre seznam tipkovnic telefona). Slovar jezika se naloži šele, ko ga prvič uporabiš. Cirilica in glagolica sta za medslovanščino.",
+   "hr": "Jedna tipkovnica, Interslove; jezike označi ovdje ili u samoj tipkovnici (zadrži 123, zatim ⚙). Prebacuješ povlačenjem po razmaknici ili dodirom na 🌐; zadržana razmaknica prikazuje popis (zadržan 🌐 otvara popis tipkovnica telefona). Rječnik jezika učitava se tek kad ga prvi put upotrijebiš. Ćirilica i glagoljica su za međuslavenski.",
+   "sr": "Jedna tastatura, Interslove; jezike označavaš ovde ili u samoj tastaturi (zadrži 123, pa ⚙). Za promenu prevuci po razmaknici ili dodirni 🌐; zadrži razmaknicu za listu (zadržan 🌐 otvara listu tastatura telefona). Rečnik jezika se učitava tek kad ga prvi put upotrebiš. Ćirilica i glagoljica su za međuslovenski.",
+   "bs": "Jedna tastatura, Interslove; jezike označavaš ovdje ili u samoj tastaturi (zadrži 123, pa ⚙). Za promjenu prevuci po razmaknici ili dodirni 🌐; zadrži razmaknicu za listu (zadržan 🌐 otvara listu tastatura telefona). Rječnik jezika se učitava tek kad ga prvi put upotrijebiš. Ćirilica i glagoljica su za međuslavenski.",
+   "mk": "Една тастатура, Interslove; јазиците ги означуваш тука или во самата тастатура (задржи 123, потоа ⚙). За промена лизни по копчето за празно место или допри 🌐; задржи го копчето за празно место за листата (задржаното копче 🌐 ја отвора листата со тастатури на телефонот). Речникот на јазикот се вчитува дури кога првпат ќе го употребиш. Кирилицата и глаголицата се за меѓусловенскиот.",
+   "ru": "Одна клавиатура — Interslove; отметь её языки здесь или в самой клавиатуре (удерживай 123, затем ⚙). Чтобы переключить язык, проведи по пробелу или нажми 🌐; удерживай пробел, чтобы открыть список (если удерживать 🌐, откроется список клавиатур телефона). Словарь языка загружается только при первом использовании. Кириллица и глаголица — для межславянского.",
+   "uk": "Одна клавіатура — Interslove; познач її мови тут або в самій клавіатурі (утримуй 123, потім ⚙). Щоб перемкнути мову, проведи по пробілу або натисни 🌐; утримуй пробіл, щоб відкрити список (якщо утримувати 🌐, відкриється список клавіатур телефону). Словник мови завантажується лише під час першого використання. Кирилиця і глаголиця — для міжсловʼянської.",
+   "bg": "Една клавиатура — Interslove; отбележи езиците ѝ тук или в самата клавиатура (задръж 123, после ⚙). Сменяш езика с плъзгане по интервала или с 🌐; задръж интервала, за да видиш списъка (ако задържиш 🌐, се отваря списъкът с клавиатури на телефона). Речникът на даден език се зарежда едва когато го използваш. Кирилицата и глаголицата са за междуславянския.",
+   "be": "Адна клавіятура — Interslove; адзначай яе мовы тут або ў самой клавіятуры (утрымлівай 123, потым ⚙). Каб пераключыць мову, правядзі па прабеле або націсні 🌐; утрымлівай прабел, каб адкрыць спіс (калі ўтрымліваць 🌐, адкрыецца спіс клавіятур тэлефона). Слоўнік мовы загружаецца толькі пры першым выкарыстанні. Кірыліца і глаголіца — для міжславянскай."
+  },
+  "langs_head": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Jezyki klaviatury",
+   "en": "Keyboard languages",
+   "pl": "Języki klawiatury",
+   "nb": "Tastaturspråk",
+   "cs": "Jazyky klávesnice",
+   "sk": "Jazyky klávesnice",
+   "sl": "Jeziki tipkovnice",
+   "hr": "Jezici tipkovnice",
+   "sr": "Jezici tastature",
+   "bs": "Jezici tastature",
+   "mk": "Јазици на тастатурата",
+   "ru": "Языки клавиатуры",
+   "uk": "Мови клавіатури",
+   "bg": "Езици на клавиатурата",
+   "be": "Мовы клавіятуры"
+  },
+  "langs_now": {
+   "platforms": [
+    "android"
+   ],
+   "en": "On now",
+   "pl": "Włączone teraz",
+   "nb": "På nå",
+   "cs": "Teď zapnuté",
+   "sk": "Teraz zapnuté",
+   "sl": "Zdaj vklopljeno",
+   "hr": "Sad uključeno",
+   "sr": "Sada uključeni",
+   "bs": "Sada uključeni",
+   "mk": "Сега вклучени",
+   "ru": "Включены сейчас",
+   "uk": "Увімкнені зараз",
+   "bg": "Включени сега",
+   "be": "Уключаны зараз"
+  },
+  "layout_body": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Standardno kako v kraju togo jezyka.",
+   "en": "By default as in that language's country.",
+   "pl": "Domyślnie jak w kraju danego języka.",
+   "nb": "Som standard som i landet til språket.",
+   "cs": "Ve výchozím stavu jako v zemi daného jazyka.",
+   "sk": "Predvolene ako v krajine daného jazyka.",
+   "sl": "Privzeto kot v državi tega jezika.",
+   "hr": "Prema zadanim postavkama kao u zemlji tog jezika.",
+   "sr": "Podrazumevano kao u zemlji tog jezika.",
+   "bs": "Zadano kao u zemlji tog jezika.",
+   "mk": "Стандардно како во земјата на тој јазик.",
+   "ru": "По умолчанию — как в стране этого языка.",
+   "uk": "Типово — як у країні цієї мови.",
+   "bg": "По подразбиране — както в страната на съответния език.",
+   "be": "Па змаўчанні — як у краіне гэтай мовы."
+  },
+  "layout_head": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Razloženje klaviatury",
+   "en": "Key layout",
+   "pl": "Układ klawiszy",
+   "nb": "Tastaturoppsett",
+   "cs": "Rozložení kláves",
+   "sk": "Rozloženie klávesov",
+   "sl": "Razporeditev tipk",
+   "hr": "Raspored tipki",
+   "sr": "Raspored tastera",
+   "bs": "Raspored tipki",
+   "mk": "Распоред на копчињата",
+   "ru": "Раскладка клавиш",
+   "uk": "Розкладка клавіш",
+   "bg": "Подредба на клавишите",
+   "be": "Раскладка клавіш"
+  },
+  "letters_head": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Litery",
+   "en": "The letters",
+   "pl": "Litery",
+   "nb": "Bokstavene",
+   "cs": "Písmena",
+   "sk": "Písmená",
+   "sl": "Črke",
+   "hr": "Slova",
+   "sr": "Slova",
+   "bs": "Slova",
+   "mk": "Буквите",
+   "ru": "Буквы",
+   "uk": "Літери",
+   "bg": "Буквите",
+   "be": "Літары"
+  },
+  "log_body": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Kogdy jest zapis vključeny, klaviatura zapisyvaje na tom telefonu trasu prsta i prědložene slova (približno do 2 MB, starše gesty se odstranjajut). Telefon ničego ne posylaje sam: zapis se posylaje jedino tvojeju poštoju, kogdy pritiskneš «Pošli». Služi jedino za popravjenje grěšek klaviatury. Full Access jest potrěbny.",
+   "en": "When on, the keyboard keeps the path of the finger and the suggested words on this phone (about 2 MB at most, older gestures are dropped). Nothing leaves the phone by itself: the log is sent only by your own mail, when you tap Send. It is used only to fix errors of the keyboard. Needs Full Access.",
+   "pl": "Gdy włączone, klawiatura zapisuje na tym telefonie ślad palca i podpowiedziane słowa (najwyżej ok. 2 MB, starsze gesty są usuwane). Nic nie wychodzi z telefonu samo: zapis wysyłasz tylko swoją pocztą, gdy stukniesz „Wyślij”. Służy wyłącznie do poprawiania błędów klawiatury. Wymaga pełnego dostępu.",
+   "nb": "Når dette er på, lagrer tastaturet fingerens bane og de foreslåtte ordene på denne telefonen (maks. ca. 2 MB, eldre sveip slettes). Ingenting sendes automatisk fra telefonen: Loggen sendes bare via din egen e-post når du trykker på Send. Den brukes bare til å rette feil i tastaturet. Krever full tilgang.",
+   "cs": "Když je zapnuto, klávesnice uchovává v tomto telefonu dráhu prstu a navržená slova (nejvýš asi 2 MB, starší gesta se mažou). Nic neodchází z telefonu samo: záznam se odesílá jen tvou vlastní poštou, když klepneš na Odeslat. Slouží jen k opravě chyb klávesnice. Vyžaduje plný přístup.",
+   "sk": "Keď je zapnuté, klávesnica uchováva v tomto telefóne dráhu prsta a navrhnuté slová (najviac asi 2 MB, staršie gestá sa mažú). Nič neodchádza z telefónu samo: záznam sa odosiela len tvojou vlastnou poštou, keď ťukneš na Odoslať. Slúži len na opravu chýb klávesnice. Vyžaduje plný prístup.",
+   "sl": "Ko je vklopljeno, tipkovnica v tem telefonu hrani pot prsta in predlagane besede (največ približno 2 MB, starejše poteze se brišejo). Nič ne zapusti telefona samo od sebe: dnevnik se pošlje le s tvojo e-pošto, ko tapneš Pošlji. Uporablja se le za odpravljanje napak tipkovnice. Zahteva poln dostop.",
+   "hr": "Kad je uključeno, tipkovnica na ovom telefonu čuva putanju prsta i predložene riječi (najviše oko 2 MB, starije geste se brišu). Ništa ne napušta telefon samo od sebe: zapis se šalje samo tvojom e-poštom kad dodirneš Pošalji. Koristi se samo za ispravljanje pogrešaka tipkovnice. Zahtijeva potpuni pristup.",
+   "sr": "Kad je uključeno, tastatura na ovom telefonu čuva putanju prsta i predložene reči (najviše oko 2 MB, stariji pokreti se brišu). Ništa ne napušta telefon samo od sebe: zapis se šalje samo tvojom poštom, kad dodirneš „Pošalji“. Koristi se samo za ispravljanje grešaka tastature. Potreban je pun pristup.",
+   "bs": "Kad je uključeno, tastatura na ovom telefonu sprema putanju prsta i predložene riječi (najviše oko 2 MB, stariji pokreti se brišu). Ništa ne napušta telefon samo od sebe: zapis se šalje samo tvojom poštom, kad dodirneš „Pošalji“. Koristi se samo za ispravljanje grešaka tastature. Potreban je potpuni pristup.",
+   "mk": "Кога е вклучено, тастатурата на овој телефон ја чува патеката на прстот и предложените зборови (најмногу околу 2 MB, постарите гестови се бришат). Ништо не го напушта телефонот само од себе: записот се испраќа само со твојата пошта, кога ќе допреш „Испрати“. Се користи само за поправање грешки на тастатурата. Потребен е целосен пристап.",
+   "ru": "Если включено, клавиатура сохраняет на этом телефоне траекторию пальца и предложенные слова (примерно до 2 MB, старые жесты удаляются). Ничто не покидает телефон само по себе: журнал отправляется только твоей почтой, когда ты нажимаешь «Отправить». Он используется только для исправления ошибок клавиатуры. Требуется полный доступ.",
+   "uk": "Якщо ввімкнено, клавіатура зберігає на цьому телефоні траєкторію пальця й запропоновані слова (приблизно до 2 MB, старіші жести видаляються). Ніщо не залишає телефон саме собою: журнал надсилається лише твоєю поштою, коли ти торкаєшся «Надіслати». Він слугує лише для виправлення помилок клавіатури. Потрібен повний доступ.",
+   "bg": "Когато е включено, клавиатурата пази на този телефон следата на пръста и предложените думи (най-много около 2 MB, по-старите жестове се изтриват). Нищо не напуска телефона само: дневникът се изпраща само през собствената ти поща, когато докоснеш „Изпрати“. Използва се само за отстраняване на грешки в клавиатурата. Изисква пълен достъп.",
+   "be": "Калі ўключана, клавіятура захоўвае на гэтым тэлефоне траекторыю пальца і прапанаваныя словы (прыблізна да 2 MB, старэйшыя жэсты выдаляюцца). Нішто не пакідае тэлефон само па сабе: журнал адпраўляецца толькі тваёй поштай, калі ты націскаеш «Адправіць». Ён выкарыстоўваецца толькі для выпраўлення памылак клавіятуры. Патрабуецца поўны доступ."
+  },
+  "log_clear": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Izčisti zapis",
+   "en": "Clear the log",
+   "pl": "Wyczyść zapis",
+   "nb": "Tøm loggen",
+   "cs": "Vymazat záznam",
+   "sk": "Vymazať záznam",
+   "sl": "Počisti dnevnik",
+   "hr": "Očisti zapis",
+   "sr": "Obriši zapis",
+   "bs": "Obriši zapis",
+   "mk": "Избриши го записот",
+   "ru": "Очистить журнал",
+   "uk": "Очистити журнал",
+   "bg": "Изчисти дневника",
+   "be": "Ачысціць журнал"
+  },
+  "log_count": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Zapisane gesty:",
+   "en": "Gestures recorded:",
+   "pl": "Zapisane gesty:",
+   "nb": "Lagrede sveip:",
+   "cs": "Zaznamenaná gesta:",
+   "sk": "Zaznamenané gestá:",
+   "sl": "Zabeležene poteze:",
+   "hr": "Zabilježene geste:",
+   "sr": "Zabeleženi pokreti:",
+   "bs": "Zabilježeni pokreti:",
+   "mk": "Снимени гестови:",
+   "ru": "Записано жестов:",
+   "uk": "Записано жестів:",
+   "bg": "Записани жестове:",
+   "be": "Запісана жэстаў:"
+  },
+  "log_empty": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Zapis jest pusty.",
+   "en": "The log is empty.",
+   "pl": "Zapis jest pusty.",
+   "nb": "Loggen er tom.",
+   "cs": "Záznam je prázdný.",
+   "sk": "Záznam je prázdny.",
+   "sl": "Dnevnik je prazen.",
+   "hr": "Zapis je prazan.",
+   "sr": "Zapis je prazan.",
+   "bs": "Zapis je prazan.",
+   "mk": "Записот е празен.",
+   "ru": "Журнал пуст.",
+   "uk": "Журнал порожній.",
+   "bg": "Дневникът е празен.",
+   "be": "Журнал пусты."
+  },
+  "log_head": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Zapis gestov",
+   "en": "Gesture log",
+   "pl": "Zapis gestów",
+   "nb": "Sveipelogg",
+   "cs": "Záznam gest",
+   "sk": "Záznam giest",
+   "sl": "Dnevnik potez",
+   "hr": "Zapis gesta",
+   "sr": "Zapis pokreta",
+   "bs": "Zapis pokreta",
+   "mk": "Запис на гестови",
+   "ru": "Журнал жестов",
+   "uk": "Журнал жестів",
+   "bg": "Дневник на жестовете",
+   "be": "Журнал жэстаў"
+  },
+  "log_privacy": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Aplikacija posylaje zapis gestov jedino tvojeju vlastnoju poštoju, kogdy pritiskneš «Pošli».",
+   "en": "The app sends the gesture log only when you tap Send, by your own mail.",
+   "pl": "Aplikacja wysyła zapis gestów tylko Twoją pocztą, gdy stukniesz „Wyślij”.",
+   "nb": "Appen sender sveipeloggen bare når du trykker på Send, via din egen e-post.",
+   "cs": "Aplikace odesílá záznam gest jen tvou vlastní poštou, když klepneš na Odeslat.",
+   "sk": "Aplikácia odosiela záznam giest len tvojou vlastnou poštou, keď ťukneš na Odoslať.",
+   "sl": "Aplikacija pošlje dnevnik potez le s tvojo e-pošto, ko tapneš Pošlji.",
+   "hr": "Aplikacija šalje zapis gesta samo tvojom e-poštom kad dodirneš Pošalji.",
+   "sr": "Aplikacija šalje zapis pokreta samo tvojom poštom, kad dodirneš „Pošalji“.",
+   "bs": "Aplikacija šalje zapis pokreta samo tvojom poštom, kad dodirneš „Pošalji“.",
+   "mk": "Апликацијата го испраќа записот на гестови само со твојата пошта, кога ќе допреш „Испрати“.",
+   "ru": "Приложение отправляет журнал жестов только твоей почтой, когда ты нажимаешь «Отправить».",
+   "uk": "Застосунок надсилає журнал жестів лише твоєю поштою, коли ти торкаєшся «Надіслати».",
+   "bg": "Приложението изпраща дневника на жестовете само през собствената ти поща, когато докоснеш „Изпрати“.",
+   "be": "Праграма адпраўляе журнал жэстаў толькі тваёй поштай, калі ты націскаеш «Адправіць»."
+  },
+  "log_send": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Pošli zapis",
+   "en": "Send the log",
+   "pl": "Wyślij zapis",
+   "nb": "Send loggen",
+   "cs": "Odeslat záznam",
+   "sk": "Odoslať záznam",
+   "sl": "Pošlji dnevnik",
+   "hr": "Pošalji zapis",
+   "sr": "Pošalji zapis",
+   "bs": "Pošalji zapis",
+   "mk": "Испрати го записот",
+   "ru": "Отправить журнал",
+   "uk": "Надіслати журнал",
+   "bg": "Изпрати дневника",
+   "be": "Адправіць журнал"
+  },
+  "log_subject": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Zapis gestov",
+   "en": "Gesture log",
+   "pl": "Zapis gestów",
+   "nb": "Sveipelogg",
+   "cs": "Záznam gest",
+   "sk": "Záznam giest",
+   "sl": "Dnevnik potez",
+   "hr": "Zapis gesta",
+   "sr": "Zapis pokreta",
+   "bs": "Zapis pokreta",
+   "mk": "Запис на гестови",
+   "ru": "Журнал жестов",
+   "uk": "Журнал жестів",
+   "bg": "Дневник на жестовете",
+   "be": "Журнал жэстаў"
+  },
+  "log_toggle": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Zapisyvati gesty",
+   "en": "Record gestures",
+   "pl": "Zapisuj gesty",
+   "nb": "Lagre sveip",
+   "cs": "Zaznamenávat gesta",
+   "sk": "Zaznamenávať gestá",
+   "sl": "Beleži poteze",
+   "hr": "Bilježi geste",
+   "sr": "Beleži pokrete",
+   "bs": "Bilježi pokrete",
+   "mk": "Снимај гестови",
+   "ru": "Записывать жесты",
+   "uk": "Записувати жести",
+   "bg": "Записвай жестовете",
+   "be": "Запісваць жэсты"
+  },
+  "on_head": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Vklučenje",
+   "en": "Turn it on",
+   "pl": "Włączenie",
+   "nb": "Slå på tastaturet",
+   "cs": "Zapnutí",
+   "sk": "Zapnutie",
+   "sl": "Vklop",
+   "hr": "Uključivanje",
+   "sr": "Uključivanje",
+   "bs": "Uključivanje",
+   "mk": "Вклучување",
+   "ru": "Как включить",
+   "uk": "Як увімкнути",
+   "bg": "Включване",
+   "be": "Як уключыць"
+  },
+  "pop_body": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Kogda je vključeno, slova, ktore potvrdiš pri pisanju — svajpom, izborom iz pasa, dokončenjem znanogo slova — sut lokalno čisljene za spis najpopularnějših medžuslovjanskih slov. Psevdonimno (identifikator telefona niže), bez personalnyh danyh. Ničto se ne posyla avtomatično — do bazy dojde jedino v grupě, ktoru sam pošlješ. Standardno izključeno.",
+   "en": "When on, Interslavic words you CONFIRM while typing — swipe, picking from the bar, finishing a known word — are counted LOCALLY to feed a ranking of the most popular Interslavic words. Pseudonymously (device id below), no personal data. Nothing leaves automatically — it reaches the database only in a batch you send yourself. Off by default.",
+   "pl": "Gdy włączone, słowa międzysłowiańskie, które ZATWIERDZASZ przy pisaniu — swipe'em, wyborem z paska, dokończeniem znanego słowa — są liczone LOKALNIE do rankingu najpopularniejszych słów. Pseudonimowo (identyfikator urządzenia niżej), bez danych osobowych. Nic nie wychodzi samo — trafia do bazy tylko w paczce, którą sam wyślesz. Domyślnie wyłączone.",
+   "nb": "Når dette er på, telles interslaviske ord du BEKREFTER mens du skriver — med sveip, valg fra linjen eller ved å fullføre et kjent ord — LOKALT til en rangering av de mest brukte ordene. Pseudonymt (enhets-ID nedenfor), uten personopplysninger. Ingenting sendes automatisk — det når databasen bare i pakken du selv sender. Av som standard.",
+   "cs": "Když je zapnuto, mezislovanská slova, která při psaní POTVRDÍŠ — tahem, výběrem z lišty, dokončením známého slova — se LOKÁLNĚ počítají pro žebříček nejoblíbenějších mezislovanských slov. Pseudonymně (ID zařízení níže), bez osobních údajů. Nic neodchází automaticky — do databáze se dostane jen v balíčku, který sám odešleš. Ve výchozím stavu vypnuto.",
+   "sk": "Keď je zapnuté, medzislovanské slová, ktoré pri písaní POTVRDÍŠ — ťahom, výberom z lišty, dokončením známeho slova — sa LOKÁLNE počítajú pre rebríček najobľúbenejších medzislovanských slov. Pseudonymne (ID zariadenia nižšie), bez osobných údajov. Nič neodchádza automaticky — do databázy sa dostane len v balíku, ktorý sám odošleš. Predvolene vypnuté.",
+   "sl": "Ko je vklopljeno, se medslovanske besede, ki jih med tipkanjem POTRDIŠ — s potegom, z izbiro iz vrstice, z dokončanjem znane besede — LOKALNO štejejo za lestvico najbolj priljubljenih medslovanskih besed. Psevdonimno (ID naprave spodaj), brez osebnih podatkov. Nič ne odide samodejno — v bazo pride le v paketu, ki ga sam pošlješ. Privzeto izklopljeno.",
+   "hr": "Kad je uključeno, međuslavenske riječi koje POTVRDIŠ tijekom pisanja — povlačenjem, odabirom s trake, dovršavanjem poznate riječi — LOKALNO se broje za ljestvicu najpopularnijih međuslavenskih riječi. Pseudonimno (ID uređaja ispod), bez osobnih podataka. Ništa ne odlazi automatski — u bazu stiže samo u paketu koji sam pošalješ. Prema zadanim postavkama isključeno.",
+   "sr": "Kad je uključeno, međuslovenske reči koje POTVRDIŠ dok kucaš — prevlačenjem, izborom sa trake, dovršavanjem poznate reči — broje se LOKALNO za rang-listu najpopularnijih međuslovenskih reči. Pod pseudonimom (identifikator uređaja ispod), bez ličnih podataka. Ništa ne odlazi automatski — podaci stižu u bazu samo u paketu koji sam pošalješ. Podrazumevano isključeno.",
+   "bs": "Kad je uključeno, međuslavenske riječi koje POTVRDIŠ dok kucaš — prevlačenjem, odabirom s trake, dovršavanjem poznate riječi — broje se LOKALNO za rang-listu najpopularnijih međuslavenskih riječi. Pod pseudonimom (identifikator uređaja ispod), bez ličnih podataka. Ništa ne odlazi automatski — podaci stižu u bazu samo u paketu koji sam pošalješ. Zadano isključeno.",
+   "mk": "Кога е вклучено, меѓусловенските зборови што ги ПОТВРДУВАШ додека пишуваш — со лизгање, со избор од лентата, со довршување познат збор — се бројат ЛОКАЛНО за рангирање на најпопуларните меѓусловенски зборови. Под псевдоним (идентификатор на уредот подолу), без лични податоци. Ништо не заминува автоматски — податоците стигнуваат во базата само во пакет што сам го испраќаш. Стандардно исклучено.",
+   "ru": "Если включено, межславянские слова, которые ты ПОДТВЕРЖДАЕШЬ при наборе — свайпом, выбором на панели, дописыванием известного слова, — подсчитываются ЛОКАЛЬНО для рейтинга самых популярных межславянских слов. Псевдонимно (идентификатор устройства ниже), без персональных данных. Ничего не отправляется автоматически — данные попадают в базу только пакетом, который ты сам отправишь. По умолчанию выключено.",
+   "uk": "Якщо ввімкнено, міжсловʼянські слова, які ти ПІДТВЕРДЖУЄШ під час набору — свайпом, вибором на панелі, дописуванням відомого слова, — підраховуються ЛОКАЛЬНО для рейтингу найпопулярніших міжсловʼянських слів. Псевдонімно (ідентифікатор пристрою нижче), без персональних даних. Нічого не надсилається автоматично — дані потрапляють до бази лише пакетом, який ти сам надішлеш. Типово вимкнено.",
+   "bg": "Когато е включено, междуславянските думи, които ПОТВЪРЖДАВАШ при писане — с плъзгане, с избор от лентата, с довършване на позната дума, — се броят ЛОКАЛНО за класация на най-популярните междуславянски думи. Псевдонимно (идентификаторът на устройството е по-долу), без лични данни. Нищо не се изпраща автоматично — данните стигат до базата само в пакет, който сам изпратиш. По подразбиране е изключено.",
+   "be": "Калі ўключана, міжславянскія словы, якія ты ПАЦВЯРДЖАЕШ падчас набору — свайпам, выбарам на панэлі, дапісваннем вядомага слова, — падлічваюцца ЛАКАЛЬНА для рэйтынгу самых папулярных міжславянскіх слоў. Псеўданімна (ідэнтыфікатар прылады ніжэй), без асабістых дадзеных. Нічога не адпраўляецца аўтаматычна — дадзеныя трапляюць у базу толькі пакетам, які ты сам адправіш. Па змаўчанні выключана."
+  },
+  "pop_head": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Poredok popularnosti (opcionalno)",
+   "en": "Popularity ranking (optional)",
+   "pl": "Ranking popularności (opcjonalnie)",
+   "nb": "Popularitetsrangering (valgfritt)",
+   "cs": "Žebříček oblíbenosti (volitelné)",
+   "sk": "Rebríček obľúbenosti (voliteľné)",
+   "sl": "Lestvica priljubljenosti (neobvezno)",
+   "hr": "Ljestvica popularnosti (neobavezno)",
+   "sr": "Rang-lista popularnosti (opciono)",
+   "bs": "Rang-lista popularnosti (opcionalno)",
+   "mk": "Рангирање по популарност (опционално)",
+   "ru": "Рейтинг популярности (необязательно)",
+   "uk": "Рейтинг популярності (необовʼязково)",
+   "bg": "Класация по популярност (по избор)",
+   "be": "Рэйтынг папулярнасці (неабавязкова)"
+  },
+  "pop_sw": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Vklad do poredka popularnosti",
+   "en": "Contribute to the popularity ranking",
+   "pl": "Dokładaj do rankingu popularności",
+   "nb": "Bidra til popularitetsrangeringen",
+   "cs": "Přispívat do žebříčku oblíbenosti",
+   "sk": "Prispievať do rebríčka obľúbenosti",
+   "sl": "Prispevaj k lestvici priljubljenosti",
+   "hr": "Doprinosi ljestvici popularnosti",
+   "sr": "Doprinosi rang-listi popularnosti",
+   "bs": "Doprinosi rang-listi popularnosti",
+   "mk": "Придонесувај кон рангирањето по популарност",
+   "ru": "Участвовать в рейтинге популярности",
+   "uk": "Долучитися до рейтингу популярності",
+   "bg": "Участвай в класацията по популярност",
+   "be": "Удзельнічаць у рэйтынгу папулярнасці"
+  },
+  "privacy_body": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Full Access jest potrěbny jedino, da by aplikacija i klaviatura dělili tvoje slova i nastrojenja. Bez njego klaviatura dalje dobro pracuje.",
+   "en": "Full Access is only for sharing your words and settings between this app and the keyboard. The keyboard has no network code and works fully without it.",
+   "pl": "Pełny dostęp służy wyłącznie do dzielenia słów i ustawień między aplikacją a klawiaturą. Klawiatura nie ma kodu sieciowego i bez niego działa w pełni.",
+   "nb": "Full tilgang brukes bare til å dele ordene og innstillingene dine mellom appen og tastaturet. Tastaturet har ingen nettverkskode og fungerer fullt ut uten den.",
+   "cs": "Plný přístup slouží jen ke sdílení tvých slov a nastavení mezi touto aplikací a klávesnicí. Klávesnice nemá žádný síťový kód a plně funguje i bez plného přístupu.",
+   "sk": "Plný prístup slúži len na zdieľanie tvojich slov a nastavení medzi touto aplikáciou a klávesnicou. Klávesnica nemá žiadny sieťový kód a plne funguje aj bez plného prístupu.",
+   "sl": "Poln dostop je namenjen le deljenju tvojih besed in nastavitev med to aplikacijo in tipkovnico. Tipkovnica nima omrežne kode in brez njega deluje v celoti.",
+   "hr": "Potpuni pristup služi samo za dijeljenje tvojih riječi i postavki između ove aplikacije i tipkovnice. Tipkovnica nema mrežni kod i u potpunosti radi i bez tog pristupa.",
+   "sr": "Pun pristup služi samo za deljenje tvojih reči i podešavanja između ove aplikacije i tastature. Tastatura nema mrežni kod i radi u potpunosti i bez njega.",
+   "bs": "Potpuni pristup služi samo za dijeljenje tvojih riječi i postavki između ove aplikacije i tastature. Tastatura nema mrežni kod i radi u potpunosti i bez njega.",
+   "mk": "Целосниот пристап служи само за споделување на твоите зборови и поставки меѓу оваа апликација и тастатурата. Тастатурата нема мрежен код и целосно работи и без него.",
+   "ru": "Полный доступ нужен только для того, чтобы приложение и клавиатура могли обмениваться твоими словами и настройками. В клавиатуре нет сетевого кода, и без полного доступа она полностью работает.",
+   "uk": "Повний доступ потрібен лише для того, щоб застосунок і клавіатура могли спільно використовувати твої слова й налаштування. У клавіатурі немає мережевого коду, і без повного доступу вона працює повністю.",
+   "bg": "Пълният достъп служи само за споделяне на думите и настройките ти между това приложение и клавиатурата. Клавиатурата няма мрежов код и работи напълно и без него.",
+   "be": "Поўны доступ патрэбны толькі для таго, каб праграма і клавіятура маглі абменьвацца тваімі словамі і наладамі. У клавіятуры няма сеткавага кода, і без поўнага доступу яна працуе цалкам."
+  },
+  "privacy_head": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Privatnost",
+   "en": "Privacy",
+   "pl": "Prywatność",
+   "nb": "Personvern",
+   "cs": "Soukromí",
+   "sk": "Súkromie",
+   "sl": "Zasebnost",
+   "hr": "Privatnost",
+   "sr": "Privatnost",
+   "bs": "Privatnost",
+   "mk": "Приватност",
+   "ru": "Конфиденциальность",
+   "uk": "Конфіденційність",
+   "bg": "Поверителност",
+   "be": "Прыватнасць"
+  },
+  "s_cyrillic": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Kirilica",
+   "en": "Cyrillic",
+   "pl": "Cyrylica",
+   "nb": "Kyrillisk",
+   "cs": "Cyrilice",
+   "sk": "Cyrilika",
+   "sl": "Cirilica",
+   "hr": "Ćirilica",
+   "sr": "Ćirilica",
+   "bs": "Ćirilica",
+   "mk": "Кирилица",
+   "ru": "Кириллица",
+   "uk": "Кирилиця",
+   "bg": "Кирилица",
+   "be": "Кірыліца"
+  },
+  "s_glagolitic": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Glagolica",
+   "en": "Glagolitic",
+   "pl": "Głagolica",
+   "nb": "Glagolittisk",
+   "cs": "Hlaholice",
+   "sk": "Hlaholika",
+   "sl": "Glagolica",
+   "hr": "Glagoljica",
+   "sr": "Glagoljica",
+   "bs": "Glagoljica",
+   "mk": "Глаголица",
+   "ru": "Глаголица",
+   "uk": "Глаголиця",
+   "bg": "Глаголица",
+   "be": "Глаголіца"
+  },
+  "s_latin": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Latinica",
+   "en": "Latin",
+   "pl": "Łacinka",
+   "nb": "Latinsk",
+   "cs": "Latinka",
+   "sk": "Latinka",
+   "sl": "Latinica",
+   "hr": "Latinica",
+   "sr": "Latinica",
+   "bs": "Latinica",
+   "mk": "Латиница",
+   "ru": "Латиница",
+   "uk": "Латиниця",
+   "bg": "Латиница",
+   "be": "Лацінка"
+  },
+  "script_body": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Izberi:",
+   "en": "The Interslavic keyboard writes in the chosen script. The letters stay on the same keys, and the dictionary and swipe work the same.",
+   "pl": "Klawiatura międzysłowiańska pisze wybranym alfabetem. Litery zostają na tych samych klawiszach, słownik i swipe działają tak samo.",
+   "nb": "Det interslaviske tastaturet skriver med det valgte alfabetet. Bokstavene blir på de samme tastene, og ordbok og sveip virker likt.",
+   "cs": "Mezislovanská klávesnice píše zvoleným písmem. Písmena zůstávají na stejných klávesách a slovník i psaní tahem fungují stejně.",
+   "sk": "Medzislovanská klávesnica píše zvoleným písmom. Písmená zostávajú na rovnakých klávesoch a slovník aj písanie ťahaním fungujú rovnako.",
+   "sl": "Medslovanska tipkovnica piše v izbrani pisavi. Črke ostanejo na istih tipkah, slovar in tipkanje s potegom pa delujeta enako.",
+   "hr": "Međuslavenska tipkovnica piše odabranim pismom. Slova ostaju na istim tipkama, a rječnik i pisanje povlačenjem rade jednako.",
+   "sr": "Međuslovenska tastatura piše izabranim pismom. Slova ostaju na istim tasterima, a rečnik i kucanje prevlačenjem rade isto.",
+   "bs": "Međuslavenska tastatura piše odabranim pismom. Slova ostaju na istim tipkama, a rječnik i kucanje prevlačenjem rade isto.",
+   "mk": "Меѓусловенската тастатура пишува со избраното писмо. Буквите остануваат на истите копчиња, а речникот и пишувањето со лизгање работат исто.",
+   "ru": "Межславянская клавиатура пишет выбранным алфавитом. Буквы остаются на тех же клавишах, словарь и свайп работают так же.",
+   "uk": "Міжсловʼянська клавіатура пише вибраною абеткою. Літери залишаються на тих самих клавішах, словник і свайп працюють так само.",
+   "bg": "Междуславянската клавиатура пише с избраната азбука. Буквите остават на същите клавиши, а речникът и плъзгането работят по същия начин.",
+   "be": "Міжславянская клавіятура піша выбраным алфавітам. Літары застаюцца на тых самых клавішах, слоўнік і свайп працуюць гэтак жа."
+  },
+  "script_cyrillic": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Kirilica",
+   "en": "Cyrillic",
+   "pl": "Cyrylica",
+   "nb": "Kyrillisk",
+   "cs": "Cyrilice",
+   "sk": "Cyrilika",
+   "sl": "Cirilica",
+   "hr": "Ćirilica",
+   "sr": "Ćirilica",
+   "bs": "Ćirilica",
+   "mk": "Кирилица",
+   "ru": "Кириллица",
+   "uk": "Кирилиця",
+   "bg": "Кирилица",
+   "be": "Кірыліца"
+  },
+  "script_glagolitic": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Glagolica",
+   "en": "Glagolitic",
+   "pl": "Głagolica",
+   "nb": "Glagolittisk",
+   "cs": "Hlaholice",
+   "sk": "Hlaholika",
+   "sl": "Glagolica",
+   "hr": "Glagoljica",
+   "sr": "Glagoljica",
+   "bs": "Glagoljica",
+   "mk": "Глаголица",
+   "ru": "Глаголица",
+   "uk": "Глаголиця",
+   "bg": "Глаголица",
+   "be": "Глаголіца"
+  },
+  "script_head": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Latinica, kirilica ili glagolica",
+   "en": "Latin, Cyrillic or Glagolitic",
+   "pl": "Łacinka, cyrylica czy głagolica",
+   "nb": "Latinsk, kyrillisk eller glagolittisk",
+   "cs": "Latinka, cyrilice, nebo hlaholice",
+   "sk": "Latinka, cyrilika alebo hlaholika",
+   "sl": "Latinica, cirilica ali glagolica",
+   "hr": "Latinica, ćirilica ili glagoljica",
+   "sr": "Latinica, ćirilica ili glagoljica",
+   "bs": "Latinica, ćirilica ili glagoljica",
+   "mk": "Латиница, кирилица или глаголица",
+   "ru": "Латиница, кириллица или глаголица",
+   "uk": "Латиниця, кирилиця чи глаголиця",
+   "bg": "Латиница, кирилица или глаголица",
+   "be": "Лацінка, кірыліца ці глаголіца"
+  },
+  "script_latin": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Latinica",
+   "en": "Latin",
+   "pl": "Łacinka",
+   "nb": "Latinsk",
+   "cs": "Latinka",
+   "sk": "Latinka",
+   "sl": "Latinica",
+   "hr": "Latinica",
+   "sr": "Latinica",
+   "bs": "Latinica",
+   "mk": "Латиница",
+   "ru": "Латиница",
+   "uk": "Латиниця",
+   "bg": "Латиница",
+   "be": "Лацінка"
+  },
+  "script_pick": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Latinica, kirilica ili glagolica",
+   "en": "Latin, Cyrillic or Glagolitic",
+   "pl": "Łacinka, cyrylica czy głagolica",
+   "nb": "Latinsk, kyrillisk eller glagolittisk skrift",
+   "cs": "Latinka, cyrilice, nebo hlaholice",
+   "sk": "Latinka, cyrilika alebo hlaholika",
+   "sl": "Latinica, cirilica ali glagolica",
+   "hr": "Latinica, ćirilica ili glagoljica",
+   "sr": "Latinica, ćirilica ili glagoljica",
+   "bs": "Latinica, ćirilica ili glagoljica",
+   "mk": "Латиница, кирилица или глаголица",
+   "ru": "Латиница, кириллица или глаголица",
+   "uk": "Латиниця, кирилиця чи глаголиця",
+   "bg": "Латиница, кирилица или глаголица",
+   "be": "Лацінка, кірыліца ці глаголіца"
+  },
+  "settings_head": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Nastrojenja",
+   "en": "Settings",
+   "pl": "Ustawienia",
+   "nb": "Innstillinger",
+   "cs": "Nastavení",
+   "sk": "Nastavenia",
+   "sl": "Nastavitve",
+   "hr": "Postavke",
+   "sr": "Podešavanja",
+   "bs": "Postavke",
+   "mk": "Поставки",
+   "ru": "Настройки",
+   "uk": "Налаштування",
+   "bg": "Настройки",
+   "be": "Налады"
+  },
+  "sound_body": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Kratky zvuk i vibracija pri každoj klaviši. Standardno izključeno.",
+   "en": "A short sound and vibration on each key. Off by default.",
+   "pl": "Krótki dźwięk i wibracja przy każdym klawiszu. Domyślnie wyłączone.",
+   "nb": "En kort lyd og vibrasjon for hver tast. Av som standard.",
+   "cs": "Krátký zvuk a vibrace při každé klávese. Ve výchozím stavu vypnuto.",
+   "sk": "Krátky zvuk a vibrácia pri každom klávese. Predvolene vypnuté.",
+   "sl": "Kratek zvok in vibriranje ob vsaki tipki. Privzeto izklopljeno.",
+   "hr": "Kratak zvuk i vibracija pri svakoj tipki. Prema zadanim postavkama isključeno.",
+   "sr": "Kratak zvuk i vibracija pri svakom pritisku tastera. Podrazumevano isključeno.",
+   "bs": "Kratak zvuk i vibracija pri svakom pritisku tipke. Zadano isključeno.",
+   "mk": "Краток звук и вибрација при секој притисок на копче. Стандардно исклучено.",
+   "ru": "Короткий звук и вибрация при каждом нажатии клавиши. По умолчанию выключено.",
+   "uk": "Короткий звук і вібрація під час кожного натискання клавіші. Типово вимкнено.",
+   "bg": "Кратък звук и вибрация при всеки клавиш. По подразбиране е изключено.",
+   "be": "Кароткі гук і вібрацыя пры кожным націсканні клавішы. Па змаўчанні выключана."
+  },
+  "sound_head": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Zvuk i vibracija (opcionalno)",
+   "en": "Sound and vibration (optional)",
+   "pl": "Dźwięk i wibracja (opcjonalnie)",
+   "nb": "Lyd og vibrasjon (valgfritt)",
+   "cs": "Zvuk a vibrace (volitelné)",
+   "sk": "Zvuk a vibrácie (voliteľné)",
+   "sl": "Zvok in vibriranje (neobvezno)",
+   "hr": "Zvuk i vibracija (neobavezno)",
+   "sr": "Zvuk i vibracija (opciono)",
+   "bs": "Zvuk i vibracija (opcionalno)",
+   "mk": "Звук и вибрација (опционално)",
+   "ru": "Звук и вибрация (необязательно)",
+   "uk": "Звук і вібрація (необовʼязково)",
+   "bg": "Звук и вибрация (по избор)",
+   "be": "Гук і вібрацыя (неабавязкова)"
+  },
+  "sound_sw": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Zvuk i vibracija klaviatury",
+   "en": "Key sound and vibration",
+   "pl": "Dźwięk i wibracja klawiszy",
+   "nb": "Tastelyd og vibrasjon",
+   "cs": "Zvuk a vibrace kláves",
+   "sk": "Zvuk a vibrácie klávesov",
+   "sl": "Zvok in vibriranje tipk",
+   "hr": "Zvuk i vibracija tipki",
+   "sr": "Zvuk i vibracija tastera",
+   "bs": "Zvuk i vibracija tipki",
+   "mk": "Звук и вибрација на копчињата",
+   "ru": "Звук и вибрация клавиш",
+   "uk": "Звук і вібрація клавіш",
+   "bg": "Звук и вибрация на клавишите",
+   "be": "Гук і вібрацыя клавіш"
+  },
+  "space_body": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Standardno odstup jest dodavany PRĚD slědujuče slovo, tako že interpunkcija se drži slova bez odstupa. Izključi, ako hočeš stary sposob: odstup ide směsta po slovu.",
+   "en": "By default the space is added BEFORE the next word, so punctuation stays tight against the word. Turn this off for the classic way: the space follows the word immediately.",
+   "pl": "Domyślnie spacja trafia PRZED następne słowo, więc interpunkcja przylega do słowa. Wyłącz, jeśli wolisz klasycznie: spacja zaraz po słowie.",
+   "nb": "Som standard settes mellomrommet inn FØR neste ord, slik at tegnsettingen står tett inntil ordet. Slå av for den klassiske måten: mellomrom rett etter ordet.",
+   "cs": "Ve výchozím stavu se mezera přidá PŘED další slovo, takže interpunkce zůstane těsně u slova. Pokud chceš klasický způsob (mezera hned za slovem), vypni to.",
+   "sk": "Predvolene sa medzera pridá PRED ďalšie slovo, takže interpunkcia zostane tesne pri slove. Ak chceš klasický spôsob (medzera hneď za slovom), vypni to.",
+   "sl": "Privzeto se presledek doda PRED naslednjo besedo, zato ločila ostanejo tesno ob besedi. Če želiš klasičen način (presledek takoj za besedo), to izklopi.",
+   "hr": "Prema zadanim postavkama razmak se dodaje ISPRED sljedeće riječi, pa interpunkcija ostaje priljubljena uz riječ. Ako želiš klasičan način (razmak odmah iza riječi), isključi ovo.",
+   "sr": "Podrazumevano se razmak dodaje PRE sledeće reči, pa interpunkcija ostaje priljubljena uz reč. Isključi ovo za klasičan način: razmak ide odmah posle reči.",
+   "bs": "Prema zadanim postavkama razmak se dodaje PRIJE sljedeće riječi, pa interpunkcija ostaje priljubljena uz riječ. Isključi ovo za klasičan način: razmak ide odmah poslije riječi.",
+   "mk": "Стандардно празното место се додава ПРЕД следниот збор, па интерпункцијата останува прилепена до зборот. Исклучи го ова за класичниот начин: празното место доаѓа веднаш по зборот.",
+   "ru": "По умолчанию пробел ставится ПЕРЕД следующим словом, поэтому знаки препинания прилегают к слову. Выключи, если предпочитаешь классический вариант: пробел сразу после слова.",
+   "uk": "Типово пробіл ставиться ПЕРЕД наступним словом, тож розділові знаки прилягають до слова. Вимкни, якщо волієш класичний спосіб: пробіл одразу після слова.",
+   "bg": "По подразбиране интервалът се добавя ПРЕДИ следващата дума, така че пунктуацията остава плътно до думата. Изключи го, ако предпочиташ класическия начин: интервалът идва веднага след думата.",
+   "be": "Па змаўчанні прабел ставіцца ПЕРАД наступным словам, таму знакі прыпынку прылягаюць да слова. Выключы, калі аддаеш перавагу класічнаму спосабу: прабел адразу пасля слова."
+  },
+  "space_head": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Odstup medžu slovami",
+   "en": "Spacing between words",
+   "pl": "Odstęp między słowami",
+   "nb": "Mellomrom mellom ord",
+   "cs": "Mezera mezi slovy",
+   "sk": "Medzera medzi slovami",
+   "sl": "Presledek med besedami",
+   "hr": "Razmak između riječi",
+   "sr": "Razmak između reči",
+   "bs": "Razmak između riječi",
+   "mk": "Празно место меѓу зборовите",
+   "ru": "Пробел между словами",
+   "uk": "Пробіл між словами",
+   "bg": "Интервал между думите",
+   "be": "Прабел паміж словамі"
+  },
+  "space_sw": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Umny odstup",
+   "en": "Smart space",
+   "pl": "Inteligentna spacja",
+   "nb": "Smart mellomrom",
+   "cs": "Chytrá mezera",
+   "sk": "Inteligentná medzera",
+   "sl": "Pametni presledek",
+   "hr": "Pametni razmak",
+   "sr": "Pametan razmak",
+   "bs": "Pametni razmak",
+   "mk": "Паметно празно место",
+   "ru": "Умный пробел",
+   "uk": "Розумний пробіл",
+   "bg": "Интелигентен интервал",
+   "be": "Разумны прабел"
+  },
+  "st_new": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "en": "New words",
+   "pl": "Nowe słowa",
+   "nb": "Nye ord",
+   "cs": "Nová slova",
+   "sk": "Nové slová",
+   "sl": "Nove besede",
+   "hr": "Nove riječi",
+   "sr": "Nove reči",
+   "bs": "Nove riječi",
+   "mk": "Нови зборови",
+   "ru": "Новые слова",
+   "uk": "Нові слова",
+   "bg": "Нови думи",
+   "be": "Новыя словы"
+  },
+  "st_off": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "en": "off",
+   "pl": "wyłączone",
+   "nb": "av",
+   "cs": "vypnuto",
+   "sk": "vypnuté",
+   "sl": "izklopljeno",
+   "hr": "isključeno",
+   "sr": "isključeno",
+   "bs": "isključeno",
+   "mk": "исклучено",
+   "ru": "выключено",
+   "uk": "вимкнено",
+   "bg": "изключено",
+   "be": "выключана"
+  },
+  "st_on": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "en": "on",
+   "pl": "włączone",
+   "nb": "på",
+   "cs": "zapnuto",
+   "sk": "zapnuté",
+   "sl": "vklopljeno",
+   "hr": "uključeno",
+   "sr": "uključeno",
+   "bs": "uključeno",
+   "mk": "вклучено",
+   "ru": "включено",
+   "uk": "увімкнено",
+   "bg": "включено",
+   "be": "уключана"
+  },
+  "st_queue": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "en": "queued",
+   "pl": "w kolejce",
+   "nb": "i kø",
+   "cs": "ve frontě",
+   "sk": "vo fronte",
+   "sl": "v čakalni vrsti",
+   "hr": "u redu čekanja",
+   "sr": "na čekanju",
+   "bs": "na čekanju",
+   "mk": "во редица",
+   "ru": "в очереди",
+   "uk": "у черзі",
+   "bg": "в опашката",
+   "be": "у чарзе"
+  },
+  "st_rank": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "en": "ranking",
+   "pl": "ranking",
+   "nb": "rangering",
+   "cs": "žebříček",
+   "sk": "rebríček",
+   "sl": "lestvica",
+   "hr": "ljestvica",
+   "sr": "rang-lista",
+   "bs": "rang-lista",
+   "mk": "рангирање",
+   "ru": "рейтинг",
+   "uk": "рейтинг",
+   "bg": "класация",
+   "be": "рэйтынг"
+  },
+  "step1": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Nastrojenja → Osnovne → Tipkovnica → Tipkovnici",
+   "en": "Settings → General → Keyboard → Keyboards",
+   "pl": "Ustawienia → Ogólne → Klawiatura → Klawiatury",
+   "nb": "Innstillinger → Generelt → Tastatur → Tastaturer",
+   "cs": "Nastavení → Obecné → Klávesnice → Klávesnice",
+   "sk": "Nastavenia → Všeobecné → Klávesnica → Klávesnice",
+   "sl": "Nastavitve → Splošno → Tipkovnica → Tipkovnice",
+   "hr": "Postavke → Općenito → Tipkovnica → Tipkovnice",
+   "sr": "Podešavanja → Opšte → Tastatura → Tastature",
+   "bs": "Postavke → Općenito → Tipkovnica → Tipkovnice",
+   "mk": "Поставки → Општо → Тастатура → Тастатури",
+   "ru": "Настройки → Основные → Клавиатура → Клавиатуры",
+   "uk": "Параметри → Загальні → Клавіатура → Клавіатури",
+   "bg": "Настройки → Общи → Клавиатура → Клавиатури",
+   "be": "Налады → Агульныя → Клавіятура → Клавіятуры"
+  },
+  "step2": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Dodaj novu tipkovnicu → Interslove",
+   "en": "Add New Keyboard → Interslove",
+   "pl": "Dodaj nową klawiaturę → Interslove",
+   "nb": "Legg til nytt tastatur → Interslove",
+   "cs": "Přidat novou klávesnici → Interslove",
+   "sk": "Pridať novú klávesnicu → Interslove",
+   "sl": "Dodaj novo tipkovnico → Interslove",
+   "hr": "Dodaj novu tipkovnicu → Interslove",
+   "sr": "Dodaj novu tastaturu → Interslove",
+   "bs": "Dodaj novu tipkovnicu → Interslove",
+   "mk": "Додај нова тастатура → Interslove",
+   "ru": "Новые клавиатуры… → Interslove",
+   "uk": "Додати нову клавіатуру… → Interslove",
+   "bg": "Добавяне на нова клавиатура… → Interslove",
+   "be": "Дадаць новую клавіятуру… → Interslove"
+  },
+  "step3": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "V tekstu tikni 🌐 i vyberi ju",
+   "en": "In any text field tap 🌐 and pick it",
+   "pl": "W dowolnym polu tekstowym stuknij 🌐 i wybierz ją",
+   "nb": "Trykk på 🌐 i et tekstfelt og velg Interslove",
+   "cs": "V libovolném textovém poli klepni na 🌐 a vyber ji",
+   "sk": "V ľubovoľnom textovom poli ťukni na 🌐 a vyber ju",
+   "sl": "V poljubnem besedilnem polju tapni 🌐 in jo izberi",
+   "hr": "U bilo kojem tekstnom polju dodirni 🌐 i odaberi je",
+   "sr": "U bilo kom polju za tekst dodirni 🌐 i izaberi je",
+   "bs": "U bilo kojem polju za tekst dodirni 🌐 i odaberi je",
+   "mk": "Во кое било поле за текст допри 🌐 и избери ја",
+   "ru": "В любом текстовом поле нажми 🌐 и выбери её",
+   "uk": "У будь-якому текстовому полі торкнися 🌐 і вибери її",
+   "bg": "Във всяко текстово поле докосни 🌐 и я избери",
+   "be": "У любым тэкставым полі націсні 🌐 і выберы яе"
+  },
+  "step4": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Interslove → Full Access (opcionalno)",
+   "en": "Interslove → Allow Full Access (optional: my words, theme, collecting)",
+   "pl": "Interslove → Pełny dostęp (opcjonalnie: moje słowa, motyw, zbieranie)",
+   "nb": "Interslove → Tillat full tilgang (valgfritt: mine ord, tema, innsamling av ord)",
+   "cs": "Interslove → Povolit plný přístup (volitelné: moje slova, motiv, sbírání)",
+   "sk": "Interslove → Povoliť plný prístup (voliteľné: moje slová, motív, zbieranie)",
+   "sl": "Interslove → Dovoli poln dostop (neobvezno: moje besede, tema, zbiranje)",
+   "hr": "Interslove → Dopusti potpuni pristup (neobavezno: moje riječi, tema, prikupljanje)",
+   "sr": "Interslove → Dozvoli pun pristup (opciono: moje reči, tema, prikupljanje)",
+   "bs": "Interslove → Dopusti potpuni pristup (opcionalno: moje riječi, tema, prikupljanje)",
+   "mk": "Interslove → Дозволи целосен пристап (опционално: мои зборови, тема, собирање)",
+   "ru": "Interslove → Разрешить полный доступ (необязательно: мои слова, тема, сбор слов)",
+   "uk": "Interslove → Дозволити повний доступ (необовʼязково: мої слова, тема, збирання слів)",
+   "bg": "Interslove → Разрешаване на пълен достъп (по избор: моите думи, тема, събиране на думи)",
+   "be": "Interslove → Дазволіць поўны доступ (неабавязкова: мае словы, тэма, збор слоў)"
+  },
+  "sub_batch": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "en": "Interslavic — batch for the database",
+   "pl": "medžuslovjansky — paczka do bazy",
+   "nb": "interslavisk — pakke til databasen",
+   "cs": "Mezislovanština — balíček pro databázi",
+   "sk": "Medzislovančina — balík pre databázu",
+   "sl": "Medslovanščina — paket za bazo",
+   "hr": "Međuslavenski — paket za bazu",
+   "sr": "Međuslovenski — paket za bazu",
+   "bs": "Međuslavenski — paket za bazu",
+   "mk": "Меѓусловенски — пакет за базата",
+   "ru": "Межславянский — пакет для базы",
+   "uk": "Міжсловʼянська — пакет для бази",
+   "bg": "Междуславянски — пакет за базата",
+   "be": "Міжславянская — пакет для базы"
+  },
+  "sub_review": {
+   "platforms": [
+    "android"
+   ],
+   "en": "Interslavic — words for review",
+   "pl": "medžuslovjansky — słowa do przeglądu",
+   "nb": "interslavisk — ord til gjennomgang",
+   "cs": "Mezislovanština — slova ke kontrole",
+   "sk": "Medzislovančina — slová na kontrolu",
+   "sl": "Medslovanščina — besede za pregled",
+   "hr": "Međuslavenski — riječi za pregled",
+   "sr": "Međuslovenski — reči za pregled",
+   "bs": "Međuslavenski — riječi za pregled",
+   "mk": "Меѓусловенски — зборови за преглед",
+   "ru": "Межславянский — слова на проверку",
+   "uk": "Міжсловʼянська — слова на перевірку",
+   "bg": "Междуславянски — думи за преглед",
+   "be": "Міжславянская — словы на праверку"
+  },
+  "sym_body": {
+   "platforms": [
+    "android"
+   ],
+   "en": "How often you type each mark (? , . „ € and the rest), counted on this phone only, without the text around it. It decides where the keys go: the more used, the nearer the thumb. Shared only in the batch you send, and only with the ranking on.",
+   "pl": "Jak często wpisujesz każdy znak (? , . „ € i reszta), liczone tylko na tym telefonie, bez tekstu dookoła. Na tej podstawie układamy klawisze: im częściej używany, tym bliżej kciuka. Wychodzi tylko w paczce, którą wysyłasz, i tylko przy włączonym rankingu.",
+   "nb": "Hvor ofte du skriver hvert tegn (? , . „ € og resten), telt bare på denne telefonen, uten teksten rundt. Det avgjør hvor tastene står: jo mer brukt, jo nærmere tommelen. Deles bare i pakken du sender, og bare med rangeringen slått på.",
+   "cs": "Jak často píšeš jednotlivé znaky (? , . „ € a další), počítáno jen v tomto telefonu, bez okolního textu. Podle toho se rozmisťují klávesy: čím častěji je znak použitý, tím je blíž palci. Sdílí se jen v balíčku, který odešleš, a jen se zapnutým žebříčkem.",
+   "sk": "Ako často píšeš jednotlivé znaky (? , . „ € a ďalšie), počítané len v tomto telefóne, bez okolitého textu. Podľa toho sa rozmiestňujú klávesy: čím častejšie je znak používaný, tým je bližšie k palcu. Zdieľa sa len v balíku, ktorý odošleš, a len so zapnutým rebríčkom.",
+   "sl": "Kako pogosto vnašaš posamezne znake (? , . „ € in ostale), šteto samo v tem telefonu, brez okoliškega besedila. Po tem se razporedijo tipke: pogosteje uporabljen znak je bližje palcu. Deli se samo v paketu, ki ga pošlješ, in samo z vklopljeno lestvico.",
+   "hr": "Koliko često upisuješ pojedini znak (? , . „ € i ostali), broji se samo na ovom telefonu, bez okolnog teksta. Prema tome se raspoređuju tipke: što se češće koristi, to je bliže palcu. Dijeli se samo u paketu koji pošalješ i samo uz uključenu ljestvicu.",
+   "sr": "Koliko često kucaš svaki znak (? , . „ € i ostali), broji se samo na ovom telefonu, bez okolnog teksta. Od toga zavisi gde stoje tasteri: što se češće koristi, to je bliže palcu. Deli se samo u paketu koji šalješ, i samo kad je rang-lista uključena.",
+   "bs": "Koliko često kucaš svaki znak (? , . „ € i ostali), broji se samo na ovom telefonu, bez okolnog teksta. Od toga zavisi gdje stoje tipke: što se češće koristi, to je bliže palcu. Dijeli se samo u paketu koji šalješ, i samo kad je rang-lista uključena.",
+   "mk": "Колку често го пишуваш секој знак (? , . „ € и останатите) се брои само на овој телефон, без текстот околу него. Од тоа зависи каде стојат копчињата: колку почесто се користи, толку е поблиску до палецот. Се споделува само во пакетот што го испраќаш, и само кога е вклучено рангирањето.",
+   "ru": "Как часто ты вводишь каждый знак (? , . „ € и остальные) — подсчёт только на этом телефоне, без окружающего текста. От этого зависит расположение клавиш: чем чаще используется знак, тем ближе он к большому пальцу. Передаётся только в пакете, который ты отправляешь, и только при включённом рейтинге.",
+   "uk": "Як часто ти вводиш кожен знак (? , . „ € та інші) — підраховується лише на цьому телефоні, без навколишнього тексту. Від цього залежить розташування клавіш: що частіше вживається знак, то ближче він до великого пальця. Передається лише в пакеті, який ти надсилаєш, і лише з увімкненим рейтингом.",
+   "bg": "Колко често въвеждаш всеки знак (? , . „ € и останалите) — брои се само на този телефон, без текста около него. От това зависи къде се разполагат клавишите: колкото по-често се използва даден знак, толкова по-близо е до палеца. Споделя се само в пакета, който изпращаш, и само при включена класация.",
+   "be": "Як часта ты ўводзіш кожны знак (? , . „ € і астатнія) — падлік толькі на гэтым тэлефоне, без навакольнага тэксту. Ад гэтага залежыць размяшчэнне клавіш: чым часцей ужываецца знак, тым бліжэй ён да вялікага пальца. Перадаецца толькі ў пакеце, які ты адпраўляеш, і толькі пры ўключаным рэйтынгу."
+  },
+  "sym_head": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Znaky",
+   "en": "Marks",
+   "pl": "Znaki",
+   "nb": "Tegn",
+   "cs": "Znaky",
+   "sk": "Znaky",
+   "sl": "Znaki",
+   "hr": "Znakovi",
+   "sr": "Znakovi",
+   "bs": "Znakovi",
+   "mk": "Знаци",
+   "ru": "Знаки",
+   "uk": "Знаки",
+   "bg": "Знаци",
+   "be": "Знакі"
+  },
+  "sym_none": {
+   "platforms": [
+    "android"
+   ],
+   "en": "Nothing counted yet.",
+   "pl": "Jeszcze nic nie policzono.",
+   "nb": "Ingenting telt ennå.",
+   "cs": "Zatím nic nespočítáno.",
+   "sk": "Zatiaľ nič nespočítané.",
+   "sl": "Še nič ni prešteto.",
+   "hr": "Još ništa nije prebrojeno.",
+   "sr": "Još ništa nije izbrojano.",
+   "bs": "Još ništa nije izbrojano.",
+   "mk": "Сè уште ништо не е избројано.",
+   "ru": "Пока ничего не подсчитано.",
+   "uk": "Ще нічого не підраховано.",
+   "bg": "Все още нищо не е преброено.",
+   "be": "Пакуль нічога не падлічана."
+  },
+  "t_cleared": {
+   "platforms": [
+    "android"
+   ],
+   "en": "Queue cleared",
+   "pl": "Kolejka wyczyszczona",
+   "nb": "Køen er tømt",
+   "cs": "Fronta vymazána",
+   "sk": "Front vymazaný",
+   "sl": "Čakalna vrsta počiščena",
+   "hr": "Red čekanja očišćen",
+   "sr": "Red čekanja je ispražnjen",
+   "bs": "Red čekanja je ispražnjen",
+   "mk": "Редицата е исчистена",
+   "ru": "Очередь очищена",
+   "uk": "Чергу очищено",
+   "bg": "Опашката е изчистена",
+   "be": "Чарга ачышчана"
+  },
+  "t_empty": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "en": "The queue is empty",
+   "pl": "Kolejka jest pusta",
+   "nb": "Køen er tom",
+   "cs": "Fronta je prázdná",
+   "sk": "Front je prázdny",
+   "sl": "Čakalna vrsta je prazna",
+   "hr": "Red čekanja je prazan",
+   "sr": "Red čekanja je prazan",
+   "bs": "Red čekanja je prazan",
+   "mk": "Редицата е празна",
+   "ru": "Очередь пуста",
+   "uk": "Черга порожня",
+   "bg": "Опашката е празна",
+   "be": "Чарга пустая"
+  },
+  "theme_auto": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Avtomatično, kako telefon",
+   "en": "Automatic, as the phone",
+   "pl": "Automatycznie, jak telefon",
+   "nb": "Automatisk, som telefonen",
+   "cs": "Automaticky, podle telefonu",
+   "sk": "Automaticky, podľa telefónu",
+   "sl": "Samodejno, kot telefon",
+   "hr": "Automatski, kao telefon",
+   "sr": "Automatski, kao na telefonu",
+   "bs": "Automatski, kao na telefonu",
+   "mk": "Автоматски, како на телефонот",
+   "ru": "Автоматически, как на телефоне",
+   "uk": "Автоматично, як на телефоні",
+   "bg": "Автоматично, като телефона",
+   "be": "Аўтаматычна, як на тэлефоне"
+  },
+  "theme_dark": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Temna",
+   "en": "Dark",
+   "pl": "Ciemny",
+   "nb": "Mørkt",
+   "cs": "Tmavý",
+   "sk": "Tmavý",
+   "sl": "Temna",
+   "hr": "Tamna",
+   "sr": "Tamna",
+   "bs": "Tamna",
+   "mk": "Темна",
+   "ru": "Тёмная",
+   "uk": "Темна",
+   "bg": "Тъмна",
+   "be": "Цёмная"
+  },
+  "theme_head": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Tema klaviatury",
+   "en": "Keyboard theme",
+   "pl": "Motyw klawiatury",
+   "nb": "Tastaturtema",
+   "cs": "Motiv klávesnice",
+   "sk": "Motív klávesnice",
+   "sl": "Tema tipkovnice",
+   "hr": "Tema tipkovnice",
+   "sr": "Tema tastature",
+   "bs": "Tema tastature",
+   "mk": "Тема на тастатурата",
+   "ru": "Тема клавиатуры",
+   "uk": "Тема клавіатури",
+   "bg": "Тема на клавиатурата",
+   "be": "Тэма клавіятуры"
+  },
+  "theme_light": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Světla",
+   "en": "Light",
+   "pl": "Jasny",
+   "nb": "Lyst",
+   "cs": "Světlý",
+   "sk": "Svetlý",
+   "sl": "Svetla",
+   "hr": "Svijetla",
+   "sr": "Svetla",
+   "bs": "Svijetla",
+   "mk": "Светла",
+   "ru": "Светлая",
+   "uk": "Світла",
+   "bg": "Светла",
+   "be": "Светлая"
+  },
+  "theme_pick": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Tema klaviatury",
+   "en": "Keyboard theme",
+   "pl": "Motyw klawiatury",
+   "nb": "Tastaturtema",
+   "cs": "Motiv klávesnice",
+   "sk": "Motív klávesnice",
+   "sl": "Tema tipkovnice",
+   "hr": "Tema tipkovnice",
+   "sr": "Tema tastature",
+   "bs": "Tema tastature",
+   "mk": "Тема на тастатурата",
+   "ru": "Тема клавиатуры",
+   "uk": "Тема клавіатури",
+   "bg": "Тема на клавиатурата",
+   "be": "Тэма клавіятуры"
+  },
+  "title": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Medžuslovjansky",
+   "en": "Interslavic keyboard",
+   "pl": "Klawiatura międzysłowiańska",
+   "nb": "Interslavisk tastatur",
+   "cs": "Mezislovanská klávesnice",
+   "sk": "Medzislovanská klávesnica",
+   "sl": "Medslovanska tipkovnica",
+   "hr": "Međuslavenska tipkovnica",
+   "sr": "Međuslovenska tastatura",
+   "bs": "Međuslavenska tastatura",
+   "mk": "Меѓусловенска тастатура",
+   "ru": "Межславянская клавиатура",
+   "uk": "Міжсловʼянська клавіатура",
+   "bg": "Междуславянска клавиатура",
+   "be": "Міжславянская клавіятура"
+  },
+  "try_head": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Proba",
+   "en": "Try it here",
+   "pl": "Wypróbuj tutaj",
+   "nb": "Prøv her",
+   "cs": "Vyzkoušej si to tady",
+   "sk": "Vyskúšaj si to tu",
+   "sl": "Preizkusi tukaj",
+   "hr": "Isprobaj ovdje",
+   "sr": "Isprobaj ovde",
+   "bs": "Isprobaj ovdje",
+   "mk": "Пробај тука",
+   "ru": "Попробуй здесь",
+   "uk": "Спробуй тут",
+   "bg": "Изпробвай тук",
+   "be": "Паспрабуй тут"
+  },
+  "try_hint": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "piši tu…",
+   "en": "type here…",
+   "pl": "pisz tutaj…",
+   "nb": "Skriv her …",
+   "cs": "piš sem…",
+   "sk": "píš sem…",
+   "sl": "tipkaj tukaj…",
+   "hr": "piši ovdje…",
+   "sr": "kucaj ovde…",
+   "bs": "kucaj ovdje…",
+   "mk": "пишувај тука…",
+   "ru": "пиши здесь…",
+   "uk": "пиши тут…",
+   "bg": "пиши тук…",
+   "be": "пішы тут…"
+  },
+  "ui_lang": {
+   "platforms": [
+    "android"
+   ],
+   "en": "Language of this screen",
+   "pl": "Język tego ekranu",
+   "nb": "Språk på denne skjermen",
+   "cs": "Jazyk této obrazovky",
+   "sk": "Jazyk tejto obrazovky",
+   "sl": "Jezik tega zaslona",
+   "hr": "Jezik ovog zaslona",
+   "sr": "Jezik ovog ekrana",
+   "bs": "Jezik ovog ekrana",
+   "mk": "Јазик на овој екран",
+   "ru": "Язык этого экрана",
+   "uk": "Мова цього екрана",
+   "bg": "Език на този екран",
+   "be": "Мова гэтага экрана"
+  },
+  "words_body": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Slova dodane čipom ＋ v pasu prědloženij, za každy jezyk. Odstrani slovo i klaviatura go prěstane prědlagati.",
+   "en": "Words you added with the ＋ chip in the suggestion bar, per language. Remove a word and the keyboard stops suggesting it.",
+   "pl": "Słowa dodane chipem ＋ na pasku podpowiedzi, osobno dla każdego języka. Usuń słowo, a klawiatura przestanie je podpowiadać.",
+   "nb": "Ord du har lagt til med ＋ i forslagslinjen, for hvert språk. Fjern et ord, så slutter tastaturet å foreslå det.",
+   "cs": "Slova přidaná tlačítkem ＋ na liště návrhů, zvlášť pro každý jazyk. Odstraň slovo a klávesnice ho přestane navrhovat.",
+   "sk": "Slová pridané tlačidlom ＋ na lište návrhov, zvlášť pre každý jazyk. Odstráň slovo a klávesnica ho prestane navrhovať.",
+   "sl": "Besede, dodane z gumbom ＋ v vrstici predlogov, ločeno za vsak jezik. Odstrani besedo in tipkovnica je ne bo več predlagala.",
+   "hr": "Riječi dodane gumbom ＋ na traci prijedloga, zasebno za svaki jezik. Ukloni riječ i tipkovnica će je prestati predlagati.",
+   "sr": "Reči dodate čipom ＋ na traci s predlozima, za svaki jezik posebno. Ukloni reč i tastatura će prestati da je predlaže.",
+   "bs": "Riječi dodane čipom ＋ na traci s prijedlozima, za svaki jezik posebno. Ukloni riječ i tastatura će je prestati predlagati.",
+   "mk": "Зборови додадени со копчето ＋ во лентата со предлози, за секој јазик посебно. Отстрани збор и тастатурата ќе престане да го предлага.",
+   "ru": "Слова, добавленные кнопкой ＋ на панели подсказок, отдельно для каждого языка. Удали слово, и клавиатура перестанет его предлагать.",
+   "uk": "Слова, додані кнопкою ＋ на панелі підказок, окремо для кожної мови. Видали слово, і клавіатура перестане його пропонувати.",
+   "bg": "Думи, добавени с бутона ＋ в лентата с предложения, отделно за всеки език. Премахни дума и клавиатурата ще спре да я предлага.",
+   "be": "Словы, дададзеныя кнопкай ＋ на панэлі падказак, асобна для кожнай мовы. Выдалі слова, і клавіятура перастане яго прапаноўваць."
+  },
+  "words_head": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Moje slova",
+   "en": "My words",
+   "pl": "Moje słowa",
+   "nb": "Mine ord",
+   "cs": "Moje slova",
+   "sk": "Moje slová",
+   "sl": "Moje besede",
+   "hr": "Moje riječi",
+   "sr": "Moje reči",
+   "bs": "Moje riječi",
+   "mk": "Мои зборови",
+   "ru": "Мои слова",
+   "uk": "Мої слова",
+   "bg": "Моите думи",
+   "be": "Мае словы"
+  },
+  "words_none": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "isv": "Ješče ničto ne jest dodano.",
+   "en": "No words added yet.",
+   "pl": "Nie dodano jeszcze słów.",
+   "nb": "Ingen ord lagt til ennå.",
+   "cs": "Zatím nejsou přidána žádná slova.",
+   "sk": "Zatiaľ nie sú pridané žiadne slová.",
+   "sl": "Dodanih besed še ni.",
+   "hr": "Još nema dodanih riječi.",
+   "sr": "Još nema dodatih reči.",
+   "bs": "Još nema dodanih riječi.",
+   "mk": "Сè уште нема додадени зборови.",
+   "ru": "Пока не добавлено ни одного слова.",
+   "uk": "Ще не додано жодного слова.",
+   "bg": "Все още няма добавени думи.",
+   "be": "Яшчэ не дададзена ніводнага слова."
+  },
+  "words_remove": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Odstrani",
+   "en": "Remove",
+   "pl": "Usuń",
+   "nb": "Fjern",
+   "cs": "Odstranit",
+   "sk": "Odstrániť",
+   "sl": "Odstrani",
+   "hr": "Ukloni",
+   "sr": "Ukloni",
+   "bs": "Ukloni",
+   "mk": "Отстрани",
+   "ru": "Удалить",
+   "uk": "Видалити",
+   "bg": "Премахни",
+   "be": "Выдаліць"
+  },
+  "words_removed": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Odstranjeno",
+   "en": "Removed",
+   "pl": "Usunięto",
+   "nb": "Fjernet",
+   "cs": "Odstraněno",
+   "sk": "Odstránené",
+   "sl": "Odstranjeno",
+   "hr": "Uklonjeno",
+   "sr": "Uklonjeno",
+   "bs": "Uklonjeno",
+   "mk": "Отстрането",
+   "ru": "Удалено",
+   "uk": "Видалено",
+   "bg": "Премахнато",
+   "be": "Выдалена"
+  }
+ }
+}
