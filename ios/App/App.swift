@@ -138,6 +138,11 @@ struct SetupView: View {
                     }
                     note("capitals")
                 }
+                // Polish in Glagolitic (layout v04, owner 2026-11-14): Polish only,
+                // shown when the app screen is Polish.
+                if Ui.current == "pl" {
+                    Section(Ui.head("glag_pl_head")) { note("glag_pl_body") }
+                }
                 Section {
                     Picker(Ui.t("script_pick"), selection: $script) {
                         Text(Ui.t("script_latin")).tag("latin")

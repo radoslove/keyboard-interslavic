@@ -1603,6 +1603,24 @@
    "uk": "Видалено",
    "bg": "Премахнато",
    "be": "Выдалена"
+  },
+  "glag_pl_head": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "_note": "Shown only when the app screen is Polish; pl is the text, en is for reference (owner 2026-11-14: pl only).",
+   "en": "Polish in Glagolitic",
+   "pl": "Polski głagolicą"
+  },
+  "glag_pl_body": {
+   "platforms": [
+    "android",
+    "ios"
+   ],
+   "_note": "As glag_pl_head.",
+   "en": "Glagolitic for Polish is an add-on. Turn it on with the ABC key next to 🌐: it changes to ⰀⰁⰂ, and the next tap goes back to Latin.\n\nYou type ordinary Polish letters and the keyboard joins them into Glagolitic: cz is Ⱍ, sz is Ⱎ, dz is Ⰷ, and siano is ⱄⱑⱀⱁ.\n\nThe v key is the soft yer Ⱐ and works like the Polish acute: s, z, c, n with v give ś, ź, ć, ń, dz with v gives dź, and r with v gives rz. Holding v gives the hard yer Ⱏ: l with it is ł.\n\nOn the free keys: q is ja (Ⱑ), x is ch (Ⱈ). The other letters are under a hold, e.g. ę and ię under e, ą and ią under a, ś and sz under s, and ja, ju, ję and ją under q and j.\n\nAll letters are ordinary Glagolitic characters, so the text works in any app and looks the way the reader's phone draws it.",
+   "pl": "Głagolica dla polskiego to dodatek. Włączasz ją klawiszem ABC obok 🌐: zmienia się na ⰀⰁⰂ, a następne dotknięcie wraca do łacinki.\n\nPiszesz zwykłymi polskimi literami, a klawiatura sama składa je w głagolicę: cz to Ⱍ, sz to Ⱎ, dz to Ⰷ, a siano to ⱄⱑⱀⱁ.\n\nKlawisz v to jer miękki Ⱐ i działa jak polska kreska: s, z, c, n z v dają ś, ź, ć, ń, dz z v daje dź, a r z v daje rz. Przytrzymanie v daje jer twardy Ⱏ: l z nim to ł.\n\nNa wolnych klawiszach: q to ja (Ⱑ), x to ch (Ⱈ). Pod przytrzymaniem są pozostałe litery, np. ę i ię pod e, ą i ią pod a, ś i sz pod s, a ja, ju, ję i ją pod q i j.\n\nWszystkie litery to zwykłe znaki głagolicy, więc tekst działa w każdej aplikacji i wygląda tak, jak rysuje je telefon odbiorcy."
   }
  }
 }
