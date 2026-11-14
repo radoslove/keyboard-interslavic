@@ -128,6 +128,27 @@ final class KeyboardViewController: UIInputViewController {
         rearmShiftIfSentenceStart()
     }
 
+    /// The user moved the cursor: the Polish Glagolitic word we were building
+    /// is no longer the one before it.
+    override func selectionWillChange(_ textInput: UITextInput?) {
+        super.selectionWillChange(textInput)
+        glagWord = nil
+    }
+
+    /// A whole word in the current script; in Polish Glagolitic with the
+    /// od-/pod-/nad-/przed- + z split applied first.
+    private func outWord(_ latin: String) -> String {
+        guard Script.rewritesWord else { return Script.out(latin) }
+        return Script.out(Script.splitPrefixD(latin, known: swipeInput.knowsWord))
+    }
+
+    /// Polish Glagolitic: the word being typed, in the keyboard's Latin (with
+    /// the ẑ ō ď markers) and as it stands on screen. Some apps report the text
+    /// before the cursor late, so a fast second letter read the word from
+    /// before the previous one and joined the letters wrong (owner 2026-11-14:
+    /// "jak", "dzień"). Kept from our own writes; any other key clears it.
+    private var glagWord: (latin: String, shown: String)?
+
     // MARK: - Building
 
     private func buildKeyboard() {
@@ -405,10 +426,29 @@ final class KeyboardViewController: UIInputViewController {
     /// language now, so this - not the system's list - says which one is on.
     private static var spaceLabel: String { Script.out(Layout.name(Layout.language).lowercased()) }
 
+    /// Polish Glagolitic draws its labels in our own font (bundled, UIAppFonts);
+    /// everything else, and any letter the font lacks, stays the system font.
+    /// Off for now (owner 2026-11-14: the letters still need work): the font is
+    /// not bundled yet, so the keys use the system font.
+    static let ownFontOnKeys = false
+
+    static func glagFont(_ size: CGFloat) -> UIFont {
+        guard ownFontOnKeys, Script.rewritesWord,
+              let f = UIFont(name: "IntersloveGlagolitic-Regular", size: size) else {
+            return .systemFont(ofSize: size)
+        }
+        return f
+    }
+
     private func styledKey(_ title: String) -> UIButton {
         let b = UIButton(type: .system)
         b.setTitle(title, for: .normal)
         b.titleLabel?.font = .systemFont(ofSize: 22)
+        // A key may carry two Glagolitic letters (Polish y = ⱏⰹ, ś = ⱄⱐ):
+        // shrink to fit instead of cutting them to "…" (owner 2026-11-14).
+        b.titleLabel?.adjustsFontSizeToFitWidth = true
+        b.titleLabel?.minimumScaleFactor = 0.5
+        b.titleLabel?.lineBreakMode = .byClipping
         b.setTitleColor(.label, for: .normal)
         b.backgroundColor = .systemBackground
         b.layer.cornerRadius = 5
@@ -421,6 +461,7 @@ final class KeyboardViewController: UIInputViewController {
 
     private func characterKey(_ ch: Character) -> UIButton {
         let b = styledKey(title(for: ch))
+        if ch.isLetter && !showingNumeric { b.titleLabel?.font = Self.glagFont(22) }
         b.accessibilityIdentifier = String(ch)
         b.addTarget(self, action: #selector(tapCharacter(_:)), for: .touchUpInside)
         // Without this a key looks dead while you press it, and a keyboard that
@@ -494,6 +535,27 @@ final class KeyboardViewController: UIInputViewController {
         var w = String(text.reversed().prefix { wordChar($0) }.reversed())
         while w.first == "'" { w.removeFirst() }
         return w
+    }
+
+    // MARK: - Wider word space in Polish Glagolitic
+
+    /// Everything the keyboard writes goes through here. In Polish Glagolitic a
+    /// word space is the en space U+2002: phone fonts draw Glagolitic letters
+    /// wide and the plain space narrow, so words ran together (owner 2026-11-14).
+    /// Inside, the keyboard keeps working with the plain space: `contextBefore`
+    /// and `contextAfter` read U+2002 back as " ", one character for one, so
+    /// counts for deleteBackward stay right.
+    private func put(_ s: String) {
+        textDocumentProxy.insertText(Script.rewritesWord
+            ? s.replacingOccurrences(of: " ", with: Script.wideSpace) : s)
+    }
+
+    private var contextBefore: String? {
+        textDocumentProxy.documentContextBeforeInput?.replacingOccurrences(of: Script.wideSpace, with: " ")
+    }
+
+    private var contextAfter: String? {
+        textDocumentProxy.documentContextAfterInput?.replacingOccurrences(of: Script.wideSpace, with: " ")
     }
 
     // MARK: - Actions
@@ -609,7 +671,8 @@ final class KeyboardViewController: UIInputViewController {
     /// stands before the cursor, and offer the other guesses of that glide.
     private func wipeStem(_ hold: (stem: String, guesses: [String])) {
         let stem = hold.stem
-        if !stem.isEmpty, (textDocumentProxy.documentContextBeforeInput ?? "").hasSuffix(stem) {
+        if !stem.isEmpty, (contextBefore ?? "").hasSuffix(stem) {
+            glagWord = nil
             for _ in 0..<stem.count { textDocumentProxy.deleteBackward() }
         }
         tappedWord = nil
@@ -628,7 +691,7 @@ final class KeyboardViewController: UIInputViewController {
     /// Returns whether there is anything left to delete.
     @discardableResult
     private func deleteWordBack() -> Bool {
-        let before = Array(textDocumentProxy.documentContextBeforeInput ?? "")
+        let before = Array(contextBefore ?? "")
         if before.isEmpty { return false }
         let floor = (before.lastIndex(of: "\n") ?? -1) + 1
         var i = before.count
@@ -647,6 +710,7 @@ final class KeyboardViewController: UIInputViewController {
         lastCandidates = []
         defer { rearmShiftIfSentenceStart(); refreshCompletions() }
         if count > 0 {
+            glagWord = nil
             for _ in 0..<count { textDocumentProxy.deleteBackward() }
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
             return i > 0
@@ -666,9 +730,9 @@ final class KeyboardViewController: UIInputViewController {
     private func restoreTrimmed(_ word: String) {
         // Trimmed in Latin, then written back: Glagolitic `y` is two marks.
         let stem = Script.out(String(Script.toLatin(word).dropLast()))
-        if !stem.isEmpty { textDocumentProxy.insertText(stem) }
+        if !stem.isEmpty { put(stem) }
         if !wipedSuffix.isEmpty {
-            textDocumentProxy.insertText(wipedSuffix)
+            put(wipedSuffix)
             textDocumentProxy.adjustTextPosition(byCharacterOffset: -wipedSuffix.count)
         }
         wipedSuffix = ""
@@ -683,6 +747,7 @@ final class KeyboardViewController: UIInputViewController {
 
     @objc private func tapBackspace() {
         defer { rearmShiftIfSentenceStart() }
+        glagWord = nil
         // Right after a swipe (no other key in between) backspace means "wrong
         // word" and takes it whole - at once, no matter how long the thumb took
         // to come back (owner, 2026-10-07: "nobody can be made to wait").
@@ -691,7 +756,7 @@ final class KeyboardViewController: UIInputViewController {
         // somewhere else in the text, wiping word.count letters there would
         // eat whatever sits at the new spot.
         if let word = lastSwipedWord,
-           (textDocumentProxy.documentContextBeforeInput ?? "").hasSuffix(word + swipeSuffix) {
+           (contextBefore ?? "").hasSuffix(word + swipeSuffix) {
             for _ in 0..<(word.count + swipeSuffix.count) { textDocumentProxy.deleteBackward() }
             wipedSuffix = swipeSuffix
             swipeSuffix = ""
@@ -1059,13 +1124,13 @@ final class KeyboardViewController: UIInputViewController {
             // A letter right after a swipe extends that word (`pisem` + `s`);
             // a letter later starts the next word and gets the owed space.
             // Space and punctuation simply cancel it.
-            if ch.isLetter && !extendsSwipe { textDocumentProxy.insertText(" ") }
+            if ch.isLetter && !extendsSwipe { put(" ") }
             pendingSpace = false
         }
         // Track a word typed letter by letter: that is the sign a swipe did
         // not find it, and the only case where `＋` is offered for a word the
         // list already has. Kept in Latin, like everything inside.
-        let before = textDocumentProxy.documentContextBeforeInput ?? ""
+        let before = contextBefore ?? ""
         let apostrophe = ch == "'" && Layout.apostropheInWord && before.last?.isLetter == true
         if apostrophe {
             // Inside a Ukrainian word: the word goes on, also after a glide.
@@ -1082,7 +1147,38 @@ final class KeyboardViewController: UIInputViewController {
         }
         lastSwipedWord = nil
         swipeSuffix = ""
-        textDocumentProxy.insertText(Script.out(latin))
+        if Script.rewritesWord && ch.isLetter {
+            // Polish Glagolitic: the new letter may join the ones before it
+            // (c + z = ⱍ), so the word under the cursor is written again.
+            // The word so far: our own record if it is still ours, otherwise read
+            // back from the text - then only the part after the last glyph typed
+            // as such (ⰷ, ⱉ, ⰴⱐ), so those stay as the user chose them.
+            let prev: (latin: String, shown: String)
+            if let w = glagWord, !extendsSwipe || w.shown.isEmpty {
+                prev = w
+            } else {
+                let word = Array(trailingWord(before))
+                let cut = (0..<word.count).last(where: { Script.endsAtomic(word, $0) }).map { $0 + 1 } ?? 0
+                let shown = String(word[cut...])
+                prev = (Script.toLatin(shown), shown)
+            }
+            for _ in prev.shown { textDocumentProxy.deleteBackward() }
+            let now = Script.out(prev.latin + latin)
+            put(now)
+            glagWord = (prev.latin + latin, now)
+        } else {
+            // Polish Glagolitic: the word is finished - split d + z after a
+            // prefix where it is two sounds (od-zyskać), then the space etc.
+            if Script.rewritesWord, let w = glagWord {
+                let fixed = Script.splitPrefixD(w.latin, known: swipeInput.knowsWord)
+                if fixed != w.latin {
+                    for _ in w.shown { textDocumentProxy.deleteBackward() }
+                    put(Script.out(fixed))
+                }
+            }
+            glagWord = nil
+            put(Script.out(latin))
+        }
         rearmShiftIfSentenceStart()
         refreshCompletions()
     }
@@ -1168,7 +1264,7 @@ final class KeyboardViewController: UIInputViewController {
     ///
     /// The text is read in the chosen script and looked up in Latin.
     private func refreshCompletions() {
-        let before = textDocumentProxy.documentContextBeforeInput ?? ""
+        let before = contextBefore ?? ""
         let typedShown = trailingWord(before)
         let typed = Script.toLatin(typedShown)
         barToken += 1
@@ -1236,7 +1332,7 @@ final class KeyboardViewController: UIInputViewController {
     /// but never while Caps Lock is deliberately on.
     private func rearmShiftIfSentenceStart(confirmed: Bool = false) {
         guard shift != .locked, !shiftByHand else { return }
-        let before = textDocumentProxy.documentContextBeforeInput ?? ""
+        let before = contextBefore ?? ""
         // `Probne versije SŠA`: shift came on mid-line after a cursor move.
         // Right after one, the proxy can report no context AND no text for a
         // moment. Never decide from that - look again once it has settled.
@@ -1289,6 +1385,11 @@ final class KeyboardViewController: UIInputViewController {
 
     // MARK: - Longpress popup
 
+    /// Popup cells: white in light mode, a lighter grey than the black keys in dark.
+    private static let popupCell = UIColor { t in
+        t.userInterfaceStyle == .dark ? UIColor(white: 0.30, alpha: 1) : .white
+    }
+
     private func showPopup(over key: UIButton, variants: [String], raw: Bool = false) {
         dismissPopup()
 
@@ -1296,8 +1397,12 @@ final class KeyboardViewController: UIInputViewController {
         let strip = UIStackView()
         strip.axis = .horizontal
         strip.distribution = .fillEqually
-        strip.spacing = 0
-        strip.backgroundColor = .systemBackground
+        // Thin separator lines between the cells: several Glagolitic letters
+        // in one cell (ⰴⰸⱐ) ran into the next one (owner 2026-11-14).
+        strip.spacing = 1
+        // Opaque, and one step lighter than the keys in dark mode, so the strip
+        // stands out without the keys showing through it (owner 2026-11-14).
+        strip.backgroundColor = .opaqueSeparator
         strip.layer.cornerRadius = 6
         strip.layer.borderWidth = 1
         strip.layer.borderColor = UIColor.separator.cgColor
@@ -1311,6 +1416,9 @@ final class KeyboardViewController: UIInputViewController {
         // (owner 2026-11-07). `variantLabels` stays in variant order; only the
         // strip shows them mirrored.
         let opensLeft = key.convert(key.bounds, to: view).midX > view.bounds.midX
+        // A cell is wide enough for its longest variant (one letter: 40 pt).
+        let longest = variants.map { (raw ? $0 : Script.out($0)).count }.max() ?? 1
+        let cellWidth: CGFloat = longest > 1 ? CGFloat(14 + 18 * longest) : 40
         popupOpensLeft = opensLeft
         variantLabels = variants.map { item in
             let l = UILabel()
@@ -1318,10 +1426,11 @@ final class KeyboardViewController: UIInputViewController {
             // Android popup once skipped it and Cyrillic `з` held showed `з`.
             l.text = raw ? item : Script.out(item)
             l.adjustsFontSizeToFitWidth = true
-            l.minimumScaleFactor = 0.6
-            l.font = .systemFont(ofSize: 24)
+            l.minimumScaleFactor = 0.4
+            l.font = raw ? .systemFont(ofSize: 24) : Self.glagFont(24)
             l.textAlignment = .center
             l.textColor = .label
+            l.backgroundColor = Self.popupCell
             return l
         }
         for l in (opensLeft ? variantLabels.reversed() : variantLabels) {
@@ -1349,7 +1458,7 @@ final class KeyboardViewController: UIInputViewController {
             strip.heightAnchor.constraint(greaterThanOrEqualToConstant: minAbove),
             strip.widthAnchor.constraint(greaterThanOrEqualTo: key.widthAnchor),
             strip.widthAnchor.constraint(
-                equalToConstant: max(CGFloat(variants.count) * 40, 44)),
+                equalToConstant: max(CGFloat(variants.count) * cellWidth, 44)),
             strip.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor,
                                            constant: 2),
             strip.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor,
@@ -1532,6 +1641,7 @@ extension KeyboardViewController: SwipeHost {
     }
 
     @objc fileprivate func tapSuggestion(_ sender: UIButton) {
+        glagWord = nil
         guard let i = suggestionButtons.firstIndex(of: sender),
               let word = slotWords[i], !word.isEmpty else { return }
         if word.hasPrefix(Self.savePrefix) {
@@ -1550,8 +1660,8 @@ extension KeyboardViewController: SwipeHost {
             completingPrefix = nil
             tappedWord = nil
             for _ in 0..<typed.count { textDocumentProxy.deleteBackward() }
-            let shown = Script.out(word)
-            textDocumentProxy.insertText(shown)
+            let shown = outWord(word)
+            put(shown)
             lastSwipedWord = shown
             swipeSuffix = ""
             swipeCommittedAt = Date()
@@ -1578,18 +1688,19 @@ extension KeyboardViewController: SwipeHost {
 
     /// Puts a decoded word in, spacing it from whatever came before.
     fileprivate func commitSwipe(_ word: String) {
+        glagWord = nil
         tappedWord = nil
         let cased = isUppercase ? word.prefix(1).uppercased() + word.dropFirst() : word
-        let before = textDocumentProxy.documentContextBeforeInput ?? ""
-        let after = textDocumentProxy.documentContextAfterInput ?? ""
+        let before = contextBefore ?? ""
+        let after = contextAfter ?? ""
         let lead = pendingSpace
             || (before.last.map { !$0.isWhitespace && !Self.openers.contains($0) } ?? false)
         // Swiped into the middle of text, right before a word: bring the space
         // after it too, or it glues on (`Dobramožlivost`).
         let trail = after.first.map { $0.isLetter || $0.isNumber } ?? false
         swipeSuffix = trail ? " " : ""
-        let shown = Script.out(cased)
-        textDocumentProxy.insertText((lead ? " " : "") + shown + swipeSuffix)
+        let shown = outWord(cased)
+        put((lead ? " " : "") + shown + swipeSuffix)
         lastSwipedWord = shown
         swipeCommittedAt = Date()
         pendingSpace = !trail
@@ -1597,13 +1708,14 @@ extension KeyboardViewController: SwipeHost {
     }
 
     fileprivate func replaceLastSwipedWord(with word: String) {
+        glagWord = nil
         guard let previous = lastSwipedWord else { return }
         for _ in 0..<(previous.count + swipeSuffix.count) { textDocumentProxy.deleteBackward() }
         // Exactly as tapped. Copying the old word's capital here is why
         // tapping `dobra` under a wrongly capitalised `Dobra` changed nothing;
         // the bar already shows the candidates in the case they went in.
-        let shown = Script.out(word)
-        textDocumentProxy.insertText(shown + swipeSuffix)
+        let shown = outWord(word)
+        put(shown + swipeSuffix)
         lastSwipedWord = shown
         pendingSpace = swipeSuffix.isEmpty
     }
@@ -1698,6 +1810,7 @@ extension KeyboardViewController: SwipeHost {
     }
 
     func swipeDidFinish(candidates: [String]) {
+        glagWord = nil
         decoding = max(0, decoding - 1)
         defer { if decoding == 0 { flushQueuedKeys() } }
         guard let best = candidates.first else {

@@ -229,6 +229,9 @@ enum Layout {
         if ["ru", "uk", "bg", "be", "sla"].contains(language) {
             return [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")]
         }
+        // Polish in Glagolitic keeps the Polish Latin grid: every key writes its
+        // own letter and the script turns whole words (cz, rz, sia) into Glagolitic.
+        if language == "pl" && !latin { return rows(latin: true) }
         if !latin && (language == "sr" || language == "mk") {
             return [Array("qwertzuiop"), Array("asdfghjkl"), Array("xcvbnm")]
         }
@@ -245,6 +248,24 @@ enum Layout {
     /// wordlist, the glide, `Script.out`) keeps seeing the two letters.
     static func keyText(_ ch: Character, latin: Bool) -> String {
         guard !latin else { return String(ch) }
+        // Polish Glagolitic: the free keys write what Polish has no key for
+        // (owner 2026-11-14, variant 1): q = ch (Ⱈ), x = dzelo (Ⰷ, marker ẑ).
+        if language == "pl" {
+            switch ch {
+            // Layout v03 (owner 2026-11-14): q = ja Ⱑ, w = ę Ⱔ, v = w Ⰲ, x = ch Ⱈ.
+            case "q": return "ja"
+            case "Q": return "Ja"
+            case "w": return "ę"
+            case "W": return "Ę"
+            case "v": return "w"
+            case "V": return "W"
+            // x = ch Ⱈ like Keyman's Glagolitic (Phonetic) and Cyrillic х
+            // (owner 2026-11-14); dzelo stays on hold d.
+            case "x": return "ch"
+            case "X": return "Ch"
+            default: return String(ch)
+            }
+        }
         // Russian, phonetic: every key writes its own letter (я on q, ш on w);
         // the Interslavic `lj`/`nj` keys are not part of this layout.
         if ["ru", "uk", "bg", "be", "sla"].contains(language) { return String(ch) }
@@ -295,7 +316,7 @@ enum Layout {
     /// Android `Lang.APOSTROPHE_IN_WORD`.
     static var apostropheInWord: Bool { ["uk", "be"].contains(language) }
 
-    static var singleLetterKeys: Bool { ["mk", "ru", "uk", "bg", "be", "sla"].contains(language) }
+    static var singleLetterKeys: Bool { ["mk", "ru", "uk", "bg", "be", "sla", "pl"].contains(language) }
     static var qwertz: Bool {
         get {
             guard qwertzOffered else { return false }
@@ -350,6 +371,21 @@ enum Layout {
         let lower = Character(key.lowercased())
         let own = accents[lower] ?? []
         var all = own
+        // Polish Glagolitic, layout v02 (owner 2026-11-14,
+        // vault_002/Projects/INTERSLOVE/glagolica_pl/uklad_klawiatury_pl_glagolica_v02.md):
+        // every letter Polish writes with more than one key sits under the key
+        // it starts with; the jotted family under q, j (ja…) and i (ia…).
+        if !latin && language == "pl" && key.isLetter {
+            let glagHolds: [Character: [String]] = [
+                "q": ["ja", "ju", "ję", "ją"], "j": ["ja", "ju", "ję", "ją"],
+                "i": ["ia", "iu", "ię", "ią"], "w": ["ę", "ię", "ą", "ią"],
+                "a": ["ą", "ia"], "c": ["ć", "cz"], "d": ["dź", "ď", "dż", "ḍ"],
+                "e": ["ę", "ię"], "h": ["ch"], "l": ["ł"], "n": ["ń"],
+                "o": ["ó", "ō"], "r": ["rz"], "s": ["ś", "sz", "szcz"], "z": ["ż", "ź"],
+            ]
+            guard let g = glagHolds[lower] else { return nil }
+            return g.map { cased($0, uppercase) }
+        }
         if latin {
             let isvOnPl: [Character: String] = ["c": "č", "s": "š", "z": "ž", "e": "ě"]
             let foreign = (foreignAccents[lower] ?? [])

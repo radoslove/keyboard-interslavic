@@ -31,6 +31,8 @@ enum Script {
     static func offered(_ lang: String) -> [Mode] {
         switch lang {
         case "isv": return [.latin, .cyrillic, .glagolitic]
+        // Polish in Glagolitic: an add-on alphabet, Latin stays the default.
+        case "pl": return [.latin, .glagolitic]
         case "sr": return [.latin, .cyrillic]
         // Proto-Slavic is Latin, but `ъ` `ь` live on `q` `f` inside, so it goes
         // through the same one-mode table as Russian; no script key is shown.
@@ -202,7 +204,132 @@ enum Script {
 
     static func convert(_ latin: String, _ m: Mode) -> String {
         if latin.isEmpty || m == .latin { return latin }
+        if m == .glagolitic && Layout.language == "pl" { return toGlagoliticPL(latin) }
         return m == .cyrillic ? toCyrillic(latin) : toGlagolitic(latin)
+    }
+
+    /// Polish written in Glagolitic: several Latin letters can become one
+    /// Glagolitic one (cz -> ⱍ, sia -> ⱄⱑ), so a letter typed at the end of a
+    /// word can change what is already on the screen. The keyboard then
+    /// re-writes the whole word under the cursor (`rewritesWord`).
+    static var rewritesWord: Bool { mode == .glagolitic && Layout.language == "pl" }
+
+    /// Glyphs typed as such (x key, hold on o): the word re-write starts after
+    /// the last of them, so they are never turned back into ⰴⰸ or ⱁ́.
+    static let atomicGlyphs: Set<Character> = ["ⰷ", "Ⰷ", "ⱉ", "Ⱉ"]
+
+    /// True when the glyph at `i` ends something typed as such: ⰷ, ⱉ, or the
+    /// soft yer right after d (ⰴⱐ, held d) - the converter never makes ⰴⱐ itself.
+    static func endsAtomic(_ w: [Character], _ i: Int) -> Bool {
+        if atomicGlyphs.contains(w[i]) { return true }
+        return (w[i] == "ⱐ" || w[i] == "Ⱐ") && i > 0 && (w[i - 1] == "ⰴ" || w[i - 1] == "Ⰴ")
+    }
+
+    /// The word space written in Polish Glagolitic: en space, wider than " ".
+    static let wideSpace = "\u{2002}"
+
+    // MARK: Polish Glagolitic - the add-on's canon (vault note glagolica_pl_261114)
+
+    /// Longest first. Jotted vowels after a consonant mark its softness
+    /// (siano -> ⱄⱑⱀⱁ), the soft yer ⱐ softens (ś ź ć ń dź rz), the hard yer ⱏ
+    /// hardens (ł, y). Same table as the converter `pl2glag.py`.
+    private static let polishGlag: [(String, String)] = [
+        // Two forms the owner keeps beside the canon (2026-11-14): x writes the
+        // historical dzelo ⰷ, holding o offers otu ⱉ. Inside they are the
+        // markers ẑ and ō, so the word re-write leaves them as typed.
+        ("ẑ", "ⰷ"), ("ō", "ⱉ"),
+        // d softened by the soft yer, offered beside dź (owner 2026-11-14): marker ď.
+        ("ď", "ⰴⱐ"),
+        ("ja", "ⱑ"), ("ia", "ⱑ"), ("ju", "ⱓ"), ("iu", "ⱓ"), ("ję", "ⱗ"), ("ię", "ⱗ"), ("ją", "ⱙ"), ("ią", "ⱙ"),
+        ("sz", "ⱎ"), ("cz", "ⱍ"), ("ż", "ⰶ"), ("ą", "ⱘ"), ("ę", "ⱔ"),
+        ("dż", "ⰴⰶ"), ("dź", "ⰷⱐ"), ("dz", "ⰷ"),   // owner 2026-11-14: dz is dzelo at once
+        // marker ḍ: a d that must NOT join a following z (pod-zielić), from hold d
+        ("ḍ", "ⰴ"), ("rz", "ⱃⱐ"),
+        ("ś", "ⱄⱐ"), ("ź", "ⰸⱐ"), ("ć", "ⱌⱐ"), ("ń", "ⱀⱐ"),
+        ("ł", "ⰾⱏ"), ("ó", "ⱁ\u{0301}"),
+        ("ch", "ⱈ"), ("h", "ⱒ"), ("y", "ⱏⰹ"),
+        ("a", "ⰰ"), ("b", "ⰱ"), ("c", "ⱌ"), ("d", "ⰴ"), ("e", "ⰵ"), ("f", "ⱚ"),
+        ("g", "ⰳ"), ("i", "ⰻ"), ("j", "ⰹ"), ("k", "ⰽ"), ("l", "ⰾ"), ("m", "ⰿ"),
+        ("n", "ⱀ"), ("o", "ⱁ"), ("p", "ⱂ"), ("r", "ⱃ"), ("s", "ⱄ"), ("t", "ⱅ"),
+        ("u", "ⱆ"), ("w", "ⰲ"), ("v", "ⰲ"), ("z", "ⰸ"),   // v writes ⰲ like w (owner 2026-11-14)
+    ]
+
+    private static func toGlagoliticPL(_ latin: String) -> String {
+        let caps = isAllCaps(latin)
+        let src = Array(latin)
+        let low = Array(latin.lowercased())
+        guard src.count == low.count else { return latin }
+        var out = ""
+        var i = 0
+        outer: while i < low.count {
+            for (lat, gl) in polishGlag {
+                let n = lat.count
+                guard i + n <= low.count, String(low[i..<i + n]) == lat else { continue }
+                out += cased(gl, src[i], caps)
+                i += n
+                continue outer
+            }
+            out.append(src[i]); i += 1
+        }
+        return out
+    }
+
+    /// Polish d + z across a prefix (od-zyskać, nad-zwyczajny, pod-ziemie,
+    /// przed-zamcze) are two sounds, not the one sound dz. The rule (owner
+    /// 2026-11-14): the word starts with od / nad / pod / przed, z follows, and
+    /// what follows the prefix is a word of its own -> that d gets the marker ḍ,
+    /// which never joins a z (podziemie = ⰒⱁⰄⰸⰻⰵⰿⰻⰵ). podzielić (po + dzielić),
+    /// odzież, nadzieja: "zielić", "zież", "zieja" are no words, so dz stays ⰷ.
+    static func splitPrefixD(_ latin: String, known: (String) -> Bool) -> String {
+        let low = latin.lowercased()
+        for prefix in ["przed", "pod", "nad", "od"] {
+            guard low.hasPrefix(prefix + "z") || low.hasPrefix(prefix + "ź") || low.hasPrefix(prefix + "ż") else { continue }
+            let rest = String(latin.dropFirst(prefix.count))
+            guard rest.count >= 3, known(rest) else { return latin }
+            var chars = Array(latin)
+            let i = prefix.count - 1
+            chars[i] = chars[i].isUppercase ? "Ḍ" : "ḍ"
+            return String(chars)
+        }
+        return latin
+    }
+
+    private static let polishVowels: Set<Character> = ["a", "ą", "e", "ę", "i", "o", "ó", "u", "y"]
+
+    /// Back to Polish Latin. A jotted vowel reads `ia` after a consonant and
+    /// `ja` elsewhere; `ⰾⱏⰹ` is `ly` (Polish has no `łj`), so typing `l` `y`
+    /// keeps going instead of turning into `łj`.
+    private static let reversePolishGlag: [(String, String)] =
+        ([("ⰾⱏⰹ", "ly"), ("ⰴⰸⱐ", "dź"), ("ⰴⰶ", "dż"), ("ⰴⰸ", "dz"), ("ⰷⱐ", "dź"), ("ⰷ", "dz"), ("ⱉ", "ó"), ("ⰴⱐ", "dź")]
+         + polishGlag.filter { !["ia", "iu", "ię", "ią", "ja", "ju", "ję", "ją", "dż", "dź", "dz", "v", "ẑ", "ō", "ď", "ḍ"].contains($0.0) }
+            .map { ($0.1, $0.0) })
+        .sorted { $0.0.count > $1.0.count }
+    private static let polishJotted: [Character: String] = ["ⱑ": "a", "ⱓ": "u", "ⱗ": "ę", "ⱙ": "ą"]
+
+    private static func backPolish(_ s: String) -> String {
+        let chars = Array(s)
+        var out = ""
+        var i = 0
+        outer: while i < chars.count {
+            let low = Character(String(chars[i]).lowercased())
+            if let v = polishJotted[low] {
+                let afterConsonant = out.last.map { $0.isLetter && !polishVowels.contains(Character($0.lowercased())) } ?? false
+                let lat = (afterConsonant ? "i" : "j") + v
+                out += chars[i].isUppercase ? lat.prefix(1).uppercased() + lat.dropFirst() : lat
+                i += 1; continue
+            }
+            for (scr, lat) in reversePolishGlag {
+                let n = scr.count
+                guard i + n <= chars.count else { continue }
+                if String(chars[i..<i + n]).lowercased() == scr.lowercased() {
+                    out += chars[i].isUppercase ? lat.prefix(1).uppercased() + lat.dropFirst() : lat
+                    i += n
+                    continue outer
+                }
+            }
+            out.append(chars[i]); i += 1
+        }
+        return out
     }
 
     private static func cased(_ mapped: String, _ source: Character, _ allCaps: Bool) -> String {
@@ -284,6 +411,7 @@ enum Script {
 
     static func back(_ s: String, _ m: Mode) -> String {
         if m == .latin || s.isEmpty { return s }
+        if m == .glagolitic && Layout.language == "pl" { return backPolish(s) }
         let table = m == .cyrillic ? reverseCyrillic : reverseGlagolitic
         let chars = Array(s)
         var out = ""

@@ -427,6 +427,14 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     }
 
     /// In the wordlist or the user's own words (exact form, ignoring case).
+    /// Like `isKnown`, but false while no wordlist is loaded (Polish
+    /// Glagolitic must not split od-/pod-/nad-/przed- + z on a guess).
+    func knowsWord(_ word: String) -> Bool {
+        let lower = word.lowercased()
+        if userWords.contains(where: { $0.lowercased() == lower }) { return true }
+        return dictionary?.contains(lower) ?? false
+    }
+
     func isKnown(_ word: String) -> Bool {
         let lower = word.lowercased()
         if userWords.contains(where: { $0.lowercased() == lower }) { return true }
