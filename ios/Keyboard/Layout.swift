@@ -252,13 +252,13 @@ enum Layout {
         // (owner 2026-11-14, variant 1): q = ch (Ⱈ), x = dzelo (Ⰷ, marker ẑ).
         if language == "pl" {
             switch ch {
-            // Layout v03 (owner 2026-11-14): q = ja Ⱑ, w = ę Ⱔ, v = w Ⰲ, x = ch Ⱈ.
+            // Layout v04 (owner 2026-11-14): q = ja Ⱑ, w = w Ⰲ, x = ch Ⱈ, and
+            // v = the soft yer Ⱐ, which works as the Polish kreska: s + v = ś,
+            // z ź, c ć, n ń, dz dź, r rz, d ⰴⱐ; after any other letter a bare Ⱐ.
+            // Inside it is the marker ʹ (`Script.softenPL`).
             case "q": return "ja"
             case "Q": return "Ja"
-            case "w": return "ę"
-            case "W": return "Ę"
-            case "v": return "w"
-            case "V": return "W"
+            case "v", "V": return Script.softYerMark
             // x = ch Ⱈ like Keyman's Glagolitic (Phonetic) and Cyrillic х
             // (owner 2026-11-14); dzelo stays on hold d.
             case "x": return "ch"
@@ -379,7 +379,9 @@ enum Layout {
             let glagHolds: [Character: [String]] = [
                 "q": ["ja", "ju", "ję", "ją"], "j": ["ja", "ju", "ję", "ją"],
                 "i": ["ia", "iu", "ię", "ią"], "w": ["ę", "ię", "ą", "ią"],
-                "a": ["ą", "ia"], "c": ["ć", "cz"], "d": ["dź", "ď", "dż", "ḍ"],
+                // v: the hard yer Ⱏ (l + Ⱏ = ł, otherwise a bare Ⱏ)
+                "v": [Script.hardYerMark],
+                "a": ["ą", "ią", "ia"],   // ę ię ą ią also under the keys they contain (owner 0.6.30) "c": ["ć", "cz"], "d": ["dź", "ď", "dż", "ḍ"],
                 "e": ["ę", "ię"], "h": ["ch"], "l": ["ł"], "n": ["ń"],
                 "o": ["ó", "ō"], "r": ["rz"], "s": ["ś", "sz", "szcz"], "z": ["ż", "ź"],
             ]

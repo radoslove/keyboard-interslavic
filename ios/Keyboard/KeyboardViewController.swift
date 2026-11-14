@@ -1138,6 +1138,8 @@ final class KeyboardViewController: UIInputViewController {
         } else if ch.isLetter && !extendsSwipe {
             let prev = before.last
             tappedWord = (prev.map { wordChar($0) } == true) ? tappedWord.map { $0 + latin } : latin
+            // Polish Glagolitic: the v key's kreska joins the letter before (s + ʹ = ś).
+            if Script.rewritesWord { tappedWord = tappedWord.map { Script.softenPL($0) } }
         } else if ch.isLetter {
             tappedWord = nil
         } else {
@@ -1163,9 +1165,10 @@ final class KeyboardViewController: UIInputViewController {
                 prev = (Script.toLatin(shown), shown)
             }
             for _ in prev.shown { textDocumentProxy.deleteBackward() }
-            let now = Script.out(prev.latin + latin)
+            let joined = Script.softenPL(prev.latin + latin)
+            let now = Script.out(joined)
             put(now)
-            glagWord = (prev.latin + latin, now)
+            glagWord = (joined, now)
         } else {
             // Polish Glagolitic: the word is finished - split d + z after a
             // prefix where it is two sounds (od-zyskać), then the space etc.

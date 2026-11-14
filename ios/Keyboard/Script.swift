@@ -225,6 +225,40 @@ enum Script {
         return (w[i] == "ⱐ" || w[i] == "Ⱐ") && i > 0 && (w[i - 1] == "ⰴ" || w[i - 1] == "Ⰴ")
     }
 
+    /// The v key in Polish Glagolitic writes the soft yer Ⱐ as a kreska, its
+    /// hold the hard yer Ⱏ (layout v04, owner 2026-11-14). Inside they are the
+    /// modifier letters ʹ ʺ (letters to Swift, so a word goes on through them);
+    /// `softenPL` folds them into the letter before where Polish has one.
+    static let softYerMark = "\u{02B9}"
+    static let hardYerMark = "\u{02BA}"
+
+    private static let softened: [(String, String)] = [
+        ("s", "ś"), ("z", "ź"), ("c", "ć"), ("n", "ń"), ("r", "rz"), ("d", "ď"),
+    ]
+
+    /// s + ʹ = ś, z ź, c ć, n ń (so dz + ʹ = dź), r rz, d ď (ⰴⱐ); l + ʺ = ł.
+    /// Any other pair keeps the marker, which writes a bare Ⱐ or Ⱏ.
+    static func softenPL(_ latin: String) -> String {
+        var out: [Character] = []
+        for ch in latin {
+            let s = String(ch)
+            if s == softYerMark || s == hardYerMark, let prev = out.last {
+                let lowPrev = String(prev).lowercased()
+                let up = prev.isUppercase
+                let table: [(String, String)] = s == softYerMark
+                    ? softened : [("l", "ł")]
+                if let (_, to) = table.first(where: { $0.0 == lowPrev }) {
+                    out.removeLast()
+                    let t = up ? to.prefix(1).uppercased() + to.dropFirst() : to
+                    out.append(contentsOf: t)
+                    continue
+                }
+            }
+            out.append(ch)
+        }
+        return String(out)
+    }
+
     /// The word space written in Polish Glagolitic: en space, wider than " ".
     static let wideSpace = "\u{2002}"
 
@@ -240,6 +274,8 @@ enum Script {
         ("ẑ", "ⰷ"), ("ō", "ⱉ"),
         // d softened by the soft yer, offered beside dź (owner 2026-11-14): marker ď.
         ("ď", "ⰴⱐ"),
+        // v key: bare yers where Polish has no letter for the pair (layout v04)
+        ("\u{02B9}", "ⱐ"), ("\u{02BA}", "ⱏ"),
         ("ja", "ⱑ"), ("ia", "ⱑ"), ("ju", "ⱓ"), ("iu", "ⱓ"), ("ję", "ⱗ"), ("ię", "ⱗ"), ("ją", "ⱙ"), ("ią", "ⱙ"),
         ("sz", "ⱎ"), ("cz", "ⱍ"), ("ż", "ⰶ"), ("ą", "ⱘ"), ("ę", "ⱔ"),
         ("dż", "ⰴⰶ"), ("dź", "ⰷⱐ"), ("dz", "ⰷ"),   // owner 2026-11-14: dz is dzelo at once

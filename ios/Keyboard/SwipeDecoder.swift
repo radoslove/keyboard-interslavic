@@ -59,11 +59,11 @@ struct SwipeDecoder {
     /// two-letter gesture returned the word 0 times in 126.
     var digraphKeys = false
 
-    /// Polish Glagolitic (owner 2026-11-14): the keys are labelled by what they
-    /// TAP - v shows Ⰲ (w), w shows Ⱔ (ę) - while the wordlist files letters
-    /// under the Latin keys. A glide then counts both ways: a `w` of the word
-    /// may run over the w key OR the v key, an `ę` over the e key OR the w key.
+    /// Polish Glagolitic (owner 2026-11-14): in layout v02-v03 v carried Ⰲ (w),
+    /// and the owner keeps v catching w in v04 (0.6.29), where w is back on w:
+    /// a `w` of the word may run over the w key OR the v key.
     var polishGlag = false
+
     private static let keyE: UInt8 = 4, keyV: UInt8 = 21, keyWLatin: UInt8 = 22
     /// Serbian Cyrillic: `x` is the `џ` key, so `d ž` has a third route over it
     /// (Android 3.8.8, `Dictionary.pairKey`). The file stores FOLDED keys, where
@@ -159,19 +159,18 @@ struct SwipeDecoder {
             let c = keyCentres[Int(key)], r = Double(keyWidth) * 0.6
             return path.contains { hypot(Double($0.x - c.x), Double($0.y - c.y)) < r }
         }
+        // Layout v04 (owner 2026-11-14): w writes w again, ę is under e only,
+        // and v still catches w as it did when it carried Ⰲ.
         let nearV = polishGlag && passesNear(Self.keyV)
-        let nearW = polishGlag && passesNear(Self.keyWLatin)
-        /// The word's route with w on the v key and ę on the w key, nil if it
-        /// has neither (or the finger came near neither key).
+        /// The word's route with w on the v key, nil if it has no w (or the
+        /// finger did not come near v).
         func glagRoute(_ keys: UnsafeBufferPointer<UInt8>, offset: Int, length: Int) -> [UInt8]? {
-            guard nearV || nearW,
-                  (nearV && keys.contains(Self.keyWLatin)) || (nearW && keys.contains(Self.keyE)) else { return nil }
+            guard nearV, keys.contains(Self.keyWLatin) else { return nil }
             let word = Array(dictionary.word(at: offset, length: length).lowercased())
             guard word.count == keys.count else { return nil }
             var out = Array(keys), changed = false
             for i in 0..<word.count {
                 if nearV && word[i] == "w" { out[i] = Self.keyV; changed = true }
-                if nearW && word[i] == "ę" { out[i] = Self.keyWLatin; changed = true }
             }
             return changed ? out : nil
         }
@@ -222,11 +221,9 @@ struct SwipeDecoder {
             }
         }
         if polishGlag {
-            // A glide starting or ending on v may be a word filed under w; one
-            // ending on w may end in ę (filed under e).
+            // A glide starting or ending on v may be a word filed under w.
             if firstKeys.contains(Int(Self.keyV)) { firstKeys.append(Int(Self.keyWLatin)) }
             if lastKeys.contains(Int(Self.keyV)) { lastKeys.append(Int(Self.keyWLatin)) }
-            if lastKeys.contains(Int(Self.keyWLatin)) { lastKeys.append(Int(Self.keyE)) }
             var seenF = Set<Int>(), seenL = Set<Int>()
             firstKeys = firstKeys.filter { seenF.insert($0).inserted }
             lastKeys = lastKeys.filter { seenL.insert($0).inserted }
