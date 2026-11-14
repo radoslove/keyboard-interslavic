@@ -58,6 +58,13 @@ struct SwipeDecoder {
     /// (Android 3.6.14, `Dictionary.digraphKeys`). With one route only, the
     /// two-letter gesture returned the word 0 times in 126.
     var digraphKeys = false
+
+    /// Polish Glagolitic (owner 2026-11-14): the keys are labelled by what they
+    /// TAP - v shows Ⰲ (w), w shows Ⱔ (ę) - while the wordlist files letters
+    /// under the Latin keys. A glide then counts both ways: a `w` of the word
+    /// may run over the w key OR the v key, an `ę` over the e key OR the w key.
+    var polishGlag = false
+    private static let keyE: UInt8 = 4, keyV: UInt8 = 21, keyWLatin: UInt8 = 22
     /// Serbian Cyrillic: `x` is the `џ` key, so `d ž` has a third route over it
     /// (Android 3.8.8, `Dictionary.pairKey`). The file stores FOLDED keys, where
     /// `dž` and `dz` are both `d z` - so the pair counts only when the word
@@ -145,6 +152,30 @@ struct SwipeDecoder {
         var best: [(score: Double, offset: Int, length: Int)] = []
         var worstKept = Double.greatestFiniteMagnitude
 
+        // Polish Glagolitic: only when the finger came near the v or w key is a
+        // second route worth building (it needs the word's letters).
+        func passesNear(_ key: UInt8) -> Bool {
+            guard Int(key) < keyCentres.count else { return false }
+            let c = keyCentres[Int(key)], r = Double(keyWidth) * 0.6
+            return path.contains { hypot(Double($0.x - c.x), Double($0.y - c.y)) < r }
+        }
+        let nearV = polishGlag && passesNear(Self.keyV)
+        let nearW = polishGlag && passesNear(Self.keyWLatin)
+        /// The word's route with w on the v key and ę on the w key, nil if it
+        /// has neither (or the finger came near neither key).
+        func glagRoute(_ keys: UnsafeBufferPointer<UInt8>, offset: Int, length: Int) -> [UInt8]? {
+            guard nearV || nearW,
+                  (nearV && keys.contains(Self.keyWLatin)) || (nearW && keys.contains(Self.keyE)) else { return nil }
+            let word = Array(dictionary.word(at: offset, length: length).lowercased())
+            guard word.count == keys.count else { return nil }
+            var out = Array(keys), changed = false
+            for i in 0..<word.count {
+                if nearV && word[i] == "w" { out[i] = Self.keyV; changed = true }
+                if nearW && word[i] == "ę" { out[i] = Self.keyWLatin; changed = true }
+            }
+            return changed ? out : nil
+        }
+
         /// RMS distance of a word's ideal path from the finger, in key widths;
         /// with digraph keys on, the better of the word's two routes.
         func fit(_ keys: UnsafeBufferPointer<UInt8>, dzh: Bool = false) -> Double? {
@@ -164,6 +195,18 @@ struct SwipeDecoder {
             else { return plain }
             return min(plain ?? alt, alt)
         }
+        func fitGlag(_ keys: UnsafeBufferPointer<UInt8>, offset: Int, length: Int) -> Double? {
+            let plain = fit(keys)
+            guard let route = glagRoute(keys, offset: offset, length: length),
+                  let ideal = route.withUnsafeBufferPointer({ idealPath(for: $0) }) else { return plain }
+            var sum = 0.0
+            for i in 0..<Self.samples {
+                let dx = Double(path[i].x - ideal[i].x), dy = Double(path[i].y - ideal[i].y)
+                sum += dx * dx + dy * dy
+            }
+            let alt = (sum / Double(Self.samples)).squareRoot() / Double(keyWidth)
+            return min(plain ?? alt, alt)
+        }
 
         // A glide that starts on `љ` belongs to a word filed under `l` (the
         // wordlist is bucketed by its LETTERS), and one that ends on `љ`/`њ`
@@ -177,6 +220,16 @@ struct SwipeDecoder {
                 softLast[hit.key] = softEndPenalty
                 lastKeys.append(hit.key)
             }
+        }
+        if polishGlag {
+            // A glide starting or ending on v may be a word filed under w; one
+            // ending on w may end in ę (filed under e).
+            if firstKeys.contains(Int(Self.keyV)) { firstKeys.append(Int(Self.keyWLatin)) }
+            if lastKeys.contains(Int(Self.keyV)) { lastKeys.append(Int(Self.keyWLatin)) }
+            if lastKeys.contains(Int(Self.keyWLatin)) { lastKeys.append(Int(Self.keyE)) }
+            var seenF = Set<Int>(), seenL = Set<Int>()
+            firstKeys = firstKeys.filter { seenF.insert($0).inserted }
+            lastKeys = lastKeys.filter { seenL.insert($0).inserted }
         }
         if digraphKeys {
             if firstKeys.contains(Layout.ljKey) { firstKeys.append(Int(Self.keyL)) }
@@ -200,7 +253,9 @@ struct SwipeDecoder {
                     let dzh = dzhKey && Self.hasDZ(entry.keys)
                         && dictionary.word(at: entry.wordOffset, length: entry.wordLength)
                             .lowercased().contains("dž")
-                    guard let rms = fit(entry.keys, dzh: dzh) else { return }
+                    guard let rms = polishGlag
+                            ? fitGlag(entry.keys, offset: entry.wordOffset, length: entry.wordLength)
+                            : fit(entry.keys, dzh: dzh) else { return }
 
                     // Frequency breaks ties between shapes the finger cannot
                     // distinguish anyway. It nudges, it does not decide: a

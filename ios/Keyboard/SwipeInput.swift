@@ -284,6 +284,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         let digraph = Script.mode != .latin && !Layout.singleLetterKeys
         let dzh = digraph && Layout.language == "sr"
         let lang = Layout.language, script = "\(Script.mode)"
+        let polishGlag = Script.rewritesWord
         queue.async { [weak self] in
             var decoder = SwipeDecoder(dictionary: dictionary,
                                        keyCentres: centres,
@@ -292,6 +293,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
                                        userWords: mine)
             decoder.digraphKeys = digraph
             decoder.dzhKey = dzh
+            decoder.polishGlag = polishGlag
             let started = CFAbsoluteTimeGetCurrent()
             let found = decoder.decode(path: path, times: times)
             let decodeMs = (CFAbsoluteTimeGetCurrent() - started) * 1000
