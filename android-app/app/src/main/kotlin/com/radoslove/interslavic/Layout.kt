@@ -120,6 +120,22 @@ object Layout {
         'c' to listOf("č"), 's' to listOf("š"), 'z' to listOf("ž"), 'e' to listOf("ě"),
     )
 
+    /** Polish in Glagolitic, held (layout v04 + iOS 0.6.30, owner 2026-11-14):
+     *  the jotted family under q, j and i; ę ię ą ią also under the keys that
+     *  contain them; v = the hard yer Ⱏ (l + Ⱏ = ł, otherwise a bare Ⱏ).
+     *  Markers, read by `Script`: ď = ⰴⱐ, ḍ = a d that never joins a z,
+     *  ō = otu Ⱉ. */
+    private val polishGlagHolds: Map<Char, List<String>> = mapOf(
+        'q' to listOf("ja", "ju", "ję", "ją"), 'j' to listOf("ja", "ju", "ję", "ją"),
+        'i' to listOf("ia", "iu", "ię", "ią"), 'w' to listOf("ę", "ię", "ą", "ią"),
+        'v' to listOf(Script.HARD_YER_MARK),
+        'a' to listOf("ą", "ią", "ia"), 'e' to listOf("ę", "ię"),
+        'c' to listOf("ć", "cz"), 'd' to listOf("dź", "ď", "dż", "ḍ"),
+        'h' to listOf("ch"), 'l' to listOf("ł"), 'n' to listOf("ń"),
+        'o' to listOf("ó", "ō"), 'r' to listOf("rz"), 's' to listOf("ś", "sz", "szcz"),
+        'z' to listOf("ż", "ź"),
+    )
+
     /** Held on `.`: punctuation our MS texts actually use. */
     val periodHold = listOf("…", "!", "„", "”", "\"", "'")
 
@@ -293,6 +309,11 @@ object Layout {
         // Proto-Slavic: `ъ` on `q`, `ь` on `f`, every other key its letter.
         lang == Lang.RU || lang == Lang.UK || lang == Lang.BG || lang == Lang.SLA ||
             lang == Lang.BE -> latinRows
+        // Polish in Glagolitic keeps the Polish Latin grid: every key writes its
+        // own letter and the script turns whole words (cz, rz, sia) into
+        // Glagolitic. ⚠ Only for the NON-Latin script - iOS 0.6.12 crashed at
+        // start when this branch did not say so and called itself.
+        lang == Lang.PL && script != Script.Mode.LATIN -> if (qwertz) qwertzRows else latinRows
         script != Script.Mode.LATIN -> nonLatinRows
         qwertz -> qwertzRows
         else -> latinRows
@@ -311,6 +332,16 @@ object Layout {
         // Ukrainian, Bulgarian and Proto-Slavic likewise.
         lang == Lang.RU || lang == Lang.UK || lang == Lang.BG || lang == Lang.SLA ||
             lang == Lang.BE -> ch.toString()
+        // Polish Glagolitic, layout v04 (owner 2026-11-14, iOS 0.6.29): q = ja Ⱑ,
+        // x = ch Ⱈ (as Keyman's Glagolitic (Phonetic)), v = the soft yer Ⱐ as the
+        // Polish kreska (s + v = ś, z ź, c ć, n ń, dz dź, r rz, d ⰴⱐ; after any
+        // other letter a bare Ⱐ) - inside the marker ʹ, `Script.softenPL`.
+        lang == Lang.PL -> when (ch) {
+            'q' -> "ja"
+            'x' -> "ch"
+            'v' -> Script.SOFT_YER_MARK
+            else -> ch.toString()
+        }
         ch == 'q' -> "lj"
         ch == 'w' -> "nj"
         // Serbian only: `џ` is one letter there and has the `x` position in the
@@ -368,6 +399,9 @@ object Layout {
      * Latin letters in the middle of the other script.
      */
     fun variants(key: Char, uppercase: Boolean, lang: String, latin: Boolean): List<String> {
+        // Polish Glagolitic: every letter Polish writes with more than one key
+        // sits under the key it starts with (layout v04, iOS `glagHolds`).
+        if (!latin && lang == Lang.PL) return polishGlagHolds[key].orEmpty().map { cased(it, uppercase) }
         val mine = own(lang)[key].orEmpty()
         if (!latin) return mine.map { cased(it, uppercase) }
         val extra = foreign[key].orEmpty() + if (lang == Lang.PL) isvOnPl[key].orEmpty() else emptyList()

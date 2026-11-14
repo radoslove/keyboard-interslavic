@@ -44,6 +44,9 @@ object Script {
     fun offered(lang: String): List<Mode> = when (lang) {
         Lang.ISV -> listOf(Mode.LATIN, Mode.CYRILLIC, Mode.GLAGOLITIC)
         Lang.SR -> listOf(Mode.LATIN, Mode.CYRILLIC)
+        // Polish in Glagolitic: an add-on alphabet, Latin stays the default
+        // (iOS 0.6.12, owner 2026-11-14).
+        Lang.PL -> listOf(Mode.LATIN, Mode.GLAGOLITIC)
         // Cyrillic ONLY: there is no Latin Macedonian to offer, so the script
         // key does not appear and the keyboard opens in Cyrillic. The wordlist
         // is already in the internal Latin (tools/build_mk_wordlist.py); the
@@ -237,6 +240,7 @@ object Script {
     fun convert(latin: String, m: Mode, lang: String = Lang.ISV): String = when {
         latin.isEmpty() || m == Mode.LATIN -> latin
         m == Mode.CYRILLIC -> cyrillic(latin, cyrTable(lang))
+        lang == Lang.PL -> glagoliticPL(latin)
         else -> glagolitic(latin)
     }
 
@@ -317,6 +321,7 @@ object Script {
 
     fun back(s: String, m: Mode, lang: String = Lang.ISV): String {
         if (m == Mode.LATIN || s.isEmpty()) return s
+        if (m == Mode.GLAGOLITIC && lang == Lang.PL) return backPolish(s)
         val rev = when {
             m == Mode.CYRILLIC && lang == Lang.SR -> REVERSE_SR
             m == Mode.CYRILLIC && lang == Lang.MK -> REVERSE_MK
@@ -340,5 +345,154 @@ object Script {
             sb.append(s[i]); i++
         }
         return sb.toString()
+    }
+
+    // ---- Polish written in Glagolitic (iOS 0.6.12-0.6.30, owner 2026-11-14) ----
+    // Canon: the converter pl2glag.py of the Polish Glagolitic note; the same
+    // table as iOS `Script.polishGlag`. Key layout v04.
+
+    /** Polish in Glagolitic: several Latin letters can become one Glagolitic
+     *  one (cz -> ⱍ, sia -> ⱄⱑ), so a letter typed at the end of a word can
+     *  change what is already on the screen; the keyboard then re-writes the
+     *  whole word under the cursor. */
+    fun rewritesWord(context: Context): Boolean =
+        Lang.current(context) == Lang.PL && mode(context) == Mode.GLAGOLITIC
+
+    /** Glyphs typed as such (held o, held d): the word re-write starts after
+     *  the last of them, so they are never turned back into ⰴⰸ or ⱁ́. */
+    private val ATOMIC = setOf('ⰷ', 'Ⰷ', 'ⱉ', 'Ⱉ')
+
+    /** True when the glyph at [i] ends something typed as such: ⰷ, ⱉ, or the
+     *  soft yer right after d (ⰴⱐ) - the converter never makes ⰴⱐ itself. */
+    fun endsAtomic(w: String, i: Int): Boolean {
+        if (w[i] in ATOMIC) return true
+        return (w[i] == 'ⱐ' || w[i] == 'Ⱐ') && i > 0 && (w[i - 1] == 'ⰴ' || w[i - 1] == 'Ⰴ')
+    }
+
+    /** The v key writes the soft yer Ⱐ as a kreska, its hold the hard yer Ⱏ.
+     *  Inside they are the modifier letters ʹ ʺ (letters to Kotlin too, so a
+     *  word goes on through them); [softenPL] folds them into the letter before. */
+    const val SOFT_YER_MARK = "ʹ"
+    const val HARD_YER_MARK = "ʺ"
+
+    private val SOFTENED = mapOf("s" to "ś", "z" to "ź", "c" to "ć", "n" to "ń", "r" to "rz", "d" to "ď")
+
+    /** s + ʹ = ś, z ź, c ć, n ń (so dz + ʹ = dź), r rz, d ď (ⰴⱐ); l + ʺ = ł.
+     *  Any other pair keeps the marker, which writes a bare Ⱐ or Ⱏ. */
+    fun softenPL(latin: String): String {
+        val out = StringBuilder()
+        for (ch in latin) {
+            val m = ch.toString()
+            if ((m == SOFT_YER_MARK || m == HARD_YER_MARK) && out.isNotEmpty()) {
+                val prev = out[out.length - 1]
+                val table = if (m == SOFT_YER_MARK) SOFTENED else mapOf("l" to "ł")
+                val to = table[prev.lowercaseChar().toString()]
+                if (to != null) {
+                    out.setLength(out.length - 1)
+                    out.append(if (prev.isUpperCase()) to.replaceFirstChar { it.uppercaseChar() } else to)
+                    continue
+                }
+            }
+            out.append(ch)
+        }
+        return out.toString()
+    }
+
+    /** The word space written in Polish Glagolitic: the en space, wider than
+     *  " " (owner 2026-11-14: words ran together in phone fonts). */
+    const val WIDE_SPACE = ' '
+
+    /** Longest first. Jotted vowels after a consonant mark its softness
+     *  (siano -> ⱄⱑⱀⱁ), the soft yer ⱐ softens (ś ź ć ń dź rz), the hard yer ⱏ
+     *  hardens (ł, y). Markers: ẑ = dzelo typed as such, ō = otu ⱉ, ď = ⰴⱐ,
+     *  ḍ = a d that never joins a following z (pod-ziemie). */
+    private val POLISH_GLAG: List<Pair<String, String>> = listOf(
+        "ẑ" to "ⰷ", "ō" to "ⱉ", "ď" to "ⰴⱐ",
+        SOFT_YER_MARK to "ⱐ", HARD_YER_MARK to "ⱏ",
+        "ja" to "ⱑ", "ia" to "ⱑ", "ju" to "ⱓ", "iu" to "ⱓ", "ję" to "ⱗ", "ię" to "ⱗ", "ją" to "ⱙ", "ią" to "ⱙ",
+        "sz" to "ⱎ", "cz" to "ⱍ", "ż" to "ⰶ", "ą" to "ⱘ", "ę" to "ⱔ",
+        "dż" to "ⰴⰶ", "dź" to "ⰷⱐ", "dz" to "ⰷ",
+        "ḍ" to "ⰴ", "rz" to "ⱃⱐ",
+        "ś" to "ⱄⱐ", "ź" to "ⰸⱐ", "ć" to "ⱌⱐ", "ń" to "ⱀⱐ",
+        "ł" to "ⰾⱏ", "ó" to "ⱁ́",
+        "ch" to "ⱈ", "h" to "ⱒ", "y" to "ⱏⰹ",
+        "a" to "ⰰ", "b" to "ⰱ", "c" to "ⱌ", "d" to "ⰴ", "e" to "ⰵ", "f" to "ⱚ",
+        "g" to "ⰳ", "i" to "ⰻ", "j" to "ⰹ", "k" to "ⰽ", "l" to "ⰾ", "m" to "ⰿ",
+        "n" to "ⱀ", "o" to "ⱁ", "p" to "ⱂ", "r" to "ⱃ", "s" to "ⱄ", "t" to "ⱅ",
+        "u" to "ⱆ", "w" to "ⰲ", "v" to "ⰲ", "z" to "ⰸ",
+    )
+
+    private fun glagoliticPL(latin: String): String {
+        val caps = allCaps(latin)
+        val low = latin.lowercase()
+        if (low.length != latin.length) return latin
+        val sb = StringBuilder()
+        var i = 0
+        outer@ while (i < low.length) {
+            for ((lat, gl) in POLISH_GLAG) {
+                if (low.startsWith(lat, i)) {
+                    sb.append(cased(gl, latin[i], caps))
+                    i += lat.length
+                    continue@outer
+                }
+            }
+            sb.append(latin[i]); i++
+        }
+        return sb.toString()
+    }
+
+    /** Polish d + z across a prefix (od-zyskać, nad-zwyczajny, pod-ziemie,
+     *  przed-zamcze) are two sounds, not the one sound dz. The word starts with
+     *  od / nad / pod / przed, z ź ż follows, and what follows the prefix is a
+     *  word of its own -> that d gets the marker ḍ, which never joins a z.
+     *  podzielić, odzież, nadzieja: "zielić", "zież", "zieja" are no words. */
+    fun splitPrefixD(latin: String, known: (String) -> Boolean): String {
+        val low = latin.lowercase()
+        for (prefix in listOf("przed", "pod", "nad", "od")) {
+            if (!(low.startsWith(prefix + "z") || low.startsWith(prefix + "ź") || low.startsWith(prefix + "ż"))) continue
+            val rest = latin.substring(prefix.length)
+            if (rest.length < 3 || !known(rest)) return latin
+            val i = prefix.length - 1
+            val chars = latin.toCharArray()
+            chars[i] = if (chars[i].isUpperCase()) 'Ḍ' else 'ḍ'
+            return String(chars)
+        }
+        return latin
+    }
+
+    private val POLISH_VOWELS = setOf('a', 'ą', 'e', 'ę', 'i', 'o', 'ó', 'u', 'y')
+    private val POLISH_JOTTED = mapOf('ⱑ' to "a", 'ⱓ' to "u", 'ⱗ' to "ę", 'ⱙ' to "ą")
+    private val REVERSE_PL: List<Pair<String, String>> = (
+        listOf("ⰾⱏⰹ" to "ly", "ⰴⰸⱐ" to "dź", "ⰴⰶ" to "dż", "ⰴⰸ" to "dz", "ⰷⱐ" to "dź",
+            "ⰷ" to "dz", "ⱉ" to "ó", "ⰴⱐ" to "dź") +
+            POLISH_GLAG.filter {
+                it.first !in setOf("ia", "iu", "ię", "ią", "ja", "ju", "ję", "ją", "dż", "dź", "dz", "v", "ẑ", "ō", "ď", "ḍ")
+            }.map { it.second to it.first }
+        ).sortedByDescending { it.first.length }
+
+    /** Back to Polish Latin. A jotted vowel reads `ia` after a consonant and
+     *  `ja` elsewhere; `ⰾⱏⰹ` is `ly` (Polish has no `łj`). */
+    private fun backPolish(s: String): String {
+        val out = StringBuilder()
+        var i = 0
+        outer@ while (i < s.length) {
+            val v = POLISH_JOTTED[s[i].lowercaseChar()]
+            if (v != null) {
+                val last = out.lastOrNull()
+                val afterConsonant = last != null && last.isLetter() && last.lowercaseChar() !in POLISH_VOWELS
+                val lat = (if (afterConsonant) "i" else "j") + v
+                out.append(if (s[i].isUpperCase()) lat.replaceFirstChar { it.uppercaseChar() } else lat)
+                i++; continue
+            }
+            for ((scr, lat) in REVERSE_PL) {
+                if (s.regionMatches(i, scr, 0, scr.length, ignoreCase = true)) {
+                    out.append(if (s[i].isUpperCase()) lat.replaceFirstChar { it.uppercaseChar() } else lat)
+                    i += scr.length
+                    continue@outer
+                }
+            }
+            out.append(s[i]); i++
+        }
+        return out.toString()
     }
 }

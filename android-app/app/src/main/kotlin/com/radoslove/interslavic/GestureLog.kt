@@ -1,6 +1,7 @@
 package com.radoslove.interslavic
 
 import android.content.Context
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -28,6 +29,16 @@ import java.net.URL
  * it, deletes it, or moves on — so a gesture is held back until its fate is
  * settled, and each one is sent exactly once, already labelled.
  *
+ * ## For users: a local file, sent only by mail (iOS 0.6.11, owner 2026-11-13)
+ *
+ * Any build can ALSO keep the gestures in a local file, `filesDir/gestures.jsonl`
+ * (one JSON object per line, at most [FILE_CAP] bytes - past that the older half
+ * goes). Off until the user switches it on in the app, where the switch is
+ * hidden behind five taps on the version line. Nothing is sent from here: the
+ * app attaches the file to a mail the user sends from their own mail app
+ * (`SetupActivity.sendGestureLog`), the same road as "Send to the database",
+ * so the released keyboard still has no INTERNET permission.
+ *
  * ## Guards
  *
  * Same two as [CrashReporter], for the same reason: this ships only in TEST
@@ -43,6 +54,63 @@ object GestureLog {
 
     private var enabled = false
     private var device = ""
+    private var appContext: Context? = null
+
+    private const val PREFS = "isv_collector"
+    private const val KEY_FILE = "gesture_log"
+    private const val FILE = "gestures.jsonl"
+    const val FILE_CAP = 2_000_000L
+
+    /** One writer, so lines never interleave and typing never waits on disk. */
+    private val writer = java.util.concurrent.Executors.newSingleThreadExecutor { r ->
+        Thread(r, "gesture-log").apply { isDaemon = true }
+    }
+
+    fun fileOn(context: Context): Boolean =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getBoolean(KEY_FILE, false)
+
+    fun setFileOn(context: Context, on: Boolean) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putBoolean(KEY_FILE, on).apply()
+    }
+
+    private fun file(context: Context) = File(context.filesDir, FILE)
+
+    /** The log as lines, oldest first; empty when there is none. */
+    fun lines(context: Context): List<String> = try {
+        file(context).takeIf { it.exists() }?.readLines(Charsets.UTF_8)?.filter { it.isNotBlank() }.orEmpty()
+    } catch (_: Throwable) { emptyList() }
+
+    fun clear(context: Context) {
+        file(context).delete()
+    }
+
+    /** The whole log as ONE JSON object for the mail, in the iOS shape. */
+    fun exportJson(context: Context, version: String, contributor: String): String =
+        """{"kind":"gestures","platform":"android","version":${quote(version)},""" +
+            """"device":${quote(android.os.Build.MODEL ?: "")},""" +
+            """"system":${quote(android.os.Build.VERSION.RELEASE ?: "")},""" +
+            """"contributor":${quote(contributor)},"rows":[""" +
+            lines(context).joinToString(",") + "]}"
+
+    private fun appendLine(line: String) {
+        val ctx = appContext ?: return
+        if (!fileOn(ctx)) return
+        writer.execute {
+            try {
+                val f = file(ctx)
+                f.appendText(line + "\n", Charsets.UTF_8)
+                if (f.length() > FILE_CAP) {
+                    val all = f.readLines(Charsets.UTF_8)
+                    val keep = all.drop(all.size / 2)
+                    val tmp = File(f.parentFile, "$FILE.tmp")
+                    tmp.writeText(keep.joinToString("\n", postfix = "\n"), Charsets.UTF_8)
+                    tmp.renameTo(f)
+                }
+            } catch (_: Throwable) {
+                // A lost line is cheap; a keyboard that crashes on a full disk is not.
+            }
+        }
+    }
 
     /** Held until we know how it ended. */
     private class Pending(
@@ -57,6 +125,7 @@ object GestureLog {
     private var pending: Pending? = null
 
     fun install(context: Context) {
+        appContext = context.applicationContext
         enabled = context.packageName.endsWith(".debug") && SINKS.isNotEmpty()
         device = android.os.Build.MODEL ?: ""
     }
@@ -72,8 +141,10 @@ object GestureLog {
         committed: String,
         decodeMs: Int = -1,
         lang: String = "",
+        script: String = "",
     ) {
-        if (!enabled) return
+        val toFile = appContext?.let { fileOn(it) } == true
+        if (!enabled && !toFile) return
         flush("kept", null)
         val trail = StringBuilder("[")
         var i = 0
@@ -96,17 +167,30 @@ object GestureLog {
         keys.append('}')
         val cands = candidates.joinToString(",", "[", "]") { quote(it) }
         pending = Pending(trail.toString(), keys.toString(), cands, committed, decodeMs, lang)
+        if (toFile) {
+            val t = System.currentTimeMillis() / 1000.0
+            appendLine("""{"t":$t,"lang":${quote(lang)},"script":${quote(script)},""" +
+                """"keys":$keys,"path":$trail,"words":$cands,"committed":${quote(committed)}""" +
+                (if (decodeMs >= 0) ""","decode_ms":$decodeMs""" else "") + "}")
+        }
     }
 
     /** The user said what they actually wanted, or threw the guess away. */
     fun resolve(outcome: String, chosen: String?) {
-        if (!enabled) return
         flush(outcome, chosen)
     }
 
     private fun flush(outcome: String, chosen: String?) {
         val p = pending ?: return
         pending = null
+        // The local file gets the label as its own line (iOS `kind: kept`),
+        // right after the gesture it belongs to.
+        if (appContext?.let { fileOn(it) } == true) {
+            val t = System.currentTimeMillis() / 1000.0
+            appendLine("""{"kind":${quote(outcome)},"word":${quote(chosen ?: p.committed)},""" +
+                """"lang":${quote(p.lang)},"t":$t}""")
+        }
+        if (!enabled) return
         // The language rides in `device` ("model|lang"): the table has no column
         // for it, and a gesture means nothing without knowing which dictionary
         // decoded it. `decode_ms` only when measured (older sinks lack the column).

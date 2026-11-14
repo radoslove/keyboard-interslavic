@@ -17,6 +17,8 @@ import android.view.Gravity
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.ViewConfiguration
+import android.view.inputmethod.InputConnection
+import android.view.inputmethod.InputConnectionWrapper
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -195,7 +197,88 @@ class KeyboardView(
      *  inside one (`\u043F'\u044F\u0442\u044C`, `\u0441\u0456\u043C'\u044F`), or completions, `\uFF0B` and backspace by
      *  word would break the word in two at it (iOS 0.6.6, owner 2026-11-11). */
     private fun wordChar(c: Char, lang: String = Lang.current(context)): Boolean =
-        c.isLetter() || (c == '\'' && lang in Lang.APOSTROPHE_IN_WORD)
+        c.isLetter() || Character.getType(c) == Character.NON_SPACING_MARK.toInt() ||
+            (c == '\'' && lang in Lang.APOSTROPHE_IN_WORD)
+
+    /** The editor, seen through Polish Glagolitic's wide word space: there a
+     *  word space goes out as the en space U+2002 (phone fonts draw Glagolitic
+     *  wide and the plain space narrow, so words ran together - owner
+     *  2026-11-14) and reads back as " ", one char for one, so every count of
+     *  characters to delete stays right (iOS 0.6.14 `put` / `contextBefore`). */
+    private val conn: InputConnection?
+        get() {
+            val ic = service.currentInputConnection ?: return null
+            return if (Script.rewritesWord(context)) WideSpace(ic) else ic
+        }
+
+    private class WideSpace(target: InputConnection) : InputConnectionWrapper(target, false) {
+        override fun commitText(text: CharSequence?, newCursorPosition: Int): Boolean =
+            super.commitText(text?.toString()?.replace(' ', Script.WIDE_SPACE), newCursorPosition)
+        override fun getTextBeforeCursor(n: Int, flags: Int): CharSequence? =
+            super.getTextBeforeCursor(n, flags)?.toString()?.replace(Script.WIDE_SPACE, ' ')
+        override fun getTextAfterCursor(n: Int, flags: Int): CharSequence? =
+            super.getTextAfterCursor(n, flags)?.toString()?.replace(Script.WIDE_SPACE, ' ')
+    }
+
+    /** Polish Glagolitic: the word being typed, in the keyboard's Latin (with
+     *  the markers) and as it stands on screen. Kept from our own writes rather
+     *  than read back from the text every time (iOS 0.6.23: some apps report
+     *  the text before the cursor late, and a fast second letter joined wrong -
+     *  "jak", "dzień"); any other key, a glide, a suggestion or a cursor move
+     *  clears it. */
+    private var glagWord: Pair<String, String>? = null
+
+    /** In the wordlist or the user's own words; false while no list is loaded,
+     *  so od-/pod-/nad-/przed- + z is never split on a guess (iOS `knowsWord`). */
+    private fun knowsWord(word: String): Boolean {
+        val lower = word.lowercase()
+        if (Dictionary.contains(lower)) return true
+        return UserWords.all(context).any { it.lowercase() == lower }
+    }
+
+    /** A whole word in the current script; in Polish Glagolitic with the
+     *  od-/pod-/nad-/przed- + z split applied first (iOS `outWord`). */
+    private fun outWord(latin: String): String =
+        if (!Script.rewritesWord(context)) Script.out(context, latin)
+        else Script.out(context, Script.splitPrefixD(latin) { knowsWord(it) })
+
+    /** Polish Glagolitic: a typed letter may join the ones before it (c + z =
+     *  ⱍ), so the word under the cursor is written again. The word so far is
+     *  our own record if the text still ends with it, otherwise it is read
+     *  back - only the part after the last glyph typed as such (ⰷ ⱉ ⰴⱐ), so
+     *  those stay as the user chose them. Returns inserted minus deleted. */
+    private fun glagType(ic: InputConnection, latin: String): Int {
+        val before = ic.getTextBeforeCursor(48, 0)?.toString().orEmpty()
+        val w = glagWord
+        val prev: Pair<String, String> = if (w != null && before.endsWith(w.second)) w else {
+            val word = trailingWord(before)
+            var cut = 0
+            for (i in word.indices) if (Script.endsAtomic(word, i)) cut = i + 1
+            val shown = word.substring(cut)
+            Script.toLatin(context, shown) to shown
+        }
+        if (prev.second.isNotEmpty()) ic.deleteSurroundingText(prev.second.length, 0)
+        val joined = Script.softenPL(prev.first + latin)
+        val now = Script.out(context, joined)
+        ic.commitText(now, 1)
+        glagWord = joined to now
+        return now.length - prev.second.length
+    }
+
+    /** Polish Glagolitic: the word is finished - split d + z after a prefix
+     *  where it is two sounds (od-zyskać), then whatever ends it is written.
+     *  Returns inserted minus deleted. */
+    private fun finishGlagWord(ic: InputConnection): Int {
+        val w = glagWord ?: return 0
+        glagWord = null
+        val fixed = Script.splitPrefixD(w.first) { knowsWord(it) }
+        if (fixed == w.first) return 0
+        if (ic.getTextBeforeCursor(w.second.length, 0)?.toString() != w.second) return 0
+        ic.deleteSurroundingText(w.second.length, 0)
+        val now = Script.out(context, fixed)
+        ic.commitText(now, 1)
+        return now.length - w.second.length
+    }
 
     /** The word right before the cursor, as shown; a leading apostrophe is a
      *  quote mark, not part of it (iOS `trailingWord`). */
@@ -224,6 +307,11 @@ class KeyboardView(
     /** Soft end gate (mirrors swipe_eval END_SOFT / END_SOFT_REACH, 2026-11-12). */
     private val END_SOFT = 20.0
     private val END_SOFT_REACH = 1.8f
+    /** Strip after a glide: alternatives at most this many key widths behind
+     *  the winner (measured, see [swipeStrip]); farther ones only when their
+     *  frequency byte is at least [STRIP_FAR_FREQ] (iOS `farAlternativeFreq`). */
+    private val STRIP_MARGIN = 0.25f
+    private val STRIP_FAR_FREQ = 150
     private val ANCHOR_KEYS = 3       // start-key candidates; 1 hid `pisati` behind `ležati`
     private val ANCHOR_MS = 120f      // how far back from each end anchorPoint looks
     // Velocity minima (see velocityPivots). Tuned in tools/swipe_eval.py against
@@ -340,15 +428,27 @@ class KeyboardView(
             previewTxt.textSize = minOf(dp(24).toFloat(), popupCell * 0.62f)
             val fm = previewTxt.fontMetrics
             val baseline = (popupTop + popupBottom) / 2f - (fm.ascent + fm.descent) / 2f
+            val fullSize = previewTxt.textSize
             for (slot in popupOrder.indices) {
                 val i = popupOrder[slot]
                 val l = popupLeft + popupCell * slot
+                // A thin line between cells, so several letters in one cell
+                // do not read as part of the next (iOS 0.6.19).
+                if (slot > 0) canvas.drawLine(l, popupTop + dp(6), l, popupBottom - dp(6), previewBorder)
                 if (i == popupSel) {
                     canvas.drawRoundRect(l + 2f, popupTop + 2f, l + popupCell - 2f, popupBottom - 2f, r, r, popupSelBg)
                     previewTxt.color = Color.WHITE
                 } else previewTxt.color = cText
-                canvas.drawText(Script.out(context, items[i]), l + popupCell / 2f, baseline, previewTxt)
+                val label = Script.out(context, items[i])
+                // Shrink a label that does not fit its cell instead of letting it
+                // spill over (down to 0.4, as on iOS).
+                previewTxt.textSize = fullSize
+                val wTxt = previewTxt.measureText(label)
+                val fit = popupCell * 0.88f
+                if (wTxt > fit) previewTxt.textSize = maxOf(fullSize * 0.4f, fullSize * fit / wTxt)
+                canvas.drawText(label, l + popupCell / 2f, baseline, previewTxt)
             }
+            previewTxt.textSize = fullSize
             previewTxt.color = cText
         }
         langItems?.let { items ->
@@ -481,6 +581,13 @@ class KeyboardView(
         // The first cell is half over the key, hence n - 0.5 cells to fit.
         val room = (if (popupMirrored) centre else width - centre) - dp(2)
         popupCell = maxOf(tv.width.toFloat(), dp(38).toFloat())
+        // Polish Glagolitic: one variant can be two or three letters (ⰴⰸⱐ, ⱎⱍ),
+        // which ran into the next cell (owner 2026-11-14) - a cell is as wide as
+        // the longest variant (iOS 0.6.19: 14 + 18 per letter).
+        if (Script.rewritesWord(context)) {
+            val longest = items.maxOf { Script.out(context, it).length }
+            if (longest > 1) popupCell = maxOf(popupCell, dp(14 + 18 * longest).toFloat())
+        }
         popupCell = minOf(popupCell, room / (items.size - 0.5f))
         // A floor, so a long list cannot shrink into unreadable slivers; below
         // it the strip is clamped again and the first item may slide off the
@@ -638,7 +745,7 @@ class KeyboardView(
      * Any other key ends the run. Returns true when it handled the press.
      */
     private fun cycleCase(): Boolean {
-        val ic = service.currentInputConnection ?: return false
+        val ic = conn ?: return false
         val selected = if (selStart != selEnd) ic.getSelectedText(0)?.toString() else null
         val last = recased
         val text: String
@@ -679,6 +786,9 @@ class KeyboardView(
         if (shift && !capsLocked) { shift = false; render() }
     }
 
+    /** Polish Glagolitic is on; read by the glide decoder off the UI thread. */
+    @Volatile private var polishGlag = false
+
     private fun renderLetters() {
         letterKeyViews.clear()
         val lang = Lang.current(context)
@@ -698,7 +808,11 @@ class KeyboardView(
         // Both non-Latin scripts glide `lj` and `nj` over one key each: `љ`/`њ` in
         // Cyrillic, `ⰾⱐ`/`ⱀⱐ` in Glagolitic. The route over `l`+`j` stays too.
         // Not where every key writes ONE letter (mk ru uk bg sla, iOS `singleLetterKeys`).
-        Dictionary.digraphKeys = script != Script.Mode.LATIN && lang !in Lang.SINGLE_LETTER_KEYS
+        // Not in Polish Glagolitic either: its keys write Polish letters (iOS
+        // `singleLetterKeys` + "pl").
+        Dictionary.digraphKeys = script != Script.Mode.LATIN && lang !in Lang.SINGLE_LETTER_KEYS &&
+            lang != Lang.PL
+        polishGlag = lang == Lang.PL && script == Script.Mode.GLAGOLITIC
         Layout.letterRows(lang, script, qwertz).forEachIndexed { index, row ->
             val rv = makeRow()
             val pad = (full[index].length - row.length) / 2f
@@ -980,8 +1094,9 @@ class KeyboardView(
 
     /** After a glide the owed space comes first: `pisem 😀`, not `pisem😀`. */
     private fun tapEmoji(e: String) {
+        glagWord = null
         feedback()
-        val ic = service.currentInputConnection ?: return
+        val ic = conn ?: return
         if (pendingSpace) {
             ic.commitText(" ", 1)
             afterSelfEdit(1)
@@ -1250,16 +1365,16 @@ class KeyboardView(
                     flickHandler.removeCallbacks(longPress)
                     tv.isPressed = false
                     hideKeyPreview()
-                    closePopup()?.let { commit(Script.out(context, it)) }
+                    closePopup()?.let { commit(Script.out(context, it), it) }
                     if (!handled) {
                         val dx = e.x - downX
                         val dy = e.y - downY
                         // Upward flick (mostly vertical) => the keyboard's own letter.
                         val flickUp = hasAccent && dy < -flickThreshold && abs(dy) >= abs(dx)
                         if (flickUp) {
-                            Layout.longPress(ch, shift, lang)?.let { commit(Script.out(context, it)) }
+                            Layout.longPress(ch, shift, lang)?.let { commit(Script.out(context, it), it) }
                         } else {
-                            commit(Script.out(context, keyText(ch)))
+                            keyText(ch).let { commit(Script.out(context, it), it) }
                         }
                     }
                     true
@@ -1353,7 +1468,7 @@ class KeyboardView(
                 if (trimAfterWipe.isNotEmpty()) {
                     val stem = trimAfterWipe
                     trimAfterWipe = ""
-                    val ic = service.currentInputConnection
+                    val ic = conn
                     val before = ic?.getTextBeforeCursor(stem.length, 0)?.toString().orEmpty()
                     if (ic != null && before == stem) {
                         ic.deleteSurroundingText(stem.length, 0)
@@ -1399,7 +1514,7 @@ class KeyboardView(
                     // then takes the stem as well (see `repeat`).
                     val stem = lastWipeRemoved.trimEnd().dropLast(1)
                     if (lastWipeRemoved.isNotEmpty() && stem.isNotEmpty()) {
-                        val ic = service.currentInputConnection
+                        val ic = conn
                         if (ic != null) {
                             ic.commitText(stem, 1)
                             afterSelfEdit(stem.length)
@@ -1463,7 +1578,9 @@ class KeyboardView(
         return tv
     }
 
-    private fun commit(s: String) {
+    /** [s] as shown; [latin] = the same in the keyboard's Latin, given by the
+     *  letter keys so Polish Glagolitic can re-write the word (iOS 0.6.12). */
+    private fun commit(s: String, latin: String? = null) {
         // A letter typed inside the post-glide window EXTENDS the word that was
         // just glided - the very case the backspace path below already handles.
         // Smart space must not fire there, or `pisem` + `s` lands as `pisem s`
@@ -1498,7 +1615,7 @@ class KeyboardView(
         // the word goes on (iOS 0.6.6). A leading one stays a quote mark.
         val lang = Lang.current(context)
         val apostropheInWord = s == "'" && lang in Lang.APOSTROPHE_IN_WORD &&
-            service.currentInputConnection?.getTextBeforeCursor(1, 0)
+            conn?.getTextBeforeCursor(1, 0)
                 ?.lastOrNull()?.isLetter() == true
         if (apostropheInWord) pendingSpace = false
 
@@ -1514,7 +1631,7 @@ class KeyboardView(
         swipeJustCommitted = false
         clearUndo()          // one-shot: the undo chip dies on the next key
         feedback()
-        val ic = service.currentInputConnection ?: return
+        val ic = conn ?: return
         if (s.isEmpty()) return
         val c0 = s[0]
         if (c0.isLetter()) lastLetterTapMs = SystemClock.uptimeMillis()
@@ -1531,17 +1648,35 @@ class KeyboardView(
             }
         }
 
+        // Polish Glagolitic: letters re-write the word under the cursor; any
+        // other key first finishes it (the od-/pod- + z split).
+        val glag = Script.rewritesWord(context)
+        if (glag && latin != null && c0.isLetter()) {
+            var lead = 0
+            if (pendingSpace) {
+                val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
+                if (prev.isNotEmpty() && !prev[0].isWhitespace()) { ic.commitText(" ", 1); lead = 1 }
+                pendingSpace = false
+            }
+            afterSelfEdit(lead + glagType(ic, latin))
+            refreshSuggestions()
+            consumeOneShotShift()
+            return
+        }
+        var finished = 0
+        if (glag) finished = finishGlagWord(ic) else glagWord = null
+
         // Smart space: a word carries no trailing space, so the space is owed to
         // the NEXT thing typed.
-        var inserted = s.length
+        var inserted = s.length + finished
         if (pendingSpace) {
             when {
-                c0 == ' ' -> { ic.commitText(" ", 1); inserted = 1; pendingSpace = false }   // user's own space, no double
+                c0 == ' ' -> { ic.commitText(" ", 1); inserted = 1 + finished; pendingSpace = false }   // user's own space, no double
                 c0 in ATTACH_PUNCT -> { ic.commitText(s, 1); pendingSpace = true }  // glue punct, stay armed
                 else -> {
                     val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
                     if (prev.isNotEmpty() && !prev[0].isWhitespace()) {
-                        ic.commitText(" $s", 1); inserted = s.length + 1
+                        ic.commitText(" $s", 1); inserted = s.length + 1 + finished
                     } else {
                         ic.commitText(s, 1)    // guard: never a leading/double space
                     }
@@ -1635,6 +1770,7 @@ class KeyboardView(
             swipeJustCommitted = false
             lastSwipeWord = ""
             liftSample = null          // the caret moved: that word is no longer ours to measure
+            glagWord = null
             clearUndo()
             expectedCursors.clear()
             expectedCursors.addLast(start)   // resync: judge the next edit from here
@@ -1666,7 +1802,7 @@ class KeyboardView(
      */
     private fun rearmShift() {
         if (capsLocked || shiftByHand) return
-        val ic = service.currentInputConnection ?: return
+        val ic = conn ?: return
         val before = ic.getTextBeforeCursor(32, 0)?.toString().orEmpty()
         // An empty answer is not proof of an empty field: editors report nothing
         // for a moment after an edit, and acting on that armed shift in the
@@ -1723,7 +1859,7 @@ class KeyboardView(
 
     /** Put back exactly what the last whole-word delete removed. */
     private fun undoLastDelete() {
-        val ic = service.currentInputConnection ?: return
+        val ic = conn ?: return
         if (!canUndo()) return
         val text = undoText
         val word = undoWord
@@ -1756,13 +1892,13 @@ class KeyboardView(
         if (selEnd != selStart) return true
         // Belt and braces: some editors report the span, some answer this, and
         // the ones that do neither are why the first attempt at this failed.
-        val ic = service.currentInputConnection ?: return false
+        val ic = conn ?: return false
         return !ic.getSelectedText(0).isNullOrEmpty()
     }
 
     /** Replace the selection with nothing - the correct way to delete one. */
     private fun deleteSelection() {
-        val ic = service.currentInputConnection ?: return
+        val ic = conn ?: return
         val at = selStart
         ic.commitText("", 1)
         afterSelfEditTo(at)
@@ -1775,8 +1911,9 @@ class KeyboardView(
     }
 
     private fun backspace() {
+        glagWord = null
         feedback()
-        val ic = service.currentInputConnection ?: return
+        val ic = conn ?: return
         // A selection means "delete THIS", and nothing else - not the word
         // before it, and certainly not the glide committed earlier.
         if (hasSelection()) { deleteSelection(); return }
@@ -1854,7 +1991,8 @@ class KeyboardView(
      * taken back without losing the word in front of it.
      */
     private fun deleteWordBackward(): Boolean {
-        val ic = service.currentInputConnection ?: return false
+        glagWord = null
+        val ic = conn ?: return false
         // Held backspace over a selection was the dangerous one: each repeat
         // deleted another word BEFORE the untouched selection, walking backwards
         // through the text the user meant to keep.
@@ -1965,7 +2103,7 @@ class KeyboardView(
      * Saving is a deliberate tap, never silent.
      */
     private fun refreshSuggestions() {
-        val before = service.currentInputConnection
+        val before = conn
             ?.getTextBeforeCursor(48, 0)?.toString().orEmpty()
         val word = trailingWord(before)
         currentWord = word
@@ -2111,7 +2249,7 @@ class KeyboardView(
 
     /** Replace the word under the cursor with the tapped suggestion. */
     private fun applySuggestion(word: String) {
-        val ic = service.currentInputConnection ?: return
+        val ic = conn ?: return
         ic.beginBatchEdit()
         // Replacing a half-typed word leaves whatever preceded it, spacing and
         // all. Inserting a FRESH word does not - and this was the one commit
@@ -2123,7 +2261,8 @@ class KeyboardView(
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (!replacing && (pendingSpace ||
                 (prev.isNotEmpty() && !prev[0].isWhitespace()))) " " else ""
-        val shownWord = Script.out(context, word)
+        glagWord = null
+        val shownWord = outWord(word)
         val out = if (smartSpace) "$lead$shownWord" else "$lead$shownWord "
         ic.commitText(out, 1)
         ic.endBatchEdit()
@@ -2139,7 +2278,8 @@ class KeyboardView(
 
     private fun enter() {
         feedback()
-        val ic = service.currentInputConnection ?: return
+        val ic = conn ?: return
+        if (Script.rewritesWord(context)) finishGlagWord(ic) else glagWord = null
         swipeJustCommitted = false
         pendingSpace = false
         lastSwipeWord = ""
@@ -2290,7 +2430,7 @@ class KeyboardView(
                     // other letter of both non-Latin scripts.
                     val base = Layout.keyText(start, Script.mode(context), Lang.current(context))
                     val cased = if (up) base.replaceFirstChar { it.uppercaseChar() } else base
-                    commit(Script.out(context, cased))
+                    commit(Script.out(context, cased), cased)
                 } else if (pts.size >= 9) {
                     decodeSwipe(pts)                         // >= 3 points = a real glide
                 } else {
@@ -2350,7 +2490,12 @@ class KeyboardView(
      * each candidate word's ideal route; first key + length cap come from the
      * whole trail so fast swipes are not truncated.
      */
-    private fun decodeCandidates(rawPts: List<Float>, centers: Map<Char, FloatArray>): List<String> {
+    private fun decodeCandidates(rawPts: List<Float>, centers: Map<Char, FloatArray>): List<String> =
+        decodeScored(rawPts, centers).map { it.first }
+
+    /** The candidates with their scores (px of path deviation + frequency,
+     *  higher is better), best first. */
+    private fun decodeScored(rawPts: List<Float>, centers: Map<Char, FloatArray>): List<Pair<String, Double>> {
         // TOUCH LIFT: push the whole trail back DOWN before anything reads it, so
         // the anchor keys and the shape are judged where the thumb AIMED, not
         // where the glass reported it ([Lift]; iOS SwipeDecoder has done this
@@ -2416,11 +2561,26 @@ class KeyboardView(
             nearestKeys(pointList.last(), centers, 1)).toSet()
         // One key further out than [ends], for the soft end gate (see Dictionary.decodeSwipeGeo).
         val softEnds = nearestKeys(pointList.last(), centers, 6, END_SOFT_REACH).toSet() - ends
-        return Dictionary.decodeSwipeGeo(
-            starts, ends, ks.size + 2, SWIPE_CANDIDATES, coarse, fine,
+        // Polish Glagolitic (iOS 0.6.28/0.6.29, owner 2026-11-14): v carried Ⰲ
+        // in layouts v02-v03, and the owner keeps v catching w now that w is
+        // back on w - so a `w` of the word may run over the w key OR the v key.
+        // The second route is built only when the finger came near v (0.6 of a
+        // key width), and a glide starting or ending on v also looks at words
+        // filed under w.
+        val vc = centers['v']
+        val vReach = keyWidth(centers) * 0.6f
+        val wOverV = polishGlag && vc != null && pointList.any {
+            val dx = it[0] - vc[0]; val dy = it[1] - vc[1]; dx * dx + dy * dy < vReach * vReach
+        }
+        val starts2 = if (wOverV && 'v' in starts) starts + 'w' else starts
+        val ends2 = if (wOverV && 'v' in ends) ends + 'w' else ends
+        val scores = ArrayList<Double>()
+        val words = Dictionary.decodeSwipeGeo(
+            starts2, ends2, ks.size + 2, SWIPE_CANDIDATES, coarse, fine,
             { w -> Usage.count(context, w) * USAGE_W_SWIPE - (rejectedStrikes[w] ?: 0) * REJECT_W },
-            softEnds, END_SOFT,
+            softEnds - ends2, END_SOFT, wOverV, scores,
         )
+        return words.mapIndexed { i, w -> w to (scores.getOrNull(i) ?: Double.NEGATIVE_INFINITY) }
     }
 
     /**
@@ -2462,12 +2622,13 @@ class KeyboardView(
         decodeHandler.removeCallbacksAndMessages(null)   // drop any pending preview
         val liftedAt = SystemClock.uptimeMillis()
         decodeHandler.post {
-            val words = decodeCandidates(rawPts, centers)
+            val scored = decodeScored(rawPts, centers)
+            val words = scored.map { it.first }
             // From the finger leaving the glass to a decoded list: what the user
             // waits through (queue + decode). Logged with the gesture so "it
             // grinds in Polish" becomes a number per language (owner 2026-11-12).
             val decodeMs = (SystemClock.uptimeMillis() - liftedAt).toInt()
-            post { commitSwipeResult(words, rawPts, centers, decodeMs) }
+            post { commitSwipeResult(words, rawPts, centers, decodeMs, scored.map { it.second }) }
         }
     }
 
@@ -2516,19 +2677,70 @@ class KeyboardView(
         clearSlots()
     }
 
+    /**
+     * What the strip shows after a glide (iOS 0.6.11 `SwipeInput.strip`, owner
+     * 2026-11-13: `ide` -> `otče`, `osě` were shapes the finger never drew):
+     * the winner; the shorter form that begins it (Android 2026-11-07,
+     * `myslim` behind `myslimo`); alternatives within [STRIP_MARGIN] key widths
+     * of the winner; longer forms of the winner, most frequent first (`ide` ->
+     * `idemo`, `idete`); then farther shapes only if they are COMMON words.
+     *
+     * The margin is measured, not copied: the Android score is px of path
+     * deviation plus frequency, and the harness (`tools/swipe_eval.py` scoring,
+     * Android 3.9.13 settings, 300 most frequent forms x 2 seeds, key 108 px)
+     * gives at 0.25 key widths: the right word, when it came 2nd/3rd, still
+     * shown isv 100 %, pl 98.2 %, en 96.4 %, and 53-67 % of the other
+     * alternatives gone - the same as the iOS figure. At 0.5 the right word
+     * stays 100 % everywhere but only 15-27 % of the noise goes.
+     */
+    private fun swipeStrip(words: List<String>, scoreOf: Map<String, Double>, keyW: Float): List<String> {
+        if (words.isEmpty()) return emptyList()
+        // Without scores (or key geometry) nothing is filtered: the old strip.
+        if (scoreOf.isEmpty() || keyW <= 0f) {
+            val alts = words.toMutableList()
+            Dictionary.bestPrefix(words[0])?.let { short ->
+                if (short !in alts) alts.add(minOf(1, alts.size), short)
+            }
+            return alts
+        }
+        val best = words[0]
+        val top = scoreOf[best] ?: return words
+        val margin = keyW * STRIP_MARGIN
+        val out = mutableListOf(best)
+        fun add(w: String) {
+            if (out.size < SWIPE_CANDIDATES && out.none { it.equals(w, ignoreCase = true) }) out.add(w)
+        }
+        Dictionary.bestPrefix(best)?.let { add(it) }
+        val rest = words.drop(1)
+        for (w in rest) if (top - (scoreOf[w] ?: Double.NEGATIVE_INFINITY) <= margin) add(w)
+        val lower = best.lowercase()
+        for (w in Dictionary.suggest(lower, SWIPE_CANDIDATES * 2)) {
+            if (w.length > best.length && w.lowercase().startsWith(lower) &&
+                !(Lang.current(context) == Lang.ISV && Dictionary.addsPastEnding(lower, w.lowercase()))) add(w)
+        }
+        for (w in rest) {
+            if (top - (scoreOf[w] ?: Double.NEGATIVE_INFINITY) > margin &&
+                Dictionary.frequency(w.lowercase()) >= STRIP_FAR_FREQ) add(w)
+        }
+        return out
+    }
+
     private fun commitSwipeResult(
         words: List<String>,
         rawPts: List<Float> = emptyList(),
         centers: Map<Char, FloatArray> = emptyMap(),
         decodeMs: Int = -1,
+        scores: List<Double> = emptyList(),
     ) {
         if (words.isEmpty()) { glideMissed(); return }
-        val ic = service.currentInputConnection ?: return
+        val ic = conn ?: return
         // The aorist and the imperfect go to the BACK of the queue, committed
         // only when nothing else was decoded (owner 2026-11-08: a glide for
         // `myslimo` kept coming back `myslihmo` - the extra `h` sits right on
         // the way from `i` to `m`, so it costs the shape score almost nothing).
         // Stable, so everything else keeps the decoder's own order.
+        val scoreOf = HashMap<String, Double>()
+        for (i in words.indices) scores.getOrNull(i)?.let { scoreOf[words[i]] = it }
         @Suppress("NAME_SHADOWING")
         val words = words.sortedBy { if (Dictionary.isArchaicPast(it)) 1 else 0 }
         lastSwipeCapitalized = swipeShift
@@ -2538,7 +2750,8 @@ class KeyboardView(
         // at field start or already after a space), and none after it.
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (pendingSpace || (prev.isNotEmpty() && !prev[0].isWhitespace())) " " else ""
-        val shownBest = Script.out(context, best)
+        glagWord = null
+        val shownBest = outWord(best)
         val written = if (smartSpace) "$lead$shownBest" else "$lead$shownBest "
         ic.commitText(written, 1)
         afterSelfEdit(written.length)
@@ -2553,18 +2766,18 @@ class KeyboardView(
         // podac te krotka podstawowa forme, ktora zostala zrobiona gestem",
         // 2026-11-07). It is an OFFER, never the committed word: the decoder
         // still decides what gets typed.
-        val alts = words.toMutableList()
-        Dictionary.bestPrefix(words[0])?.let { short ->
-            if (short !in alts) alts.add(minOf(1, alts.size), short)
-        }
-        lastSwipeCandidates = alts
+        val alts = swipeStrip(words, scoreOf, if (centers.isEmpty()) 0f else keyWidth(centers))
+        // The strip shows the filtered list; a REJECTED glide (backspace) falls
+        // back on the whole pool, the shapes the filter hid included.
+        lastSwipeCandidates = alts + words.filter { it !in alts }
         rememberLiftSample(rawPts, centers, words[0])
         swipeJustCommitted = true
         swipeCommitAtMs = SystemClock.uptimeMillis()
         pendingSpace = smartSpace
         currentWord = ""
         showSwipeAlts(alts, highlight = 0)    // a wrong guess is one tap from fixed
-        GestureLog.committed(rawPts, centers, words, best, decodeMs, Lang.current(context))
+        GestureLog.committed(rawPts, centers, words, best, decodeMs, Lang.current(context),
+            Script.mode(context).name.lowercase())
         consumeOneShotShift()                 // one-shot capital ends with this word too
     }
 
@@ -2673,7 +2886,7 @@ class KeyboardView(
         rejectedStrikes.remove(word)
         // This is the label the harness cannot invent: what was actually wanted.
         GestureLog.resolve("corrected", word)
-        val ic = service.currentInputConnection ?: return
+        val ic = conn ?: return
         ic.beginBatchEdit()
         // With a selection live, deleting "the word we just committed" would cut
         // characters next to the selection instead. Let the insertion simply
@@ -2692,7 +2905,8 @@ class KeyboardView(
         val out = caseSwipe(word, shift || lastSwipeCapitalized, capsLocked || lastSwipeLocked)
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (lastSwipeWord.isEmpty() && prev.isNotEmpty() && !prev[0].isWhitespace()) " " else ""
-        val shownOut = Script.out(context, out)
+        glagWord = null
+        val shownOut = outWord(out)
         val written = if (smartSpace) "$lead$shownOut" else "$lead$shownOut "
         ic.commitText(written, 1)   // leading space before the old word stays
         ic.endBatchEdit()

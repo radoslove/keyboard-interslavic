@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.Gravity
+import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
@@ -31,6 +32,12 @@ import android.widget.Toast
 class SetupActivity : Activity() {
 
     private lateinit var status: TextView
+
+    /** The gesture-log section: hidden until the version line is tapped five
+     *  times, shown for good while recording is on (iOS 0.6.11). */
+    private lateinit var logBox: LinearLayout
+    private lateinit var logCount: TextView
+    private var versionTaps = 0
     private lateinit var ui: String
 
     /** The screen follows the SAME choice the keyboard draws by (owner
@@ -69,7 +76,12 @@ class SetupActivity : Activity() {
         // translated on purpose: a version and a package id read the same in all
         // four screen languages, and the `.debug` suffix is itself the answer to
         // "is this the test build or the published one?".
-        root.addView(buildLine())
+        root.addView(buildLine().apply {
+            setOnClickListener {
+                versionTaps++
+                if (versionTaps >= 5 && ::logBox.isInitialized && hasLogTexts()) logBox.visibility = View.VISIBLE
+            }
+        })
 
         section(root, "title", null)
         root.addView(body(t("intro")))
@@ -117,6 +129,12 @@ class SetupActivity : Activity() {
                 })
             }
         })
+
+        // Polish in Glagolitic: how the add-on alphabet types (iOS 0.6.30). The
+        // text exists in Polish only, so the section shows on a Polish screen.
+        if (ui == "pl" && Lang.PL in Lang.ALL && t("glag_pl_head") != "glag_pl_head") {
+            section(root, "glag_pl_head", "glag_pl_body")
+        }
 
         section(root, "collect_head", "collect_body")
         root.addView(Switch(this).apply {
@@ -219,6 +237,31 @@ class SetupActivity : Activity() {
             }
         })
 
+        // Gesture log for error reports (iOS 0.6.11, owner 2026-11-13): not for
+        // everyday use, so hidden behind five taps on the version line; kept on
+        // the phone, sent only by the user's own mail.
+        logBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        section(logBox, "log_head", "log_body_android")
+        logBox.addView(body(t("log_privacy")))
+        logBox.addView(Switch(this).apply {
+            text = t("log_toggle")
+            textSize = 17f
+            isChecked = GestureLog.fileOn(this@SetupActivity)
+            setOnCheckedChangeListener { _, on -> GestureLog.setFileOn(this@SetupActivity, on) }
+        })
+        logCount = body("")
+        logBox.addView(logCount)
+        logBox.addView(Button(this).apply {
+            text = t("log_send")
+            setOnClickListener { sendGestureLog() }
+        })
+        logBox.addView(Button(this).apply {
+            text = t("log_clear")
+            setOnClickListener { GestureLog.clear(this@SetupActivity); refreshLog() }
+        })
+        logBox.visibility = if (GestureLog.fileOn(this) && hasLogTexts()) View.VISIBLE else View.GONE
+        root.addView(logBox)
+
         val scroll = ScrollView(this).apply {
             setBackgroundColor(cBg)
             layoutParams = ViewGroup.LayoutParams(
@@ -235,6 +278,7 @@ class SetupActivity : Activity() {
         refreshStatus()
         refreshLangs()
         refreshWords()
+        refreshLog()
         val top = Symbols.top(this, 15)
         symbolsNow.text = if (top.isEmpty()) t("sym_none")
             else top.joinToString("   ") { (mark, n) -> "$mark $n" }
@@ -322,6 +366,25 @@ class SetupActivity : Activity() {
 
     private val BATCH_MAILBOX = "interslove.keyboard@gmail.com"
 
+    /** The isc app has no gesture-log texts; it never shows the section. */
+    private fun hasLogTexts() = t("log_head") != "log_head"
+
+    private fun refreshLog() {
+        if (!::logCount.isInitialized) return
+        val n = GestureLog.lines(this).size
+        logCount.text = if (n == 0) t("log_empty") else "${t("log_count")} $n"
+    }
+
+    /** The log as ONE file `interslove-gesty_<RRMMDD_HHMM>.json` - a hyphen
+     *  after `interslove`, so the word-batch reader on the server does not take
+     *  it for a batch of words (iOS `sendLog`). */
+    private fun sendGestureLog() {
+        if (GestureLog.lines(this).isEmpty()) { toast(t("log_empty")); return }
+        val stamp = java.text.SimpleDateFormat("yyMMdd_HHmm", java.util.Locale.ROOT).format(java.util.Date())
+        val json = GestureLog.exportJson(this, BuildConfig.VERSION_NAME, Collector.contributorId(this))
+        mailFile("interslove-gesty_$stamp.json", json, "${App.MAIN_NAME} Android · ${t("log_subject")} · $stamp")
+    }
+
     private fun exportBatch() {
         if (Collector.pendingCount(this) == 0 && Popularity.pendingCount(this) == 0) {
             toast(t("t_empty"))
@@ -336,13 +399,19 @@ class SetupActivity : Activity() {
         // filled in (owner 3.9.6: Gmail left the subject empty - ACTION_SENDTO
         // drops the extras). ACTION_SEND, one intent per mail app, so the
         // choice still offers only mail apps.
-        val dir = java.io.File(cacheDir, "batches").apply { mkdirs() }
-        dir.listFiles()?.forEach { it.delete() }   // only the batch being sent
         val stamp = java.text.SimpleDateFormat("yyMMdd_HHmm", java.util.Locale.ROOT).format(java.util.Date())
-        val file = java.io.File(dir, "interslove_${Collector.contributorId(this)}_$stamp.json")
+        mailFile("interslove_${Collector.contributorId(this)}_$stamp.json", json,
+            t("sub_batch") + " · " + Collector.contributorId(this) + " · " + stamp)
+    }
+
+    /** [json] as the attachment [name] of a mail to [BATCH_MAILBOX], sent from
+     *  the user's own mail app (the app has no INTERNET). */
+    private fun mailFile(name: String, json: String, subject: String) {
+        val dir = java.io.File(cacheDir, "batches").apply { mkdirs() }
+        dir.listFiles()?.forEach { it.delete() }   // only the file being sent
+        val file = java.io.File(dir, name)
         file.writeText(json, Charsets.UTF_8)
         val uri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.batches", file)
-        val subject = t("sub_batch") + " · " + Collector.contributorId(this) + " · " + stamp
         fun sendVia(pkg: String?) = Intent(Intent.ACTION_SEND).apply {
             type = "application/json"
             putExtra(Intent.EXTRA_EMAIL, arrayOf(BATCH_MAILBOX))

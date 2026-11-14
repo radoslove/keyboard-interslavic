@@ -401,9 +401,30 @@
    "bg": "Когато е включено, клавиатурата пази на този телефон следата на пръста и предложените думи (най-много около 2 MB, по-старите жестове се изтриват). Нищо не напуска телефона само: дневникът се изпраща само през собствената ти поща, когато докоснеш „Изпрати“. Използва се само за отстраняване на грешки в клавиатурата. Изисква пълен достъп.",
    "be": "Калі ўключана, клавіятура захоўвае на гэтым тэлефоне траекторыю пальца і прапанаваныя словы (прыблізна да 2 MB, старэйшыя жэсты выдаляюцца). Нішто не пакідае тэлефон само па сабе: журнал адпраўляецца толькі тваёй поштай, калі ты націскаеш «Адправіць». Ён выкарыстоўваецца толькі для выпраўлення памылак клавіятуры. Патрабуецца поўны доступ."
   },
+  "log_body_android": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Kogdy jest zapis vključeny, klaviatura zapisyvaje na tom telefonu trasu prsta i prědložene slova (približno do 2 MB, starše gesty se odstranjajut). Telefon ničego ne posylaje sam: zapis se posylaje jedino tvojeju poštoju, kogdy pritiskneš «Pošli». Služi jedino za popravjenje grěšek klaviatury.",
+   "en": "When on, the keyboard keeps the path of the finger and the suggested words on this phone (about 2 MB at most, older gestures are dropped). Nothing leaves the phone by itself: the log is sent only by your own mail, when you tap Send. It is used only to fix errors of the keyboard.",
+   "pl": "Gdy włączone, klawiatura zapisuje na tym telefonie ślad palca i podpowiedziane słowa (najwyżej ok. 2 MB, starsze gesty są usuwane). Nic nie wychodzi z telefonu samo: zapis wysyłasz tylko swoją pocztą, gdy stukniesz „Wyślij”. Służy wyłącznie do poprawiania błędów klawiatury.",
+   "nb": "Når dette er på, lagrer tastaturet fingerens bane og de foreslåtte ordene på denne telefonen (maks. ca. 2 MB, eldre sveip slettes). Ingenting sendes automatisk fra telefonen: Loggen sendes bare via din egen e-post når du trykker på Send. Den brukes bare til å rette feil i tastaturet.",
+   "cs": "Když je zapnuto, klávesnice uchovává v tomto telefonu dráhu prstu a navržená slova (nejvýš asi 2 MB, starší gesta se mažou). Nic neodchází z telefonu samo: záznam se odesílá jen tvou vlastní poštou, když klepneš na Odeslat. Slouží jen k opravě chyb klávesnice.",
+   "sk": "Keď je zapnuté, klávesnica uchováva v tomto telefóne dráhu prsta a navrhnuté slová (najviac asi 2 MB, staršie gestá sa mažú). Nič neodchádza z telefónu samo: záznam sa odosiela len tvojou vlastnou poštou, keď ťukneš na Odoslať. Slúži len na opravu chýb klávesnice.",
+   "sl": "Ko je vklopljeno, tipkovnica v tem telefonu hrani pot prsta in predlagane besede (največ približno 2 MB, starejše poteze se brišejo). Nič ne zapusti telefona samo od sebe: dnevnik se pošlje le s tvojo e-pošto, ko tapneš Pošlji. Uporablja se le za odpravljanje napak tipkovnice.",
+   "hr": "Kad je uključeno, tipkovnica na ovom telefonu čuva putanju prsta i predložene riječi (najviše oko 2 MB, starije geste se brišu). Ništa ne napušta telefon samo od sebe: zapis se šalje samo tvojom e-poštom kad dodirneš Pošalji. Koristi se samo za ispravljanje pogrešaka tipkovnice.",
+   "sr": "Kad je uključeno, tastatura na ovom telefonu čuva putanju prsta i predložene reči (najviše oko 2 MB, stariji pokreti se brišu). Ništa ne napušta telefon samo od sebe: zapis se šalje samo tvojom poštom, kad dodirneš „Pošalji“. Koristi se samo za ispravljanje grešaka tastature.",
+   "bs": "Kad je uključeno, tastatura na ovom telefonu sprema putanju prsta i predložene riječi (najviše oko 2 MB, stariji pokreti se brišu). Ništa ne napušta telefon samo od sebe: zapis se šalje samo tvojom poštom, kad dodirneš „Pošalji“. Koristi se samo za ispravljanje grešaka tastature.",
+   "mk": "Кога е вклучено, тастатурата на овој телефон ја чува патеката на прстот и предложените зборови (најмногу околу 2 MB, постарите гестови се бришат). Ништо не го напушта телефонот само од себе: записот се испраќа само со твојата пошта, кога ќе допреш „Испрати“. Се користи само за поправање грешки на тастатурата.",
+   "ru": "Если включено, клавиатура сохраняет на этом телефоне траекторию пальца и предложенные слова (примерно до 2 MB, старые жесты удаляются). Ничто не покидает телефон само по себе: журнал отправляется только твоей почтой, когда ты нажимаешь «Отправить». Он используется только для исправления ошибок клавиатуры.",
+   "uk": "Якщо ввімкнено, клавіатура зберігає на цьому телефоні траєкторію пальця й запропоновані слова (приблизно до 2 MB, старіші жести видаляються). Ніщо не залишає телефон саме собою: журнал надсилається лише твоєю поштою, коли ти торкаєшся «Надіслати». Він слугує лише для виправлення помилок клавіатури.",
+   "bg": "Когато е включено, клавиатурата пази на този телефон следата на пръста и предложените думи (най-много около 2 MB, по-старите жестове се изтриват). Нищо не напуска телефона само: дневникът се изпраща само през собствената ти поща, когато докоснеш „Изпрати“. Използва се само за отстраняване на грешки в клавиатурата.",
+   "be": "Калі ўключана, клавіятура захоўвае на гэтым тэлефоне траекторыю пальца і прапанаваныя словы (прыблізна да 2 MB, старэйшыя жэсты выдаляюцца). Нішто не пакідае тэлефон само па сабе: журнал адпраўляецца толькі тваёй поштай, калі ты націскаеш «Адправіць». Ён выкарыстоўваецца толькі для выпраўлення памылак клавіятуры."
+  },
   "log_clear": {
    "platforms": [
-    "ios"
+    "ios",
+    "android"
    ],
    "isv": "Izčisti zapis",
    "en": "Clear the log",
@@ -423,7 +444,8 @@
   },
   "log_count": {
    "platforms": [
-    "ios"
+    "ios",
+    "android"
    ],
    "isv": "Zapisane gesty:",
    "en": "Gestures recorded:",
@@ -443,7 +465,8 @@
   },
   "log_empty": {
    "platforms": [
-    "ios"
+    "ios",
+    "android"
    ],
    "isv": "Zapis jest pusty.",
    "en": "The log is empty.",
@@ -463,7 +486,8 @@
   },
   "log_head": {
    "platforms": [
-    "ios"
+    "ios",
+    "android"
    ],
    "isv": "Zapis gestov",
    "en": "Gesture log",
@@ -483,7 +507,8 @@
   },
   "log_privacy": {
    "platforms": [
-    "ios"
+    "ios",
+    "android"
    ],
    "isv": "Aplikacija posylaje zapis gestov jedino tvojeju vlastnoju poštoju, kogdy pritiskneš «Pošli».",
    "en": "The app sends the gesture log only when you tap Send, by your own mail.",
@@ -503,7 +528,8 @@
   },
   "log_send": {
    "platforms": [
-    "ios"
+    "ios",
+    "android"
    ],
    "isv": "Pošli zapis",
    "en": "Send the log",
@@ -523,7 +549,8 @@
   },
   "log_subject": {
    "platforms": [
-    "ios"
+    "ios",
+    "android"
    ],
    "isv": "Zapis gestov",
    "en": "Gesture log",
@@ -543,7 +570,8 @@
   },
   "log_toggle": {
    "platforms": [
-    "ios"
+    "ios",
+    "android"
    ],
    "isv": "Zapisyvati gesty",
    "en": "Record gestures",

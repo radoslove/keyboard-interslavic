@@ -269,6 +269,17 @@ object Dictionary {
         return false
     }
 
+    /** [longer] is [base] plus an aorist/imperfect ending (`ide` + `h`, `hu`,
+     *  `hmo`, `še`, `ste`). The 8-letter floor of [isArchaicPast] is not needed
+     *  here: that the two are one verb is already given by the prefix. Used by
+     *  the strip after a glide, which must not offer `ideh` `idehu` as the
+     *  "longer forms" of `ide` (owner 2026-11-14). */
+    fun addsPastEnding(base: String, longer: String): Boolean {
+        if (longer.length <= base.length || !longer.startsWith(base)) return false
+        val add = longer.substring(base.length)
+        return PAST_ENDS.any { it == add }
+    }
+
     /** Exact lookup, for [isArchaicPast]. */
     private fun hasWord(w: String): Boolean {
         val arr = entries
@@ -450,6 +461,8 @@ object Dictionary {
         boost: (String) -> Double = { 0.0 },
         softLastKeys: Set<Char> = emptySet(),
         softLastPen: Double = 0.0,
+        wOverV: Boolean = false,
+        scoresOut: MutableList<Double>? = null,
     ): List<String> {
         if (!ready) return emptyList()
         // A word whose last letter is one key past where the finger stopped is
@@ -496,6 +509,12 @@ object Dictionary {
                     if (alt > geo) geo = alt
                 }
             }
+            // Polish Glagolitic: a `w` may run over the v key as well (iOS
+            // 0.6.28, `SwipeDecoder.polishGlag`); only when the finger came near v.
+            if (wOverV && folded.indexOf('w') >= 0) {
+                val alt = coarse(folded.replace('w', 'v'))
+                if (alt > geo) geo = alt
+            }
             if (geo == Double.NEGATIVE_INFINITY) continue
             val s = geo + freqTerm(e.freq) - ep
             if (s > keptScore[SHORTLIST - 1]) {
@@ -525,6 +544,11 @@ object Dictionary {
                     if (alt > geo) { geo = alt; folded = plain }
                 }
             }
+            if (wOverV && folded.indexOf('w') >= 0) {
+                val viaV = folded.replace('w', 'v')
+                val alt = fine(viaV)
+                if (alt > geo) { geo = alt; folded = viaV }
+            }
             if (geo == Double.NEGATIVE_INFINITY) continue
             // geo is negative px (0 = letters sit exactly on the path); a small
             // frequency nudge breaks ties, and adaptive usage nudges harder so a
@@ -540,6 +564,9 @@ object Dictionary {
                 topScore[j] = s; topWords[j] = w
             }
         }
+        // Scores in the same order, for the strip after a glide (how far behind
+        // the winner an alternative is - KeyboardView.swipeStrip).
+        if (scoresOut != null) for (j in 0 until n) if (topWords[j] != null) scoresOut.add(topScore[j])
         return topWords.filterNotNull()
     }
 
