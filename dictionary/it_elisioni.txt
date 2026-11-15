@@ -1,0 +1,69 @@
+# Italian elided forms the wordlist keeps (tools/build_it_wordlist.py).
+#
+# FrequencyWords splits `dell'anno` at the apostrophe, so `dell'` arrives as a
+# word of its own - and hunspell rejects every one of them except `po'`. These
+# are the real elisions among the forms the list carries at least 20 times:
+# the full form (`della`, `quello`, `anche`) exists and Italian writes the
+# short one before a vowel. Left out on purpose:
+#   `piu' perche' cosi' citta' e'` ...  an apostrophe typed for a missing
+#                                       accent (più, perché) - a wrong spelling
+#   `qual'`                             `qual è` has no apostrophe
+#   `don' can' you' we' it'`            English (`don't`) cut by the tokeniser
+#   `b' g' mm' tes' perl' al' fin' gl'` noise, or too rare to rank
+# One form per line; lines starting with # are comments.
+l'
+c'
+un'
+d'
+dell'
+all'
+cos'
+dov'
+nell'
+dall'
+quell'
+com'
+anch'
+quest'
+sull'
+n'
+dev'
+gliel'
+m'
+qualcos'
+po'
+quand'
+nient'
+s'
+bell'
+t'
+mezz'
+quant'
+brav'
+vent'
+neanch'
+tutt'
+senz'
+nessun'
+qualcun'
+trent'
+sott'
+ch'
+v'
+sant'
+grand'
+quarant'
+cinquant'
+cent'
+pover'
+buon'
+ultim'
+ventiquattr'
+prim'
+quattr'
+sessant'
+null'
+diciott'
+ottant'
+settant'
+tant'

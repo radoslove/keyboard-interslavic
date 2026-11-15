@@ -43,6 +43,11 @@ object Lang {
      *  a capital, so its wordlist holds `Haus`, and [Dictionary.foldBase] reads
      *  letters case-blind for this language only. */
     const val DE = "de"
+    /** Italian (2026-11-15): the next language for Slavs living abroad (Italy,
+     *  about 0.6 million). QWERTY; `è é à ì ò ù` held on their vowel, `è` first
+     *  (2.6 million in the subtitle counts against 0.5 for `é`). Elided forms
+     *  (`dell'`, `quest'`) are words of the list and glue to the next word. */
+    const val IT = "it"
     const val CS = "cs"
     const val SK = "sk"
     const val SL = "sl"
@@ -95,6 +100,10 @@ object Lang {
 
     /** Languages that write an apostrophe INSIDE words (`п'ять`, `сям'я`). */
     val APOSTROPHE_IN_WORD = setOf(UK, BE)
+
+    /** Languages that ELIDE: a word ending in an apostrophe (`dell'`, `l'`)
+     *  takes the next word straight after it, no space (`dell'anno`). */
+    val ELISION = setOf(IT)
 
     /** This app's own language ([App.MAIN]): `isv` in Interslove, `isc` in Mellomskandinavisk. */
     const val MAIN = App.MAIN
@@ -168,7 +177,7 @@ object Lang {
 
     private fun fromLocale(code: String): String? = when (code) {
         "pl" -> PL; "cs" -> CS; "sk" -> SK; "sl" -> SL; "hr" -> HR
-        "sr" -> SR; "bs" -> BS; "mk" -> MK; "ru" -> RU; "uk" -> UK; "bg" -> BG; "be" -> BE; "de" -> DE
+        "sr" -> SR; "bs" -> BS; "mk" -> MK; "ru" -> RU; "uk" -> UK; "bg" -> BG; "be" -> BE; "de" -> DE; "it" -> IT
         "nb", "no", "nn" -> NB
         "en" -> EN
         else -> null
@@ -210,6 +219,8 @@ object Lang {
         NB -> "Norsk"
         EN -> "English"
         DE -> "Deutsch"
+        // Every living language by its own name, never the Interslavic one.
+        IT -> "Italiano"
         CS -> "Čeština"
         // Added with the languages themselves (2026-11-10): without a row here
         // the space bar fell back to the app's own name, so a phone typing

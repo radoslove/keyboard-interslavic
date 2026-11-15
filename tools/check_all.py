@@ -49,9 +49,12 @@ FLOORS = {
     "nb": 71.0, "en": 80.1,
     # German, 2026-11-14 (Android 3.9.20): QWERTZ, linear frequency, three umlaut routes.
     "de": 76.5,
+    # Italian, 2026-11-15 (Android 3.9.46): linear frequency, double penalty 3.
+    "it": 81.4,
 }
 # Languages measured with the settings the phone uses for them.
-SEED_ENV = {"de": {"SWIPE_ROWS": "qwertz", "SWIPE_LINEAR": "isc,nb,en,pl,cs,de"}}
+SEED_ENV = {"de": {"SWIPE_ROWS": "qwertz", "SWIPE_LINEAR": "isc,nb,en,pl,cs,de"},
+            "it": {"SWIPE_LINEAR": "isc,nb,en,pl,cs,de,it", "SWIPE_DOUBLE_W": "3"}}
 FLOOR_MARGIN = 4.0
 
 

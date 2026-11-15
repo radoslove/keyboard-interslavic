@@ -217,6 +217,14 @@ class KeyboardView(
     // word and pushed a space in front of it.
     private val ATTACH_PUNCT = ".,!?:;\u2026'\u2019\u201D\")]".toSet()
 
+    /** Italian elision: right after `dell'` (a letter, then an apostrophe) the
+     *  next word is written with no space before it - `dell'anno`. */
+    private fun elidedBefore(ic: InputConnection): Boolean {
+        if (Lang.current(context) !in Lang.ELISION) return false
+        val b = ic.getTextBeforeCursor(2, 0)?.toString().orEmpty()
+        return b.length == 2 && (b[1] == '\'' || b[1] == '\u2019') && b[0].isLetter()
+    }
+
     /** A character of a word: a letter, and in Ukrainian also the apostrophe
      *  inside one (`\u043F'\u044F\u0442\u044C`, `\u0441\u0456\u043C'\u044F`), or completions, `\uFF0B` and backspace by
      *  word would break the word in two at it (iOS 0.6.6, owner 2026-11-11). */
@@ -1733,7 +1741,7 @@ class KeyboardView(
                 c0 in ATTACH_PUNCT -> { ic.commitText(s, 1); pendingSpace = true }  // glue punct, stay armed
                 else -> {
                     val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
-                    if (prev.isNotEmpty() && !prev[0].isWhitespace()) {
+                    if (prev.isNotEmpty() && !prev[0].isWhitespace() && !elidedBefore(ic)) {
                         ic.commitText(" $s", 1); inserted = s.length + 1 + finished
                     } else {
                         ic.commitText(s, 1)    // guard: never a leading/double space
@@ -2340,7 +2348,7 @@ class KeyboardView(
         else 0
         if (replacing) ic.deleteSurroundingText(currentWord.length, tail)
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
-        val lead = if (!replacing && (pendingSpace ||
+        val lead = if (!replacing && !elidedBefore(ic) && (pendingSpace ||
                 (prev.isNotEmpty() && !prev[0].isWhitespace()))) " " else ""
         glagWord = null
         val shownWord = outWord(word)
@@ -2940,7 +2948,8 @@ class KeyboardView(
         // Smart space: a glide is a fresh word, so put the space BEFORE it (unless
         // at field start or already after a space), and none after it.
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
-        val lead = if (pendingSpace || (prev.isNotEmpty() && !prev[0].isWhitespace())) " " else ""
+        val lead = if (elidedBefore(ic)) ""
+            else if (pendingSpace || (prev.isNotEmpty() && !prev[0].isWhitespace())) " " else ""
         glagWord = null
         val shownBest = outWord(best)
         val written = if (smartSpace) "$lead$shownBest" else "$lead$shownBest "

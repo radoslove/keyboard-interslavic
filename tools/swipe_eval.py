@@ -170,7 +170,9 @@ for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê",
                    # Ukrainian's internal Latin: ŝ on s, ĝ on g, ï on i.
                    ("ŝ", "s"), ("ĝ", "g"), ("ï", "i"),
                    # Belarusian ў (u-short) `ŭ`, held on u.
-                   ("ŭ", "u")]:
+                   ("ŭ", "u"),
+                   # Italian ù (and the rare î û), held on u and i.
+                   ("ùû", "u"), ("î", "i")]:
     for _ch in _src:
         _FOLD[_ch] = _dst
 # The Ukrainian apostrophe is written but never drawn: it folds to nothing.
@@ -644,7 +646,7 @@ END_SOFT = float(os.environ.get("SWIPE_END_SOFT", "0"))         # px; mirrors Ke
 END_SOFT_REACH = float(os.environ.get("SWIPE_END_REACH", "1.8"))  # key widths from the lift point
 FREQ_W = 3.5           # mirrors Dictionary.FREQ_W
 FREQ_LIN = 0.15        # mirrors Dictionary.FREQ_LIN
-DOUBLE_W = 10.0        # mirrors Dictionary.DOUBLE_W
+DOUBLE_W = float(os.environ.get("SWIPE_DOUBLE_W", "10.0"))   # mirrors Dictionary.DOUBLE_W(lang)
 # Mirrors Dictionary.LINEAR_FREQ. A list whose byte was log-scaled from a corpus
 # COUNT must pull linearly in the byte, or scoring takes the log twice and the
 # frequency signal nearly vanishes. Override to test a language's move:

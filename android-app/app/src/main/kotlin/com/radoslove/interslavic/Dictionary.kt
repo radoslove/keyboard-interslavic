@@ -362,6 +362,8 @@ object Dictionary {
         'ï', 'ì' -> 'i'; 'ŝ' -> 's'; 'ǫ' -> 'o'; 'ĝ' -> 'g'
         // Belarusian ў `ŭ`, held on u.
         'ŭ' -> 'u'
+        // Italian `ù` (and the rare `î` `û`), held on u and i.
+        'ù', 'û' -> 'u'; 'î' -> 'i'
         // Norwegian: ä and ö are held on æ and ø, which are keys of their own.
         // Everywhere else (Slovak `ä`) they sit on a and o - folding Slovak `ä`
         // onto a key the keyboard does not have took every such word out of the
@@ -663,7 +665,7 @@ object Dictionary {
             // word you keep swiping wins the near-ties geometry cannot resolve.
             val freq = freqOf(w)
             val s = geo + freqTerm(freq) + boost(w) -
-                doubles(folded) * DOUBLE_W - endPen(w)
+                doubles(folded) * doubleW() - endPen(w)
             if (s > topScore[n - 1]) {
                 var j = n - 1
                 while (j > 0 && topScore[j - 1] < s) {
@@ -696,7 +698,7 @@ object Dictionary {
     // uniformly from 412 k forms it is a wash (61 % both ways) and on the rare
     // half it costs nothing, so the gain is real but narrow - it buys the
     // frequent words, which is what running text is made of.
-    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN, Lang.PL, Lang.CS, Lang.DE)
+    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN, Lang.PL, Lang.CS, Lang.DE, Lang.IT)
 
     private fun freqTerm(f: Int): Double {
         val log = Math.log((f + 1).toDouble()) * FREQ_W
@@ -712,6 +714,13 @@ object Dictionary {
      * strip, one tap away, but needs real repeated use to lead.
      */
     private const val DOUBLE_W = 10.0
+
+    /** Italian doubles its consonants everywhere (`anno`, `città`, `dell'`), so
+     *  with the full penalty `ano`, `cita`, `del` won every glide: the top 100
+     *  doubled words scored 54.4 % top-1. With 3.0 (and linear frequency) they
+     *  score 79.8 %, the whole sample 81.4 % instead of 76.6 % (five seeds,
+     *  2026-11-15); 0 gave 84.8 % / 81.0 % but drops the guard above. */
+    private fun doubleW(): Double = if (current == Lang.IT) 3.0 else DOUBLE_W
 
     private fun doubles(folded: String): Int {
         var n = 0

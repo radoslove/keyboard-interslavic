@@ -75,6 +75,10 @@ if LANG == "sk":
     FOLD = {"á": "a", "ä": "a", "č": "c", "ď": "d", "é": "e", "í": "i",
             "ĺ": "l", "ľ": "l", "ň": "n", "ó": "o", "ô": "o", "ŕ": "r",
             "š": "s", "ť": "t", "ú": "u", "ý": "y", "ž": "z"}
+if LANG == "it":
+    # Italian: the accented vowels held on their vowel (Android Layout.itOwn).
+    FOLD = {"à": "a", "è": "e", "é": "e", "ì": "i", "í": "i", "î": "i",
+            "ò": "o", "ó": "o", "ù": "u", "ú": "u"}
 if LANG == "sl":
     # Slovenian: only č š ž of its own (Android Layout.slOwn).
     FOLD = {"č": "c", "š": "s", "ž": "z"}

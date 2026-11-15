@@ -204,6 +204,14 @@ object Layout {
         "zxcvbnm",
     )
 
+    /** Italian: the accented vowels held on their vowel, ordered by how often
+     *  they are written (subtitle counts: è 2.6 M, à 1.1 M, ì 1.0 M, ò 0.6 M,
+     *  ù 0.5 M, é 0.5 M - `perché`), so the upward flick on `e` gives `è`. */
+    private val itOwn: Map<Char, List<String>> = mapOf(
+        'a' to listOf("à"), 'e' to listOf("è", "é"), 'i' to listOf("ì"),
+        'o' to listOf("ò"), 'u' to listOf("ù"),
+    )
+
     /** German: `ß` held on `s`; `ü ö ä` need no hold. */
     private val deOwn: Map<Char, List<String>> = mapOf(
         's' to listOf("ß"),
@@ -406,6 +414,7 @@ object Layout {
         Lang.BE -> beOwn
         Lang.NB, Lang.ISC -> nbOwn
         Lang.DE -> deOwn
+        Lang.IT -> itOwn
         Lang.EN -> emptyMap()
         else -> isvOwn
     }
