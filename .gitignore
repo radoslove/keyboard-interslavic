@@ -60,3 +60,5 @@ keystore.properties
 trash/
 # Xcode DerivedData of command-line device builds (xcodebuild -derivedDataPath ios/build/dd)
 /ios/build/
+/dictionary/sources_wikt/*
+!/dictionary/sources_wikt/README.md

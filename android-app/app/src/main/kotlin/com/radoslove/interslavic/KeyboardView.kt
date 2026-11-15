@@ -43,6 +43,10 @@ import kotlin.math.sqrt
  * flick thresholds especially have behaved differently on hardware.
  */
 @SuppressLint("ViewConstructor", "SetTextI18n", "ClickableViewAccessibility")
+/** Languages whose glide strip does NOT add the winner's other endings: they
+ *  inflect little, and `Haus` -> `Haut`, `Haupt` would only be noise. */
+private val NO_ENDING_ROW = setOf(Lang.DE, Lang.EN, Lang.NB, Lang.ISC)
+
 /** German words after which a glide's case twin is the NOUN (`das Leben`). */
 private val DE_BEFORE_NOUN = setOf(
     "der", "die", "das", "den", "dem", "des", "ein", "eine", "einen", "einem", "einer", "eines",
@@ -2389,6 +2393,18 @@ class KeyboardView(
      * reliable. We only yield to a short UPWARD move on an accent key, so the
      * flick (up = diacritic) still works — everything else beyond slop is a glide.
      */
+    /** Why the current touch was refused as a glide at its start, or null. */
+    private var refused: String? = null
+    private val refusedPts = ArrayList<Float>()
+    private var refusedT0 = 0L
+
+    private fun refuse(why: String, e: MotionEvent) {
+        refused = why
+        refusedT0 = e.eventTime
+        refusedPts.clear()
+        refusedPts.add(e.x); refusedPts.add(e.y); refusedPts.add(0f)
+    }
+
     override fun onInterceptTouchEvent(e: MotionEvent): Boolean {
         // No glide on a page without letters - and the emoji panel SCROLLS, so
         // the parent must keep its hands off the drag entirely.
@@ -2397,18 +2413,20 @@ class KeyboardView(
             MotionEvent.ACTION_DOWN -> {
                 // A glide may not START on the bottom row (iOS swipeCanStart): a
                 // thumb sliding on space or on the held `.` was read as a word.
-                if (e.y > lettersBottom() + dp(2)) { swipeStartKey = null; return false }
+                refused = null
+                refusedPts.clear()
+                if (e.y > lettersBottom() + dp(2)) { swipeStartKey = null; refuse("bottom", e); return false }
                 // Nor from ABOVE the letters: dragging the suggestion strip to reach
                 // a chip was read as a glide - words flickered in the strip and `ore`
                 // was committed while scrolling to `＋ farmacevt` (owner 2026-10-15).
                 // The strip's own scroll listener cannot prevent this: the chips
                 // consume the touch, so the listener never sees ACTION_DOWN.
-                if (e.y < lettersTop() - dp(2)) { swipeStartKey = null; return false }
+                if (e.y < lettersTop() - dp(2)) { swipeStartKey = null; refuse("above", e); return false }
                 // Mid-word hand typing: a touch landing right after a typed letter is
                 // the next tap, even if the finger rolls. What is typed by hand stays
                 // as typed - nothing gets decoded over it.
                 if (SystemClock.uptimeMillis() - lastLetterTapMs < TAP_RUN_MS) {
-                    swipeStartKey = null; return false
+                    swipeStartKey = null; refuse("tap_run", e); return false
                 }
                 swipePointerId = e.getPointerId(0)
                 // Fall back to the NEAREST key when the press lands in a margin or
@@ -2428,7 +2446,24 @@ class KeyboardView(
             // A second finger before any glide began = two-thumb typing, never a
             // glide: give this whole touch sequence to the keys.
             MotionEvent.ACTION_POINTER_DOWN -> { swipeStartKey = null; return false }
+            MotionEvent.ACTION_UP -> {
+                // A touch refused as a glide at its start, that then travelled
+                // like one: logged with the reason, so "the first glide is not
+                // caught" can be read (2026-11-15: `denj` left no trace at all).
+                val why = refused
+                refused = null
+                if (why != null && refusedPts.size >= 9 &&
+                    trailLength(ArrayList(refusedPts)) > keyWidth(computeCenters()) * 1.5f) {
+                    GestureLog.committed(ArrayList(refusedPts), computeCenters(), emptyList(), "", -1,
+                        Lang.current(context), Script.mode(context).name.lowercase())
+                    GestureLog.resolve("refused_$why", null)
+                }
+                refusedPts.clear()
+            }
             MotionEvent.ACTION_MOVE -> {
+                if (refused != null) {
+                    refusedPts.add(e.x); refusedPts.add(e.y); refusedPts.add((e.eventTime - refusedT0).toFloat())
+                }
                 val start = swipeStartKey ?: return false
                 if (e.pointerCount > 1) { swipeStartKey = null; return false }
                 val pi = e.findPointerIndex(swipePointerId)
@@ -2847,6 +2882,18 @@ class KeyboardView(
         }
         if (german) caseTwin(best)?.let { add(it) }
         Dictionary.bestPrefix(best)?.let { add(it) }
+        // An inflected language: the glide cannot tell the ENDING apart
+        // (`dobru` / `dobry` / `dobro`, 2026-11-15 - `dobry` was 4th of the
+        // decoder's words and the margin hid it). The forms that differ from
+        // the winner only in the last letter come next, most frequent first.
+        if (best.length >= 4 && Lang.current(context) !in NO_ENDING_ROW) {
+            val stem = best.dropLast(1).lowercase()
+            for (w in Dictionary.suggest(stem, SWIPE_CANDIDATES * 3)) {
+                val lw = w.lowercase()
+                if (lw != best.lowercase() && lw.startsWith(stem) &&
+                    w.length in best.length - 1..best.length + 1) add(w)
+            }
+        }
         val rest = words.drop(1)
         for (w in rest) if (top - (scoreOf[w] ?: Double.NEGATIVE_INFINITY) <= margin) add(w)
         val lower = best.lowercase()

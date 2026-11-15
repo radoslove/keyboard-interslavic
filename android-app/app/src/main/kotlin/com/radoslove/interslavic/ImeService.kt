@@ -14,8 +14,20 @@ import android.view.inputmethod.InputMethodManager
  */
 class ImeService : InputMethodService() {
 
+    companion object {
+        /** The running keyboard, so the app's own screen can switch its
+         *  language at once (same process); null while it is not running. */
+        @Volatile var running: ImeService? = null
+    }
+
+    override fun onDestroy() {
+        if (running === this) running = null
+        super.onDestroy()
+    }
+
     override fun onCreate() {
         super.onCreate()
+        running = this
         CrashReporter.install(this)   // test builds only; see the class doc
         GestureLog.install(this)      // likewise: real glides, for tuning
         // Kick off the background load of the prediction model once.

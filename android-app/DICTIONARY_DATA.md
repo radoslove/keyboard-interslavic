@@ -3,8 +3,12 @@
 The apps built from this code (Interslove `com.radoslove.interslavic`, Mellomskandinavisk
 `com.radoslove.interscandinavian`) bundle one wordlist per keyboard language in
 `app/src/main/assets/`. Each is a list of word **forms** with frequencies — `word=…,f=…`
-lines. **No definitions, translations, glosses or other dictionary content.** A language's
-list is loaded only when that language is first used.
+lines. A language's list is loaded only when that language is first used.
+
+The app's try box also carries a **word-by-word gloss** (`gloss_<lang>.tsv`, 2026-11-15)
+from the Polish Wiktionary, CC BY-SA 4.0 - see
+[`dictionary/sources_wikt/README.md`](../dictionary/sources_wikt/README.md). No gloss or
+translation from the Interslavic dictionary is bundled.
 
 | Asset | Language | Made from | License of the list |
 |---|---|---|---|
