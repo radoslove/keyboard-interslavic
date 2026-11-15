@@ -43,6 +43,22 @@ import kotlin.math.sqrt
  * flick thresholds especially have behaved differently on hardware.
  */
 @SuppressLint("ViewConstructor", "SetTextI18n", "ClickableViewAccessibility")
+/** German words after which a glide's case twin is the NOUN (`das Leben`). */
+private val DE_BEFORE_NOUN = setOf(
+    "der", "die", "das", "den", "dem", "des", "ein", "eine", "einen", "einem", "einer", "eines",
+    "kein", "keine", "keinen", "keinem", "keiner", "mein", "meine", "meinen", "meinem", "meiner",
+    "dein", "deine", "deinen", "deinem", "sein", "seine", "seinen", "seinem", "unser", "unsere",
+    "dieser", "diese", "dieses", "diesen", "diesem", "jeder", "jede", "jedes", "guten", "gute",
+    "zum", "zur", "im", "am", "vom", "beim", "ins", "ans", "fürs", "beim",
+)
+
+/** ... and after which it is the lowercase word (`wir leben`, `bis morgen`). */
+private val DE_BEFORE_LOWER = setOf(
+    "ich", "du", "er", "es", "wir", "man", "will", "willst", "wollen", "kann", "kannst",
+    "können", "muss", "musst", "müssen", "soll", "sollst", "sollen", "darf", "dürfen",
+    "möchte", "möchten", "mag", "zu", "nicht", "gern", "gerne", "bis",
+)
+
 class KeyboardView(
     context: Context,
     private val service: ImeService,
@@ -57,6 +73,10 @@ class KeyboardView(
     /** The text the shift key last re-cased ([cycleCase]), so the next press can
      *  go on from `Word` to `WORD`. Any other key ends the run. */
     private var recased: String? = null
+
+    /** The caret was last moved by hand (not by our own typing): the word
+     *  before it is finished, so shift re-cases it ([cycleCase]). */
+    private var caretByHand = false
     private val doubleTapMs = 300L
     private var symbols = false
     /** The `#+=` page of the symbol layer (iOS 559a71f). */
@@ -757,6 +777,20 @@ class KeyboardView(
                 afterSelfEdit(-last.length)
                 text = last
             }
+            // A FINISHED word right before the caret - glided, taken from the
+            // strip, or reached by moving the caret - is re-cased too, without
+            // selecting it: Haus -> HAUS -> haus -> Haus (owner 2026-11-15).
+            // While a word is being typed letter by letter shift keeps its
+            // usual job, the capital for the next letter.
+            selStart == selEnd && (pendingSpace || swipeJustCommitted || caretByHand) &&
+                trailingWord(ic.getTextBeforeCursor(48, 0)?.toString().orEmpty()).let { w ->
+                    w.isNotEmpty() && w.all { it.isLetter() } &&
+                        ic.getTextAfterCursor(1, 0)?.toString().orEmpty().let { a -> a.isEmpty() || !a[0].isLetter() }
+                } -> {
+                text = trailingWord(ic.getTextBeforeCursor(48, 0)?.toString().orEmpty())
+                ic.deleteSurroundingText(text.length, 0)
+                afterSelfEdit(-text.length)
+            }
             else -> { recased = null; return false }
         }
         val next = when {
@@ -765,11 +799,13 @@ class KeyboardView(
             text == text.uppercase() -> text.lowercase()
             else -> text.uppercase()
         }
+        val wasGlide = swipeJustCommitted && selected == null &&
+            lastSwipeWord.equals(next, ignoreCase = true)
         ic.commitText(next, 1)
         afterSelfEdit(next.length - if (selected != null) selected.length else 0)
         recased = next
-        swipeJustCommitted = false
-        lastSwipeWord = ""
+        swipeJustCommitted = wasGlide
+        lastSwipeWord = if (wasGlide) next else ""
         liftSample = null
         clearUndo()
         feedback()
@@ -963,7 +999,7 @@ class KeyboardView(
         // Languages (owner 2026-11-11, iOS 0.6.3): one keyboard in the system,
         // the languages ticked HERE, four codes to a row; at least one stays.
         // A language just ticked becomes the one typed, as on iOS.
-        header("Jezyki")
+        header(pt("langs_head"))
         val on = Lang.enabled(context)
         // isv first, the rest by code (owner 2026-11-11, iOS 0.6.9: "hard to find");
         // only the panel is sorted - the space bar and 🌐 keep Lang.ALL order.
@@ -981,7 +1017,7 @@ class KeyboardView(
             })
         }
 
-        header("Tema")
+        header(pt("theme_head"))
         choices(listOf(
             Triple("◐", Theme.choice(context) == Theme.AUTO,
                 { Theme.set(context, Theme.AUTO); service.rebuildView(true) }),
@@ -992,7 +1028,7 @@ class KeyboardView(
         ))
 
         if (KeyRows.offered(lang)) {
-            header("Razloženje klaviatury")
+            header(pt("layout_head"))
             val z = KeyRows.isQwertz(context, lang)
             choices(listOf(
                 Triple("QWERTY", !z, { KeyRows.set(context, lang, false); render() }),
@@ -1000,9 +1036,27 @@ class KeyboardView(
             ))
         }
 
+        // Capitals (2026-11-15): the switches of the app's screen, here too -
+        // the panel under the space bar is where the owner looked for them.
+        val prefs = context.getSharedPreferences("isv_collector", Context.MODE_PRIVATE)
+        header(pt("caps_sw"))
+        val autoCap = prefs.getBoolean("auto_cap", true)
+        choices(listOf(
+            Triple("Aa", autoCap, { prefs.edit().putBoolean("auto_cap", true).apply(); render() }),
+            Triple("aa", !autoCap, { prefs.edit().putBoolean("auto_cap", false).apply(); render() }),
+        ))
+        if (lang == Lang.DE) {
+            header(pt("de_nouns_sw"))
+            val nouns = prefs.getBoolean("de_nouns", true)
+            choices(listOf(
+                Triple("Haus", nouns, { prefs.edit().putBoolean("de_nouns", true).apply(); render() }),
+                Triple("haus", !nouns, { prefs.edit().putBoolean("de_nouns", false).apply(); render() }),
+            ))
+        }
+
         val canScripts = Script.offered(lang)
         if (canScripts.size > 1) {
-            header("Pismo")
+            header(pt("script_head"))
             val m = Script.mode(context)
             choices(canScripts.map { mode ->
                 val label = when (mode) {
@@ -1015,7 +1069,7 @@ class KeyboardView(
             })
         }
 
-        header("Moje slova")
+        header(pt("words_head"))
         val words = UserWords.all(context, lang).sorted()
         if (words.isEmpty()) {
             val tv = TextView(context)
@@ -1764,8 +1818,8 @@ class KeyboardView(
                 expectedCursors.removeFirst()
             }
         }
+        caretByHand = !ours
         if (!ours) {
-            val hadUndo = canUndo()
             pendingSpace = false
             swipeJustCommitted = false
             lastSwipeWord = ""
@@ -1775,8 +1829,12 @@ class KeyboardView(
             expectedCursors.clear()
             expectedCursors.addLast(start)   // resync: judge the next edit from here
             // The undo chip offers to put text back WHERE IT WAS; once the
-            // caret has moved it would put it somewhere else, so it goes.
-            if (hadUndo) refreshSuggestions()
+            // caret has moved it would put it somewhere else, so it goes. The
+            // glide's alternatives go too: tapped after the caret had moved,
+            // one was inserted at the new place - `E Essensssen` (2026-11-15).
+            // The strip now offers words for where the caret is.
+            lastSwipeCandidates = emptyList()
+            refreshSuggestions()
             // A caret moved by hand lands wherever it lands - including the
             // middle of a word - so the shift the user had set by hand means
             // nothing here and the text decides again.
@@ -1814,9 +1872,14 @@ class KeyboardView(
         // `.` `!` `?` still is, and so is the empty field.
         val lines = before.trimEnd(' ', '\n', '\t')
         val atStart = lines.isEmpty()
-        val gap = before.lastOrNull().let { it == ' ' || it == '\n' }
+        // Smart space glues `.` to the word and owes the space to the next one,
+        // so there is no gap yet - and the next glide came out lowercase
+        // (`Bis Morgen. guten`, 2026-11-15). The owed space counts as the gap.
+        val gap = before.lastOrNull().let { it == ' ' || it == '\n' } ||
+            (pendingSpace && lines.length == before.length)
         val afterStop = (lines.lastOrNull() in listOf('.', '!', '?')) && gap
-        val wanted = atStart || afterStop
+        // Settings: the capital at the start of a sentence can be turned off.
+        val wanted = (atStart || afterStop) && prefOn("auto_cap")
         // Only act on a real transition, or every keystroke rebuilds the view.
         if (wanted != shift) {
             shift = wanted
@@ -2172,6 +2235,14 @@ class KeyboardView(
         val latin = Script.toLatin(context, word)
         val lower = latin.lowercase()
         if (Dictionary.contains(lower)) return null
+        if (Lang.current(context) == Lang.DE) {
+            // German: a capital marks a NOUN, not a name, so `Madchen` typed in
+            // the middle of a line got no chip at all (2026-11-15). Kept as typed.
+            val cap = lower.replaceFirstChar { it.uppercaseChar() }
+            if (Dictionary.contains(latin) || Dictionary.contains(cap)) return null
+            if (latin.drop(1).any { it.isUpperCase() }) return null
+            return latin
+        }
         val first = latin.first()
         if (!first.isUpperCase()) return lower
         if (latin.drop(1).any { it.isUpperCase() }) return null
@@ -2257,7 +2328,13 @@ class KeyboardView(
         // previous word (`možemožemo`). Smart space owes the space backwards,
         // so it has to be paid here exactly as `commit()` and the glide do.
         val replacing = currentWord.isNotEmpty()
-        if (replacing) ic.deleteSurroundingText(currentWord.length, 0)
+        // With the cursor put back inside a word (`E|ssen`), the letters after
+        // it belong to the word being replaced; leaving them glued the choice
+        // onto them - `essenssen` (2026-11-15).
+        val tail = if (replacing)
+            (ic.getTextAfterCursor(48, 0)?.toString().orEmpty()).takeWhile { it.isLetter() }.length
+        else 0
+        if (replacing) ic.deleteSurroundingText(currentWord.length, tail)
         val prev = ic.getTextBeforeCursor(1, 0)?.toString().orEmpty()
         val lead = if (!replacing && (pendingSpace ||
                 (prev.isNotEmpty() && !prev[0].isWhitespace()))) " " else ""
@@ -2436,6 +2513,9 @@ class KeyboardView(
                 } else {
                     // It travelled far enough to be a glide but left too few samples
                     // to decode: still a gesture that produced nothing.
+                    GestureLog.committed(pts, computeCenters(), emptyList(), "", -1,
+                        Lang.current(context), Script.mode(context).name.lowercase())
+                    GestureLog.resolve("missed_short", null)
                     glideMissed()
                 }
             }
@@ -2636,6 +2716,56 @@ class KeyboardView(
      *  user sees - the strip during the gesture, the committed word, the list of
      *  alternatives, the replacement - has to answer this identically, or the
      *  keyboard contradicts itself in front of the user. */
+    /** A text of the ⚙ panel in the KEYBOARD's language (owner 2026-11-15):
+     *  German on the German keyboard, Interslavic on the
+     *  Interslavic and Proto-Slavic ones, English where a language has none. */
+    private fun pt(key: String): String {
+        val row = PanelTexts.TEXT[key] ?: return key
+        val code = when (val l = Lang.current(context)) {
+            Lang.ISV, Lang.SLA -> "isv"
+            Lang.ISC -> "nb"
+            Lang.SR -> if (Script.mode(context) == Script.Mode.CYRILLIC) "sr-Cyrl" else "sr"
+            else -> l
+        }
+        return row[code] ?: row["en"] ?: key
+    }
+
+    private fun prefOn(key: String): Boolean =
+        context.getSharedPreferences("isv_collector", Context.MODE_PRIVATE).getBoolean(key, true)
+
+    /** German: the same word with the other first-letter case, when the list
+     *  has it (`essen` <-> `Essen`), else null. */
+    private fun caseTwin(word: String): String? {
+        if (word.isEmpty()) return null
+        val c = word[0]
+        val t = (if (c.isUpperCase()) c.lowercaseChar() else c.uppercaseChar()) + word.substring(1)
+        return if (t != word && Dictionary.contains(t)) t else null
+    }
+
+    /**
+     * German: `wir leben` but `das Leben` - one glide, two words. The list
+     * alone always picked the more frequent one (2026-11-15: `Wir Leben gut`,
+     * `Ich will Essen`), so the word in front decides when it is telling:
+     * an article or a preposition with one puts the noun first, a pronoun or
+     * a modal verb the lowercase word. Anything else leaves the order alone.
+     */
+    private fun germanCaseByContext(words: List<String>, ic: InputConnection): List<String> {
+        if (words.isEmpty() || Lang.current(context) != Lang.DE) return words
+        if (!prefOn("de_nouns"))
+            return words.map { it.replaceFirstChar { c -> c.lowercaseChar() } }.distinct()
+        val twin = caseTwin(words[0]) ?: return words
+        val before = ic.getTextBeforeCursor(40, 0)?.toString().orEmpty()
+        val prev = Regex("([\\p{L}]+)\\s*$").find(before)?.groupValues?.get(1)?.lowercase()
+            ?: return words
+        val wantCap = when (prev) {
+            in DE_BEFORE_NOUN -> true
+            in DE_BEFORE_LOWER -> false
+            else -> return words
+        }
+        val pick = if (words[0][0].isUpperCase() == wantCap) words[0] else twin
+        return listOf(pick) + words.filter { it != pick }
+    }
+
     private fun caseSwipe(word: String, cap: Boolean, lock: Boolean): String = when {
         lock -> word.uppercase()
         cap -> word.replaceFirstChar { it.uppercaseChar() }
@@ -2707,9 +2837,15 @@ class KeyboardView(
         val top = scoreOf[best] ?: return words
         val margin = keyW * STRIP_MARGIN
         val out = mutableListOf(best)
+        // German writes `essen` and `Essen` as two words with one glide, so a
+        // case-only twin is not a duplicate there (2026-11-15: after a glide
+        // for `essen` the strip showed `Essen | Eden | Essens`, no verb).
+        val german = Lang.current(context) == Lang.DE
         fun add(w: String) {
-            if (out.size < SWIPE_CANDIDATES && out.none { it.equals(w, ignoreCase = true) }) out.add(w)
+            if (out.size < SWIPE_CANDIDATES && out.none {
+                    if (german) it == w else it.equals(w, ignoreCase = true) }) out.add(w)
         }
+        if (german) caseTwin(best)?.let { add(it) }
         Dictionary.bestPrefix(best)?.let { add(it) }
         val rest = words.drop(1)
         for (w in rest) if (top - (scoreOf[w] ?: Double.NEGATIVE_INFINITY) <= margin) add(w)
@@ -2732,7 +2868,14 @@ class KeyboardView(
         decodeMs: Int = -1,
         scores: List<Double> = emptyList(),
     ) {
-        if (words.isEmpty()) { glideMissed(); return }
+        if (words.isEmpty()) {
+            // Logged too (2026-11-15): a glide that decoded NOTHING left no
+            // trace, so "the first glide is not caught" could not be measured.
+            GestureLog.committed(rawPts, centers, emptyList(), "", decodeMs, Lang.current(context),
+                Script.mode(context).name.lowercase())
+            GestureLog.resolve("missed", null)
+            glideMissed(); return
+        }
         val ic = conn ?: return
         // The aorist and the imperfect go to the BACK of the queue, committed
         // only when nothing else was decoded (owner 2026-11-08: a glide for
@@ -2742,7 +2885,8 @@ class KeyboardView(
         val scoreOf = HashMap<String, Double>()
         for (i in words.indices) scores.getOrNull(i)?.let { scoreOf[words[i]] = it }
         @Suppress("NAME_SHADOWING")
-        val words = words.sortedBy { if (Dictionary.isArchaicPast(it)) 1 else 0 }
+        val words = germanCaseByContext(
+            words.sortedBy { if (Dictionary.isArchaicPast(it)) 1 else 0 }, ic)
         lastSwipeCapitalized = swipeShift
         lastSwipeLocked = swipeCaps
         val best = caseSwipe(words[0], swipeShift, swipeCaps)

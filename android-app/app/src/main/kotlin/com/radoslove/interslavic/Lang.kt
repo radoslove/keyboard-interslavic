@@ -37,6 +37,12 @@ object Lang {
     const val PL = "pl"
     const val NB = "nb"
     const val EN = "en"
+    /** German (owner 2026-11-14): the first non-Slavic language for the diaspora
+     *  (Slavs in German-speaking countries, about 4.8 million). QWERTZ with
+     *  `ü ö ä` as keys of their own, `ß` held on `s`. Its nouns are written with
+     *  a capital, so its wordlist holds `Haus`, and [Dictionary.foldBase] reads
+     *  letters case-blind for this language only. */
+    const val DE = "de"
     const val CS = "cs"
     const val SK = "sk"
     const val SL = "sl"
@@ -162,7 +168,7 @@ object Lang {
 
     private fun fromLocale(code: String): String? = when (code) {
         "pl" -> PL; "cs" -> CS; "sk" -> SK; "sl" -> SL; "hr" -> HR
-        "sr" -> SR; "bs" -> BS; "mk" -> MK; "ru" -> RU; "uk" -> UK; "bg" -> BG; "be" -> BE
+        "sr" -> SR; "bs" -> BS; "mk" -> MK; "ru" -> RU; "uk" -> UK; "bg" -> BG; "be" -> BE; "de" -> DE
         "nb", "no", "nn" -> NB
         "en" -> EN
         else -> null
@@ -203,6 +209,7 @@ object Lang {
         PL -> "Polski"
         NB -> "Norsk"
         EN -> "English"
+        DE -> "Deutsch"
         CS -> "Čeština"
         // Added with the languages themselves (2026-11-10): without a row here
         // the space bar fell back to the app's own name, so a phone typing

@@ -31,6 +31,17 @@ object Ui {
      *  other language gets Interslavic with the English gloss. A choice saved
      *  by the old four-language picker (removed in 3.9.7) is ignored. */
     fun current(context: Context): String {
+        // The screen speaks the language the keyboard is set to (owner
+        // 2026-11-15: switched in the keyboard's panel, the screen follows);
+        // a keyboard language the screen has no text for (German, Proto-Slavic
+        // aside) falls back to the phone's language as before.
+        val kb = when (val l = Lang.current(context)) {
+            Lang.ISV, Lang.SLA -> MS
+            Lang.ISC -> "nb"
+            Lang.SR -> if (Script.mode(context) == Script.Mode.CYRILLIC) "sr-Cyrl" else "sr"
+            else -> l
+        }
+        if (kb in UiTexts.LANGUAGES) return kb
         val loc = java.util.Locale.getDefault()
         val code = when (val l = loc.language) {
             "no", "nn" -> "nb"
@@ -50,7 +61,7 @@ object Ui {
     fun langName(ui: String, lang: String): String {
         val own = when (lang) {
             Lang.ISV -> "Medžuslovjansky"; Lang.ISC -> "Mellomskandinavisk"; Lang.PL -> "Polski"
-            Lang.NB -> "Norsk bokmål"; Lang.CS -> "Čeština"; Lang.SK -> "Slovenčina"; Lang.SL -> "Slovenščina"; Lang.HR -> "Hrvatski"; Lang.SR -> "Srpski"; Lang.BS -> "Bosanski"; Lang.MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"; Lang.RU -> "Русский"; Lang.UK -> "Українська"; Lang.BG -> "Български"; Lang.BE -> "Беларуская"; Lang.SLA -> "Praslovjansky"; else -> "English"
+            Lang.NB -> "Norsk bokmål"; Lang.DE -> "Deutsch"; Lang.CS -> "Čeština"; Lang.SK -> "Slovenčina"; Lang.SL -> "Slovenščina"; Lang.HR -> "Hrvatski"; Lang.SR -> "Srpski"; Lang.BS -> "Bosanski"; Lang.MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"; Lang.RU -> "Русский"; Lang.UK -> "Українська"; Lang.BG -> "Български"; Lang.BE -> "Беларуская"; Lang.SLA -> "Praslovjansky"; else -> "English"
         }
         val gloss = mapOf(
             Lang.ISV to mapOf("pl" to "międzysłowiański", "nb" to "interslavisk", "en" to "Interslavic"),
@@ -58,6 +69,7 @@ object Ui {
             Lang.PL to mapOf(MS to "poljsky", "nb" to "polsk", "en" to "Polish"),
             Lang.NB to mapOf(MS to "norvežsky", "pl" to "norweski", "en" to "Norwegian"),
             Lang.EN to mapOf(MS to "anglijsky", "pl" to "angielski", "nb" to "engelsk"),
+            Lang.DE to mapOf(MS to "němečsky", "pl" to "niemiecki", "nb" to "tysk", "en" to "German"),
             Lang.CS to mapOf(MS to "češsky", "pl" to "czeski", "nb" to "tsjekkisk", "en" to "Czech"),
             Lang.SK to mapOf(MS to "slovačsky", "pl" to "słowacki", "nb" to "slovakisk", "en" to "Slovak"),
             Lang.SL to mapOf(MS to "slovenečsky", "pl" to "słoweński", "nb" to "slovensk", "en" to "Slovenian"),

@@ -120,14 +120,23 @@ object Dictionary {
         val topWords = arrayOfNulls<String>(n)
         val topScore = IntArray(n) { Int.MIN_VALUE }
         var budget = SCAN_BUDGET
-        for (start in searchPrefixes(prefix)) {
+        // German (2026-11-14): typed `fur` also offers `für`, typed `fuer` too -
+        // the tap-typing twin of the glide routes over `a o u` and `ue oe ae`. A
+        // word that matches only that way is ranked [UMLAUT_SUGGEST_PENALTY]
+        // lower, so the words spelled exactly as typed come first.
+        val german = current == Lang.DE
+        val typedForms = if (german && hasUeSpelling(prefix)) listOf(prefix, ueToUmlaut(prefix)) else listOf(prefix)
+        for ((form, typed) in typedForms.withIndex())
+        for (start in searchPrefixes(typed)) {
             var i = lowerBound(arr, start)
             while (i < arr.size && budget > 0) {
                 val e = arr[i]
                 if (!e.word.startsWith(start)) break
                 i++
                 budget--
-                if (!foldedStartsWith(e.word, prefix)) continue
+                val exact = form == 0 && foldedStartsWith(e.word, typed)
+                if (!exact && !(german && umlautBlindStartsWith(e.word, typed))) continue
+                if (!exact && topWords.contains(e.word)) continue
                 // Rank by a composite: frequency dominates, but a whole inflected
                 // paradigm shares ONE frequency (the lemma's), so ties are common -
                 // and breaking them alphabetically buried the everyday form (možemo)
@@ -137,6 +146,7 @@ object Dictionary {
                 // + adaptive usage: words the user actually uses climb the ranking.
                 var score = e.freq * 64 - e.word.length + boost(e.word)
                 if (score > topScore[n - 1] && isArchaicPast(e.word)) score -= ARCHAIC_PENALTY
+                if (!exact) score -= UMLAUT_SUGGEST_PENALTY
                 if (score > topScore[n - 1]) {
                     var j = n - 1
                     while (j > 0 && topScore[j - 1] < score) {
@@ -164,6 +174,26 @@ object Dictionary {
      *  (pl `p` = 90 663), so a short prefix is never cut off alphabetically. */
     private const val SCAN_BUDGET = 250_000
 
+    /** A German word matched only through an umlaut (`fur` -> `für`) ranks as if
+     *  it were 30 frequency points rarer - behind the words typed exactly, like
+     *  the a-o-u glide route (2026-11-14). */
+    private const val UMLAUT_SUGGEST_PENALTY = 30 * 64
+
+    /** [foldedStartsWith] with `ä ö ü` read as `a o u` (German). */
+    private fun umlautBlindStartsWith(word: String, typed: String): Boolean {
+        if (word.length < typed.length) return false
+        for (k in typed.indices)
+            if (plainUmlaut(foldBase(word[k])) != plainUmlaut(foldBase(typed[k]))) return false
+        return true
+    }
+
+    private fun hasUeSpelling(t: String): Boolean =
+        t.contains("ue") || t.contains("oe") || t.contains("ae")
+
+    /** `fuer` -> `für`: the typewriter spelling read back as the letter. */
+    private fun ueToUmlaut(t: String): String =
+        t.replace("ue", "ü").replace("oe", "ö").replace("ae", "ä")
+
     /** Does [word] begin with [typed], reading both through [foldBase]? */
     private fun foldedStartsWith(word: String, typed: String): Boolean {
         if (word.length < typed.length) return false
@@ -175,7 +205,7 @@ object Dictionary {
      *  [foldBase], so adding a letter to the glide fold adds it to search too. */
     private val sameKey: Map<Char, String> by lazy {
         val byBase = HashMap<Char, StringBuilder>()
-        for (c in "abcdefghijklmnopqrstuvwxyzæøčćšśžżźěęéèêąàáłńňóòôíýúůřťďäöëŵḃḅüïìŝǫĝľŭ") {
+        for (c in "abcdefghijklmnopqrstuvwxyzæøčćšśžżźěęéèêąàáłńňóòôíýúůřťďäöëŵḃḅüïìŝǫĝľŭß") {
             byBase.getOrPut(foldBase(c)) { StringBuilder() }.append(c)
         }
         val out = HashMap<Char, String>()
@@ -191,7 +221,12 @@ object Dictionary {
     private fun searchPrefixes(prefix: String): List<String> {
         var out = listOf("")
         for (k in 0 until minOf(prefix.length, 3)) {
-            val cls = sameKey[prefix[k]] ?: prefix[k].toString()
+            val cls0 = sameKey[prefix[k]] ?: prefix[k].toString()
+            // German nouns start with a capital in the list, and the typed
+            // prefix arrives lowercased: search both cases of the first letter.
+            val cls1 = if (current == Lang.DE) cls0 + umlautPartners(cls0) else cls0
+            val cls = if (k == 0 && current == Lang.DE)
+                cls1 + String(CharArray(cls1.length) { cls1[it].uppercaseChar() }) else cls1
             if (out.size * cls.length > 24) break
             val next = ArrayList<String>(out.size * cls.length)
             for (p in out) for (c in cls) next.add(p + c)
@@ -296,7 +331,12 @@ object Dictionary {
      *  Polish ą ć ę ł ń ó ś ź ż likewise - a glide over `żółw` crosses z o l w.
      *  Public because KeyboardView needs the same answer to measure the touch
      *  lift ([Lift]): which KEY the first and last letter of a glided word sat on. */
-    fun foldBase(c: Char): Char = when (c) {
+    fun foldBase(c0: Char): Char {
+    // German keeps its nouns capitalised in the wordlist (`Haus`), and a key
+    // has no case: read the letter case-blind, German only, so nothing
+    // changes for the languages that were here before (2026-11-14).
+    val c = if (current == Lang.DE) c0.lowercaseChar() else c0
+    return when (c) {
         'č', 'ć' -> 'c'; 'š', 'ś' -> 's'; 'ž', 'ż', 'ź' -> 'z'; 'ě', 'ę', 'é', 'è', 'ê' -> 'e'
         'ą', 'à', 'á' -> 'a'; 'ł', 'ľ', 'ĺ' -> 'l'; 'ń', 'ň' -> 'n'; 'ó', 'ò', 'ô' -> 'o'
         // Czech: the length marks and háčeks sit on their base key, like every other
@@ -311,7 +351,11 @@ object Dictionary {
         'ǉ' -> 'q'; 'ǌ' -> 'w'; 'ǆ' -> 'x'; 'ǵ' -> 'g'; 'ḱ' -> 'k'; 'ẑ' -> 'z'
         // Russian's internal Latin (tools/build_cyrillic_wordlist.py): ё on e,
         // щ on w, ь ъ on b, ю on u (э `ê` and ж `ž` are folded above).
-        'ë' -> 'e'; 'ŵ' -> 'w'; 'ḃ', 'ḅ' -> 'b'; 'ü' -> 'u'
+        'ë' -> 'e'; 'ŵ' -> 'w'; 'ḃ', 'ḅ' -> 'b'
+        // German `ü` is a key of its own; Russian's internal `ü` (ю) is held on u.
+        'ü' -> if (current == Lang.DE) 'ü' else 'u'
+        // German `ß`, held on s.
+        'ß' -> 's'
         // Ukrainian ї `ï` on i, Bulgarian щ `ŝ` on s and ѝ `ì` on i, Proto-Slavic
         // `ǫ` on o (tools/swipe_eval.py folds the same; without `ǫ` Proto-Slavic
         // measured 65.8 % instead of 71.5 %). `ĝ` for a Ukrainian ґ variant.
@@ -322,9 +366,11 @@ object Dictionary {
         // Everywhere else (Slovak `ä`) they sit on a and o - folding Slovak `ä`
         // onto a key the keyboard does not have took every such word out of the
         // glide.
-        'ä' -> if (current == Lang.NB || current == Lang.ISC) 'æ' else 'a'
-        'ö' -> if (current == Lang.NB || current == Lang.ISC) 'ø' else 'o'
+        // German: `ä` and `ö` are keys of their own.
+        'ä' -> if (current == Lang.NB || current == Lang.ISC) 'æ' else if (current == Lang.DE) 'ä' else 'a'
+        'ö' -> if (current == Lang.NB || current == Lang.ISC) 'ø' else if (current == Lang.DE) 'ö' else 'o'
         else -> c
+    }
     }
 
     /** In Cyrillic and Glagolitic the `q` and `w` keys carry the `lj` and `nj`
@@ -381,6 +427,44 @@ object Dictionary {
      *  these two run over EVERY entry on every decode, so they stay allocation free. */
     fun foldFirst(w: String): Char = pairKey(w, 0) ?: foldBase(w.first())
 
+    /** German (2026-11-14):
+     *  a word with `ä ö ü` has a SECOND route, over `a o u`, and the better one
+     *  scores - the same two-route rule as the Cyrillic `lj`/`nj` keys. */
+    /** px the `a o u` route pays, so on the same shape `wurde` beats `würde` and
+     *  `würde` stays next in the strip (2026-11-14). Measured in swipe_eval (UMLAUT_PEN): 0 px dropped plain words
+     *  with an umlaut twin from 72.0 to 49.1 % top-1; 10 px gives 70.4 %, and an
+     *  umlaut word glided over a o u is in the top 3 in 87.7 % (74.0 % when it has
+     *  a plain twin). Same px as END_SOFT. */
+    private const val UMLAUT_ROUTE_PEN = 10.0
+
+    /** The letters [cls] lacks of the pairs a/ä, o/ö, u/ü. */
+    private fun umlautPartners(cls: String): String {
+        val sb = StringBuilder()
+        for (c in cls) {
+            val p = when (c) { 'a' -> 'ä'; 'o' -> 'ö'; 'u' -> 'ü'; 'ä' -> 'a'; 'ö' -> 'o'; 'ü' -> 'u'; else -> null }
+            if (p != null && cls.indexOf(p) < 0 && sb.indexOf(p.toString()) < 0) sb.append(p)
+        }
+        return sb.toString()
+    }
+
+    private fun plainUmlaut(c: Char): Char = when (c) { 'ä' -> 'a'; 'ö' -> 'o'; 'ü' -> 'u'; else -> c }
+    private fun hasUmlaut(folded: String): Boolean =
+        folded.indexOf('ä') >= 0 || folded.indexOf('ö') >= 0 || folded.indexOf('ü') >= 0
+    private fun plainUmlauts(folded: String): String =
+        String(CharArray(folded.length) { plainUmlaut(folded[it]) })
+    /** The third route: `ue` `oe` `ae`, the old typewriter spelling (2026-11-14). One key longer than the word. */
+    private fun ueRoute(folded: String): String {
+        val sb = StringBuilder(folded.length + 2)
+        for (c in folded) { val p = plainUmlaut(c); sb.append(p); if (p != c) sb.append('e') }
+        return sb.toString()
+    }
+    /** px the `ue` route pays (swipe_eval UE_PEN). Measured 2026-11-14, 3 seeds: off ->
+     *  umlaut words glided over ue 26.8/50.3 % (top-1/top-3), plain ue-words (neue,
+     *  Feuer) 73.9/93.1; 0 px -> 77.5/94.2 and 72.7/91.9 (-1.2, inside the ~2-point
+     *  noise); 10 px -> 69.5/90.2 and 73.5/92.7. Unlike the a-o-u route it rarely
+     *  meets a real twin, so it needs no penalty. */
+    private const val UE_ROUTE_PEN = 0.0
+
     fun foldLast(w: String): Char =
         if (w.length >= 2) pairKey(w, w.length - 2) ?: foldBase(w.last()) else foldBase(w.last())
 
@@ -429,6 +513,10 @@ object Dictionary {
             tmp.getOrPut(a) { ArrayList() }.add(i)
             val b = foldBase(w.first())
             if (b != a) tmp.getOrPut(b) { ArrayList() }.add(i)
+            if (current == Lang.DE) {
+                val u = plainUmlaut(a)
+                if (u != a && u != b) tmp.getOrPut(u) { ArrayList() }.add(i)
+            }
         }
         val built = StartIndex(arr, digraphKeys, tmp.mapValues { it.value.toIntArray() })
         startIndexes[arr] = built
@@ -465,15 +553,20 @@ object Dictionary {
         scoresOut: MutableList<Double>? = null,
     ): List<String> {
         if (!ready) return emptyList()
+        val umlauts = current == Lang.DE
         // A word whose last letter is one key past where the finger stopped is
         // not thrown out but pays [softLastPen] px (2026-11-12: a glide for
         // `here` ended on `r` after a short retreat; its shape beat `her`, and
         // the hard gate never let it compete). Same test in both passes.
         fun endPen(w: String): Double {
             if (lastKeys.isEmpty() || foldLast(w) in lastKeys ||
-                (digraphKeys && foldBase(w.last()) in lastKeys)) return 0.0
+                (digraphKeys && foldBase(w.last()) in lastKeys) ||
+                (umlauts && plainUmlaut(foldLast(w)) in lastKeys) ||
+                (umlauts && foldLast(w) != plainUmlaut(foldLast(w)) && 'e' in lastKeys)) return 0.0
             return if (foldLast(w) in softLastKeys ||
-                (digraphKeys && foldBase(w.last()) in softLastKeys)) softLastPen
+                (digraphKeys && foldBase(w.last()) in softLastKeys) ||
+                (umlauts && plainUmlaut(foldLast(w)) in softLastKeys) ||
+                (umlauts && foldLast(w) != plainUmlaut(foldLast(w)) && 'e' in softLastKeys)) softLastPen
             else Double.NEGATIVE_INFINITY
         }
 
@@ -495,7 +588,8 @@ object Dictionary {
             // glide may have started on `љ` or on `l`. Still allocation free -
             // these two lines run over every entry on every decode.
             if (foldFirst(w) !in firstKeys &&
-                (!digraphKeys || foldBase(w.first()) !in firstKeys)) continue
+                (!digraphKeys || foldBase(w.first()) !in firstKeys) &&
+                (!umlauts || plainUmlaut(foldFirst(w)) !in firstKeys)) continue
             // Cheap gate before the costly geometry: a glide ends ON its last
             // letter, so a word ending elsewhere cannot be what was drawn.
             val ep = endPen(w)
@@ -514,6 +608,12 @@ object Dictionary {
             if (wOverV && folded.indexOf('w') >= 0) {
                 val alt = coarse(folded.replace('w', 'v'))
                 if (alt > geo) geo = alt
+            }
+            if (umlauts && hasUmlaut(folded)) {
+                val alt = coarse(plainUmlauts(folded)) - UMLAUT_ROUTE_PEN
+                if (alt > geo) geo = alt
+                val altE = coarse(ueRoute(folded)) - UE_ROUTE_PEN
+                if (altE > geo) geo = altE
             }
             if (geo == Double.NEGATIVE_INFINITY) continue
             val s = geo + freqTerm(e.freq) - ep
@@ -548,6 +648,14 @@ object Dictionary {
                 val viaV = folded.replace('w', 'v')
                 val alt = fine(viaV)
                 if (alt > geo) { geo = alt; folded = viaV }
+            }
+            if (umlauts && hasUmlaut(folded)) {
+                val plainU = plainUmlauts(folded)
+                val alt = fine(plainU) - UMLAUT_ROUTE_PEN
+                val viaE = ueRoute(folded)
+                val altE = fine(viaE) - UE_ROUTE_PEN
+                if (alt >= altE && alt > geo) { geo = alt; folded = plainU }
+                else if (altE > alt && altE > geo) { geo = altE; folded = viaE }
             }
             if (geo == Double.NEGATIVE_INFINITY) continue
             // geo is negative px (0 = letters sit exactly on the path); a small
@@ -588,7 +696,7 @@ object Dictionary {
     // uniformly from 412 k forms it is a wash (61 % both ways) and on the rare
     // half it costs nothing, so the gain is real but narrow - it buys the
     // frequent words, which is what running text is made of.
-    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN, Lang.PL, Lang.CS)
+    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN, Lang.PL, Lang.CS, Lang.DE)
 
     private fun freqTerm(f: Int): Double {
         val log = Math.log((f + 1).toDouble()) * FREQ_W

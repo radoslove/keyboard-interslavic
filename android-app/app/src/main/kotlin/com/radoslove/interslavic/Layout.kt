@@ -190,6 +190,25 @@ object Layout {
         "zxcvbnm",
     )
 
+    /** German (owner 2026-11-14): `ü ö ä` are keys of their own, where every
+     *  German keyboard has them, rows of 11 like Norwegian. QWERTZ is the
+     *  default ([KeyRows.QWERTZ_BY_DEFAULT]); QWERTY swaps `y` and `z` only. */
+    private val deQwertzRows: List<String> = listOf(
+        "qwertzuiopü",
+        "asdfghjklöä",
+        "yxcvbnm",
+    )
+    private val deQwertyRows: List<String> = listOf(
+        "qwertyuiopü",
+        "asdfghjklöä",
+        "zxcvbnm",
+    )
+
+    /** German: `ß` held on `s`; `ü ö ä` need no hold. */
+    private val deOwn: Map<Char, List<String>> = mapOf(
+        's' to listOf("ß"),
+    )
+
     /** No script but Latin has a letter on `q w x`, and a foreign word inside a
      *  Cyrillic sentence is written WHOLE in Latin (`Linux`, `WhatsApp`), never
      *  as three Latin letters inside a Cyrillic word - so the way to it is the
@@ -302,6 +321,7 @@ object Layout {
         script: Script.Mode = Script.Mode.LATIN,
         qwertz: Boolean = false,
     ): List<String> = when {
+        lang == Lang.DE -> if (qwertz) deQwertzRows else deQwertyRows
         lang == Lang.NB || lang == Lang.ISC -> nbRows
         script != Script.Mode.LATIN && lang == Lang.SR -> srCyrillicRows
         lang == Lang.MK -> mkCyrillicRows
@@ -385,6 +405,7 @@ object Layout {
         Lang.SLA -> slaOwn
         Lang.BE -> beOwn
         Lang.NB, Lang.ISC -> nbOwn
+        Lang.DE -> deOwn
         Lang.EN -> emptyMap()
         else -> isvOwn
     }
@@ -426,7 +447,7 @@ object Layout {
 object KeyRows {
 
     /** Languages whose national keyboard is QWERTZ. */
-    val QWERTZ_BY_DEFAULT = setOf(Lang.CS, Lang.SK, Lang.SL, Lang.HR, Lang.SR, Lang.BS)
+    val QWERTZ_BY_DEFAULT = setOf(Lang.CS, Lang.SK, Lang.SL, Lang.HR, Lang.SR, Lang.BS, Lang.DE)
 
     /** Languages where the choice exists at all. */
     fun offered(lang: String) =

@@ -83,6 +83,29 @@ class SetupActivity : Activity() {
             }
         })
 
+        // A box to try the keyboard right here (iOS `try_head`, owner
+        // 2026-11-15): it tells "the keyboard is broken" from "it is not
+        // switched on", and is a place to write without opening another app -
+        // so it comes FIRST, large and framed, inviting to write.
+        root.addView(header(t("try_head")).apply { textSize = 22f })
+        root.addView(android.widget.EditText(this).apply {
+            hint = t("try_hint")
+            textSize = 20f
+            minLines = 4
+            maxLines = 10
+            gravity = Gravity.TOP or Gravity.START
+            val d = resources.displayMetrics.density
+            setPadding((14 * d).toInt(), (12 * d).toInt(), (14 * d).toInt(), (12 * d).toInt())
+            background = android.graphics.drawable.GradientDrawable().apply {
+                cornerRadius = 14 * d
+                setColor(col("#F4F7F9", "#263238"))
+                setStroke((2 * d).toInt(), col("#4F7FA8", "#7FA8CF"))
+            }
+            inputType = android.text.InputType.TYPE_CLASS_TEXT or
+                android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE or
+                android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+        })
+
         section(root, "title", null)
         root.addView(body(t("intro")))
         glossOf("intro")?.let { root.addView(gloss(it)) }
@@ -221,6 +244,24 @@ class SetupActivity : Activity() {
             }
         })
 
+        section(root, "caps_head", "caps_body")
+        root.addView(Switch(this).apply {
+            text = labelled("caps_sw")
+            textSize = 17f
+            isChecked = prefs.getBoolean("auto_cap", true)
+            setOnCheckedChangeListener { _, on ->
+                prefs.edit().putBoolean("auto_cap", on).apply()
+            }
+        })
+        root.addView(Switch(this).apply {
+            text = labelled("de_nouns_sw")
+            textSize = 17f
+            isChecked = prefs.getBoolean("de_nouns", true)
+            setOnCheckedChangeListener { _, on ->
+                prefs.edit().putBoolean("de_nouns", on).apply()
+            }
+        })
+
         status = body("")
         root.addView(status)
 
@@ -275,6 +316,12 @@ class SetupActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        if (Ui.current(this) != ui) { recreate(); return }
+        if (batchHandedOver) {
+            batchHandedOver = false
+            Collector.clear(this)
+            Popularity.clear(this)
+        }
         refreshStatus()
         refreshLangs()
         refreshWords()
@@ -402,7 +449,13 @@ class SetupActivity : Activity() {
         val stamp = java.text.SimpleDateFormat("yyMMdd_HHmm", java.util.Locale.ROOT).format(java.util.Date())
         mailFile("interslove_${Collector.contributorId(this)}_$stamp.json", json,
             t("sub_batch") + " · " + Collector.contributorId(this) + " · " + stamp)
+        batchHandedOver = true
     }
+
+    /** The batch went to the mail app: on the way back the queue is emptied
+     *  (owner 2026-11-15: sent words should go from the list at once). The
+     *  words themselves stay in the user's dictionary ([UserWords]). */
+    private var batchHandedOver = false
 
     /** [json] as the attachment [name] of a mail to [BATCH_MAILBOX], sent from
      *  the user's own mail app (the app has no INTERNET). */
@@ -454,10 +507,12 @@ class SetupActivity : Activity() {
         gravity = Gravity.START
     }
 
+    /** Descriptions: smaller and quieter than the headers and the controls
+     *  (owner 2026-11-15). */
     private fun body(t: String) = TextView(this).apply {
         text = t
-        textSize = 15f
-        setTextColor(cBody)
+        textSize = 13.5f
+        setTextColor(col("#546E7A", "#9AABB4"))   // 5.3:1 light, quieter than cBody
         setPadding(0, 4, 0, 8)
     }
 

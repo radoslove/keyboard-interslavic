@@ -49,9 +49,12 @@ object UserWords {
     /** Save [word] (lowercased) once and make it known to [Dictionary] at once. */
     @Synchronized
     fun add(context: Context, word: String) {
-        val w = word.lowercase()
-        if (w.isEmpty() || !w.all { it.isLetter() }) return
         val lang = Lang.current(context)
+        // German writes every noun with a capital (`Madchen`, 2026-11-15), so a
+        // German word keeps the capital it was typed with; elsewhere lowercase.
+        val w = if (lang == Lang.DE && word.drop(1).none { it.isUpperCase() }) word
+                else word.lowercase()
+        if (w.isEmpty() || !w.all { it.isLetter() }) return
         if (w !in all(context, lang)) {
             try {
                 file(context, lang).appendText(w + "\n")

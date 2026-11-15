@@ -1,0 +1,9 @@
+# German words added by hand: real words (each in Duden) that neither source
+# brings in - hunspell de_DE_frami does not know them, or they are too rare in
+# the corpora for the cut. One per line, spelled as German writes them.
+Homeoffice
+WLAN
+rausnehmen
+Kassenzettel
+Umlaut
+iPhone

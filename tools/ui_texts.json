@@ -284,7 +284,8 @@
   },
   "langs_head": {
    "platforms": [
-    "android"
+    "android",
+    "panel"
    ],
    "isv": "Jezyki klaviatury",
    "en": "Keyboard languages",
@@ -300,7 +301,8 @@
    "ru": "Языки клавиатуры",
    "uk": "Мови клавіатури",
    "bg": "Езици на клавиатурата",
-   "be": "Мовы клавіятуры"
+   "be": "Мовы клавіятуры",
+   "de": "Tastatursprachen"
   },
   "langs_now": {
    "platforms": [
@@ -343,7 +345,8 @@
   },
   "layout_head": {
    "platforms": [
-    "android"
+    "android",
+    "panel"
    ],
    "isv": "Razloženje klaviatury",
    "en": "Key layout",
@@ -359,7 +362,8 @@
    "ru": "Раскладка клавиш",
    "uk": "Розкладка клавіш",
    "bg": "Подредба на клавишите",
-   "be": "Раскладка клавіш"
+   "be": "Раскладка клавіш",
+   "de": "Tastaturlayout"
   },
   "letters_head": {
    "platforms": [
@@ -834,7 +838,8 @@
   },
   "script_head": {
    "platforms": [
-    "android"
+    "android",
+    "panel"
    ],
    "isv": "Latinica, kirilica ili glagolica",
    "en": "Latin, Cyrillic or Glagolitic",
@@ -850,7 +855,8 @@
    "ru": "Латиница, кириллица или глаголица",
    "uk": "Латиниця, кирилиця чи глаголиця",
    "bg": "Латиница, кирилица или глаголица",
-   "be": "Лацінка, кірыліца ці глаголіца"
+   "be": "Лацінка, кірыліца ці глаголіца",
+   "de": "Lateinisch, Kyrillisch oder Glagolitisch"
   },
   "script_latin": {
    "platforms": [
@@ -1392,7 +1398,8 @@
   },
   "theme_head": {
    "platforms": [
-    "android"
+    "android",
+    "panel"
    ],
    "isv": "Tema klaviatury",
    "en": "Keyboard theme",
@@ -1408,7 +1415,8 @@
    "ru": "Тема клавиатуры",
    "uk": "Тема клавіатури",
    "bg": "Тема на клавиатурата",
-   "be": "Тэма клавіятуры"
+   "be": "Тэма клавіятуры",
+   "de": "Tastaturdesign"
   },
   "theme_light": {
    "platforms": [
@@ -1473,6 +1481,7 @@
   },
   "try_head": {
    "platforms": [
+    "android",
     "ios"
    ],
    "isv": "Proba",
@@ -1489,10 +1498,12 @@
    "ru": "Попробуй здесь",
    "uk": "Спробуй тут",
    "bg": "Изпробвай тук",
-   "be": "Паспрабуй тут"
+   "be": "Паспрабуй тут",
+   "de": "Hier ausprobieren"
   },
   "try_hint": {
    "platforms": [
+    "android",
     "ios"
    ],
    "isv": "piši tu…",
@@ -1509,7 +1520,8 @@
    "ru": "пиши здесь…",
    "uk": "пиши тут…",
    "bg": "пиши тук…",
-   "be": "пішы тут…"
+   "be": "пішы тут…",
+   "de": "hier tippen…"
   },
   "ui_lang": {
    "platforms": [
@@ -1553,7 +1565,8 @@
   "words_head": {
    "platforms": [
     "android",
-    "ios"
+    "ios",
+    "panel"
    ],
    "isv": "Moje slova",
    "en": "My words",
@@ -1569,7 +1582,8 @@
    "ru": "Мои слова",
    "uk": "Мої слова",
    "bg": "Моите думи",
-   "be": "Мае словы"
+   "be": "Мае словы",
+   "de": "Meine Wörter"
   },
   "words_none": {
    "platforms": [
@@ -1649,6 +1663,90 @@
    "_note": "As glag_pl_head.",
    "en": "Glagolitic for Polish is an add-on. Turn it on with the ABC key next to 🌐: it changes to ⰀⰁⰂ, and the next tap goes back to Latin.\n\nYou type ordinary Polish letters and the keyboard joins them into Glagolitic: cz is Ⱍ, sz is Ⱎ, dz is Ⰷ, and siano is ⱄⱑⱀⱁ.\n\nThe v key is the soft yer Ⱐ and works like the Polish acute: s, z, c, n with v give ś, ź, ć, ń, dz with v gives dź, and r with v gives rz. Holding v gives the hard yer Ⱏ: l with it is ł.\n\nOn the free keys: q is ja (Ⱑ), x is ch (Ⱈ). The other letters are under a hold, e.g. ę and ię under e, ą and ią under a, ś and sz under s, and ja, ju, ję and ją under q and j.\n\nAll letters are ordinary Glagolitic characters, so the text works in any app and looks the way the reader's phone draws it.",
    "pl": "Głagolica dla polskiego to dodatek. Włączasz ją klawiszem ABC obok 🌐: zmienia się na ⰀⰁⰂ, a następne dotknięcie wraca do łacinki.\n\nPiszesz zwykłymi polskimi literami, a klawiatura sama składa je w głagolicę: cz to Ⱍ, sz to Ⱎ, dz to Ⰷ, a siano to ⱄⱑⱀⱁ.\n\nKlawisz v to jer miękki Ⱐ i działa jak polska kreska: s, z, c, n z v dają ś, ź, ć, ń, dz z v daje dź, a r z v daje rz. Przytrzymanie v daje jer twardy Ⱏ: l z nim to ł.\n\nNa wolnych klawiszach: q to ja (Ⱑ), x to ch (Ⱈ). Pod przytrzymaniem są pozostałe litery, np. ę i ię pod e, ą i ią pod a, ś i sz pod s, a ja, ju, ję i ją pod q i j.\n\nWszystkie litery to zwykłe znaki głagolicy, więc tekst działa w każdej aplikacji i wygląda tak, jak rysuje je telefon odbiorcy."
+  },
+  "caps_head": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Velike bukvy",
+   "en": "Capital letters",
+   "pl": "Wielkie litery",
+   "nb": "Store forbokstaver",
+   "cs": "Velká písmena",
+   "sk": "Veľké písmená",
+   "sl": "Velike začetnice",
+   "hr": "Velika slova",
+   "sr": "Velika slova",
+   "bs": "Velika slova",
+   "mk": "Големи букви",
+   "ru": "Заглавные буквы",
+   "uk": "Великі літери",
+   "bg": "Главни букви",
+   "be": "Вялікія літары"
+  },
+  "caps_body": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Klaviatura sama piše veliku bukvu na početku rěčenja. Po němečsky piše takože imenniky velikoju bukvoju (Haus, das Leben). Oboje možeš izključiti.",
+   "en": "The keyboard puts a capital at the start of a sentence by itself. In German it also writes nouns with a capital (Haus, das Leben). Both can be turned off.",
+   "pl": "Klawiatura sama stawia wielką literę na początku zdania. Po niemiecku pisze też rzeczowniki wielką literą (Haus, das Leben). Obie rzeczy można wyłączyć.",
+   "nb": "Tastaturet setter automatisk stor forbokstav først i en setning. På tysk skriver det også substantiver med stor forbokstav (Haus, das Leben). Begge deler kan slås av.",
+   "cs": "Klávesnice sama začíná větu velkým písmenem. V němčině píše velkým písmenem i podstatná jména (Haus, das Leben). Obojí můžeš vypnout.",
+   "sk": "Klávesnica sama začína vetu veľkým písmenom. V nemčine píše veľkým písmenom aj podstatné mená (Haus, das Leben). Obe funkcie môžeš vypnúť.",
+   "sl": "Tipkovnica sama začne poved z veliko začetnico. V nemščini z veliko začetnico piše tudi samostalnike (Haus, das Leben). Oboje lahko izključiš.",
+   "hr": "Tipkovnica sama piše veliko slovo na početku rečenice. Na njemačkom i imenice piše velikim slovom (Haus, das Leben). Oboje možeš isključiti.",
+   "sr": "Tastatura sama piše veliko slovo na početku rečenice. Na nemačkom i imenice piše velikim slovom (Haus, das Leben). Oboje možeš da isključiš.",
+   "bs": "Tastatura sama piše veliko slovo na početku rečenice. Na njemačkom i imenice piše velikim slovom (Haus, das Leben). Oboje možeš isključiti.",
+   "mk": "Тастатурата сама ја почнува реченицата со голема буква. На германски со голема буква ги пишува и именките (Haus, das Leben). И двете можеш да ги исклучиш.",
+   "ru": "Клавиатура сама начинает предложение с заглавной буквы. В немецком она также пишет существительные с заглавной (Haus, das Leben). Обе функции можно отключить.",
+   "uk": "Клавіатура сама починає речення з великої літери. У німецькій вона також пише іменники з великої літери (Haus, das Leben). Обидві функції можна вимкнути.",
+   "bg": "Клавиатурата сама започва изречението с главна буква. На немски с главна буква пише и съществителните (Haus, das Leben). Можеш да изключиш и двете.",
+   "be": "Клавіятура сама пачынае сказ з вялікай літары. У нямецкай мове яна таксама піша назоўнікі з вялікай літары (Haus, das Leben). Абедзве функцыі можна выключыць."
+  },
+  "caps_sw": {
+   "platforms": [
+    "android",
+    "panel"
+   ],
+   "isv": "Velika bukva na početku rěčenja",
+   "en": "Capital at the start of a sentence",
+   "pl": "Wielka litera na początku zdania",
+   "nb": "Stor forbokstav først i setningen",
+   "cs": "Velké písmeno na začátku věty",
+   "sk": "Veľké písmeno na začiatku vety",
+   "sl": "Velika začetnica na začetku povedi",
+   "hr": "Veliko slovo na početku rečenice",
+   "sr": "Veliko slovo na početku rečenice",
+   "bs": "Veliko slovo na početku rečenice",
+   "mk": "Голема буква на почетокот на реченицата",
+   "ru": "Заглавная в начале предложения",
+   "uk": "Велика літера на початку речення",
+   "bg": "Главна буква в началото на изречението",
+   "be": "Вялікая літара ў пачатку сказа",
+   "de": "Großbuchstabe am Satzanfang"
+  },
+  "de_nouns_sw": {
+   "platforms": [
+    "android",
+    "panel"
+   ],
+   "isv": "Němečsky: imenniky s velikoju bukvoju",
+   "en": "German: nouns with a capital",
+   "pl": "Niemiecki: rzeczowniki wielką literą",
+   "nb": "Tysk: substantiver med stor forbokstav",
+   "cs": "Němčina: podstatná jména velkým písmenem",
+   "sk": "Nemčina: podstatné mená veľkým písmenom",
+   "sl": "Nemščina: samostalniki z veliko začetnico",
+   "hr": "Njemački: imenice velikim slovom",
+   "sr": "Nemački: imenice velikim slovom",
+   "bs": "Njemački: imenice velikim slovom",
+   "mk": "Германски: именки со голема буква",
+   "ru": "Немецкий: существительные с заглавной",
+   "uk": "Німецька: іменники з великої літери",
+   "bg": "Немски: съществителни с главна буква",
+   "be": "Нямецкая: назоўнікі з вялікай літары",
+   "de": "Deutsch: Nomen großschreiben"
   }
  }
 }

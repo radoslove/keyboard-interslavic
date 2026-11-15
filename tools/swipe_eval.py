@@ -86,6 +86,12 @@ SCRIPT = os.environ.get("SWIPE_SCRIPT", "latin")
 QWERTZ = os.environ.get("SWIPE_ROWS", "qwerty") == "qwertz"
 if QWERTZ:
     LATIN_ROWS = ["qwertzuiop", "asdfghjkl", "yxcvbnm"]
+# German (2026-11-14): `ü ö ä` are keys of their own, rows of 11 as in
+# Layout.deQwertzRows; row 3 keeps shift + 7 + backspace = 10 widths.
+DE = LANG == "de"
+if DE:
+    LATIN_ROWS = (["qwertzuiopü", "asdfghjklöä", "yxcvbnm"] if QWERTZ
+                  else ["qwertyuiopü", "asdfghjklöä", "zxcvbnm"])
 DIGRAPH_KEYS = SCRIPT != "latin"
 # Serbian Cyrillic (JUS I.K1.003, added 2026-11-10) differs from the Interslavic
 # one in both directions: the national layout is QWERTZ, and `џ` is a LETTER
@@ -112,6 +118,13 @@ ROWS = (["qwertzuiop", "asdfghjkl", "xcvbnm"] if MK
 
 def build_centers():
     c = {}
+    if DE:
+        for r, row in enumerate(ROWS[:2]):
+            for i, ch in enumerate(row):
+                c[ch] = ((i + 0.5) * BOARD_W / len(row), (r + 0.5) * KEY_H)
+        for i, ch in enumerate(ROWS[2]):
+            c[ch] = ((1.5 + i + 0.5) * BOARD_W / 10.0, 2.5 * KEY_H)
+        return c
     units = float(len(LATIN_ROWS[0]))     # a letter row spans ten key widths
     # row 0: 10 keys fill the width; a shorter row is padded at both ends
     pad = (len(LATIN_ROWS[0]) - len(ROWS[0])) / 2.0
@@ -162,9 +175,16 @@ for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê",
         _FOLD[_ch] = _dst
 # The Ukrainian apostrophe is written but never drawn: it folds to nothing.
 _FOLD["'"] = ""
+# German: ä ö ü are keys (not folded), ß is held on s. Mirrors Dictionary.foldBase.
+if LANG == "de":
+    for _ch in "äöü":
+        _FOLD[_ch] = _ch
+    _FOLD["ß"] = "s"
 
 
 def fold(ch):
+    if LANG == "de":
+        ch = ch.lower()       # German nouns are capitalised in the list (`Haus`)
     return _FOLD.get(ch, ch)
 
 
@@ -188,6 +208,13 @@ def fold_word(w):
     return _collapse(w) if DIGRAPH_KEYS else "".join(fold(c) for c in w)
 
 
+_UMLAUT_PLAIN = str.maketrans("äöü", "aou")
+_UMLAUT_E = str.maketrans({"ä": "ae", "ö": "oe", "ü": "ue"})
+UE_PEN = float(os.environ.get("UE_PEN", "0"))   # = Dictionary.UE_ROUTE_PEN
+# px the a-o-u route of an umlaut word pays, so `wurde` beats `würde` on a tie
+UMLAUT_PEN = float(os.environ.get("UMLAUT_PEN", "10"))   # = Dictionary.UMLAUT_ROUTE_PEN
+
+
 def folds(w):
     """Every route a word can be glided along.
 
@@ -196,6 +223,14 @@ def folds(w):
     takes whichever fits better (`Dictionary.foldPlain`, 3.6.15).
     """
     plain = "".join(fold(c) for c in w)
+    if LANG == "de":
+        # German: a word with ä ö ü glides over those keys OR over a o u
+        # (owner 2026-11-14), the better route scores - Dictionary.plainUmlauts.
+        bare = plain.translate(_UMLAUT_PLAIN)
+        if bare == plain:
+            return (plain,)
+        # ...and over `ue` `oe` `ae`, the old typewriter spelling (owner 2026-11-14)
+        return (plain, bare, plain.translate(_UMLAUT_E))
     if not DIGRAPH_KEYS:
         return (plain,)
     collapsed = _collapse(w)
@@ -690,6 +725,9 @@ def decode(path, buckets, n=3, mode="pivot", lift_comp=0.0):
             if ideal is None:
                 continue
             score = -shape_dist(rp, ideal) + freq_term(fr) - doubles(folded) * DOUBLE_W - end_pen
+            if LANG == "de" and folded != fold_word(w):
+                # German: the a-o-u route (same length) or the ue/oe/ae route (longer)
+                score -= UMLAUT_PEN if len(folded) == len(fold_word(w)) else UE_PEN
             if pivots:
                 pen = pivot_penalty(pivots, folded)
                 if pen is not None:

@@ -47,7 +47,11 @@ FLOORS = {
     "isv": 73.7, "pl": 69.1, "cs": 82.6, "sk": 82.2, "sl": 81.9, "hr": 81.3,
     "sr": 78.6, "bs": 85.4, "mk": 77.9, "ru": 89.1, "uk": 88.0, "bg": 83.8, "sla": 71.5, "be": 85.0,
     "nb": 71.0, "en": 80.1,
+    # German, 2026-11-14 (Android 3.9.20): QWERTZ, linear frequency, three umlaut routes.
+    "de": 76.5,
 }
+# Languages measured with the settings the phone uses for them.
+SEED_ENV = {"de": {"SWIPE_ROWS": "qwertz", "SWIPE_LINEAR": "isc,nb,en,pl,cs,de"}}
 FLOOR_MARGIN = 4.0
 
 
@@ -68,7 +72,7 @@ def floor_ok(measured, floor):
 
 
 def seeds(lang):
-    code, out = run([PY, str(TOOLS / "five_seeds.py")], {"SWIPE_LANG": lang})
+    code, out = run([PY, str(TOOLS / "five_seeds.py")], {"SWIPE_LANG": lang, **SEED_ENV.get(lang, {})})
     m = re.search(r"mean of 5: top-1 ([\d.]+)%\s+top-3 ([\d.]+)%", out)
     return lang, code, out, (float(m.group(1)), float(m.group(2))) if m else None
 
