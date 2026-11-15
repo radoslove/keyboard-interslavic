@@ -29,6 +29,12 @@ OUT = os.path.join(ROOT, "android-app", "app", "src", "main", "assets")
 
 LANGS = ["cs", "sk", "sl", "hr", "sr", "bs", "mk", "ru", "uk", "bg", "be", "nb", "en", "de"]
 PL_MAX_ENTRIES = 15000
+# A form listed under more entries than this is an auxiliary, not a form of each.
+SHARED_MAX = 8
+# Verbs whose forms ARE the auxiliaries (`jest`, `był`, `będzie`): never thinned.
+AUX = {"bym", "byś", "by", "byśmy", "byście", "będę", "będziesz", "będzie", "będziemy",
+       "będziecie", "będą", "był", "była", "było", "byli", "były", "niech", "niechaj"}
+KEEP_ALL = {"być", "byt", "biti", "byť", "быть", "бути", "быць", "съм", "sein", "werden", "be"}
 # English, kept to the entries its keyboard list ranks highest (size).
 EN_MAX_ENTRIES = 20000
 
@@ -91,6 +97,33 @@ def main():
                     if tl in gloss and tl not in tr and tw and len(tw) <= 30:
                         tr[tl] = tw.split(",")[0].strip()
                 trans.append(([k.lower() for k in keys], tr))
+    # Inflection tables list analytic forms word by word (`będę polemizował`,
+    # `polemizowałbym`), so auxiliaries - `będę`, `był`, `by`, `bym` - turned up
+    # as forms of every verb and `był` came out as `polemizować` (2026-11-15).
+    # A form shared by many entries is such a helper: it stays only with the
+    # entry whose headword it is.
+    def drop_shared(rows, low):
+        count = {}
+        for keys, _ in rows:
+            for k in set(keys[1:]):
+                count[k] = count.get(k, 0) + 1
+        heads = {keys[0] for keys, _ in rows}
+        out = []
+        for keys, v in rows:
+            head = keys[0]
+            if head in KEEP_ALL:          # the auxiliaries' own verb keeps them
+                out.append((keys, v))
+                continue
+            kept = [head] + [k for k in keys[1:] if count.get(k, 0) <= SHARED_MAX and k not in AUX and
+                             # a headword of its own that begins differently
+                             # (`by`, `bym` under `polemizować`) is not this
+                             # word's form; `jest` keeps its own entry
+                             not (len(k) <= 3 and k in heads and k[:2] != head[:2])]
+            out.append((kept, v))
+        return out
+    for l in gloss:
+        gloss[l] = drop_shared(gloss[l], l != "de")
+    trans = drop_shared(trans, True)
     # A gloss that only DESCRIBES a form (`3. lp czasownika sein`, `czas
     # przeszły prosty czasownika finden`) is replaced by the gloss of the word
     # it names (`sein` -> `być`); one that names nothing usable is dropped, so

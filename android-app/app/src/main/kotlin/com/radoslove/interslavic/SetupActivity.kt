@@ -48,12 +48,12 @@ class SetupActivity : Activity() {
      *  (buttons, radios, switches) come from the window theme, our own text
      *  from the pairs under it. */
     private var dark = false
-    private fun col(light: String, night: String) =
+    internal fun col(light: String, night: String) =
         Color.parseColor(if (dark) night else light)
     private val cBg get() = col("#FAFAFA", "#1B1F22")      // keyboard board colour
-    private val cText get() = col("#1C2529", "#E8EAED")    // 13.8:1 on the dark bg
+    internal val cText get() = col("#1C2529", "#E8EAED")    // 13.8:1 on the dark bg
     private val cBody get() = col("#37474F", "#B0BEC5")    // 8.7:1
-    private val cGloss get() = col("#78909C", "#90A4AE")   // the EN aid, below the body
+    internal val cGloss get() = col("#78909C", "#90A4AE")   // the EN aid, below the body
 
     override fun onCreate(savedInstanceState: Bundle?) {
         dark = Theme.isDark(this)
@@ -63,11 +63,23 @@ class SetupActivity : Activity() {
         ui = Ui.current(this)
 
         val pad = (16 * resources.displayMetrics.density).toInt()
-        val root = LinearLayout(this).apply {
+        val page = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(pad, pad, pad, pad)
             setBackgroundColor(cBg)
         }
+        // Three tabs in the one app (owner 2026-11-15): writing and translating,
+        // learning the user's own words, and the keyboard's settings. The try
+        // tab lives in TryTab.kt, the learning tab in LearnTab.kt.
+        val tryRoot = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val learnRoot = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val root = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        page.addView(tabBar(tryRoot, learnRoot, root))
+        page.addView(tryRoot)
+        page.addView(learnRoot)
+        page.addView(root)
+        buildTryTab(tryRoot)
+        buildLearnTab(learnRoot)
 
         // Which build is this? The released app showed its version nowhere at
         // all - only a test build carried it, and only inside its label - so a
@@ -76,50 +88,6 @@ class SetupActivity : Activity() {
         // translated on purpose: a version and a package id read the same in all
         // four screen languages, and the `.debug` suffix is itself the answer to
         // "is this the test build or the published one?".
-        // A box to try the keyboard right here (iOS `try_head`, owner
-        // 2026-11-15): it tells "the keyboard is broken" from "it is not
-        // switched on", and is a place to write without opening another app -
-        // so it comes FIRST, large and framed, inviting to write.
-        // What the text becomes (gloss, other alphabet) comes FIRST, at the
-        // very top: below the box the keyboard covered it (owner 2026-11-15).
-        // No header: the box's own hint says what it is for.
-        val mirrors = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        root.addView(mirrors)
-        addLanguageRow(root)
-        val tryBox = android.widget.EditText(this)
-        root.addView(tryBox.apply {
-            hint = t("try_hint")
-            textSize = 20f
-            minLines = 4
-            maxLines = 10
-            gravity = Gravity.TOP or Gravity.START
-            val d = resources.displayMetrics.density
-            setPadding((14 * d).toInt(), (12 * d).toInt(), (14 * d).toInt(), (12 * d).toInt())
-            background = android.graphics.drawable.GradientDrawable().apply {
-                cornerRadius = 14 * d
-                setColor(col("#F4F7F9", "#263238"))
-                setStroke((2 * d).toInt(), col("#4F7FA8", "#7FA8CF"))
-            }
-            inputType = android.text.InputType.TYPE_CLASS_TEXT or
-                android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE or
-                android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
-        })
-
-        addGlossMirror(mirrors, tryBox)
-        addScriptMirror(mirrors, tryBox)
-        // A language switched from this screen rebuilds it; the text typed so
-        // far comes back, with the keyboard up (owner 2026-11-15).
-        keptText?.let {
-            tryBox.setText(it)
-            tryBox.setSelection(it.length)
-            tryBox.requestFocus()
-            tryBox.postDelayed({
-                (getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager)
-                    .showSoftInput(tryBox, 0)
-            }, 250)
-        }
-        keptText = null
-        tryText = { tryBox.text?.toString().orEmpty() }
 
         section(root, "title", null)
         root.addView(body(t("intro")))
@@ -196,10 +164,8 @@ class SetupActivity : Activity() {
             }
         })
 
-        // The user's own words (the `＋ word` chip), per language, each removable.
-        section(root, "words_head", "words_body")
-        wordsBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        root.addView(wordsBox)
+        // The user's own words (the `＋ word` chip) moved to the learning tab
+        // (owner 2026-11-15): they gather where they are reviewed.
 
         // Light or dark keyboard; automatic follows the phone.
         section(root, "theme_head", null)
@@ -332,7 +298,7 @@ class SetupActivity : Activity() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            addView(root)
+            addView(page)
         }
         setContentView(scroll)
     }
@@ -347,7 +313,7 @@ class SetupActivity : Activity() {
         }
         refreshStatus()
         refreshLangs()
-        refreshWords()
+        learnRefresh()
         refreshLog()
         val top = Symbols.top(this, 15)
         symbolsNow.text = if (top.isEmpty()) t("sym_none")
@@ -365,42 +331,8 @@ class SetupActivity : Activity() {
         for ((lang, box) in langBoxes) box.isChecked = lang in on
     }
     private lateinit var symbolsNow: TextView
-    private lateinit var wordsBox: LinearLayout
 
-    /** One block per language that has words: its name, then each word with a remove button. */
-    private fun refreshWords() {
-        wordsBox.removeAllViews()
-        var any = false
-        for (lang in Lang.ALL) {
-            val words = UserWords.all(this, lang).sorted()
-            if (words.isEmpty()) continue
-            any = true
-            wordsBox.addView(body(langName(lang)).apply { textSize = 16f })
-            for (w in words) {
-                wordsBox.addView(LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = Gravity.CENTER_VERTICAL
-                    addView(TextView(this@SetupActivity).apply {
-                        text = w
-                        textSize = 17f
-                        setTextColor(cText)
-                        layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-                    })
-                    addView(Button(this@SetupActivity).apply {
-                        text = t("words_remove")
-                        setOnClickListener {
-                            UserWords.remove(this@SetupActivity, lang, w)
-                            toast("${t("words_removed")}: $w")
-                            refreshWords()
-                        }
-                    })
-                })
-            }
-        }
-        if (!any) wordsBox.addView(body(t("words_none")))
-    }
-
-    private fun t(key: String) = Ui.t(ui, key)
+    internal fun t(key: String) = Ui.t(ui, key)
     private fun glossOf(key: String) = Ui.gloss(ui, key)
 
     /** `ms` shows `Interslavic (English)`, the other languages their text alone. */
@@ -522,7 +454,7 @@ class SetupActivity : Activity() {
         setPadding(0, 0, 0, 2)
     }
 
-    private fun header(t: String) = TextView(this).apply {
+    internal fun header(t: String) = TextView(this).apply {
         text = t
         textSize = 20f
         setTextColor(cText)
@@ -548,253 +480,36 @@ class SetupActivity : Activity() {
         setPadding(0, 0, 0, 10)
     }
 
-    /**
-     * Under the try box: the same text, live, in another alphabet of the
-     * keyboard's language - ABC / АБВ / ⰀⰁⰂ - with a copy button, to write in
-     * one script and paste the other (owner 2026-11-15). Offline, exact: it is
-     * the keyboard's own transliteration. Shown only for languages with more
-     * than one alphabet (Interslavic, Serbian, Polish).
-     */
-    /** The keyboard's ticked languages as buttons right above the try box: a
-     *  tap makes that language the one typed (owner 2026-11-15: switching had
-     *  to be easier here), and the screen follows. */
-    /** Buttons as wide as their label: the default minimum width pushed the
-     *  copy button off the screen. */
-    private fun narrow(b: Button) {
-        val d = resources.displayMetrics.density
-        b.minWidth = 0
-        b.minimumWidth = 0
-        b.setPadding((14 * d).toInt(), b.paddingTop, (14 * d).toInt(), b.paddingBottom)
-    }
 
-    private var tryText: () -> String = { "" }
 
-    private companion object {
-        /** The try box's text across a language switch (the screen is rebuilt). */
-        var keptText: String? = null
-    }
-
-    private fun addLanguageRow(root: LinearLayout) {
-        val on = Lang.enabled(this)
-        if (on.size < 2) return
-        val cur = Lang.current(this)
-        val chips = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        for (l in on) chips.addView(Button(this).apply {
-            text = l.uppercase()
-            isAllCaps = false
-            narrow(this)
-            textSize = 16f
-            alpha = if (l == cur) 1f else 0.45f
-            setOnClickListener {
-                if (l != Lang.current(this@SetupActivity)) {
-                    // Through the running keyboard when there is one, so its
-                    // view and dictionary follow at once - setting the stored
-                    // choice alone left the open keyboard on the old language.
-                    val ime = ImeService.running
-                    if (ime == null || !ime.switchToLanguage(l)) Lang.setCurrent(this@SetupActivity, l)
-                    keptText = tryText()
-                    recreate()
-                }
-            }
-        })
-        root.addView(android.widget.HorizontalScrollView(this).apply {
-            isHorizontalScrollBarEnabled = false
-            addView(chips)
-        })
-    }
-
-    private fun addScriptMirror(root: LinearLayout, box: android.widget.EditText) {
-        val lang = Lang.current(this)
-        val modes = Script.offered(lang)
-        if (modes.size < 2) return
+    /** ✎ (write, translate) | 🎓 (learn own words) | ⚙ (keyboard settings);
+     *  the last one stays chosen. */
+    private fun tabBar(tryRoot: View, learnRoot: View, setRoot: View): View {
         val prefs = getSharedPreferences("isv_collector", MODE_PRIVATE)
-        val d = resources.displayMetrics.density
-        fun label(m: Script.Mode) = when (m) {
-            Script.Mode.LATIN -> "ABC"; Script.Mode.CYRILLIC -> "АБВ"; Script.Mode.GLAGOLITIC -> "ⰀⰁⰂ"
-        }
-        var target = modes.firstOrNull { it.name == prefs.getString("try_target", null) }
-            ?: modes.first { it != Script.mode(this, lang) }
-        val out = TextView(this).apply {
-            textSize = 20f
-            setTextColor(cText)
-            setTextIsSelectable(true)
-            minLines = 2
-            setPadding((14 * d).toInt(), (10 * d).toInt(), (14 * d).toInt(), (10 * d).toInt())
-            background = android.graphics.drawable.GradientDrawable().apply {
-                cornerRadius = 14 * d
-                setColor(col("#EEF2F5", "#1E2A31"))
-            }
-        }
-        fun update() {
-            val typed = box.text?.toString().orEmpty()
-            val latin = Script.back(typed, Script.mode(this, lang), lang)
-            out.text = Script.convert(latin, target, lang)
-        }
-        val row = LinearLayout(this).apply {
+        val bar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, (8 * d).toInt(), 0, (4 * d).toInt())
+            setPadding(0, 0, 0, (8 * resources.displayMetrics.density).toInt())
         }
-        val chips = modes.map { m ->
-            Button(this).apply {
-                text = label(m)
-                isAllCaps = false
-            narrow(this)
-                textSize = 17f
-                setOnClickListener {
-                    target = m
-                    prefs.edit().putString("try_target", m.name).apply()
-                    update()
-                    (parent as? LinearLayout)?.let { p ->
-                        for (i in 0 until p.childCount) (p.getChildAt(i) as? Button)?.let { c ->
-                            c.alpha = if (c === this) 1f else 0.45f
-                        }
-                    }
-                }
-                alpha = if (m == target) 1f else 0.45f
-            }
+        val tabs = listOf("try" to "✎", "learn" to "🎓", "set" to "⚙")
+        val buttons = ArrayList<Button>()
+        fun show(which: String) {
+            tryRoot.visibility = if (which == "try") View.VISIBLE else View.GONE
+            learnRoot.visibility = if (which == "learn") View.VISIBLE else View.GONE
+            setRoot.visibility = if (which == "set") View.VISIBLE else View.GONE
+            for ((i, btn) in buttons.withIndex()) btn.alpha = if (tabs[i].first == which) 1f else 0.45f
+            prefs.edit().putString("app_tab", which).apply()
         }
-        chips.forEach { row.addView(it) }
-        row.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
-        row.addView(Button(this).apply {
-            text = "⧉"
-            textSize = 18f
-            narrow(this)
-            setOnClickListener {
-                val cm = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                cm.setPrimaryClip(android.content.ClipData.newPlainText("Interslove", out.text))
-                toast("✓ ${label(target)}")
-            }
+        for ((key, label) in tabs) buttons.add(Button(this).apply {
+            text = label
+            isAllCaps = false
+            textSize = 17f
+            setOnClickListener { show(key) }
+            bar.addView(this, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT,
+                if (key == "try") 2f else 1f))
         })
-        root.addView(out)
-        root.addView(row)
-        box.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
-            override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
-            override fun afterTextChanged(s: android.text.Editable?) = update()
-        })
-        update()
+        show(prefs.getString("app_tab", "try") ?: "try")
+        return bar
     }
 
-    /**
-     * Under the try box: the typed text glossed word by word into another
-     * language (owner 2026-11-15), offline, from Wiktionary ([Gloss]). Polish
-     * glosses into the other keyboard languages, every other language into
-     * Polish. Not for Interslavic yet (its dictionary's licence is open).
-     */
-    private fun addGlossMirror(root: LinearLayout, box: android.widget.EditText) {
-        val from = Lang.current(this)
-        val targets = Gloss.targets(this, from)
-        if (targets.isEmpty()) return
-        val prefs = getSharedPreferences("isv_collector", MODE_PRIVATE)
-        val d = resources.displayMetrics.density
-        var to = targets.firstOrNull { it == prefs.getString("gloss_target_$from", null) }
-            ?: targets.firstOrNull { it in Lang.enabled(this) && it != from } ?: targets.first()
-        var table: Map<String, String>? = null
-        val out = TextView(this).apply {
-            textSize = 20f
-            setTextColor(cText)
-            setTextIsSelectable(true)
-            minLines = 2
-            text = "…"
-            setPadding((14 * d).toInt(), (10 * d).toInt(), (14 * d).toInt(), (10 * d).toInt())
-            background = android.graphics.drawable.GradientDrawable().apply {
-                cornerRadius = 14 * d
-                setColor(col("#EEF2F5", "#1E2A31"))
-            }
-        }
-        fun update() {
-            val t = table ?: return
-            var typed = box.text?.toString().orEmpty()
-            // Serbian entries are Cyrillic; Latin typing is read as Cyrillic.
-            if (from == Lang.SR && Script.mode(this, from) == Script.Mode.LATIN)
-                typed = Script.convert(typed, Script.Mode.CYRILLIC, Lang.SR)
-            val sb = android.text.SpannableStringBuilder()
-            for ((piece, known) in Gloss.pieces(t, typed, from, to)) {
-                val a = sb.length
-                sb.append(piece)
-                if (!known) sb.setSpan(android.text.style.ForegroundColorSpan(cGloss), a, sb.length, 0)
-            }
-            out.text = sb
-        }
-        val row = LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            gravity = Gravity.CENTER_VERTICAL
-            setPadding(0, (10 * d).toInt(), 0, (4 * d).toInt())
-        }
-        // Every target in sight, five to a row (a scrolling row hid Norwegian).
-        val chips = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-        val allChips = ArrayList<Button>()
-        // ⇄ turns the direction round (owner 2026-11-15): the keyboard switches
-        // to the language translated into, the translation becomes the text,
-        // and the old source becomes the target.
-        row.addView(Button(this).apply {
-            text = "${from.uppercase()} ⇄"
-            isAllCaps = false
-            textSize = 15f
-            narrow(this)
-            setOnClickListener {
-                val back = to
-                if (back !in Lang.enabled(this@SetupActivity))
-                    Lang.setEnabled(this@SetupActivity, Lang.enabled(this@SetupActivity) + back)
-                prefs.edit().putString("gloss_target_$back", from).apply()
-                val ime = ImeService.running
-                if (ime == null || !ime.switchToLanguage(back)) Lang.setCurrent(this@SetupActivity, back)
-                keptText = out.text.toString()
-                recreate()
-            }
-        })
-        row.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
-        for (l in targets) allChips.add(Button(this).apply {
-            text = l.uppercase()
-            isAllCaps = false
-            narrow(this)
-            textSize = 16f
-            alpha = if (l == to) 1f else 0.45f
-            setOnClickListener {
-                to = l
-                prefs.edit().putString("gloss_target_$from", l).apply()
-                for (c in allChips) c.alpha = if (c === this) 1f else 0.45f
-                update()
-            }
-        })
-        for (c in allChips) { c.textSize = 14f; c.setPadding((9 * d).toInt(), 0, (9 * d).toInt(), 0) }
-        for (part in allChips.chunked(7)) {
-            val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-            part.forEach { line.addView(it) }
-            chips.addView(line)
-        }
-        row.addView(Button(this).apply {
-            text = "⧉"
-            textSize = 18f
-            narrow(this)
-            setOnClickListener {
-                val cm = getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager
-                cm.setPrimaryClip(android.content.ClipData.newPlainText("Interslove", out.text))
-                toast("✓ ${to.uppercase()}")
-            }
-        })
-        root.addView(out)
-        root.addView(row)
-        root.addView(chips)
-        // Attribution the licence asks for.
-        root.addView(TextView(this).apply {
-            text = "Wiktionary · CC BY-SA 4.0"
-            textSize = 11f
-            setTextColor(cGloss)
-            setPadding(0, (2 * d).toInt(), 0, 0)
-        })
-        box.addTextChangedListener(object : android.text.TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
-            override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
-            override fun afterTextChanged(s: android.text.Editable?) = update()
-        })
-        // The table is large: read it off the UI thread, then gloss what is there.
-        Thread {
-            val t = Gloss.table(this, from)
-            runOnUiThread { table = t; update() }
-        }.start()
-    }
-
-    private fun toast(t: String) = Toast.makeText(this, t, Toast.LENGTH_SHORT).show()
+    internal fun toast(t: String) = Toast.makeText(this, t, Toast.LENGTH_SHORT).show()
 }

@@ -1747,6 +1747,158 @@
    "bg": "Немски: съществителни с главна буква",
    "be": "Нямецкая: назоўнікі з вялікай літары",
    "de": "Deutsch: Nomen großschreiben"
+  },
+  "learn_head": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Učenje",
+   "en": "Learning",
+   "pl": "Nauka"
+  },
+  "learn_body": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Tvoje vlastne slova, zapisane čipom ＋ v pasu prědloženij, za povtarjanje v intervalah. Každo zapisano slovo směsta ulěpšaje prědloženja i gesty na tvojem telefonu, a po poslanju do bazy — u vsih od slědujučej versije.",
+   "en": "Your own words, saved with ＋ in the suggestion bar, to review at spaced intervals. Every saved word also improves suggestions and gliding on your phone at once, and once sent to the database, for everyone from the next version.",
+   "pl": "Twoje własne słowa zapisane przyciskiem ＋ na pasku podpowiedzi, do powtarzania w odstępach. Każde zapisane słowo od razu poprawia podpowiedzi i gest na twoim telefonie, a po wysłaniu do bazy u wszystkich od następnej wersji."
+  },
+  "learn_due": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Za povtarjanje tutčas: {k}",
+   "en": "To review now: {k}",
+   "pl": "Do powtórki teraz: {k}"
+  },
+  "learn_start": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Povtarjaj",
+   "en": "Review",
+   "pl": "Powtarzaj"
+  },
+  "learn_show": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Pokaži odgovor",
+   "en": "Show answer",
+   "pl": "Pokaż odpowiedź"
+  },
+  "learn_g0": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Ne znajem",
+   "en": "Don't know",
+   "pl": "Nie wiem"
+  },
+  "learn_g1": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Srědnje",
+   "en": "So-so",
+   "pl": "Średnio"
+  },
+  "learn_g2": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Znajem",
+   "en": "Know",
+   "pl": "Wiem"
+  },
+  "learn_done": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Dočasno jest vse povtorjeno.",
+   "en": "All reviewed for now.",
+   "pl": "Na teraz wszystko powtórzone."
+  },
+  "learn_all": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Vse kategorije",
+   "en": "All",
+   "pl": "Wszystkie"
+  },
+  "learn_nocat": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Bez kategorije",
+   "en": "No category",
+   "pl": "Bez kategorii"
+  },
+  "learn_cat": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Kategorija",
+   "en": "Category",
+   "pl": "Kategoria"
+  },
+  "learn_note": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Zapiska",
+   "en": "Note",
+   "pl": "Notatka"
+  },
+  "learn_ex": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Priklad",
+   "en": "Example",
+   "pl": "Przykład"
+  },
+  "learn_save": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Zapiši",
+   "en": "Save",
+   "pl": "Zapisz"
+  },
+  "learn_cancel": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Anuluj",
+   "en": "Cancel",
+   "pl": "Anuluj"
+  },
+  "learn_nogloss": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "V slovniku nema prěklada — dopiši svoju zapisku.",
+   "en": "No dictionary gloss — add your own note.",
+   "pl": "Brak glosy ze słownika, dopisz własną notatkę."
+  },
+  "learn_new": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "novo",
+   "en": "new",
+   "pl": "nowe"
+  },
+  "learn_in": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "za {k} d.",
+   "en": "in {k} d",
+   "pl": "za {k} dn."
   }
  }
 }
