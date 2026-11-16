@@ -54,6 +54,7 @@ internal fun SetupActivity.buildTryTab(root: LinearLayout) {
     })
 
     addGlossMirror(mirrors, tryBox)
+    addLearnChips(mirrors, tryBox)
     addScriptRow(root, tryBox, root.indexOfChild(frame))
     // A language switched from this screen rebuilds it; the text typed so
     // far comes back, with the keyboard up (owner 2026-11-15).
@@ -278,4 +279,60 @@ internal fun SetupActivity.addGlossMirror(root: LinearLayout, box: android.widge
         val t = Gloss.table(this, from)
         runOnUiThread { table = t; update() }
     }.start()
+}
+
+
+/** Under the translation, every word of the box as a button: a tap puts it
+ *  among the learning cards (owner 2026-11-15: unknown words are met while
+ *  reading and writing, not in the `＋` chip, which only collects words the
+ *  keyboard was missing). Works for every language, with or without a gloss. */
+internal fun SetupActivity.addLearnChips(root: LinearLayout, box: android.widget.EditText) {
+    val d = resources.displayMetrics.density
+    val lang = Lang.current(this)
+    val label = TextView(this).apply {
+        text = t("try_learn")
+        textSize = 13f
+        setTextColor(cGloss)
+        setPadding(0, (8 * d).toInt(), 0, 0)
+    }
+    val chips = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+    val scroll = android.widget.HorizontalScrollView(this).apply {
+        isHorizontalScrollBarEnabled = false
+        addView(chips)
+    }
+    root.addView(label)
+    root.addView(scroll)
+    val token = Regex("\\p{L}+")
+    fun update() {
+        chips.removeAllViews()
+        var typed = box.text?.toString().orEmpty()
+        if (lang == Lang.PL && Script.mode(this, lang) == Script.Mode.GLAGOLITIC)
+            typed = Script.back(typed, Script.Mode.GLAGOLITIC, Lang.PL)
+        val words = token.findAll(typed).map { it.value }
+            .distinctBy { it.lowercase() }.filter { it.length > 1 }.toList().takeLast(12)
+        label.visibility = if (words.isEmpty()) View.GONE else View.VISIBLE
+        val known = Learn.cards(this).filter { it.lang == lang }.map { it.word.lowercase() }.toSet()
+        for (w in words) chips.addView(Button(this).apply {
+            val inDeck = w.lowercase() in known
+            text = if (inDeck) "✓ $w" else w
+            isAllCaps = false
+            textSize = 15f
+            narrow(this)
+            alpha = if (inDeck) 0.5f else 1f
+            setOnClickListener {
+                if (inDeck) return@setOnClickListener
+                val word = if (lang == Lang.DE) w else w.lowercase()
+                Learn.add(this@addLearnChips, lang, word, null)
+                toast("${t("learn_added")}: $word")
+                update()
+                learnRefresh()
+            }
+        })
+    }
+    box.addTextChangedListener(object : android.text.TextWatcher {
+        override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+        override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+        override fun afterTextChanged(s: android.text.Editable?) = update()
+    })
+    update()
 }

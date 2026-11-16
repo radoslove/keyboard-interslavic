@@ -144,7 +144,7 @@
     "android",
     "ios"
    ],
-   "isv": "Kogda je vključeno, klaviatura lokalno zapisyvaje slova, ktoryh nema v slovniku, da by pozdněje šli do prěgleda (nikogda ne avtomatično popravjene). Ničto se ne posyla avtomatično — slova idut dalje jedino v grupě, ktoru sam pošlješ iz svojej pošty. Standardno izključeno.",
+   "isv": "Kogdy je vključeno, klaviatura lokalno zapisyvaje slova, ktoryh nema v slovniku, da by pozdněje šli do prěgleda (nikogda ne avtomatično popravjene). Ničto se ne posyla avtomatično — slova idut dalje jedino v grupě, ktoru sam pošlješ iz svojej pošty. Standardno izključeno.",
    "en": "When on, the keyboard saves Interslavic words NOT in the dictionary LOCALLY, to later go to review (never auto-corrected). Nothing leaves on its own — the words go out only in a batch you send yourself from your mail app. Off by default.",
    "pl": "Gdy włączone, klawiatura zapisuje LOKALNIE słowa międzysłowiańskie, których nie ma w słowniku, żeby później trafiły do przeglądu (nigdy nie są poprawiane automatycznie). Nic nie wychodzi samo — słowa trafiają dalej tylko w paczce, którą sam wysyłasz ze swojej poczty. Domyślnie wyłączone.",
    "nb": "Når dette er på, lagrer tastaturet LOKALT interslaviske ord som ikke står i ordboka, slik at de kan gjennomgås senere (de rettes aldri automatisk). Ingenting sendes automatisk — ordene går bare videre i pakken du selv sender fra e-postappen din. Av som standard.",
@@ -618,7 +618,7 @@
     "android",
     "ios"
    ],
-   "isv": "Kogda je vključeno, slova, ktore potvrdiš pri pisanju — svajpom, izborom iz pasa, dokončenjem znanogo slova — sut lokalno čisljene za spis najpopularnějših medžuslovjanskih slov. Psevdonimno (identifikator telefona niže), bez personalnyh danyh. Ničto se ne posyla avtomatično — do bazy dojde jedino v grupě, ktoru sam pošlješ. Standardno izključeno.",
+   "isv": "Kogdy je vključeno, slova, ktore potvrdiš pri pisanju — svajpom, izborom iz pasa, dokončenjem znanogo slova — sut lokalno čisljene za spis najpopularnějših medžuslovjanskih slov. Psevdonimno (identifikator telefona niže), bez personalnyh danyh. Ničto se ne posyla avtomatično — do bazy dojde jedino v grupě, ktoru sam pošlješ. Standardno izključeno.",
    "en": "When on, Interslavic words you CONFIRM while typing — swipe, picking from the bar, finishing a known word — are counted LOCALLY to feed a ranking of the most popular Interslavic words. Pseudonymously (device id below), no personal data. Nothing leaves automatically — it reaches the database only in a batch you send yourself. Off by default.",
    "pl": "Gdy włączone, słowa międzysłowiańskie, które ZATWIERDZASZ przy pisaniu — swipe'em, wyborem z paska, dokończeniem znanego słowa — są liczone LOKALNIE do rankingu najpopularniejszych słów. Pseudonimowo (identyfikator urządzenia niżej), bez danych osobowych. Nic nie wychodzi samo — trafia do bazy tylko w paczce, którą sam wyślesz. Domyślnie wyłączone.",
    "nb": "Når dette er på, telles interslaviske ord du BEKREFTER mens du skriver — med sveip, valg fra linjen eller ved å fullføre et kjent ord — LOKALT til en rangering av de mest brukte ordene. Pseudonymt (enhets-ID nedenfor), uten personopplysninger. Ingenting sendes automatisk — det når databasen bare i pakken du selv sender. Av som standard.",
@@ -1760,9 +1760,9 @@
    "platforms": [
     "android"
    ],
-   "isv": "Tvoje vlastne slova, zapisane čipom ＋ v pasu prědloženij, za povtarjanje v intervalah. Každo zapisano slovo směsta ulěpšaje prědloženja i gesty na tvojem telefonu, a po poslanju do bazy — u vsih od slědujučej versije.",
-   "en": "Your own words, saved with ＋ in the suggestion bar, to review at spaced intervals. Every saved word also improves suggestions and gliding on your phone at once, and once sent to the database, for everyone from the next version.",
-   "pl": "Twoje własne słowa zapisane przyciskiem ＋ na pasku podpowiedzi, do powtarzania w odstępach. Każde zapisane słowo od razu poprawia podpowiedzi i gest na twoim telefonie, a po wysłaniu do bazy u wszystkich od następnej wersji."
+   "isv": "Slova, ktore hčeš naučiti se: dodaj je niže abo klikni na slovo pod poljem za pisanje v ✎. Karta pokazyvaje slovo: pomysli, čto ono znači, potom pokaži odgovor i ocěni, kako dobro go znaješ.",
+   "en": "Words you want to learn: add them below, or tap a word under the writing box in ✎. Each card shows the word; check yourself against the translation and say how well you knew it.",
+   "pl": "Słowa, których chcesz się nauczyć: dodaj je poniżej albo stuknij słowo pod polem pisania w ✎. Karta pokazuje słowo; sprawdź się z tłumaczeniem i oceń, jak dobrze je znałeś."
   },
   "learn_due": {
    "platforms": [
@@ -1884,21 +1884,85 @@
    "en": "No dictionary gloss — add your own note.",
    "pl": "Brak glosy ze słownika, dopisz własną notatkę."
   },
-  "learn_new": {
+  "learn_add_hint": {
    "platforms": [
     "android"
    ],
-   "isv": "novo",
-   "en": "new",
-   "pl": "nowe"
+   "isv": "novo slovo",
+   "en": "new word",
+   "pl": "nowe słowo"
   },
-  "learn_in": {
+  "learn_add": {
    "platforms": [
     "android"
    ],
-   "isv": "za {k} d.",
-   "en": "in {k} d",
-   "pl": "za {k} dn."
+   "isv": "＋ Za učenje",
+   "en": "＋ Learn",
+   "pl": "＋ Do nauki"
+  },
+  "learn_added": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Dodano za učenje",
+   "en": "Added to learning",
+   "pl": "Dodano do nauki"
+  },
+  "learn_deck_head": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Za učenje",
+   "en": "To learn",
+   "pl": "Do nauki"
+  },
+  "learn_tr": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Prěklad",
+   "en": "Translation",
+   "pl": "Tłumaczenie"
+  },
+  "learn_notr": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "dopiši prěklad",
+   "en": "add a translation",
+   "pl": "dopisz tłumaczenie"
+  },
+  "learn_unlearn": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Odstrani iz učenja",
+   "en": "Remove from learning",
+   "pl": "Usuń z nauki"
+  },
+  "learn_empty": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Ješče ničto ne jest dodano za učenje.",
+   "en": "Nothing to learn yet.",
+   "pl": "Nic jeszcze nie dodano do nauki."
+  },
+  "learn_my_body": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Slova dodane čipom ＋ v pasu prědloženij: klaviatura jih ne znala. Odstrani slovo i klaviatura go prěstane prědlagati; ＋ Za učenje go doda do kart.",
+   "en": "Words added with ＋ in the suggestion bar: the keyboard did not know them. Remove one and the keyboard stops suggesting it; ＋ Learn puts it among the cards.",
+   "pl": "Słowa dodane ＋ na pasku podpowiedzi: klawiatura ich nie znała. Usuń słowo, a klawiatura przestanie je podpowiadać; ＋ Do nauki dokłada je do kart."
+  },
+  "try_learn": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Klikni na slovo za učenje:",
+   "en": "Tap a word to learn it:",
+   "pl": "Stuknij słowo, żeby się go uczyć:"
   }
  }
 }

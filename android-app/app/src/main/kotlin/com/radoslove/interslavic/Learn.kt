@@ -5,14 +5,14 @@ import org.json.JSONObject
 import java.io.File
 
 /**
- * Spaced repetition over the user's own words ([UserWords]) for the app's
- * learning tab (2026-11-15).
+ * Spaced repetition for the app's learning tab (2026-11-15).
  *
- * The words themselves stay in [UserWords] - that is what the keyboard reads -
- * and this file keeps only what learning adds on top: a category, a note, an
- * example and the review schedule. A word removed from the keyboard simply
- * stops showing up here; its card data stays, so adding it again brings the
- * history back.
+ * The cards are the words the user chose to LEARN - typed into the tab or
+ * tapped under the writing box - not the `＋` words of [UserWords]: those are
+ * words the keyboard was missing, which the user usually knows. A `＋` word
+ * becomes a card only when the user puts it there. Each card has its own
+ * translation (filled from the Wiktionary gloss when there is one, editable),
+ * so the back of the card is something to check oneself against.
  *
  * The schedule is a small SM-2 (the family Anki comes from), with three grades:
  * 0 "don't know" starts the word over and shows it again in a minute,
@@ -26,6 +26,8 @@ object Learn {
     data class Card(
         val lang: String,
         val word: String,
+        var tr: String = "",
+        var deck: Boolean = false,
         var cat: String = "",
         var note: String = "",
         var ex: String = "",
@@ -56,6 +58,7 @@ object Learn {
                 if (t <= 0) continue
                 out[k] = Card(
                     lang = k.substring(0, t), word = k.substring(t + 1),
+                    tr = o.optString("tr"), deck = o.optBoolean("deck"),
                     cat = o.optString("cat"), note = o.optString("note"), ex = o.optString("ex"),
                     reps = o.optInt("reps"), ivl = o.optDouble("ivl", 0.0),
                     ease = o.optDouble("ease", 2.5), due = o.optLong("due"),
@@ -72,6 +75,8 @@ object Learn {
         try {
             val root = JSONObject()
             for ((k, c) in cards) root.put(k, JSONObject().apply {
+                if (c.tr.isNotEmpty()) put("tr", c.tr)
+                if (c.deck) put("deck", true)
                 if (c.cat.isNotEmpty()) put("cat", c.cat)
                 if (c.note.isNotEmpty()) put("note", c.note)
                 if (c.ex.isNotEmpty()) put("ex", c.ex)
@@ -87,14 +92,34 @@ object Learn {
         }
     }
 
-    /** One card per saved word of every language, in language order then alphabetically. */
+    /** The cards being learned, in language order then alphabetically. */
     @Synchronized
     fun cards(context: Context): List<Card> {
-        val stored = load(context)
-        val out = ArrayList<Card>()
-        for (lang in Lang.ALL) for (w in UserWords.all(context, lang).sorted())
-            out.add(stored[key(lang, w)] ?: Card(lang, w))
-        return out
+        val order = Lang.ALL
+        return load(context).values.filter { it.deck }
+            .sortedWith(compareBy({ order.indexOf(it.lang) }, { it.word.lowercase() }))
+    }
+
+    /** The stored card of [word], or a fresh one (not in the deck). */
+    @Synchronized
+    fun card(context: Context, lang: String, word: String): Card =
+        load(context)[key(lang, word)] ?: Card(lang, word)
+
+    /** Put [word] among the cards; a card met before keeps its history. */
+    @Synchronized
+    fun add(context: Context, lang: String, word: String, tr: String?) {
+        val w = word.trim()
+        if (w.isEmpty()) return
+        val c = card(context, lang, w)
+        c.deck = true
+        if (c.tr.isEmpty() && !tr.isNullOrEmpty()) c.tr = tr
+        update(context, c)
+    }
+
+    /** Take [card] out of the deck; its data stays for a later return. */
+    fun drop(context: Context, card: Card) {
+        card.deck = false
+        update(context, card)
     }
 
     /** Cards due at [now], the longest-overdue first, new words last. */
@@ -151,6 +176,23 @@ object Learn {
         val f = File(context.filesDir, "learn_log.tsv")
         if (f.exists()) f.readLines().count { it.isNotBlank() } else 0
     } catch (_: Throwable) { 0 }
+
+    /** The language a [lang] word is translated into: Polish for every other
+     *  language, and for Polish the target last chosen under the writing box. */
+    fun target(context: Context, lang: String): String? {
+        if (lang != Lang.PL) return Lang.PL
+        val ts = Gloss.targets(context, Lang.PL)
+        val chosen = context.getSharedPreferences("isv_collector", Context.MODE_PRIVATE)
+            .getString("gloss_target_pl", null)
+        return ts.firstOrNull { it == chosen } ?: ts.firstOrNull { it in Lang.enabled(context) } ?: ts.firstOrNull()
+    }
+
+    /** The Wiktionary gloss of [word], or null. Loads the table: off the UI thread. */
+    fun gloss(context: Context, lang: String, word: String): String? = try {
+        val to = target(context, lang)
+        if (to == null || !Gloss.has(context, lang)) null
+        else Gloss.word(Gloss.table(context, lang), word, lang, to)
+    } catch (_: Throwable) { null }
 
     /** Whole days until [card] is due again; 0 when due now. */
     fun daysLeft(card: Card, now: Long = System.currentTimeMillis()): Int =
