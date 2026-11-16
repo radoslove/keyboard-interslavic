@@ -2406,6 +2406,21 @@ class KeyboardView(
     private val refusedPts = ArrayList<Float>()
     private var refusedT0 = 0L
 
+    /** A touch refused as a glide that then travelled like one: logged with the
+     *  reason, so "the first glide is not caught" can be read (2026-11-15:
+     *  `denj` left no trace at all). */
+    private fun logRefused() {
+        val why = refused
+        refused = null
+        if (why != null && refusedPts.size >= 9 &&
+            trailLength(ArrayList(refusedPts)) > keyWidth(computeCenters()) * 1.5f) {
+            GestureLog.committed(ArrayList(refusedPts), computeCenters(), emptyList(), "", -1,
+                Lang.current(context), Script.mode(context).name.lowercase())
+            GestureLog.resolve("refused_$why", null)
+        }
+        refusedPts.clear()
+    }
+
     private fun refuse(why: String, e: MotionEvent) {
         refused = why
         refusedT0 = e.eventTime
@@ -2416,7 +2431,27 @@ class KeyboardView(
     override fun onInterceptTouchEvent(e: MotionEvent): Boolean {
         // No glide on a page without letters - and the emoji panel SCROLLS, so
         // the parent must keep its hands off the drag entirely.
-        if (symbols || emoji || popupItems != null) return false
+        if (symbols || emoji) return false
+        if (popupItems != null) {
+            // A hold strip is up: the touch belongs to it, never a glide. Logged,
+            // because this path dropped gestures without a trace: a thumb that
+            // rested on the first key past the hold time opened its strip, and
+            // the glide that followed did nothing ("the first glide is not
+            // caught, the second is", 2026-11-16 - no `missed` in the log).
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> { swipeStartKey = null; refuse("popup", e) }
+                MotionEvent.ACTION_MOVE -> if (refused == null && swipeStartKey != null) {
+                    swipeStartKey = null; refuse("hold", e)
+                    // Keep the trail drawn before the strip opened (same x, y, t triples).
+                    refusedT0 = swipeT0
+                    refusedPts.clear(); refusedPts.addAll(trailPts)
+                } else if (refused != null) {
+                    refusedPts.add(e.x); refusedPts.add(e.y); refusedPts.add((e.eventTime - refusedT0).toFloat())
+                }
+                MotionEvent.ACTION_UP -> logRefused()
+            }
+            return false
+        }
         when (e.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
                 // A glide may not START on the bottom row (iOS swipeCanStart): a
@@ -2454,20 +2489,7 @@ class KeyboardView(
             // A second finger before any glide began = two-thumb typing, never a
             // glide: give this whole touch sequence to the keys.
             MotionEvent.ACTION_POINTER_DOWN -> { swipeStartKey = null; return false }
-            MotionEvent.ACTION_UP -> {
-                // A touch refused as a glide at its start, that then travelled
-                // like one: logged with the reason, so "the first glide is not
-                // caught" can be read (2026-11-15: `denj` left no trace at all).
-                val why = refused
-                refused = null
-                if (why != null && refusedPts.size >= 9 &&
-                    trailLength(ArrayList(refusedPts)) > keyWidth(computeCenters()) * 1.5f) {
-                    GestureLog.committed(ArrayList(refusedPts), computeCenters(), emptyList(), "", -1,
-                        Lang.current(context), Script.mode(context).name.lowercase())
-                    GestureLog.resolve("refused_$why", null)
-                }
-                refusedPts.clear()
-            }
+            MotionEvent.ACTION_UP -> logRefused()
             MotionEvent.ACTION_MOVE -> {
                 if (refused != null) {
                     refusedPts.add(e.x); refusedPts.add(e.y); refusedPts.add((e.eventTime - refusedT0).toFloat())
