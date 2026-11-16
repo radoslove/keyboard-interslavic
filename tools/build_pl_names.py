@@ -5,8 +5,8 @@
 
 Why: the wordlist is built through PoliMorf, which keeps common nouns and drops
 everything it does not know, so a keyboard that handles `zabezpieczeniem`
-offered nothing for `Marek` (owner 2026-11-01: "czasami z wypelnianiem
-formularzy jest chujnia jak musze wszystko wpisywac"). A name is exactly the
+offered nothing for `Marek`, which made filling in forms tedious. A name is
+exactly the
 word a phone keyboard must not make you spell out.
 
 Source: the Ministry of Digital Affairs publishes the register's own lists on

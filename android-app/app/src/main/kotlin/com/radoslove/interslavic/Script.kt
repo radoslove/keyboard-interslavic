@@ -45,7 +45,7 @@ object Script {
         Lang.ISV -> listOf(Mode.LATIN, Mode.CYRILLIC, Mode.GLAGOLITIC)
         Lang.SR -> listOf(Mode.LATIN, Mode.CYRILLIC)
         // Polish in Glagolitic: an add-on alphabet, Latin stays the default
-        // (iOS 0.6.12, owner 2026-11-14).
+        // (iOS 0.6.12).
         Lang.PL -> listOf(Mode.LATIN, Mode.GLAGOLITIC)
         // Cyrillic ONLY: there is no Latin Macedonian to offer, so the script
         // key does not appear and the keyboard opens in Cyrillic. The wordlist
@@ -347,7 +347,7 @@ object Script {
         return sb.toString()
     }
 
-    // ---- Polish written in Glagolitic (iOS 0.6.12-0.6.30, owner 2026-11-14) ----
+    // ---- Polish written in Glagolitic (iOS 0.6.12-0.6.30) ----
     // Canon: the converter pl2glag.py of the Polish Glagolitic note; the same
     // table as iOS `Script.polishGlag`. Key layout v04.
 
@@ -399,7 +399,7 @@ object Script {
     }
 
     /** The word space written in Polish Glagolitic: the en space, wider than
-     *  " " (owner 2026-11-14: words ran together in phone fonts). */
+     *  " " (words ran together in phone fonts). */
     const val WIDE_SPACE = ' '
 
     /** Longest first. Jotted vowels after a consonant mark its softness

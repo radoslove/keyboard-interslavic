@@ -38,6 +38,6 @@ Przefiltrowany wynik JEST commitowany — `names_pl.tsv` (2 206 imion od 200 os�
 i `surnames_pl.tsv` (6 487 nazwisk od 1 000 osób w górę) — więc listę da się odtworzyć
 bez pobierania. Budowa: `python tools/build_pl_names.py`.
 
-⚠ Warunki ponownego użycia tych zbiorów **nie są tu jeszcze potwierdzone** (owner
-2026-11-01: „olać na razie te licencje"). Do sprawdzenia przed publikacją wydania, bo
+⚠ Warunki ponownego użycia tych zbiorów **nie są tu jeszcze potwierdzone**.
+Do sprawdzenia przed publikacją wydania, bo
 pozostałe źródła tej klawiatury mają licencje wypisane co do jednego.

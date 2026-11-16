@@ -1,8 +1,8 @@
 # F-Droid metadata recipe — DRAFT (staging copy).
 # Destination: fdroiddata repo → metadata/com.radoslove.interslavic.yml
 # This is NOT submitted. It waits on: (1) purchased-source terms check,
-# (2) merge android-app -> main + a `v3.1` tag (the `commit:` below), (3) owner
-# opening the merge request. See SUBMIT.md in this folder.
+# (2) merge android-app -> main + a `v3.1` tag (the `commit:` below), (3) the
+# maintainer opening the merge request. See SUBMIT.md in this folder.
 #
 # ⚠ The subdir/gradle block below is a first draft — the Gradle project root is
 # `android-app/` (not the repo root), so the build config must be validated

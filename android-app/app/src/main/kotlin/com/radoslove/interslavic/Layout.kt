@@ -38,7 +38,7 @@ object Layout {
 
     /**
      * Letters of OTHER languages, after the keyboard's own in the same popup
-     * (owner 2026-10-10: `mañana` in a letter meant switching keyboards). Polish
+     * (`mañana` in a letter used to mean switching keyboards). Polish
      * first, then other Slavic, then the rest. For writing other languages only -
      * the Interslavic wordlist stays standard orthography.
      */
@@ -60,7 +60,7 @@ object Layout {
     )
 
     /** Norwegian: æ ø å have keys of their own, where every Norwegian keyboard
-     *  has them (owner 2026-10-06, Interscandinavian); held, they give the Swedish
+     *  has them (as in Interscandinavian); held, they give the Swedish
      *  and Danish neighbours. Accents for loanwords sit on the base letters. */
     private val nbOwn: Map<Char, List<String>> = mapOf(
         'e' to listOf("é", "è", "ê"), 'o' to listOf("ó", "ò", "ô"), 'a' to listOf("à"),
@@ -74,7 +74,7 @@ object Layout {
      * habit `c` held -> `č` is then the same in both languages.
      *
      * Rows follow [KeyRows]: QWERTZ by default, as on every Czech keyboard
-     * (owner 2026-11-10, reversing the one-layout rule of 2026-11-01).
+     * (reversing the earlier one-layout rule).
      *
      * Two keys carry two letters, and the ORDER is measured, not guessed - on
      * `main_cs.combined`, weighted by word frequency: ě (265 564) before é
@@ -120,7 +120,7 @@ object Layout {
         'c' to listOf("č"), 's' to listOf("š"), 'z' to listOf("ž"), 'e' to listOf("ě"),
     )
 
-    /** Polish in Glagolitic, held (layout v04 + iOS 0.6.30, owner 2026-11-14):
+    /** Polish in Glagolitic, held (layout v04 + iOS 0.6.30):
      *  the jotted family under q, j and i; ę ię ą ią also under the keys that
      *  contain them; v = the hard yer Ⱏ (l + Ⱏ = ł, otherwise a bare Ⱏ).
      *  Markers, read by `Script`: ď = ⰴⱐ, ḍ = a d that never joins a z,
@@ -139,11 +139,10 @@ object Layout {
     /** Held on `.`: punctuation our MS texts actually use. */
     val periodHold = listOf("…", "!", "„", "”", "\"", "'")
 
-    /** Held on `.` of the LETTER layer, in the owner's own order (2026-11-07,
-     *  read off his phone): `,` first and over the key, then `!`, `-`, `'`,
-     *  `"`, and `:` `;` last - plus `?` back in second place, next to the
-     *  comma (owner 2026-11-07, once the comma finally sat over the key): the
-     *  two marks he reaches for most are then the two nearest the thumb.
+    /** Held on `.` of the LETTER layer: `,` first and over the key, then `!`,
+     *  `-`, `'`, `"`, and `:` `;` last - plus `?` back in second place, next to
+     *  the comma (once the comma sat over the key): the two marks reached for
+     *  most are then the two nearest the thumb.
      *
      *  SEVEN marks, not eleven - and that is a measurement, not taste. The
      *  strip draws one cell per mark, at least 38dp, so eleven asked for 418dp
@@ -158,7 +157,7 @@ object Layout {
     val periodLetterHold = listOf(",", "?", "!", "-", "'", "\"", ":", ";")
 
     /** Held on `,`: the rest of the sentence punctuation. Unused since the
-     *  comma key left the bottom row (owner 2026-11-07) - kept, not deleted,
+     *  comma key left the bottom row - kept, not deleted,
      *  for the day a comma key comes back; iOS keeps its `commaAccents` too. */
     val commaHold = listOf(":", ";", "-", "–", "(", ")")
 
@@ -190,7 +189,7 @@ object Layout {
         "zxcvbnm",
     )
 
-    /** German (owner 2026-11-14): `ü ö ä` are keys of their own, where every
+    /** German: `ü ö ä` are keys of their own, where every
      *  German keyboard has them, rows of 11 like Norwegian. QWERTZ is the
      *  default ([KeyRows.QWERTZ_BY_DEFAULT]); QWERTY swaps `y` and `z` only. */
     private val deQwertzRows: List<String> = listOf(
@@ -225,10 +224,9 @@ object Layout {
      *
      *  **Both non-Latin scripts keep the first two positions and put the `lj` and
      *  `nj` keys there** - in Cyrillic `љ` and `њ`, exactly where the Serbian and
-     *  Macedonian standards have them, and in Glagolitic `ⰾⱐ` and `ⱀⱐ` (owner
-     *  2026-11-08, first for Cyrillic - better to have them in plain sight, and it
-     *  is practised elsewhere - then "to elegancko jakby było tak analogicznie" for
-     *  Glagolitic). Glagolitic has no single SIGN for either pair, but a two-sign
+     *  Macedonian standards have them, and in Glagolitic `ⰾⱐ` and `ⱀⱐ` (first
+     *  for Cyrillic - better to have them in plain sight, and it is practised
+     *  elsewhere - then by analogy for Glagolitic). Glagolitic has no single SIGN for either pair, but a two-sign
      *  key is nothing new on this keyboard: `y` has stood there as `ⱐⰹ` all along,
      *  and the key is a shortcut to the digraph, not a claim that it is a letter.
      *
@@ -248,13 +246,12 @@ object Layout {
      *  for Interslavic - so the thumb that knows the Serbian Latin keyboard
      *  knows this one. One position goes - Serbian has no letter on `y` - while
      *  `x` keeps the place the standard gives `џ`, which is a letter of its own
-     *  and was hard to find under a hold (owner 2026-11-10: "litere џ bylo
-     *  troche trudno znalezc bo jest jako druga nad d"). It works like `љ` and
+     *  and was hard to find as the second hold on `d`. It works like `љ` and
      *  `њ`: the key writes the PAIR `dž`, and the route over `d` + `ž` keeps
      *  working, so a glide has two ways through it.
      *  `з` sits where QWERTZ puts `z`, in the top row, so `ж` is held there, and
      *  the remaining marks `ђ ћ ч ш` are holds on their base letter, as every
-     *  mark in this keyboard is (owner 2026-11-10). */
+     *  mark in this keyboard is. */
     private val srCyrillicRows: List<String> = listOf(
         "qwertzuiop",
         "asdfghjkl",
@@ -282,8 +279,8 @@ object Layout {
         'b' to listOf("\u1e03", "\u1e05"), 'u' to listOf("\u00fc"),
     )
 
-    /** Ukrainian homophonic (xkeyboard-config `ua(homophonic)`, owner
-     *  2026-11-11; iOS 0.6.5): the letters the phone lacks are held on their
+    /** Ukrainian homophonic (xkeyboard-config `ua(homophonic)`;
+     *  iOS 0.6.5): the letters the phone lacks are held on their
      *  Latin match - \u0447 c, \u0436 z, \u044e u, \u0449 w, \u0454 e, \u0457 i, \u044c b. The apostrophe
      *  (`\u043f'\u044f\u0442\u044c`) has no key: the glide skips it, a tap takes it from the
      *  strip under `.`. */
@@ -293,13 +290,13 @@ object Layout {
     )
 
     /** Bulgarian traditional phonetic \u042f\u0412\u0415\u0420\u0422\u042a (xkeyboard-config `bg(phonetic)`,
-     *  owner 2026-11-11; iOS 0.6.6): held on their Latin match, \u0448 before \u0449
+     *  iOS 0.6.6): held on their Latin match, \u0448 before \u0449
      *  (frequency in the list). */
     private val bgOwn: Map<Char, List<String>> = mapOf(
         's' to listOf("\u0161", "\u015d"), 'c' to listOf("\u010d"), 'u' to listOf("\u00fc"), 'i' to listOf("\u00ec"),
     )
 
-    /** Belarusian `by(phonetic)` (owner 2026-11-11): held on their Latin
+    /** Belarusian `by(phonetic)`: held on their Latin
      *  match, ordered by share of running words in the Leipzig corpora -
      *  ў (13.9 %) before ю (3.5 %) on u, э (7.2 %) before ё (2.2 %) on e. */
     private val beOwn: Map<Char, List<String>> = mapOf(
@@ -360,7 +357,7 @@ object Layout {
         // Ukrainian, Bulgarian and Proto-Slavic likewise.
         lang == Lang.RU || lang == Lang.UK || lang == Lang.BG || lang == Lang.SLA ||
             lang == Lang.BE -> ch.toString()
-        // Polish Glagolitic, layout v04 (owner 2026-11-14, iOS 0.6.29): q = ja Ⱑ,
+        // Polish Glagolitic, layout v04 (iOS 0.6.29): q = ja Ⱑ,
         // x = ch Ⱈ (as Keyman's Glagolitic (Phonetic)), v = the soft yer Ⱐ as the
         // Polish kreska (s + v = ś, z ź, c ć, n ń, dz dź, r rz, d ⰴⱐ; after any
         // other letter a bare Ⱐ) - inside the marker ʹ, `Script.softenPL`.
@@ -386,7 +383,7 @@ object Layout {
 
     /** `123` page - rows 1-2 as on the iOS system keyboard. Row 3 sits between
      *  `#+=` and backspace and runs from the rarest mark to the most used, so `?`
-     *  and `!` are right next to backspace, nearest the thumb (owner 2026-10-14). */
+     *  and `!` are right next to backspace, nearest the thumb. */
     val numericRows: List<String> = listOf(
         "1234567890",
         "-/:;()€&@\"",
@@ -447,8 +444,8 @@ object Layout {
 }
 
 /**
- * QWERTY or QWERTZ, chosen per language in the settings (owner 2026-11-10):
- * "so everyone can type the way they are used to in their own language". The
+ * QWERTY or QWERTZ, chosen per language in the settings, so everyone can
+ * type the way they are used to in their own language. The
  * default is the layout of that language's own keyboards - QWERTZ for Czech and
  * Slovak (later Slovenian, Croatian, Serbian), QWERTY for the rest. Languages
  * with their own row of letters (`nb`, `isc`) have no choice to make.

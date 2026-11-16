@@ -32,12 +32,12 @@ settings:
     # expires after 7 days and you rebuild. $99/year is only for distribution.
     DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM}
   # Test builds show their number in Settings -> Keyboards, so two builds can
-  # be told apart on the phone (owner, 2026-10-08: shorter, with the version).
+  # be told apart on the phone (short, with the version).
   configs:
     Debug:
       KEYBOARD_NAME: "Interslove $(MARKETING_VERSION)"
     Release:
-      # Release too (owner 2026-11-13): a user sees in the globe list which
+      # Release too: a user sees in the globe list which
       # version they have, and so that a newer one exists - as on Android.
       KEYBOARD_NAME: "Interslove $(MARKETING_VERSION)"
 
@@ -50,7 +50,7 @@ targets:
       - Shared
       # The word translator's Wiktionary data (CC BY-SA 4.0, tools/build_gloss.py),
       # the SAME files as Android - read from there, not copied (11 MB). APP ONLY:
-      # never in the keyboard extension (its memory limit; owner 2026-11-15).
+      # never in the keyboard extension (its memory limit).
       - path: ../android-app/app/src/main/assets
         includes: ["gloss_*.tsv"]
         buildPhase: resources
@@ -82,13 +82,12 @@ targets:
     info:
       path: App/Info.plist
       properties:
-        # The app is Interslove on the home screen, as in the stores (owner
-        # 2026-11-07); the KEYBOARDS keep their language names, and the space
+        # The app is Interslove on the home screen, as in the stores; the KEYBOARDS keep their language names, and the space
         # bar shows which one is on.
         CFBundleDisplayName: Interslove
         # The screen's languages (tools/ui_texts.json). Declaring them gives
         # Settings -> Interslove -> Language, so the screen language can be
-        # picked without changing the whole phone (owner 2026-11-13).
+        # picked without changing the whole phone.
         CFBundleLocalizations: [en, pl, nb, cs, sk, sl, hr, sr-Latn, sr, bs, mk, ru, uk, bg, be]
         CFBundleAllowMixedLocalizations: true
         # Without these two XcodeGen writes a literal 1.0 / 1 into the plist, so
@@ -121,7 +120,7 @@ targets:
     sources:
       - path: Keyboard
         # Every language's list ships here since 0.6.0: one extension types
-        # them all (owner 2026-11-11), 🌐 steps through the ticked ones.
+        # them all, 🌐 steps through the ticked ones.
         excludes: []
       - path: Shared
     entitlements:
@@ -149,7 +148,7 @@ targets:
           NSExtensionPointIdentifier: com.apple.keyboard-service
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardViewController
           NSExtensionAttributes:
-            # Asked for since 0.4.0 (owner 2026-10-25), and only for the App
+            # Asked for since 0.4.0, and only for the App
             # Group: without it the app cannot see the words added with `＋`
             # nor hand the keyboard a theme. The keyboard works in full with
             # it switched OFF (Shared.swift falls back to its own defaults),

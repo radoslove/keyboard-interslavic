@@ -82,7 +82,7 @@ LATIN_ROWS = ["qwertyuiop", "asdfghjkl", "zxcvbnm"]
 #                the phone.
 SCRIPT = os.environ.get("SWIPE_SCRIPT", "latin")
 # SWIPE_ROWS=qwertz swaps `y` and `z`, as the Czech and Slovak keyboards do
-# (KeyRows, owner 2026-11-10). Latin script only; the grid stays the same.
+# (KeyRows). Latin script only; the grid stays the same.
 QWERTZ = os.environ.get("SWIPE_ROWS", "qwerty") == "qwertz"
 if QWERTZ:
     LATIN_ROWS = ["qwertzuiop", "asdfghjkl", "yxcvbnm"]
@@ -227,11 +227,11 @@ def folds(w):
     plain = "".join(fold(c) for c in w)
     if LANG == "de":
         # German: a word with ä ö ü glides over those keys OR over a o u
-        # (owner 2026-11-14), the better route scores - Dictionary.plainUmlauts.
+        # - the better route scores - Dictionary.plainUmlauts.
         bare = plain.translate(_UMLAUT_PLAIN)
         if bare == plain:
             return (plain,)
-        # ...and over `ue` `oe` `ae`, the old typewriter spelling (owner 2026-11-14)
+        # ...and over `ue` `oe` `ae`, the old typewriter spelling
         return (plain, bare, plain.translate(_UMLAUT_E))
     if not DIGRAPH_KEYS:
         return (plain,)
@@ -904,8 +904,8 @@ def run_test(words, buckets, mode="pivot"):
 def run_lift(words, buckets, mode="pivot"):
     """What the touch lift costs, and what compensating for it buys back.
 
-    Reproduces the owner's standing complaint ("the swipe does not catch, I have
-    to do it two or three times") as a number: a thumb whose touches land high
+    Reproduces the "swipe does not catch, it takes two or three tries"
+    problem as a number: a thumb whose touches land high
     pushes the first and last letters into the row ABOVE, the anchor sets
     (`starts`, `ends`) then never contain the real letters, the decoder returns
     NOTHING, and KeyboardView types nothing at all. The `nothing` column is that
@@ -1032,15 +1032,15 @@ def replay(rows, mode="pivot"):
 # ---- digraph keys (Cyrillic and Glagolitic): both routes must decode --------------------------
 # The `lj`/`nj` keys on `q` and `w` (`љ` `њ` in Cyrillic, `ⰾⱐ` `ⱀⱐ`
 # in Glagolitic) mean a word with `lj`/`nj` can be glided TWO ways,
-# over the new key or over the two letters, and the owner asked for both to
-# work (2026-11-08). This gate watches that, with the negative control that
+# over the new key or over the two letters, and both have to
+# work. This gate watches that, with the negative control that
 # makes it believable: with only the collapsed route in the dictionary - which
 # is what build 3.6.14 shipped - the two-letter gesture must FAIL. A gate nobody
 # has seen fail looks exactly like a dead one.
 DIGRAPH_WORDS = ["ljudi", "bolje", "denj", "veljmi", "cibulje", "nositelja",
                  "tečenju", "mljaskavše"]
 # Serbian: the same gate over its own words, with `dž` words carrying the third
-# digraph key. `džep` `džak` `džem` are the ones the owner tests by hand.
+# digraph key. `džep` `džak` `džem` are the ones checked by hand.
 DIGRAPH_WORDS_SR = ["ljudi", "ljubav", "njegov", "konj", "bolje", "nedelja",
                     "džep", "džak", "džem"]
 DIGRAPH_DRAWS = 6

@@ -1,6 +1,6 @@
 import Foundation
 
-/// The emoji panel behind the 😀 key (owner 2026-10-25: in place of `,`).
+/// The emoji panel behind the 😀 key (in place of `,`).
 ///
 /// A custom keyboard cannot open the system emoji keyboard on iOS - there is
 /// no API for it, only 🌐 to leave our keyboard altogether - so the panel is

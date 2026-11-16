@@ -38,7 +38,7 @@ object Gloss {
                         m[k] = if (old == null) v else if (lang == Lang.PL) "$old|$v" else old
                     }
                     // The same forms without diacritics, so `duzy` finds `duży`
-                    // (owner 2026-11-15); a real spelling always wins over a fold.
+                    // - a real spelling always wins over a fold.
                     for (k in line.substring(0, t).split(' ')) {
                         val f = fold(k)
                         if (f != k && f.isNotEmpty()) folded.putIfAbsent(f, v)

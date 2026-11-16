@@ -9,8 +9,7 @@ import java.io.File
  * plain tap or from a hold popup.
  *
  * Key placement is decided by measurement, not by feel: the more a mark is used,
- * the nearer the thumb it belongs (owner 2026-10-14, after `?` moved next to
- * backspace). Only the mark itself is counted, never the text around it, so
+ * the nearer the thumb it belongs (as when `?` moved next to backspace). Only the mark itself is counted, never the text around it, so
  * nothing written can be read back from this.
  *
  * Always on and on-device, like [Usage]. It leaves the phone only inside the

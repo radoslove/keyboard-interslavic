@@ -4,7 +4,7 @@ import SwiftUI
 /// Wiktionary data, app only). A box to try the
 /// keyboard - it tells "the keyboard is broken" from "it is not switched on" -
 /// and under it every word typed as a button: a tap puts it among the cards
-/// (owner 2026-11-15: unknown words are met while writing, not in the `＋` chip).
+/// (unknown words are met while writing, not in the `＋` chip).
 struct TryView: View {
     var active = true
     @State private var text = ""
@@ -37,8 +37,7 @@ struct TryView: View {
     }
 
     /// The translated words, each with the word it came from: the text typed
-    /// is often already known, so a card can be made from either side (owner
-    /// 2026-11-16: "raz tak, raz tak, pół na pół").
+    /// is often already known, so a card can be made from either side.
     private var glossed: [(word: String, from: String)] {
         guard let t = table, let to else { return [] }
         var seen = Set<String>(), out: [(String, String)] = []
@@ -136,7 +135,7 @@ struct TryView: View {
         NavigationStack {
             List {
                 // What the text becomes comes FIRST, at the top: below the box
-                // the keyboard covers it (owner 2026-11-15, Android).
+                // the keyboard covers it (as on Android).
                 if !targets.isEmpty { Section { translator } }
                 Section {
                     TextField(Ui.t("try_hint"), text: $text, axis: .vertical)

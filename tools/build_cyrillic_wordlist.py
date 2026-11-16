@@ -16,7 +16,7 @@ transliterated once, at build time, one Latin character per Cyrillic letter, so
 the mapping is bijective and `Script` turns it back without guessing. Everything
 inside the keyboard - decoder, ranking, learned touch offset - stays Latin.
 
-The phonetic layout (owner 2026-11-11) puts each letter
+The phonetic layout puts each letter
 on the Latin key that sounds or looks like it, the arrangement Russian users know
 as ЯШЕРТЫ: я q, ш w, е e, р r, т t, ы y, у u, и i, о o, п p / а s д f г ч(h) й(j)
 к л / з х(x) ц(c) в(v) б н м. The letters that have no key of their own are HELD
@@ -75,7 +75,7 @@ UK_B = {   # homophonic: ш w, и y, ґ g, г h, х x, в v. Held: ч c, ж z, �
     "я": "q", "'": "'",
 }
 # Five seeds on the same list: A 87.4 % / 97.4 %, B 87.4 % / 98.0 % (top-1 /
-# top-3) - a tie; the owner chose B (2026-11-11). A stays here as measured.
+# top-3) - a tie; B was chosen. A stays here as measured.
 TABLES["uk"] = UK_B
 # Bulgarian, the two phonetic arrangements of xkeyboard-config, measured
 # against each other (2026-11-11): `bg(phonetic)` - traditional, ЯВЕРТЪ - and
@@ -96,7 +96,7 @@ BG_B = {   # BDS 2006: ч q, ш w, ж x, в v, ъ y. Held: я on a, щ w, ь b, 
     "ь": "ḃ", "ю": "ü", "я": "ä",
 }
 # Five seeds on the same list: A 83.8 % / 96.8 %, B 84.4 % / 95.5 % (top-1 /
-# top-3) - a tie; the owner chose A (2026-11-11): in B the frequent `я` is
+# top-3) - a tie; A was chosen: in B the frequent `я` is
 # only a hold. B stays here as measured.
 TABLES["bg"] = BG_A
 # Belarusian (2026-11-11), official orthography of 2008 - the one the

@@ -4,7 +4,7 @@ import android.content.Context
 import java.io.File
 
 /**
- * Adaptive ranking (the owner's "ranking that builds up through usage"). Every
+ * Adaptive ranking (a ranking that builds up through usage). Every
  * word the user actually commits — typed, swiped, or picked from the bar — gets
  * a local count. That count boosts the word in both the prediction bar and the
  * swipe decoder, so the words YOU use surface first. This is the achievable form

@@ -96,8 +96,8 @@ object Dictionary {
      * Up to [n] words that start with [prefix] (lowercased by the caller),
      * highest frequency first. Empty while the model is still loading.
      *
-     * DIACRITICS DO NOT HAVE TO BE TYPED (owner 2026-11-07: "czasami nie jestem
-     * pewnym co powinno byc"): `verojetno` finds `věrojetno`, because every
+     * DIACRITICS DO NOT HAVE TO BE TYPED (users are not always sure which
+     * letter is right): `verojetno` finds `věrojetno`, because every
      * letter is compared through [foldBase] - the same fold the glide decoder
      * uses, so the two can never disagree about which letters share a key. It
      * matters more than it sounds: 45 % of the Interslavic forms and 61 % of the
@@ -260,8 +260,7 @@ object Dictionary {
 
     /**
      * Endings of the AORIST and IMPERFECT - the two past tenses nobody writes
-     * in everyday Interslavic (owner 2026-11-08: "aoryst moze zostac tylko
-     * dalej w kolejce"). Kept typeable, pushed down the queue.
+     * in everyday Interslavic. Kept typeable, pushed down the queue.
      */
     private val PAST_ENDS = arrayOf(
         "hmo", "hu", "ste", "sta", "hte", "še", "šę", "h",
@@ -308,7 +307,7 @@ object Dictionary {
      *  `hmo`, `še`, `ste`). The 8-letter floor of [isArchaicPast] is not needed
      *  here: that the two are one verb is already given by the prefix. Used by
      *  the strip after a glide, which must not offer `ideh` `idehu` as the
-     *  "longer forms" of `ide` (owner 2026-11-14). */
+     *  "longer forms" of `ide`. */
     fun addsPastEnding(base: String, longer: String): Boolean {
         if (longer.length <= base.length || !longer.startsWith(base)) return false
         val add = longer.substring(base.length)
@@ -415,8 +414,7 @@ object Dictionary {
 
     /** Per-char fold only: the route over `l` and `j`, which are still keys of
      *  their own. A word with `lj` therefore has TWO routes in Cyrillic - over
-     *  `љ`, or over the two letters - and both have to decode (owner 2026-11-08:
-     *  "zeby lapalo wyrazy i po swipowaniu przez љ albo њ i przez osobno l i j").
+     *  `љ`, or over the two letters - and both have to decode.
      *  The better route scores; this one costs nothing for a word without a pair,
      *  because then it equals [foldWord] and is never computed twice. */
     private fun foldPlain(w: String): String {
@@ -494,8 +492,7 @@ object Dictionary {
      * digraph word), built once per list. PASS 1 used to walk EVERY entry on
      * every decode - 548 530 Polish forms - and the decode time grew with the
      * list: 21 ms median in English (32 k), 53 ms in Interslavic (248 k), 219 ms
-     * in Polish with 552 ms at the 90th percentile (gesture log, owner 2026-11-12:
-     * "polski dalej mieli"). Only the 2-3 start keys' buckets can pass the first
+     * in Polish with 552 ms at the 90th percentile (gesture log). Only the 2-3 start keys' buckets can pass the first
      * gate anyway, so walking them in index order gives the same candidates in
      * the same order.
      */
@@ -709,7 +706,7 @@ object Dictionary {
      * A doubled letter is invisible in a glide: `žže` and `že` draw the same
      * line, so geometry ties and the decision falls to frequency and usage.
      * One kept `žže` (usage +8) outweighed the whole frequency gap (že 204,
-     * žže 74 = +3.5), and `žže` then came first every time (owner 2026-10-05).
+     * žže 74 = +3.5), and `žže` then came first every time.
      * Each double therefore costs a fixed penalty: the double form stays in the
      * strip, one tap away, but needs real repeated use to lead.
      */
@@ -782,7 +779,7 @@ object Dictionary {
      * word is being EXTENDED" from "the next word is starting". That used to be
      * decided by a clock alone, so whether two words came out glued depended on
      * how fast the user typed: a letter tapped within 1.2 s of a glide to begin
-     * the next word landed as `wyjscs` (owner 2026-11-04). The list can answer
+     * the next word landed as `wyjscs`. The list can answer
      * the real question - can the word still grow this way? - and it includes
      * the user's own words, so a word they added behaves like any other.
      */

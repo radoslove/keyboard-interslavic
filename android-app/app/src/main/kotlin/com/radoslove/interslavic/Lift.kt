@@ -13,9 +13,8 @@ import android.content.Context
  * decoder anchors a word on the keys NEAREST the first and last point: lift
  * the ends by a third of a key and the real first letter drops out of the
  * anchor set, the word is never even looked at, and the glide produces
- * NOTHING. That is the owner's standing complaint — "the keyboard does not
- * catch, I have to swipe two or three times" (`KOLEJKA_klawiatura_261005.md`,
- * 2026-10-14) — and the repeat works because the second attempt lands lower.
+ * NOTHING. To the user the keyboard "does not catch" and needs two or three
+ * swipes — and the repeat works because the second attempt lands lower.
  *
  * iOS has had this since 0.1.4: 0.35 key widths, measured on 34 labelled real
  * gestures on an iPhone 13 (2026-10-07), where compensating for it alone moved
@@ -24,7 +23,7 @@ import android.content.Context
  *
  * [DEFAULT] is only the starting point. Every glide the user KEEPS is a
  * measurement of their own thumb on their own phone, so the value is nudged
- * toward what was measured ([learn]) and the keyboard converges on its owner.
+ * toward what was measured ([learn]) and the keyboard converges on its user.
  * One value per phone, not per language — it is a property of the finger.
  */
 object Lift {
@@ -34,7 +33,7 @@ object Lift {
 
     /** Learned values stay in a band a thumb can actually produce. */
     // A thumb that lands BELOW the key it aims at is just as real as one that
-    // lands above, and the Android test phone is one: after 195 glides the value sat on this
+    // lands above, and one measured phone is like that: after 195 glides the value sat on this
     // floor with the estimator still pulling down, so compensation was simply
     // switched off on the phone that needed it. Measured in swipe_eval.py: an
     // offset of -0.35 costs 6 points of top-1 while clamped and none when
@@ -52,7 +51,7 @@ object Lift {
      * gap, i.e. the first word counts for half and the tenth for a tenth. The old
      * flat tenth needed dozens of KEPT glides to walk away from a wrong default -
      * and a wrong default is exactly the state in which nothing gets kept
-     * (owner 2026-11-01 on the Android test phone: the value had crawled 0.35 -> 0.276 and was
+     * (measured on a phone: the value had crawled 0.35 -> 0.276 and was
      * still over-compensating, which drags a top-row start down onto the home row:
      * `wyjść` came back as `semtex`, `wysoko` as `do`).
      */

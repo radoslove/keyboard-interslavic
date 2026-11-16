@@ -142,7 +142,7 @@ class KeyboardView(
     /** The finger a glide follows. Two-thumb typing overlaps touches: when the
      *  first thumb lifted, "pointer 0" became the second one, the position jumped
      *  `m`->`a`, and a run of hand-typed letters was decoded as ONE glide -
-     *  `master` typed by hand landed as `mastet` (owner 2026-10-15). */
+     *  `master` typed by hand landed as `mastet`. */
     private var swipePointerId = -1
     /** When a letter was last TYPED (tapped); a touch right after is a tap too. */
     private var lastLetterTapMs = 0L
@@ -173,7 +173,7 @@ class KeyboardView(
      * Used only to tell a letter that EXTENDS the glided word (`pisem` + `s`)
      * from one that starts the next word. Backspace no longer looks at it: the
      * first press after a glide takes the word whatever the delay, and an
-     * ending is fixed by holding backspace (owner, 2026-10-08).
+     * ending is fixed by holding backspace.
      */
     private var swipeCommitAtMs = 0L
     /** Norwegian compounds are long (`søtningsstoff`) and take longer to read,
@@ -227,15 +227,14 @@ class KeyboardView(
 
     /** A character of a word: a letter, and in Ukrainian also the apostrophe
      *  inside one (`\u043F'\u044F\u0442\u044C`, `\u0441\u0456\u043C'\u044F`), or completions, `\uFF0B` and backspace by
-     *  word would break the word in two at it (iOS 0.6.6, owner 2026-11-11). */
+     *  word would break the word in two at it (iOS 0.6.6). */
     private fun wordChar(c: Char, lang: String = Lang.current(context)): Boolean =
         c.isLetter() || Character.getType(c) == Character.NON_SPACING_MARK.toInt() ||
             (c == '\'' && lang in Lang.APOSTROPHE_IN_WORD)
 
     /** The editor, seen through Polish Glagolitic's wide word space: there a
      *  word space goes out as the en space U+2002 (phone fonts draw Glagolitic
-     *  wide and the plain space narrow, so words ran together - owner
-     *  2026-11-14) and reads back as " ", one char for one, so every count of
+     *  wide and the plain space narrow, so words ran together) and reads back as " ", one char for one, so every count of
      *  characters to delete stays right (iOS 0.6.14 `put` / `contextBefore`). */
     private val conn: InputConnection?
         get() {
@@ -511,13 +510,13 @@ class KeyboardView(
         }
     }
 
-    // Hold on SPACE (iOS 0.6.3, owner 2026-11-11): the ticked languages as a
+    // Hold on SPACE (iOS 0.6.3): the ticked languages as a
     // VERTICAL list of full names over the space bar - a horizontal strip of
     // codes was hard to notice. The keyboard cannot draw above its own top, so
     // when the rows do not fit above the space bar the list breaks into columns.
     private var langItems: List<String>? = null
-    /** Last row of the space-bar list (owner 2026-11-11, iOS 0.6.10: "more
-     *  intuitive than looking under 123"): lifting on it opens the panel. */
+    /** Last row of the space-bar list (iOS 0.6.10: easier to find than
+     *  under 123): lifting on it opens the panel. */
     private val LANG_GEAR = " gear"
     private var langLeft = 0f
     private var langTop = 0f
@@ -598,23 +597,22 @@ class KeyboardView(
         val keyLeft = (row.left + tv.left).toFloat()
         val keyTop = (row.top + tv.top).toFloat()
         // The first item sits over the key and the rest run AWAY from the nearer
-        // edge, so a key on the right half opens leftward (iOS 0.5.1, owner
-        // 2026-11-07): the `.` strip used to be pushed against the edge and its
+        // edge, so a key on the right half opens leftward (iOS 0.5.1): the `.` strip used to be pushed against the edge and its
         // first item, the comma, landed far from the thumb.
         val centre = keyLeft + tv.width / 2f
         popupMirrored = centre > width / 2f
-        // THE FIRST ITEM MUST BE OVER THE KEY ON EVERY PHONE (owner 2026-11-07:
-        // "zeby sie na innych modelach dobrze pokazywal przecinek nad zawsze").
+        // THE FIRST ITEM MUST BE OVER THE KEY ON EVERY PHONE (the comma must
+        // show above the key on other models too).
         // It is not enough to pick the roomier side: if the strip is wider than
         // that side, the old code shoved it back and the first cells fell off
-        // the screen - on his phone (1080 px at density 510 = 339 dp) eleven
+        // the screen - on a 1080 px phone at density 510 (339 dp) eleven
         // 38 dp marks asked for 418 dp, so `,` and `:` were not on screen at
         // all. So the cells SHRINK to the room the chosen side really has.
         // The first cell is half over the key, hence n - 0.5 cells to fit.
         val room = (if (popupMirrored) centre else width - centre) - dp(2)
         popupCell = maxOf(tv.width.toFloat(), dp(38).toFloat())
         // Polish Glagolitic: one variant can be two or three letters (ⰴⰸⱐ, ⱎⱍ),
-        // which ran into the next cell (owner 2026-11-14) - a cell is as wide as
+        // which ran into the next cell - a cell is as wide as
         // the longest variant (iOS 0.6.19: 14 + 18 per letter).
         if (Script.rewritesWord(context)) {
             val longest = items.maxOf { Script.out(context, it).length }
@@ -631,8 +629,7 @@ class KeyboardView(
         // ONE cell may hang PAST the key, over whatever is on the other side -
         // on the `.` key that is the backspace of the row above, and while a
         // popup is up no other key takes a touch anyway, so the space is free
-        // (owner 2026-11-07: "zeby byl na miejscu znaku kasowania ktory i tak
-        // jest nieaktywny"). The SECOND item goes there, which is why `?` sits
+        // (the backspace there is inactive meanwhile). The SECOND item goes there, which is why `?` sits
         // to the right of the comma instead of queueing on its left.
         val roomPast = (if (popupMirrored) width - (centre + popupCell / 2f) else centre - popupCell / 2f) - dp(2)
         val overhang = mayOverhang && n >= 2 && roomPast >= popupCell
@@ -767,7 +764,7 @@ class KeyboardView(
 
     /**
      * Shift on selected text: small -> Capital -> CAPS -> small, as on the
-     * system keyboard (iOS 0.4.2, owner 2026-10-25). This is how an ACRONYM gets
+     * system keyboard (iOS 0.4.2). This is how an ACRONYM gets
      * typed - write `sša`, select it, press shift twice - and how a word is
      * fixed after the fact without retyping it.
      *
@@ -791,7 +788,7 @@ class KeyboardView(
             }
             // A FINISHED word right before the caret - glided, taken from the
             // strip, or reached by moving the caret - is re-cased too, without
-            // selecting it: Haus -> HAUS -> haus -> Haus (owner 2026-11-15).
+            // selecting it: Haus -> HAUS -> haus -> Haus.
             // While a word is being typed letter by letter shift keeps its
             // usual job, the capital for the next letter.
             selStart == selEnd && (pendingSpace || swipeJustCommitted || caretByHand) &&
@@ -903,9 +900,9 @@ class KeyboardView(
             refreshSuggestions()
         })
         // Only `.` beside space, on its right; 😀 is the one key on the left
-        // (owner 2026-11-07, after using the iOS row: the comma comes back as
-        // the FIRST item held on `.`, "a obok te pozostale znaki jak wczesniej").
-        // This undoes the 2026-11-01 comma key (92b3ad4) and buys its 0.8 plus
+        // (as in the iOS row: the comma comes back as the FIRST item held on
+        // `.`, the other marks beside it as before).
+        // This undoes the earlier comma key (92b3ad4) and buys its 0.8 plus
         // 0.1 off 😀 for the space bar: the weights are now the iOS ones to the
         // decimal, so the same thumb travel works on both phones. Nothing moved
         // out of reach - `: ; ( ) -` sit on the `123` page and `–` is held on
@@ -920,8 +917,8 @@ class KeyboardView(
     /** `123`: tap = the symbol page. HOLD opens a one-item strip with the gear,
      *  which draws this keyboard's own settings in place of the letters - the
      *  same gesture as on the iPhone, where the globe belongs to the system and
-     *  a keyboard may not open the picker itself, so `123` had to carry it
-     *  (owner 2026-11-10). Android keeps its own extra route as well: the gear
+     *  a keyboard may not open the picker itself, so `123` had to carry it.
+     *  Android keeps its own extra route as well: the gear
      *  held on the GLOBE still opens the app, which is where everything this
      *  panel does not carry lives - the collector, the mark counter, the test
      *  build number, the language list. */
@@ -1008,12 +1005,12 @@ class KeyboardView(
             column.addView(rv)
         }
 
-        // Languages (owner 2026-11-11, iOS 0.6.3): one keyboard in the system,
+        // Languages (iOS 0.6.3): one keyboard in the system,
         // the languages ticked HERE, four codes to a row; at least one stays.
         // A language just ticked becomes the one typed, as on iOS.
         header(pt("langs_head"))
         val on = Lang.enabled(context)
-        // isv first, the rest by code (owner 2026-11-11, iOS 0.6.9: "hard to find");
+        // isv first, the rest by code (iOS 0.6.9: easier to find);
         // only the panel is sorted - the space bar and 🌐 keep Lang.ALL order.
         (listOf(Lang.ISV) + Lang.ALL.filter { it != Lang.ISV }.sorted()).chunked(4).forEach { chunk ->
             choices(chunk.map { code ->
@@ -1048,8 +1045,8 @@ class KeyboardView(
             ))
         }
 
-        // Capitals (2026-11-15): the switches of the app's screen, here too -
-        // the panel under the space bar is where the owner looked for them.
+        // Capitals: the switches of the app's screen, here too -
+        // the panel under the space bar is where users look for them.
         val prefs = context.getSharedPreferences("isv_collector", Context.MODE_PRIVATE)
         header(pt("caps_sw"))
         val autoCap = prefs.getBoolean("auto_cap", true)
@@ -1197,7 +1194,7 @@ class KeyboardView(
 
     /**
      * With more than one language ticked the space bar also switches them
-     * (iOS 0.6.3, owner 2026-11-11): slide right = the next ticked language,
+     * (iOS 0.6.3): slide right = the next ticked language,
      * left = the previous, round the list (never out to the system - that stays
      * 🌐's job); HOLD = the vertical list, slide onto one and lift. So the space
      * is typed on LIFT, inside or outside the key - a thumb that slid a little
@@ -1285,14 +1282,14 @@ class KeyboardView(
      *
      *  The settings were reachable only from the app icon, which meant leaving
      *  whatever you were typing - and a tester does not necessarily know the
-     *  keyboard has an app at all (owner, 2026-11-04). Icons and not words on
+     *  keyboard has an app at all. Icons and not words on
      *  purpose: the keyboard surface carries no translated strings, and a gear
      *  reads the same in all six languages. The strip is the same one the
      *  letter keys use, so a hold-and-slide works exactly as it does there;
      *  The PICKER sits first, over the key, so a plain hold-and-release does
      *  what holding the globe always did - and it is the only way back from
      *  a foreign keyboard, so it must not need aiming. The gear is one slide
-     *  to the right (owner, 2026-11-04). */
+     *  to the right. */
     private fun globeKey(weight: Float): TextView {
         val gear = "⚙"
         val picker = "🌐"
@@ -1374,7 +1371,7 @@ class KeyboardView(
         row.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
         // A row lines its keys up by text BASELINE by default, so a label that
         // wrapped onto two lines (`ⰀⰁⰂ`, `Medžuslovjansky`, Glagolitic `y` = `ⱐⰹ`)
-        // pushed its key down out of the row (owner 2026-10-14, Android test phone).
+        // pushed its key down out of the row.
         row.isBaselineAligned = false
         return row
     }
@@ -1519,7 +1516,7 @@ class KeyboardView(
      *  word by word, a little faster the longer you hold (never whole lines).
      *  A hold that STARTED by wiping a glided word trims it instead: the word
      *  comes back one letter short and loses letters while held - the way to
-     *  fix an ending without first tapping space (owner, 2026-10-08). */
+     *  fix an ending without first tapping space. */
     private fun backspaceKey(weight: Float = 1.5f): TextView {
         val tv = baseKey("⌫", weight)
         // The view's own long-press machinery competes with ours for the same
@@ -1527,7 +1524,7 @@ class KeyboardView(
         tv.isLongClickable = false
         val repeat = object : Runnable {
             override fun run() {
-                // Held right after a glide (iOS 0.5.14, owner 2026-11-11): the tap
+                // Held right after a glide (iOS 0.5.14): the tap
                 // already took the last letter, so the first held step takes the
                 // rest of that word and offers the glide's other guesses; then
                 // whole words, as for any held backspace.
@@ -1575,8 +1572,7 @@ class KeyboardView(
                     backspace()                       // a tap is still one character
                     trimAfterWipe = ""
                     // Right after a glide `backspace()` took the whole word; a TAP
-                    // means "fix the ending" (owner 2026-11-11, parity with iOS
-                    // 0.5.14), so it comes straight back one letter short. A hold
+                    // means "fix the ending" (parity with iOS 0.5.14), so it comes straight back one letter short. A hold
                     // then takes the stem as well (see `repeat`).
                     val stem = lastWipeRemoved.trimEnd().dropLast(1)
                     if (lastWipeRemoved.isNotEmpty() && stem.isNotEmpty()) {
@@ -1662,7 +1658,7 @@ class KeyboardView(
         // because UserWords is part of the list this asks.
         // Past the window, one more case still extends: the letter COMPLETES a
         // word that is more frequent than the glided one (`her` + `e` = `here`,
-        // owner 2026-11-12: picked `her`, paused, tapped `e`, got `her e`).
+        // where picking `her`, pausing and tapping `e` used to give `her e`).
         // A whole, MORE common word guards the frequent case the window exists
         // for - the next word starting right after a glide - because `her` + `s`
         // (`hers`) or `the` + `y` (`they`) is a rarer word and keeps its space.
@@ -1878,7 +1874,7 @@ class KeyboardView(
         // for a moment after an edit, and acting on that armed shift in the
         // middle of a word. Empty counts only with the caret at position 0.
         if (before.isEmpty() && selStart > 0) return
-        // A bare new line is NOT a sentence start (iOS 0.5.1, owner 2026-11-07):
+        // A bare new line is NOT a sentence start (iOS 0.5.1):
         // a word per line got a capital on every line, and deleting a mark at
         // the start of a line armed it again each time. A new line after
         // `.` `!` `?` still is, and so is the empty field.
@@ -1996,7 +1992,7 @@ class KeyboardView(
         // wanted" — wipe the WHOLE word in one press so the user can re-swipe,
         // instead of tapping backspace letter by letter.
         //
-        // No time limit (owner, 2026-10-08: "nobody can be made to wait"):
+        // No time limit (nobody can be made to wait):
         // the first press after a glide always takes the word, however long
         // the eye took to read it. Fixing only the ENDING is a hold instead -
         // see backspaceKey: the word comes back one letter short and trims.
@@ -2076,8 +2072,7 @@ class KeyboardView(
         if (before.isEmpty()) return false
 
         // A step stops at the start of a line; the next one takes the line break
-        // and a hold that goes on carries on into the line above (owner
-        // 2026-11-11). This reverses the earlier rule that a
+        // and a hold that goes on carries on into the line above. This reverses the earlier rule that a
         // held backspace never crossed a line break; the pause at each break is
         // what is left of it - the word pace (200 ms floor) is the guard now.
         val floor = before.lastIndexOf('\n') + 1
@@ -2168,7 +2163,40 @@ class KeyboardView(
             }
             false        // let the scroll view and the chips do their own work
         }
-        return scroller
+        // Hide the keyboard: a down chevron at the right end of the strip, as
+        // on iOS 0.6.34 and on most keyboards. Outside the scroll view, so it
+        // never scrolls away.
+        val hide = object : android.view.View(context) {
+            private val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = cText; style = Paint.Style.STROKE
+                strokeWidth = dp(2).toFloat(); strokeCap = Paint.Cap.ROUND
+                strokeJoin = Paint.Join.ROUND
+            }
+            override fun onDraw(c: Canvas) {
+                val cx = width / 2f; val cy = height / 2f; val r = dp(6).toFloat()
+                c.drawLine(cx - r, cy - r / 2, cx, cy + r / 2, p)
+                c.drawLine(cx, cy + r / 2, cx + r, cy - r / 2, p)
+            }
+        }
+        hide.layoutParams = LayoutParams(dp(40), LayoutParams.MATCH_PARENT)
+        hide.contentDescription = "Hide keyboard"
+        hide.isClickable = true
+        hide.setOnClickListener { service.requestHideSelf(0) }
+        hide.setOnTouchListener { v, e ->
+            if (e.actionMasked == MotionEvent.ACTION_DOWN) {
+                (v.parent?.parent as? android.view.ViewGroup)
+                    ?.requestDisallowInterceptTouchEvent(true)
+            }
+            false
+        }
+        scroller.layoutParams = LayoutParams(0, dp(42), 1f)
+        val row = LinearLayout(context)
+        row.orientation = HORIZONTAL
+        row.setBackgroundColor(cStrip)
+        row.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, dp(42))
+        row.addView(scroller)
+        row.addView(hide)
+        return row
     }
 
     /**
@@ -2219,8 +2247,7 @@ class KeyboardView(
         val capital = word.first().isUpperCase()
         // The `＋ word` chip goes FIRST, where it is seen. It used to sit in the
         // last of six slots, off the right edge of the screen, so it could only be
-        // reached by scrolling the strip - which looked like no adding at all
-        // (owner 2026-10-15).
+        // reached by scrolling the strip - which looked like no adding at all.
         val off = if (saved != null) {
             setSlot(first, "＋ ${Script.out(context, saved)}", saved, save = true); first + 1
         } else first
@@ -2236,7 +2263,7 @@ class KeyboardView(
      *
      * Lowercase-initial words go in as they are. A capital is kept out, because
      * a capital mid-sentence is a NAME and names do not belong in a shared
-     * wordlist - with one exception the owner hit on 2026-10-25 (iOS 0.4.0):
+     * wordlist - with one exception (iOS 0.4.0):
      * at the START of a sentence the capital was put there by shift, not by the
      * writer, so `Neznaneslovo` is the same word as `neznaneslovo` and used to
      * get no chip at all. There it is offered, and saved LOWERCASE.
@@ -2309,9 +2336,9 @@ class KeyboardView(
         val w = slotWord[i] ?: return
         // Taking another candidate from the strip is not a lost sample - it is a
         // LABELLED one: the gesture is the same and now the true word is known.
-        // Dropping it was the deadlock behind "swipe nie łapie": while the offset
-        // is wrong nothing is ever kept, so nothing could ever teach [Lift]
-        // (owner 2026-11-01). Undo and completion still teach nothing, and `＋`
+        // Dropping it was the deadlock behind "the swipe does not catch": while
+        // the offset is wrong nothing is ever kept, so nothing could ever teach
+        // [Lift]. Undo and completion still teach nothing, and `＋`
         // changes no text so it leaves the sample alone.
         if (slotIsSwipeAlt[i]) {
             liftSampleWord = Script.toLatin(context, w).lowercase()
@@ -2461,7 +2488,7 @@ class KeyboardView(
                 if (e.y > lettersBottom() + dp(2)) { swipeStartKey = null; refuse("bottom", e); return false }
                 // Nor from ABOVE the letters: dragging the suggestion strip to reach
                 // a chip was read as a glide - words flickered in the strip and `ore`
-                // was committed while scrolling to `＋ farmacevt` (owner 2026-10-15).
+                // was committed while scrolling to `＋ farmacevt`.
                 // The strip's own scroll listener cannot prevent this: the chips
                 // consume the touch, so the listener never sees ACTION_DOWN.
                 if (e.y < lettersTop() - dp(2)) { swipeStartKey = null; refuse("above", e); return false }
@@ -2567,8 +2594,8 @@ class KeyboardView(
                     // keys `q` `w` `x` carry `lj` `nj` `dž`) and `Script.out`.
                     // Committing `start` raw typed a LATIN letter whenever a tap
                     // drifted enough to reach this branch - on the Serbian
-                    // Cyrillic keyboard the `џ` key put an `x` in the text
-                    // (owner 2026-11-10), and the same hole swallowed every
+                    // Cyrillic keyboard the `џ` key put an `x` in the text,
+                    // and the same hole swallowed every
                     // other letter of both non-Latin scripts.
                     val base = Layout.keyText(start, Script.mode(context), Lang.current(context))
                     val cased = if (up) base.replaceFirstChar { it.uppercaseChar() } else base
@@ -2699,16 +2726,15 @@ class KeyboardView(
         // slowed on the TURN before it, the real lift point drops out of the set
         // and the word that ends there cannot even enter the race. That is how a
         // glide for `myslim` came back `myslimo` with `myslim` nowhere in the
-        // strip (owner 2026-11-07). So the key under the actual last point is
+        // strip. So the key under the actual last point is
         // always in the set as well; it costs one lookup and one more candidate
         // bucket.
         val ends = (nearestKeys(anchorPoint(pointList, true, spd), centers, ANCHOR_KEYS) +
             nearestKeys(pointList.last(), centers, 1)).toSet()
         // One key further out than [ends], for the soft end gate (see Dictionary.decodeSwipeGeo).
         val softEnds = nearestKeys(pointList.last(), centers, 6, END_SOFT_REACH).toSet() - ends
-        // Polish Glagolitic (iOS 0.6.28/0.6.29, owner 2026-11-14): v carried Ⰲ
-        // in layouts v02-v03, and the owner keeps v catching w now that w is
-        // back on w - so a `w` of the word may run over the w key OR the v key.
+        // Polish Glagolitic (iOS 0.6.28/0.6.29): v carried Ⰲ in layouts
+        // v02-v03, and v keeps catching w now that w is back on w - so a `w` of the word may run over the w key OR the v key.
         // The second route is built only when the finger came near v (0.6 of a
         // key width), and a glide starting or ending on v also looks at words
         // filed under w.
@@ -2771,7 +2797,7 @@ class KeyboardView(
             val words = scored.map { it.first }
             // From the finger leaving the glass to a decoded list: what the user
             // waits through (queue + decode). Logged with the gesture so "it
-            // grinds in Polish" becomes a number per language (owner 2026-11-12).
+            // grinds in Polish" becomes a number per language.
             val decodeMs = (SystemClock.uptimeMillis() - liftedAt).toInt()
             post { commitSwipeResult(words, rawPts, centers, decodeMs, scored.map { it.second }) }
         }
@@ -2781,7 +2807,7 @@ class KeyboardView(
      *  user sees - the strip during the gesture, the committed word, the list of
      *  alternatives, the replacement - has to answer this identically, or the
      *  keyboard contradicts itself in front of the user. */
-    /** A text of the ⚙ panel in the KEYBOARD's language (owner 2026-11-15):
+    /** A text of the ⚙ panel in the KEYBOARD's language:
      *  German on the German keyboard, Interslavic on the
      *  Interslavic and Proto-Slavic ones, English where a language has none. */
     private fun pt(key: String): String {
@@ -2845,9 +2871,8 @@ class KeyboardView(
      * wiped that word whole, the strip's `↶` chip and the old alternatives
      * still offered a word the user had already moved past, and a letter typed
      * inside the window could extend it. From the user's side the keyboard
-     * pushed back a word from before the gesture (owner 2026-11-09: "po
-     * nieznalezionym swipie jak sie wpisuje jeszcze raz to wpierdala sie wyraz
-     * z przed"). Nothing is deleted here - the previous word stays exactly as
+     * pushed back a word from before the gesture after a glide that found
+     * nothing. Nothing is deleted here - the previous word stays exactly as
      * it was typed; it simply stops being "the word just glided".
      *
      * The owed space is NOT cleared: it belongs to the word that is standing in
@@ -2873,9 +2898,9 @@ class KeyboardView(
     }
 
     /**
-     * What the strip shows after a glide (iOS 0.6.11 `SwipeInput.strip`, owner
-     * 2026-11-13: `ide` -> `otče`, `osě` were shapes the finger never drew):
-     * the winner; the shorter form that begins it (Android 2026-11-07,
+     * What the strip shows after a glide (iOS 0.6.11 `SwipeInput.strip`:
+     * `ide` -> `otče`, `osě` were shapes the finger never drew):
+     * the winner; the shorter form that begins it (Android,
      * `myslim` behind `myslimo`); alternatives within [STRIP_MARGIN] key widths
      * of the winner; longer forms of the winner, most frequent first (`ide` ->
      * `idemo`, `idete`); then farther shapes only if they are COMMON words.
@@ -2955,7 +2980,7 @@ class KeyboardView(
         }
         val ic = conn ?: return
         // The aorist and the imperfect go to the BACK of the queue, committed
-        // only when nothing else was decoded (owner 2026-11-08: a glide for
+        // only when nothing else was decoded (a glide for
         // `myslimo` kept coming back `myslihmo` - the extra `h` sits right on
         // the way from `i` to `m`, so it costs the shape score almost nothing).
         // Stable, so everything else keeps the decoder's own order.
@@ -2984,9 +3009,8 @@ class KeyboardView(
         // A glide cannot tell "I stopped here" from "I carried on": the path for
         // `myslim` IS the path for `myslimo` up to its last letter. So whenever
         // the winner has a shorter real word as its beginning, that word gets a
-        // slot right behind it - the owner asked for exactly this ("przynajmniej
-        // podac te krotka podstawowa forme, ktora zostala zrobiona gestem",
-        // 2026-11-07). It is an OFFER, never the committed word: the decoder
+        // slot right behind it - at least the short base form the gesture
+        // actually drew is offered. It is an OFFER, never the committed word: the decoder
         // still decides what gets typed.
         val alts = swipeStrip(words, scoreOf, if (centers.isEmpty()) 0f else keyWidth(centers))
         // The strip shows the filtered list; a REJECTED glide (backspace) falls

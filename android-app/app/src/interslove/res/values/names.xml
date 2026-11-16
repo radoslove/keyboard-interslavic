@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- One keyboard, named as on iOS (owner 2026-11-11: "jedna klawiatura Interslove"). -->
+    <!-- One keyboard, named as on iOS. -->
     <string name="app_name">Interslove</string>
     <string name="ime_name">Interslove</string>
 
-    <!-- The system keyboard list, in THIS app's language (owner 2026-11-01:
-         "medžuskandinavsky, poljsky, češsky, norvežsky i anglijsky"). Every
+    <!-- The system keyboard list, in THIS app's language
+         (medžuskandinavsky, poljsky, češsky, norvežsky, anglijsky). Every
          adjective verified in medzuslove_canon; `medžuskandinavsky` is built
          regularly from `skandinavsky` with the productive `medžu-`. The
          Mellomskandinavisk app keeps the endonyms from main/strings.xml.

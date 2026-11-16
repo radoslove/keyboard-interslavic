@@ -97,7 +97,7 @@ class ImeService : InputMethodService() {
     /**
      * Straight to ONE ticked language (space bar slide or list, 🌐, the
      * settings panel). Ours alone since the list moved into the keyboard
-     * (owner 2026-11-11, "jedna klawiatura Interslove"): no subtype, no round
+     * (one Interslove keyboard): no subtype, no round
      * trip through the system - the view is rebuilt here for the new language.
      */
     fun switchToLanguage(lang: String): Boolean {

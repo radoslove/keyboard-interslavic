@@ -12,10 +12,10 @@ composite form is ever in it, and the filter dropped every single one. Measured
 and FOUR conditional. "zrobil" was in, "zrobilem" was not; "chcial" was in,
 "chcialbym" was not; "zeby" was in, "zebym" was not.
 
-The owner found it before the measurement did: 15 of the 28 words in his own
-user_words_pl.txt on the phone are exactly this class (chcialem, moglbym,
-bylby, przydalby, zaczalem, bym...). He was repairing by hand, one word at a
-time, what the build was losing by the thousand.
+A user's word list showed it before the measurement did: 15 of the 28 words
+in one user_words_pl.txt are exactly this class (chcialem, moglbym,
+bylby, przydalby, zaczalem, bym...). They were being repaired by hand, one word
+at a time, while the build was losing them by the thousand.
 
 HOW, and why not by rule. The first attempt grew the endings off the wordlist
 itself, guarding against junk by asking whether the paradigm's other forms were
@@ -70,7 +70,7 @@ TABLE = {
 FLOOR = 15
 
 # Closed class, so written out rather than derived: the same agglutinant on a
-# conjunction and on its own. The owner had to add "bym" by hand.
+# conjunction and on its own. "bym" had to be added by hand.
 PARTICLES = {
     "bym": 150, "byś": 120, "byśmy": 110, "byście": 70,
     "żebym": 150, "żebyś": 130, "żebyśmy": 100,

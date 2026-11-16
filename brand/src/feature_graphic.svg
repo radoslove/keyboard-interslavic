@@ -12,7 +12,7 @@
   <rect width="1024" height="1024" fill="#12328C"/>
   <g transform="translate(0 262)">
     <rect width="1024" height="500" fill="url(#g)"/>
-    <!-- hearts clover (variant B, owner's pick) -->
+    <!-- hearts clover (variant B) -->
     <defs>
       <path id="h" d="M0,-24 C-44,-70 -104,-22 -58,26 L0,86 L58,26 C104,-22 44,-70 0,-24 Z"/>
     </defs>

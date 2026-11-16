@@ -17,7 +17,7 @@ it is also the first whose wordlist is transliterated at build time. Everything
 inside the keyboard stays Latin - the wordlist, the glide decoder, the ranking,
 the learned touch offset - and only the key labels and the committed text are
 turned into Cyrillic (`Script`), exactly as for Interslavic and Serbian. That
-is the cheap half of the owner's decision of 2026-11-10: convert by rule into
+is the cheap half of the decision: convert by rule into
 an internal Latin instead of teaching the dictionary about scripts.
 
 The rule has to be REVERSIBLE, and the obvious transliteration is not:

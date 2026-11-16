@@ -4,7 +4,7 @@ import android.content.Context
 import java.io.File
 
 /**
- * Popularity contribution (owner-approved 2026-08-10). When — and ONLY when —
+ * Popularity contribution. When — and ONLY when —
  * the user has switched it on, every CONFIRMED word (a swipe commit, a pick from
  * the bar, or a hand-typed word that is already in the dictionary) is logged
  * automatically and silently to a local queue. That queue feeds the community

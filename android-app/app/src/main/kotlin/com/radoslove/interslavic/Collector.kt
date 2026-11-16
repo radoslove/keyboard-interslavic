@@ -17,7 +17,7 @@ import java.util.UUID
  *  - OPT-IN, default OFF. Nothing is collected until the user turns it on in the
  *    setup screen.
  *  - On-device only. This class never touches the network; export is a file the
- *    owner moves deliberately. The canonical online sink (a server) is a
+ *    user moves deliberately. The canonical online sink (a server) is a
  *    separate infra seam, not wired here.
  *  - A MISS is flagged for REVIEW, never treated as a correction — absence from
  *    the wordlist (≈⅓ of the DB) is not proof a form is wrong.
@@ -89,7 +89,7 @@ object Collector {
 
     /**
      * Write the queue as an inbox file (`- form = seen N×`, most-seen first) and
-     * return it. This is the deliberate, owner-driven export — the file that goes
+     * return it. This is the deliberate, user-driven export — the file that goes
      * to review, and later to the canonical online sink.
      */
     @Synchronized

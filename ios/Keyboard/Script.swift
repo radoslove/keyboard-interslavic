@@ -226,7 +226,7 @@ enum Script {
     }
 
     /// The v key in Polish Glagolitic writes the soft yer Ⱐ as a kreska, its
-    /// hold the hard yer Ⱏ (layout v04, owner 2026-11-14). Inside they are the
+    /// hold the hard yer Ⱏ (layout v04). Inside they are the
     /// modifier letters ʹ ʺ (letters to Swift, so a word goes on through them);
     /// `softenPL` folds them into the letter before where Polish has one.
     static let softYerMark = "\u{02B9}"
@@ -268,17 +268,17 @@ enum Script {
     /// (siano -> ⱄⱑⱀⱁ), the soft yer ⱐ softens (ś ź ć ń dź rz), the hard yer ⱏ
     /// hardens (ł, y). Same table as the converter `pl2glag.py`.
     private static let polishGlag: [(String, String)] = [
-        // Two forms the owner keeps beside the canon (2026-11-14): x writes the
+        // Two forms kept beside the canon: x writes the
         // historical dzelo ⰷ, holding o offers otu ⱉ. Inside they are the
         // markers ẑ and ō, so the word re-write leaves them as typed.
         ("ẑ", "ⰷ"), ("ō", "ⱉ"),
-        // d softened by the soft yer, offered beside dź (owner 2026-11-14): marker ď.
+        // d softened by the soft yer, offered beside dź: marker ď.
         ("ď", "ⰴⱐ"),
         // v key: bare yers where Polish has no letter for the pair (layout v04)
         ("\u{02B9}", "ⱐ"), ("\u{02BA}", "ⱏ"),
         ("ja", "ⱑ"), ("ia", "ⱑ"), ("ju", "ⱓ"), ("iu", "ⱓ"), ("ję", "ⱗ"), ("ię", "ⱗ"), ("ją", "ⱙ"), ("ią", "ⱙ"),
         ("sz", "ⱎ"), ("cz", "ⱍ"), ("ż", "ⰶ"), ("ą", "ⱘ"), ("ę", "ⱔ"),
-        ("dż", "ⰴⰶ"), ("dź", "ⰷⱐ"), ("dz", "ⰷ"),   // owner 2026-11-14: dz is dzelo at once
+        ("dż", "ⰴⰶ"), ("dź", "ⰷⱐ"), ("dz", "ⰷ"),   // dz is dzelo at once
         // marker ḍ: a d that must NOT join a following z (pod-zielić), from hold d
         ("ḍ", "ⰴ"), ("rz", "ⱃⱐ"),
         ("ś", "ⱄⱐ"), ("ź", "ⰸⱐ"), ("ć", "ⱌⱐ"), ("ń", "ⱀⱐ"),
@@ -287,7 +287,7 @@ enum Script {
         ("a", "ⰰ"), ("b", "ⰱ"), ("c", "ⱌ"), ("d", "ⰴ"), ("e", "ⰵ"), ("f", "ⱚ"),
         ("g", "ⰳ"), ("i", "ⰻ"), ("j", "ⰹ"), ("k", "ⰽ"), ("l", "ⰾ"), ("m", "ⰿ"),
         ("n", "ⱀ"), ("o", "ⱁ"), ("p", "ⱂ"), ("r", "ⱃ"), ("s", "ⱄ"), ("t", "ⱅ"),
-        ("u", "ⱆ"), ("w", "ⰲ"), ("v", "ⰲ"), ("z", "ⰸ"),   // v writes ⰲ like w (owner 2026-11-14)
+        ("u", "ⱆ"), ("w", "ⰲ"), ("v", "ⰲ"), ("z", "ⰸ"),   // v writes ⰲ like w
     ]
 
     private static func toGlagoliticPL(_ latin: String) -> String {
@@ -311,8 +311,8 @@ enum Script {
     }
 
     /// Polish d + z across a prefix (od-zyskać, nad-zwyczajny, pod-ziemie,
-    /// przed-zamcze) are two sounds, not the one sound dz. The rule (owner
-    /// 2026-11-14): the word starts with od / nad / pod / przed, z follows, and
+    /// przed-zamcze) are two sounds, not the one sound dz. The rule: the
+    /// word starts with od / nad / pod / przed, z follows, and
     /// what follows the prefix is a word of its own -> that d gets the marker ḍ,
     /// which never joins a z (podziemie = ⰒⱁⰄⰸⰻⰵⰿⰻⰵ). podzielić (po + dzielić),
     /// odzież, nadzieja: "zielić", "zież", "zieja" are no words, so dz stays ⰷ.

@@ -41,7 +41,7 @@ MIN_COUNT = 2
 # PoliMorf is the filter, and it does not list every closed-class word: the
 # reflexive pronoun `siebie` has no entry at all, so `sobie` - around rank 20 in
 # Polish - fell out of the wordlist and the keyboard offered `➕ sobie` as if it
-# were a new word (owner 2026-11-01, measured on a 150-word probe of pronouns,
+# were a new word (measured on a 150-word probe of pronouns,
 # prepositions and conjunctions: these three were the ONLY holes). A form here is
 # added with the frequency byte of its neighbours in the frequency list.
 SUPPLEMENT = {"sobie": 237, "siebie": 207, "sobą": 180}

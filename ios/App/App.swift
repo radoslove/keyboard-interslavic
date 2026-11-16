@@ -12,7 +12,7 @@ struct InterslavicKeyboardApp: App {
 }
 
 /// ⚙ keyboard settings | ✎ write | 🎓 learn, as a bar at the TOP like Android
-/// `SetupActivity.tabBar`, with big icons (owner 2026-11-16: the system tab bar
+/// `SetupActivity.tabBar`, with big icons (the system tab bar
 /// at the bottom was barely visible, and the settings come FIRST - they are
 /// what the app is for, the rest is a bonus). The last tab stays chosen; a new
 /// install opens on ⚙. All three views stay alive, so the text typed in ✎
@@ -161,7 +161,7 @@ struct SetupView: View {
                     }
                     note("capitals")
                 }
-                // Polish in Glagolitic (layout v04, owner 2026-11-14): Polish only,
+                // Polish in Glagolitic (layout v04): Polish only,
                 // shown when the app screen is Polish.
                 if Ui.current == "pl" {
                     Section(Ui.head("glag_pl_head")) { note("glag_pl_body") }
@@ -207,8 +207,8 @@ struct SetupView: View {
                     note("privacy_body")
                 }
                 // The gesture log is for error reports, not for everyday use:
-                // hidden until the version line is tapped five times (owner
-                // 2026-11-13), and shown for good once recording is on.
+                // hidden until the version line is tapped five times, and
+                // shown for good once recording is on.
                 if showLog || logOn {
                     Section {
                         Toggle(Ui.t("log_toggle"), isOn: $logOn)

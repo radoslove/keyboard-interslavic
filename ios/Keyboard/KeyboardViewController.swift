@@ -21,7 +21,7 @@ final class KeyboardViewController: UIInputViewController {
     /// Shift was pressed, not armed by the text. The automatic re-arm must
     /// not take it back: a press mid-sentence was undone by the next
     /// `textDidChange`, so the second press (meant for Caps Lock) only turned
-    /// it on again (owner 2026-10-25: "after the next one it goes back to small").
+    /// it on again (after the next letter it went back to small).
     private var shiftByHand = false
     private var showingNumeric = false
     /// The `#+=` page of the numeric layer.
@@ -139,8 +139,8 @@ final class KeyboardViewController: UIInputViewController {
     }
 
     /// A custom keyboard is told about a caret moved by hand through
-    /// `textDidChange`, not `selectionDidChange` (owner 2026-11-16: after the
-    /// caret was moved the bar stayed empty). The glided word no longer right
+    /// `textDidChange`, not `selectionDidChange` (after the caret was moved
+    /// the bar stayed empty). The glided word no longer right
     /// before the caret means the caret moved: the glide's alternatives would
     /// land at the new place, so they go, and the bar offers words for the
     /// word the caret is in now. Looked at twice, 0.15 s apart, because some
@@ -199,8 +199,8 @@ final class KeyboardViewController: UIInputViewController {
     /// Polish Glagolitic: the word being typed, in the keyboard's Latin (with
     /// the ẑ ō ď markers) and as it stands on screen. Some apps report the text
     /// before the cursor late, so a fast second letter read the word from
-    /// before the previous one and joined the letters wrong (owner 2026-11-14:
-    /// "jak", "dzień"). Kept from our own writes; any other key clears it.
+    /// before the previous one and joined the letters wrong (`jak`, `dzień`).
+    /// Kept from our own writes; any other key clears it.
     private var glagWord: (latin: String, shown: String)?
 
     // MARK: - Building
@@ -357,7 +357,7 @@ final class KeyboardViewController: UIInputViewController {
                                        : showingEmoji ? #selector(tapEmojiKey) : #selector(tapLayer))
         if !panel {
             // Hold `123` for ⚙: the keyboard's own settings, drawn in place of
-            // the letters (owner 2026-11-07). Android holds 🌐 for the same
+            // the letters. Android holds 🌐 for the same
             // strip; on iOS 🌐 belongs to the system, and a keyboard may not
             // open other apps (App Review 4.4.1), so nothing leaves the keyboard.
             layerKey.tag = 3        // bottom row: the strip goes above the key
@@ -388,7 +388,7 @@ final class KeyboardViewController: UIInputViewController {
                 stack.addArrangedSubview(script)
                 weights.append((script, 1.2))
             }
-            // 😀 left of space where `,` was (owner 2026-10-25); the comma is
+            // 😀 left of space where `,` was; the comma is
             // now the FIRST item held on `.`, so it is still one gesture away.
             // `?` and `!` live on `123` next to backspace.
             let emoji = functionKey("😀", action: #selector(tapEmojiKey))
@@ -399,7 +399,7 @@ final class KeyboardViewController: UIInputViewController {
 
         // Space fires on touch DOWN, like backspace: on lift, a thumb that
         // slid a little lost the press ("space sometimes takes two taps").
-        // The space bar names the keyboard that is on (owner 2026-11-07), the
+        // The space bar names the keyboard that is on, the
         // way the system keyboard does: its display name from Settings ->
         // Keyboards, lowercase (`medžuslovjansky`, `polski`, `češsky`).
         let space = styledKey(Self.spaceLabel)
@@ -407,8 +407,8 @@ final class KeyboardViewController: UIInputViewController {
         space.setTitleColor(.secondaryLabel, for: .normal)
         space.titleLabel?.lineBreakMode = .byTruncatingTail
         space.backgroundColor = .systemBackground
-        // With more than one language ticked, the space bar also switches them
-        // (owner 2026-11-11): slide right = next, left = previous, hold = a
+        // With more than one language ticked, the space bar also switches them:
+        // slide right = next, left = previous, hold = a
         // strip of the ticked languages to slide onto. So the space is typed on
         // LIFT now - inside or outside the key, so a thumb that slid a little
         // still gets its space - and a recognised gesture cancels it.
@@ -420,7 +420,7 @@ final class KeyboardViewController: UIInputViewController {
             space.tag = 3
             // The hold works with ONE language too: its list ends with ⚙,
             // the way to the settings that is easier to find than holding
-            // `123` (owner 2026-11-11). Sliding needs two languages.
+            // `123`. Sliding needs two languages.
             let hold = UILongPressGestureRecognizer(target: self, action: #selector(holdSpace(_:)))
             hold.minimumPressDuration = 0.4
             space.addGestureRecognizer(hold)
@@ -489,7 +489,7 @@ final class KeyboardViewController: UIInputViewController {
 
     /// Polish Glagolitic draws its labels in our own font (bundled, UIAppFonts);
     /// everything else, and any letter the font lacks, stays the system font.
-    /// Off for now (owner 2026-11-14: the letters still need work): the font is
+    /// Off for now (the letters still need work): the font is
     /// not bundled yet, so the keys use the system font.
     static let ownFontOnKeys = false
 
@@ -506,7 +506,7 @@ final class KeyboardViewController: UIInputViewController {
         b.setTitle(title, for: .normal)
         b.titleLabel?.font = .systemFont(ofSize: 22)
         // A key may carry two Glagolitic letters (Polish y = ⱏⰹ, ś = ⱄⱐ):
-        // shrink to fit instead of cutting them to "…" (owner 2026-11-14).
+        // shrink to fit instead of cutting them to "…".
         b.titleLabel?.adjustsFontSizeToFitWidth = true
         b.titleLabel?.minimumScaleFactor = 0.5
         b.titleLabel?.lineBreakMode = .byClipping
@@ -585,7 +585,7 @@ final class KeyboardViewController: UIInputViewController {
 
     /// A character of a word: a letter, and in Ukrainian also the apostrophe
     /// inside one (`п'ять`, `сім'я`), or completions and own words would break
-    /// the word in two at it (owner 2026-11-11).
+    /// the word in two at it.
     private func wordChar(_ c: Character) -> Bool {
         c.isLetter || (c == "'" && Layout.apostropheInWord)
     }
@@ -602,7 +602,7 @@ final class KeyboardViewController: UIInputViewController {
 
     /// Everything the keyboard writes goes through here. In Polish Glagolitic a
     /// word space is the en space U+2002: phone fonts draw Glagolitic letters
-    /// wide and the plain space narrow, so words ran together (owner 2026-11-14).
+    /// wide and the plain space narrow, so words ran together.
     /// Inside, the keyboard keeps working with the plain space: `contextBefore`
     /// and `contextAfter` read U+2002 back as " ", one character for one, so
     /// counts for deleteBackward stay right.
@@ -672,7 +672,7 @@ final class KeyboardViewController: UIInputViewController {
 
     /// One press: the next letter capital. Two: Caps Lock. Three: off.
     /// With text selected it changes THAT text instead: small -> Capital ->
-    /// CAPS -> small, as on the system keyboard (owner 2026-10-25).
+    /// CAPS -> small, as on the system keyboard.
     @objc private func tapShift() {
         if cycleCase() { return }
         switch shift {
@@ -690,7 +690,7 @@ final class KeyboardViewController: UIInputViewController {
     /// Fires on touch DOWN, like the system keyboard: waiting for the lift is
     /// what made backspace feel like it "doesn't catch". Holding repeats.
     ///
-    /// Right after a glide (owner 2026-11-11, after a tester's report): a TAP
+    /// Right after a glide (after a tester's report): a TAP
     /// takes ONE letter - the stem is usually right and only the ending needs
     /// fixing - and HOLDING takes the rest of the word at once and offers the
     /// other guesses. This replaces "tap wipes the word, hold trims it", and with
@@ -704,7 +704,7 @@ final class KeyboardViewController: UIInputViewController {
             guard let self else { return }
             // Held: whole words, one after another, at the pace of Android
             // (`KeyboardView` ⌫ repeat: 500 ms, then 260 ms ramping by 15 ms to a
-            // 200 ms floor; owner 2026-11-11). After a glide the first step is
+            // 200 ms floor). After a glide the first step is
             // the rest of that word, with its other guesses.
             var more = true
             if let hold = self.trimAfterWipe {
@@ -736,7 +736,7 @@ final class KeyboardViewController: UIInputViewController {
         // Only when this press WIPED the glided word. A plain one-letter
         // delete also drops the glide state - after the caret was moved by
         // hand - and putting the stem back then wrote it into the middle of
-        // another word (owner 2026-11-16: `E|ssen` + ⌫ -> `EEssesen`).
+        // another word (`E|ssen` + ⌫ -> `EEssesen`).
         guard wiped, let word = before else { return }
         let guesses = lastCandidates
         restoreTrimmed(word)
@@ -763,8 +763,8 @@ final class KeyboardViewController: UIInputViewController {
     /// One step of a held ⌫ (Android `deleteWordBackward`): the run before the
     /// cursor - letters and digits, or a run of marks - with the spaces after
     /// it. A step stops at the start of a line; the next one takes the line
-    /// break, and a hold that goes on carries on into the line above (owner
-    /// 2026-11-11; this reverses the old stop at the line).
+    /// break, and a hold that goes on carries on into the line above (this
+    /// reverses the old stop at the line).
     /// Returns whether there is anything left to delete.
     @discardableResult
     private func deleteWordBack() -> Bool {
@@ -830,7 +830,7 @@ final class KeyboardViewController: UIInputViewController {
         glagWord = nil
         // Right after a swipe (no other key in between) backspace means "wrong
         // word" and takes it whole - at once, no matter how long the thumb took
-        // to come back (owner, 2026-10-07: "nobody can be made to wait").
+        // to come back (nobody can be made to wait).
         // To fix only an ending: space first, then backspace deletes letters.
         // Only if the word is still right behind the cursor: after a tap
         // somewhere else in the text, wiping word.count letters there would
@@ -1031,12 +1031,12 @@ final class KeyboardViewController: UIInputViewController {
             return row
         }
 
-        // Languages (owner 2026-11-11): one keyboard in the system's list,
+        // Languages: one keyboard in the system's list,
         // the languages ticked here, 🌐 steps through them. At least one stays.
         column.addArrangedSubview(header(Self.pt("langs_head")))
         let on = Layout.enabled
         // Interslavic first, the rest alphabetically by the code shown, so a
-        // language is easy to find (owner 2026-11-11, variant B).
+        // language is easy to find.
         let codes = Layout.all.map(\.code)
         let langs = codes.filter { $0 == "isv" } + codes.filter { $0 != "isv" }.sorted()
         for start in stride(from: 0, to: langs.count, by: 4) {
@@ -1337,7 +1337,7 @@ final class KeyboardViewController: UIInputViewController {
 
     /// When a letter was last typed by a tap. A touch this soon after belongs
     /// to the typing run, never to a swipe (Android 3.5.30, TAP_RUN_MS):
-    /// `master` typed fast was decoded as `mastet` (owner 2026-10-15).
+    /// `master` typed fast was decoded as `mastet`.
     private var lastLetterTapAt = Date.distantPast
     private static let tapRun: TimeInterval = 0.25
 
@@ -1424,7 +1424,7 @@ final class KeyboardViewController: UIInputViewController {
 
     /// What `＋` would save for `word`, or nil. Lowercase-initial words as
     /// they are. A capital only where shift put it - the first word of a
-    /// sentence (`Neznaneslovo` got no chip, owner 2026-10-25) - and then
+    /// sentence (`Neznaneslovo` got no chip) - and then
     /// saved in lowercase; a capital mid-sentence is a name and stays out.
     private static func saveForm(_ word: String, after before: String) -> String? {
         guard word.count >= 3, SwipeDictionary.keys(of: word.lowercased()) != nil,
@@ -1464,7 +1464,7 @@ final class KeyboardViewController: UIInputViewController {
         // An EMPTY context is not proof of an empty field: right after our own
         // edits some hosts briefly report nothing, and that armed shift in the
         // middle of a word (`napiŠ`). Empty counts only when the field is.
-        // A bare new line is NOT a sentence start (owner 2026-11-07): typing a
+        // A bare new line is NOT a sentence start: typing a
         // list or a word per line got a capital on every line, and deleting a
         // test mark at the start of a line armed it again each time (log
         // 17:38, `chciałbym \n\n` -> on). A new line after `.` `!` `?` still is.
@@ -1521,10 +1521,10 @@ final class KeyboardViewController: UIInputViewController {
         strip.axis = .horizontal
         strip.distribution = .fillEqually
         // Thin separator lines between the cells: several Glagolitic letters
-        // in one cell (ⰴⰸⱐ) ran into the next one (owner 2026-11-14).
+        // in one cell (ⰴⰸⱐ) ran into the next one.
         strip.spacing = 1
         // Opaque, and one step lighter than the keys in dark mode, so the strip
-        // stands out without the keys showing through it (owner 2026-11-14).
+        // stands out without the keys showing through it.
         strip.backgroundColor = .opaqueSeparator
         strip.layer.cornerRadius = 6
         strip.layer.borderWidth = 1
@@ -1535,8 +1535,8 @@ final class KeyboardViewController: UIInputViewController {
         // The first variant sits over the key and the rest run AWAY from the
         // nearer edge, so a key on the right half opens leftward. Centring the
         // strip pushed a long one (11 marks on `.`) against the left margin,
-        // and the comma - the first and most used - landed far from the thumb
-        // (owner 2026-11-07). `variantLabels` stays in variant order; only the
+        // and the comma - the first and most used - landed far from the thumb.
+        // `variantLabels` stays in variant order; only the
         // strip shows them mirrored.
         let opensLeft = key.convert(key.bounds, to: view).midX > view.bounds.midX
         // A cell is wide enough for its longest variant (one letter: 40 pt).
@@ -1566,8 +1566,8 @@ final class KeyboardViewController: UIInputViewController {
         // over the app above it the way the system keyboard does. Rows 1-3
         // always have a full row above them. Row 0 has only the suggestion
         // strip, so there the popup goes OVER that strip, lower than elsewhere
-        // but above the finger (owner 2026-11-11: it showed below `u` and `e`,
-        // hidden under the thumb). It drops below the key only when even the
+        // but above the finger (it used to show below `u` and `e`, hidden
+        // under the thumb). It drops below the key only when even the
         // strip is missing (less than `minAbove` points above the key).
         let minAbove: CGFloat = 28
         let roomAbove = key.convert(key.bounds, to: view).minY - 3
@@ -1611,8 +1611,7 @@ final class KeyboardViewController: UIInputViewController {
     }
 
     /// Hold on space: the ticked languages as a VERTICAL list of full names
-    /// over the space bar (owner 2026-11-11: a horizontal strip of codes was
-    /// hard to notice). The keyboard is clipped to its own frame, so when the
+    /// over the space bar (a horizontal strip of codes was hard to notice). The keyboard is clipped to its own frame, so when the
     /// rows would not fit above the space bar the list breaks into columns.
     private func showLanguageList(over key: UIButton, langs: [String]) {
         dismissPopup()
@@ -1730,7 +1729,7 @@ extension KeyboardViewController: SwipeHost {
             b.titleLabel?.minimumScaleFactor = 0.7
             b.setTitleColor(.label, for: .normal)
             b.addTarget(self, action: #selector(tapSuggestion(_:)), for: .touchUpInside)
-            // Owner 2026-11-16: right after a glide or ⌫ a tap on the bar
+            // Right after a glide or ⌫ a tap on the bar
             // sometimes does nothing. Every touch is logged to measure why.
             for (ev, name) in [(UIControl.Event.touchDown, "down"), (.touchUpOutside, "upOutside"),
                                (.touchCancel, "cancel"), (.touchUpInside, "up")] {
@@ -1746,7 +1745,7 @@ extension KeyboardViewController: SwipeHost {
 
         view.addSubview(stack)
         suggestionBar = stack
-        // Hide the keyboard (owner 2026-11-16), at the right end of the bar as
+        // Hide the keyboard, at the right end of the bar as
         // on most keyboards.
         let hide = UIButton(type: .system)
         hide.setImage(UIImage(systemName: "keyboard.chevron.compact.down"), for: .normal)

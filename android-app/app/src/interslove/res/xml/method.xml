@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- IME metadata. ONE keyboard in the system, "Interslove" (owner 2026-11-11,
-     parity with iOS 0.6.3); its languages are ticked inside the keyboard and
+<!-- IME metadata. ONE keyboard in the system, "Interslove" (parity with
+     iOS 0.6.3); its languages are ticked inside the keyboard and
      the app (Lang.enabled) and switched there, not by the system.
 
      From 3.5.9 to 3.8.16 every language was a subtype of its own here (ids

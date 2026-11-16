@@ -25,7 +25,7 @@ TEXT_PATTERNS = {
     'personal home path': re.compile(r'(?:/(?:Users|home)/|[A-Za-z]:[/\\]Users[/\\])[A-Za-z][\w.-]+[/\\]'),
     'private workspace reference': re.compile(r'\b(?:vault_\d+|remote_[v]ault|hardware_[i]nventory\.md|NOW[.]md)\b'),
     'private key material': re.compile(r'-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----'),
-    # The owner's machine and phone names (owner 2026-11-07: they are private).
+    # Private machine and phone names.
     # Bare names that are also ordinary words (mc, hp, host, com) only count in
     # backticks, the way session notes write them.
     # Spelled in pieces so this file does not trip its own check; `ubu` is

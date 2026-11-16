@@ -267,7 +267,7 @@ def main():
     shipped = set(per_list.values()) | {
         total,
         # What the five advertised languages hold: isc is built but not
-        # advertised while it is still developmental (owner, 2026-11-04).
+        # advertised while it is still developmental.
         total - per_list.get("main_isc.combined", 0),
     }
     # Measured figures these docs quote that are NOT dictionary sizes. Named

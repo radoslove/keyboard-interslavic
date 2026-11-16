@@ -20,7 +20,7 @@ enum AppLangs {
 
 /// The 🎓 tab - the iOS twin of Android `LearnTab.kt` (3.9.44): flashcards with
 /// spaced repetition, each with the user's OWN translation to check oneself
-/// against (owner 2026-11-15: writing it is part of learning), then the `＋`
+/// against (writing it is part of learning), then the `＋`
 /// words, which become cards only with "＋ Learn".
 struct LearnView: View {
     var active = true

@@ -16,7 +16,7 @@ inside the Keyman app they already have.
 ## Identity
 
 Submit as **Radoslove** — same identity as the public repo and the Codeberg
-dictionary PR. The PRs must be opened by the owner; the work below is staged,
+dictionary PR. The PRs must be opened by the maintainer; the work below is staged,
 not sent.
 
 ---

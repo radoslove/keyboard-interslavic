@@ -59,8 +59,8 @@ struct SwipeDecoder {
     /// two-letter gesture returned the word 0 times in 126.
     var digraphKeys = false
 
-    /// Polish Glagolitic (owner 2026-11-14): in layout v02-v03 v carried Ⰲ (w),
-    /// and the owner keeps v catching w in v04 (0.6.29), where w is back on w:
+    /// Polish Glagolitic: in layout v02-v03 v carried Ⰲ (w),
+    /// and v keeps catching w in v04 (0.6.29), where w is back on w:
     /// a `w` of the word may run over the w key OR the v key.
     var polishGlag = false
 
@@ -187,7 +187,7 @@ struct SwipeDecoder {
             let c = keyCentres[Int(key)], r = Double(keyWidth) * 0.6
             return path.contains { hypot(Double($0.x - c.x), Double($0.y - c.y)) < r }
         }
-        // Layout v04 (owner 2026-11-14): w writes w again, ę is under e only,
+        // Layout v04: w writes w again, ę is under e only,
         // and v still catches w as it did when it carried Ⰲ.
         let nearV = polishGlag && passesNear(Self.keyV)
         /// The word's route with w on the v key, nil if it has no w (or the

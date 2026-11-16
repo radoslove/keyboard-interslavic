@@ -368,18 +368,17 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     }
 
     /// Alternatives scoring more than this behind the winner (key widths) are
-    /// shapes the finger did not draw (`ide` -> `otče`, `osě`, owner
-    /// 2026-11-13). Measured on noisy synthetic glides, 300 most frequent
+    /// shapes the finger did not draw (`ide` -> `otče`, `osě`). Measured on noisy synthetic glides, 300 most frequent
     /// forms: at 0.25 the right word, when it came 2nd/3rd, is still shown
     /// 95 % (isv) / 99 % (pl) / 98 % (en), and 63-67 % of the noise goes.
     static let alternativeMargin = 0.25
-    /// A far shape may still fill a slot if it is a COMMON word (owner: "better
-    /// further off, but with sense"). Byte = frequency quantile.
+    /// A far shape may still fill a slot if it is a COMMON word (better
+    /// further off, but with sense). Byte = frequency quantile.
     static let farAlternativeFreq: UInt8 = 150
 
     /// What the strip shows after a glide: the winner, close alternatives, then
     /// longer forms of the winner, most frequent first (`ide` -> `idemo`,
-    /// `idete`, owner 2026-11-13), then far alternatives only if common.
+    /// `idete`), then far alternatives only if common.
     static func strip(_ found: [SwipeDecoder.Candidate], _ dictionary: SwipeDictionary,
                       size: Int = 4) -> [String] {
         guard let best = found.first else { return [] }

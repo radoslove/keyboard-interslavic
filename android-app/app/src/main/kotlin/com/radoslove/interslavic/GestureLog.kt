@@ -29,7 +29,7 @@ import java.net.URL
  * it, deletes it, or moves on — so a gesture is held back until its fate is
  * settled, and each one is sent exactly once, already labelled.
  *
- * ## For users: a local file, sent only by mail (iOS 0.6.11, owner 2026-11-13)
+ * ## For users: a local file, sent only by mail (iOS 0.6.11)
  *
  * Any build can ALSO keep the gestures in a local file, `filesDir/gestures.jsonl`
  * (one JSON object per line, at most [FILE_CAP] bytes - past that the older half

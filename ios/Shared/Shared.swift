@@ -68,9 +68,9 @@ enum Shared {
 
     /// The learned touch offset moves into the group the same way, once.
     /// 0.4.0 forgot it: with Full Access on, the decoder fell back to the
-    /// default 0.35 while the owner's thumb had taught it 0.15, and swipes
-    /// went wrong (`kuznja` -> `kyslina`, owner 2026-10-25: "as if the
-    /// dictionary stopped working"). Overwrites what the group learned since,
+    /// default 0.35 while the user's thumb had taught it 0.15, and swipes
+    /// went wrong (`kuznja` -> `kyslina`, as if the dictionary had stopped
+    /// working). Overwrites what the group learned since,
     /// which started from that wrong default.
     static func adoptLocalLift() {
         guard fullAccess, let group = UserDefaults(suiteName: group) else { return }
@@ -147,7 +147,7 @@ enum Shared {
 
     // MARK: - Gesture log (error reports)
 
-    /// Real glides kept for error reports (owner 2026-11-13): OFF until the
+    /// Real glides kept for error reports: OFF until the
     /// user switches it on in the app. The file lives in the group container,
     /// so the keyboard writes it only with Full Access, and nothing leaves the
     /// phone unless the user mails it from the app - the keyboard still has no

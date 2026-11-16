@@ -22,12 +22,11 @@ internal var tryText: () -> String = { "" }
 
 /** Builds the try tab into [root]. */
 internal fun SetupActivity.buildTryTab(root: LinearLayout) {
-        // A box to try the keyboard right here (iOS `try_head`, owner
-    // 2026-11-15): it tells "the keyboard is broken" from "it is not
+        // A box to try the keyboard right here (iOS `try_head`): it tells "the keyboard is broken" from "it is not
     // switched on", and is a place to write without opening another app -
     // so it comes FIRST, large and framed, inviting to write.
     // What the text becomes (gloss, other alphabet) comes FIRST, at the
-    // very top: below the box the keyboard covered it (owner 2026-11-15).
+    // very top: below the box the keyboard covered it.
     // No header: the box's own hint says what it is for.
     val mirrors = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
     root.addView(mirrors)
@@ -57,7 +56,7 @@ internal fun SetupActivity.buildTryTab(root: LinearLayout) {
     addLearnChips(mirrors, tryBox)
     addScriptRow(root, tryBox, root.indexOfChild(frame))
     // A language switched from this screen rebuilds it; the text typed so
-    // far comes back, with the keyboard up (owner 2026-11-15).
+    // far comes back, with the keyboard up.
     tryKeptText?.let {
         tryBox.setText(it)
         tryBox.setSelection(it.length)
@@ -75,12 +74,12 @@ internal fun SetupActivity.buildTryTab(root: LinearLayout) {
 /**
  * Under the try box: the same text, live, in another alphabet of the
  * keyboard's language - ABC / АБВ / ⰀⰁⰂ - with a copy button, to write in
- * one script and paste the other (owner 2026-11-15). Offline, exact: it is
+ * one script and paste the other. Offline, exact: it is
  * the keyboard's own transliteration. Shown only for languages with more
  * than one alphabet (Interslavic, Serbian, Polish).
  */
 /** The keyboard's ticked languages as buttons right above the try box: a
- *  tap makes that language the one typed (owner 2026-11-15: switching had
+ *  tap makes that language the one typed (switching had
  *  to be easier here), and the screen follows. */
 /** Buttons as wide as their label: the default minimum width pushed the
  *  copy button off the screen. */
@@ -123,8 +122,7 @@ internal fun SetupActivity.addLanguageRow(root: LinearLayout) {
 
 
 /**
- * The language's alphabets as buttons right above the try box (owner
- * 2026-11-15): a tap turns the text IN the box into that alphabet and the
+ * The language's alphabets as buttons right above the try box: a tap turns the text IN the box into that alphabet and the
  * keyboard switches with it, so writing goes on in the new script - Polish in
  * Glagolitic, Interslavic in Cyrillic. Only for languages with more than one.
  */
@@ -160,7 +158,7 @@ internal fun SetupActivity.addScriptRow(root: LinearLayout, box: android.widget.
 
 /**
  * Under the try box: the typed text glossed word by word into another
- * language (owner 2026-11-15), offline, from Wiktionary ([Gloss]). Polish
+ * language, offline, from Wiktionary ([Gloss]). Polish
  * glosses into the other keyboard languages, every other language into
  * Polish. Not for Interslavic yet (its dictionary's licence is open).
  */
@@ -185,6 +183,45 @@ internal fun SetupActivity.addGlossMirror(root: LinearLayout, box: android.widge
             setColor(col("#EEF2F5", "#1E2A31"))
         }
     }
+    // The translated words as buttons too: what is typed is often already
+    // known, so a card can be made from either side. The card is in the
+    // target language and the
+    // typed word is its translation. Same as iOS 0.6.36.
+    val tChips = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+    val tScroll = android.widget.HorizontalScrollView(this).apply {
+        isHorizontalScrollBarEnabled = false
+        setPadding(0, (6 * d).toInt(), 0, 0)
+        addView(tChips)
+    }
+    fun glossedRow(tab: Map<String, String>, typed: String) {
+        tChips.removeAllViews()
+        val known = Learn.cards(this).filter { it.lang == to }.map { it.word.lowercase() }.toSet()
+        val seen = HashSet<String>()
+        for (m in Regex("\\p{L}+").findAll(typed)) {
+            val w = m.value
+            if (w.length < 2) continue
+            var g = Gloss.word(tab, w, from, to) ?: continue
+            if (to != Lang.DE) g = g.lowercase()
+            if (!seen.add(g.lowercase())) continue
+            val src = if (from == Lang.DE) w else w.lowercase()
+            val has = g.lowercase() in known
+            tChips.addView(Button(this).apply {
+                text = if (has) "✓ $g" else "＋ $g"
+                isAllCaps = false
+                textSize = 15f
+                narrow(this)
+                alpha = if (has) 0.5f else 1f
+                setOnClickListener {
+                    if (has) return@setOnClickListener
+                    Learn.add(this@addGlossMirror, to, g, src)
+                    toast("${t("learn_added")}: $g")
+                    glossedRow(tab, typed)
+                    learnRefresh()
+                }
+            })
+        }
+        tScroll.visibility = if (tChips.childCount == 0) View.GONE else View.VISIBLE
+    }
     fun update() {
         val t = table ?: return
         var typed = box.text?.toString().orEmpty()
@@ -201,6 +238,7 @@ internal fun SetupActivity.addGlossMirror(root: LinearLayout, box: android.widge
             if (!known) sb.setSpan(android.text.style.ForegroundColorSpan(cGloss), a, sb.length, 0)
         }
         out.text = sb
+        glossedRow(t, typed)
     }
     val row = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
@@ -210,7 +248,7 @@ internal fun SetupActivity.addGlossMirror(root: LinearLayout, box: android.widge
     // Every target in sight, five to a row (a scrolling row hid Norwegian).
     val chips = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
     val allChips = ArrayList<Button>()
-    // ⇄ turns the direction round (owner 2026-11-15): the keyboard switches
+    // ⇄ turns the direction round: the keyboard switches
     // to the language translated into, the translation becomes the text,
     // and the old source becomes the target.
     row.addView(Button(this).apply {
@@ -262,6 +300,7 @@ internal fun SetupActivity.addGlossMirror(root: LinearLayout, box: android.widge
     root.addView(out)
     root.addView(row)
     root.addView(chips)
+    root.addView(tScroll)
     // Attribution the licence asks for.
     root.addView(TextView(this).apply {
         text = "Wiktionary · CC BY-SA 4.0"
@@ -283,7 +322,7 @@ internal fun SetupActivity.addGlossMirror(root: LinearLayout, box: android.widge
 
 
 /** Under the translation, every word of the box as a button: a tap puts it
- *  among the learning cards (owner 2026-11-15: unknown words are met while
+ *  among the learning cards (unknown words are met while
  *  reading and writing, not in the `＋` chip, which only collects words the
  *  keyboard was missing). Works for every language, with or without a gloss. */
 internal fun SetupActivity.addLearnChips(root: LinearLayout, box: android.widget.EditText) {

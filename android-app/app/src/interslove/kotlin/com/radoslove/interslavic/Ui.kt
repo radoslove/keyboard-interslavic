@@ -31,8 +31,8 @@ object Ui {
      *  other language gets Interslavic with the English gloss. A choice saved
      *  by the old four-language picker (removed in 3.9.7) is ignored. */
     fun current(context: Context): String {
-        // The screen speaks the language the keyboard is set to (owner
-        // 2026-11-15: switched in the keyboard's panel, the screen follows);
+        // The screen speaks the language the keyboard is set to (switched in
+        // the keyboard's panel, the screen follows);
         // a keyboard language the screen has no text for (German, Proto-Slavic
         // aside) falls back to the phone's language as before.
         val kb = when (val l = Lang.current(context)) {

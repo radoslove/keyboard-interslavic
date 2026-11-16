@@ -11,12 +11,12 @@ import android.view.inputmethod.InputMethodSubtype
  * Croatian (`hr`), Serbian in Latin script (`sr`), Norwegian bokmål (`nb`)
  * or English (`en`).
  *
- * ONE keyboard in the system, the languages chosen INSIDE it (owner
- * 2026-11-11, parity with iOS 0.6.3): "jedna klawiatura Interslove". From
+ * ONE keyboard in the system, the languages chosen INSIDE it (parity with
+ * iOS 0.6.3). From
  * 3.5.9 to 3.8.16 every language was its own input-method subtype ticked on
  * the system's Languages page - at sixteen languages that list was long, and a
  * language added by a later build arrived unticked and invisible (Russian,
- * Ukrainian, Bulgarian and Proto-Slavic on the test phone, 2026-11-11). The
+ * Ukrainian, Bulgarian and Proto-Slavic). The
  * list lives in this keyboard's preferences now ([enabled]), ticked in the
  * in-keyboard settings panel and in the app; space and 🌐 switch between the
  * ticked ones without the system. The 3.5.8 trouble ("all ticked at install,
@@ -37,7 +37,7 @@ object Lang {
     const val PL = "pl"
     const val NB = "nb"
     const val EN = "en"
-    /** German (owner 2026-11-14): the first non-Slavic language for the diaspora
+    /** German: the first non-Slavic language for the diaspora
      *  (Slavs in German-speaking countries, about 4.8 million). QWERTZ with
      *  `ü ö ä` as keys of their own, `ß` held on `s`. Its nouns are written with
      *  a capital, so its wordlist holds `Haus`, and [Dictionary.foldBase] reads
@@ -66,20 +66,20 @@ object Lang {
      *  decoder, ranking, learned offset - works unchanged. */
     const val MK = "mk"
 
-    /** Russian: Cyrillic only, on the PHONETIC layout (owner 2026-11-11), the
+    /** Russian: Cyrillic only, on the PHONETIC layout, the
      *  arrangement Russian users know as ЯШЕРТЫ - every letter on the Latin key
      *  that sounds or looks like it, the rest held. Its wordlist is in the
      *  internal Latin of tools/build_cyrillic_wordlist.py, like Macedonian's. */
     const val RU = "ru"
 
     /** Ukrainian: Cyrillic only, on the HOMOPHONIC layout (xkeyboard-config
-     *  `ua(homophonic)`, owner 2026-11-11): я q, ш w, и y, і i, ґ g, г h, х x,
+     *  `ua(homophonic)`): я q, ш w, и y, і i, ґ g, г h, х x,
      *  ц c, в v, the rest held. The apostrophe inside a word (`п'ять`) is part
      *  of the word but never part of a glide. Internal Latin like Russian's. */
     const val UK = "uk"
 
     /** Bulgarian: Cyrillic only, on the traditional phonetic layout ЯВЕРТЪ
-     *  (xkeyboard-config `bg(phonetic)`, owner 2026-11-11): я q, в w, ъ y, ь x,
+     *  (xkeyboard-config `bg(phonetic)`): я q, в w, ъ y, ь x,
      *  ж v, х h, ц c; ш щ held on s, ч c, ю u, ѝ i. */
     const val BG = "bg"
 
@@ -89,7 +89,7 @@ object Lang {
     const val SLA = "sla"
 
     /** Belarusian: Cyrillic only, official orthography, on the published
-     *  phonetic layout xkeyboard-config `by(phonetic)` (owner 2026-11-11): я q,
+     *  phonetic layout xkeyboard-config `by(phonetic)`: я q,
      *  в w, ы y, і i, х h, ь x, ж v; ш ч ў ю э ё held. Like Ukrainian, the
      *  apostrophe inside a word (`сям'я`) is part of it. */
     const val BE = "be"
@@ -129,7 +129,7 @@ object Lang {
 
     /** NOT `languages`: 3.5.8 kept its own list under that name as a STRING
      *  SET, and phones that had 3.5.8 still carry it - reading it as a string
-     *  threw on every keyboard open in 3.8.17 (the test phone, 2026-11-11; Samsung then
+     *  threw on every keyboard open in 3.8.17 (Samsung then
      *  offered "Clear cache"). That old set is stale and is not read. */
     private const val KEY_ENABLED = "enabled_langs"
 
@@ -154,7 +154,7 @@ object Lang {
      * all of them, not only the first).
      *
      * The old system ticks of 3.5.9-3.8.16 CANNOT be read back - measured on
-     * the test phone 2026-11-11: the subtypes are gone from method.xml, so the
+     * a phone: the subtypes are gone from method.xml, so the
      * IME API lists only `isv`, and the raw setting `enabled_input_methods`,
      * which still names them by id, throws SecurityException for an app with
      * targetSdkVersion above 33 ("only readable to apps with targetSdkVersion

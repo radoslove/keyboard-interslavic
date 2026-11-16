@@ -10,8 +10,8 @@ import Foundation
 enum Layout {
 
     /// Every language of the keyboard, in the order of the list, with the name
-    /// the space bar shows. ONE keyboard extension carries them all (owner
-    /// 2026-11-11): the system's globe list had grown to a dozen entries and the
+    /// the space bar shows. ONE keyboard extension carries them all: the
+    /// system's globe list had grown to a dozen entries and the
     /// last ones fell below its edge. The user ticks the languages in the
     /// keyboard's settings and 🌐 steps through them, as on Android.
     static let all: [(code: String, name: String)] = [
@@ -24,8 +24,8 @@ enum Layout {
 
     static func name(_ code: String) -> String { all.first { $0.code == code }?.name ?? code }
 
-    /// The space bar's name: every living language in ITSELF (owner 2026-11-15,
-    /// Android `Lang.label`); the Interslavic names stay in the ⚙ list only.
+    /// The space bar's name: every living language in ITSELF (Android
+    /// `Lang.label`); the Interslavic names stay in the ⚙ list only.
     /// Proto-Slavic has no living speaker, so it keeps its Interslavic name.
     static func label(_ code: String) -> String {
         switch code {
@@ -134,19 +134,19 @@ enum Layout {
             // ё before э, ь before ъ.
             return ["e": ["ë", "ê"], "w": ["ŵ"], "z": ["ž"], "b": ["ḃ", "ḅ"], "u": ["ü"]]
         case "uk":
-            // Ukrainian homophonic (xkeyboard-config `ua(homophonic)`, owner
-            // 2026-11-11): the keys the phone lacks are held on their Latin
+            // Ukrainian homophonic (xkeyboard-config `ua(homophonic)`): the
+            // keys the phone lacks are held on their Latin
             // match. The apostrophe (`п'ять`) has no key - the glide skips it,
             // and a tap takes it from the strip under `.`.
             return ["c": ["č"], "z": ["ž"], "u": ["ü"], "w": ["ŵ"], "e": ["ê"],
                     "i": ["ï"], "b": ["ḃ"]]
         case "bg":
             // Bulgarian traditional phonetic ЯВЕРТЪ (xkeyboard-config
-            // `bg(phonetic)`, owner 2026-11-11): the keys the phone lacks are
+            // `bg(phonetic)`): the keys the phone lacks are
             // held on their Latin match, ш before щ (frequency in the list).
             return ["s": ["š", "ŝ"], "c": ["č"], "u": ["ü"], "i": ["ì"]]
         case "be":
-            // Belarusian `by(phonetic)` (owner 2026-11-11, Android `beOwn`):
+            // Belarusian `by(phonetic)` (Android `beOwn`):
             // held on their Latin match, ordered by share of running words in
             // the Leipzig corpora - ў before ю on u, э before ё on e.
             return ["s": ["š"], "c": ["č"], "u": ["ŭ", "ü"], "e": ["ê", "ë"]]
@@ -178,8 +178,8 @@ enum Layout {
     }
 
     /// Letters of OTHER languages, after the Interslavic one in the same
-    /// popup (owner 2026-10-10: `mañana` in a letter meant switching
-    /// keyboards). Polish first, then other Slavic, then the rest. These are
+    /// popup (`mañana` in a letter used to mean switching keyboards).
+    /// Polish first, then other Slavic, then the rest. These are
     /// for writing other languages - the Interslavic wordlist stays standard
     /// orthography (HOUSE_STYLE §1), and the first slot of every popup keeps
     /// its Interslavic letter so the old habit does not move.
@@ -207,12 +207,11 @@ enum Layout {
     /// letter layer, so `123` is needed only for the rare ones.
     static let periodAccents: [String] = ["…", "!", "„", "”", "\"", "'"]
 
-    /// Held on `.` of the LETTER layer, where 😀 took the comma's key
-    /// (owner 2026-10-25): the comma comes first, right over the key, then
-    /// `:` and `;` next to it (owner 2026-11-07: the comma must not sit at
-    /// the far end of the strip), then `?` (not on the letters since 3.5.16)
+    /// Held on `.` of the LETTER layer, where 😀 took the comma's key:
+    /// the comma comes first, right over the key, then `:` and `;` next to
+    /// it (the comma must not sit at the far end of the strip), then `?` (not on the letters since 3.5.16)
     /// and the rest.
-    /// Seven marks, the owner's order (2026-11-07): `,` first and over the key.
+    /// Seven marks: `,` first and over the key.
     /// Eleven did not fit the strip on the Android phone - 418dp asked of a
     /// 339dp row - and the first cells fell off the screen; the rest stay on
     /// the `123` page. ⚠ Code only: needs an Xcode build on the build Mac.
@@ -224,7 +223,7 @@ enum Layout {
 
     /// Held on keys of the numeric layer; the layer itself keeps only what is
     /// used often enough to deserve a key.
-    /// `?` and `!` left the letters (Android 3.5.16, owner 2026-10-14) and sit
+    /// `?` and `!` left the letters (Android 3.5.16) and sit
     /// next to backspace on `123`; `¿` `¡` wait behind them there.
     static let numericAccents: [Character: [String]] = [
         "-": ["–", "—", "_", "+", "="],
@@ -289,18 +288,18 @@ enum Layout {
     static func keyText(_ ch: Character, latin: Bool) -> String {
         guard !latin else { return String(ch) }
         // Polish Glagolitic: the free keys write what Polish has no key for
-        // (owner 2026-11-14, variant 1): q = ch (Ⱈ), x = dzelo (Ⰷ, marker ẑ).
+        // (variant 1): q = ch (Ⱈ), x = dzelo (Ⰷ, marker ẑ).
         if language == "pl" {
             switch ch {
-            // Layout v04 (owner 2026-11-14): q = ja Ⱑ, w = w Ⰲ, x = ch Ⱈ, and
+            // Layout v04: q = ja Ⱑ, w = w Ⰲ, x = ch Ⱈ, and
             // v = the soft yer Ⱐ, which works as the Polish kreska: s + v = ś,
             // z ź, c ć, n ń, dz dź, r rz, d ⰴⱐ; after any other letter a bare Ⱐ.
             // Inside it is the marker ʹ (`Script.softenPL`).
             case "q": return "ja"
             case "Q": return "Ja"
             case "v", "V": return Script.softYerMark
-            // x = ch Ⱈ like Keyman's Glagolitic (Phonetic) and Cyrillic х
-            // (owner 2026-11-14); dzelo stays on hold d.
+            // x = ch Ⱈ like Keyman's Glagolitic (Phonetic) and Cyrillic х;
+            // dzelo stays on hold d.
             case "x": return "ch"
             case "X": return "Ch"
             default: return String(ch)
@@ -341,7 +340,7 @@ enum Layout {
     static let dzhKey = 23  // x - Serbian Cyrillic `џ`
 
     /// QWERTY or QWERTZ, chosen per language in the keyboard's settings (Android
-    /// `KeyRows`, owner 2026-11-10). The default is the layout of the language's
+    /// `KeyRows`). The default is the layout of the language's
     /// own keyboards: QWERTZ for Czech, Slovak, Slovenian, Croatian and Serbian. Only `y` and `z` swap, so the
     /// grid stays the same; the decoder reads key centres from the buttons and
     /// the wordlist stores letters, not positions.
@@ -417,9 +416,7 @@ enum Layout {
         let lower = Character(key.lowercased())
         let own = accents[lower] ?? []
         var all = own
-        // Polish Glagolitic, layout v02 (owner 2026-11-14,
-        // vault_002/Projects/INTERSLOVE/glagolica_pl/uklad_klawiatury_pl_glagolica_v02.md):
-        // every letter Polish writes with more than one key sits under the key
+        // Polish Glagolitic, layout v02: every letter Polish writes with more than one key sits under the key
         // it starts with; the jotted family under q, j (ja…) and i (ia…).
         if !latin && language == "pl" && key.isLetter {
             let glagHolds: [Character: [String]] = [
@@ -427,7 +424,7 @@ enum Layout {
                 "i": ["ia", "iu", "ię", "ią"], "w": ["ę", "ię", "ą", "ią"],
                 // v: the hard yer Ⱏ (l + Ⱏ = ł, otherwise a bare Ⱏ)
                 "v": [Script.hardYerMark],
-                // ę ię ą ią also under the keys they contain (owner 0.6.30)
+                // ę ię ą ią also under the keys they contain (0.6.30)
                 "a": ["ą", "ią", "ia"],
                 "c": ["ć", "cz"],
                 "d": ["dź", "ď", "dż", "ḍ"],

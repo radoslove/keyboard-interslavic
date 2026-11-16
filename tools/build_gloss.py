@@ -34,6 +34,7 @@ SHARED_MAX = 8
 # Verbs whose forms ARE the auxiliaries (`jest`, `był`, `będzie`): never thinned.
 AUX = {"bym", "byś", "by", "byśmy", "byście", "będę", "będziesz", "będzie", "będziemy",
        "będziecie", "będą", "był", "była", "było", "byli", "były", "niech", "niechaj"}
+FORM_OF = re.compile(r"(?:od:?|zaimka osobowego)\s+(\w+)\s*$")
 KEEP_ALL = {"być", "byt", "biti", "byť", "быть", "бути", "быць", "съм", "sein", "werden", "be"}
 # English, kept to the entries its keyboard list ranks highest (size).
 EN_MAX_ENTRIES = 20000
@@ -67,6 +68,7 @@ def pl_list(lang="pl"):
 def main():
     gloss = {l: [] for l in LANGS}   # (keys, gloss) per entry
     trans = []                        # (keys, {lang: word}) per Polish entry
+    form_of = {}                      # Polish form -> the lemmas it is a form of
     with gzip.open(SRC, "rt", encoding="utf-8") as f:
         for line in f:
             d = json.loads(line)
@@ -97,6 +99,13 @@ def main():
                     if tl in gloss and tl not in tr and tw and len(tw) <= 30:
                         tr[tl] = tw.split(",")[0].strip()
                 trans.append(([k.lower() for k in keys], tr))
+                # A Polish FORM page (`mam`: "1. os. lp od: mieć", `mną`: "... zaimka
+                # osobowego ja") names the lemmas the form belongs to.
+                for s_ in d.get("senses", []):
+                    for gl in s_.get("glosses", []):
+                        fm = FORM_OF.search(gl)
+                        if fm:
+                            form_of.setdefault(word.lower(), set()).add(fm.group(1).lower())
     # Inflection tables list analytic forms word by word (`będę polemizował`,
     # `polemizowałbym`), so auxiliaries - `będę`, `był`, `by`, `bym` - turned up
     # as forms of every verb and `był` came out as `polemizować` (2026-11-15).
@@ -120,13 +129,23 @@ def main():
                              # word's form; `jest` keeps its own entry. The
                              # FIRST letter decides, not the first two: those
                              # threw `mam` and `ma` out of `mieć` ("ja mam" was
-                             # not translated, owner 2026-11-16).
+                             # not translated).
                              not (len(k) <= 3 and k in heads and k[0] != head[0])]
             out.append((kept, v))
         return out
     for l in gloss:
         gloss[l] = drop_shared(gloss[l], l != "de")
     trans = drop_shared(trans, True)
+    # A form whose own page says whose form it is goes to that entry only:
+    # `mną` sat under `miąć` ("ze mną" came out as `knittern`) and was missing
+    # under `ja` (2026-11-16).
+    fixed = []
+    for keys, tr in trans:
+        head = keys[0]
+        kept = [head] + [k for k in keys[1:] if k not in form_of or head in form_of[k]]
+        kept += [k for k, ls in form_of.items() if head in ls and k not in kept and len(ls) == 1]
+        fixed.append((kept, tr))
+    trans = fixed
     # A gloss that only DESCRIBES a form (`3. lp czasownika sein`, `czas
     # przeszły prosty czasownika finden`) is replaced by the gloss of the word
     # it names (`sein` -> `być`); one that names nothing usable is dropped, so
@@ -176,12 +195,32 @@ def main():
                 f.write(" ".join(dict.fromkeys(keys)) + "\t" + g + "\n")
         print(f"gloss_{l}.tsv: {len(rows):,} entries")
     rank = pl_list()
+    # An entry that is only a FORM page of a bigger entry (`mam` -> cs `mám`,
+    # `jest` -> cs `jest`, beside `mieć` and `być`) went first and hid the
+    # verb's translations (2026-11-16); it gives way to that entry.
+    parent = {}
+    for keys, tr in trans:
+        for k in keys[1:]:
+            if k != keys[0]:
+                parent[k] = max(parent.get(k, 0), len(tr))
+    trans = [(keys, tr) for keys, tr in trans
+             if not (keys[0] in parent and len(tr) <= 3 and parent[keys[0]] > 2 * len(tr))]
+    # A word with an entry of its own is looked up there, not under another
+    # entry that lists it as a form: `pole` under the rare `poła` (`Schoß`),
+    # `wino` under `wina`, `droga` under `drogi` (2026-11-16).
+    # Only when that entry is at least half as rich: `były` stays with `być`
+    # beside the thin adjective, `ryby` with `ryba` beside the zodiac sign.
+    own = {}
+    for keys, tr in trans:
+        own[keys[0]] = max(own.get(keys[0], 0), len(tr))
+    trans = [([keys[0]] + [k for k in keys[1:] if 2 * own.get(k, 0) < len(tr)], tr)
+             for keys, tr in trans]
     kept = []
     for keys, tr in trans:
         best = min((rank[k] for k in keys if k in rank), default=None)
         if best is not None:
             kept.append((best, keys, tr))
-    kept.sort(key=lambda t: t[0])
+    kept.sort(key=lambda t: (t[0], -len(t[2])))   # a tie goes to the richer entry
     kept = kept[:PL_MAX_ENTRIES]
     with open(os.path.join(OUT, "gloss_pl.tsv"), "w", encoding="utf-8", newline="\n") as f:
         for _, keys, tr in kept:

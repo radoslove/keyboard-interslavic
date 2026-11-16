@@ -28,7 +28,7 @@ FrequencyWords (the source of `ru`, `uk`, `bg`) has no Belarusian list in
 
 The list is in the keyboard's INTERNAL LATIN, one character per letter, for
 the published phonetic layout xkeyboard-config `by(phonetic)` (ЯВЕРТЫ with
-`і` on `i` and `ў` in place of `щ`; owner's choice 2026-11-11): `я q`, `в w`,
+`і` on `i` and `ў` in place of `щ`): `я q`, `в w`,
 `ы y`, `і i`, `х h`, `ь x`, `ж v`, `ц c`, the rest on their look-alike keys;
 held: `ш š` (on `s`), `ч č` (`c`), `ў ŭ` and `ю ü` (`u`), `э ê` and `ё ë` (`e`).
 The apostrophe (`сям'я`, `аб'ём`) stays in the word and is skipped by the
@@ -36,7 +36,7 @@ glide, as in Ukrainian.
 
 Measured 2026-11-11, five seeds, the same list in three arrangements:
 A `by(phonetic)` top-1 85.0 % / top-3 96.1 %, B (our Russian ЯШЕРТЫ with `і`)
-87.5 / 97.5, C (B with `ў` on `w`) 87.1 / 96.5. The owner chose A, the
+87.5 / 97.5, C (B with `ў` on `w`) 87.1 / 96.5. A was chosen, the
 published one.
 
 Built 2026-11-11: **40 279 forms** (276 with an apostrophe); hunspell

@@ -3,7 +3,7 @@ package com.radoslove.interslavic
 import android.content.Context
 
 /**
- * The emoji panel behind the 😀 key (owner 2026-10-25: in place of `,`).
+ * The emoji panel behind the 😀 key (in place of `,`).
  *
  * Ported from iOS 0.4.2 (`ios/Keyboard/Emoji.swift`): the SAME set in the SAME
  * order, because the order is muscle memory - the ones used lately first, then

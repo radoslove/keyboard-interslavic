@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.res.Configuration
 
 /**
- * Light or dark keyboard, chosen in the settings (owner 2026-10-14): automatic
+ * Light or dark keyboard, chosen in the settings: automatic
  * (follows the phone's dark mode - the default), always light, or always dark.
  */
 object Theme {

@@ -11,7 +11,7 @@
 # word<TAB>reason
 # The whole paradigm, not just the lemma: four inflected forms sat right
 # behind the nominative and would have kept the same rival in the race.
-sssr	abbreviation, f=26, kept beating `se` (f=205) on a drifting glide; owner, 2026-11-05
+sssr	abbreviation, f=26, kept beating `se` (f=205) on a drifting glide
 sssra	same
 sssre	same
 sssrom	same

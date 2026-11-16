@@ -40,8 +40,7 @@ class SetupActivity : Activity() {
     private var versionTaps = 0
     private lateinit var ui: String
 
-    /** The screen follows the SAME choice the keyboard draws by (owner
-     *  2026-11-07: "jak motyw ciemny to tutaj tez by mogl byc"), not the
+    /** The screen follows the SAME choice the keyboard draws by, not the
      *  phone's mode - picking "always dark" for the keyboard and getting a
      *  white settings screen was the whole complaint. Read once, so the radio
      *  below rebuilds the screen with `recreate()`. The system widgets
@@ -68,7 +67,7 @@ class SetupActivity : Activity() {
             setPadding(pad, pad, pad, pad)
             setBackgroundColor(cBg)
         }
-        // Three tabs in the one app (owner 2026-11-15): writing and translating,
+        // Three tabs in the one app: writing and translating,
         // learning the user's own words, and the keyboard's settings. The try
         // tab lives in TryTab.kt, the learning tab in LearnTab.kt.
         val tryRoot = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -94,7 +93,7 @@ class SetupActivity : Activity() {
         glossOf("intro")?.let { root.addView(gloss(it)) }
 
         // Languages: ticked HERE (and in the keyboard's own panel), one
-        // keyboard in the system (owner 2026-11-11, parity with iOS 0.6.3).
+        // keyboard in the system (parity with iOS 0.6.3).
         // At least one stays ticked.
         section(root, "langs_head", "langs_body")
         langsNow = body("")
@@ -164,8 +163,8 @@ class SetupActivity : Activity() {
             }
         })
 
-        // The user's own words (the `＋ word` chip) moved to the learning tab
-        // (owner 2026-11-15): they gather where they are reviewed.
+        // The user's own words (the `＋ word` chip) moved to the learning tab:
+        // they gather where they are reviewed.
 
         // Light or dark keyboard; automatic follows the phone.
         section(root, "theme_head", null)
@@ -189,7 +188,7 @@ class SetupActivity : Activity() {
         })
 
         // QWERTY or QWERTZ per language; the default is that language's own
-        // keyboards (owner 2026-11-10). Read when the keyboard next draws.
+        // keyboards. Read when the keyboard next draws.
         section(root, "layout_head", "layout_body")
         for (lang in Lang.ALL.filter { KeyRows.offered(it) }) {
             root.addView(Switch(this).apply {
@@ -259,7 +258,7 @@ class SetupActivity : Activity() {
             }
         })
 
-        // Gesture log for error reports (iOS 0.6.11, owner 2026-11-13): not for
+        // Gesture log for error reports (iOS 0.6.11): not for
         // everyday use, so hidden behind five taps on the version line; kept on
         // the phone, sent only by the user's own mail.
         logBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
@@ -394,11 +393,11 @@ class SetupActivity : Activity() {
         }
         val json = Collector.exportBatchJson(this)
         // To one fixed mailbox, read on the server side, which loads the batch
-        // into the database (owner 2026-11-12, by mail and not over HTTPS: the
+        // into the database (by mail and not over HTTPS: the
         // app gets no INTERNET permission, the user sends from their own mail
         // app, and the mail itself is the notice that something came in).
         // Subject, a one-line body and the batch as a .json ATTACHMENT, all
-        // filled in (owner 3.9.6: Gmail left the subject empty - ACTION_SENDTO
+        // filled in (3.9.6: Gmail left the subject empty - ACTION_SENDTO
         // drops the extras). ACTION_SEND, one intent per mail app, so the
         // choice still offers only mail apps.
         val stamp = java.text.SimpleDateFormat("yyMMdd_HHmm", java.util.Locale.ROOT).format(java.util.Date())
@@ -408,7 +407,7 @@ class SetupActivity : Activity() {
     }
 
     /** The batch went to the mail app: on the way back the queue is emptied
-     *  (owner 2026-11-15: sent words should go from the list at once). The
+     *  (sent words should go from the list at once). The
      *  words themselves stay in the user's dictionary ([UserWords]). */
     private var batchHandedOver = false
 
@@ -462,8 +461,7 @@ class SetupActivity : Activity() {
         gravity = Gravity.START
     }
 
-    /** Descriptions: smaller and quieter than the headers and the controls
-     *  (owner 2026-11-15). */
+    /** Descriptions: smaller and quieter than the headers and the controls. */
     private fun body(t: String) = TextView(this).apply {
         text = t
         textSize = 13.5f
@@ -482,15 +480,16 @@ class SetupActivity : Activity() {
 
 
 
-    /** ✎ (write, translate) | 🎓 (learn own words) | ⚙ (keyboard settings);
-     *  the last one stays chosen. */
+    /** ⚙ (keyboard settings) | ✎ (write, translate) | 🎓 (learn own words); settings
+     *  first (the main purpose of the app), big enough to see, equal
+     *  widths as on iOS 0.6.36; the last one chosen stays chosen. */
     private fun tabBar(tryRoot: View, learnRoot: View, setRoot: View): View {
         val prefs = getSharedPreferences("isv_collector", MODE_PRIVATE)
         val bar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             setPadding(0, 0, 0, (8 * resources.displayMetrics.density).toInt())
         }
-        val tabs = listOf("try" to "✎", "learn" to "🎓", "set" to "⚙")
+        val tabs = listOf("set" to "⚙", "try" to "✎", "learn" to "🎓")
         val buttons = ArrayList<Button>()
         fun show(which: String) {
             tryRoot.visibility = if (which == "try") View.VISIBLE else View.GONE
@@ -502,12 +501,11 @@ class SetupActivity : Activity() {
         for ((key, label) in tabs) buttons.add(Button(this).apply {
             text = label
             isAllCaps = false
-            textSize = 17f
+            textSize = 26f
             setOnClickListener { show(key) }
-            bar.addView(this, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT,
-                if (key == "try") 2f else 1f))
+            bar.addView(this, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         })
-        show(prefs.getString("app_tab", "try") ?: "try")
+        show(prefs.getString("app_tab", "set") ?: "set")
         return bar
     }
 
