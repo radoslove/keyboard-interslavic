@@ -65,6 +65,8 @@ final class KeyboardViewController: UIInputViewController {
     /// Shift re-cases it (Android `caretByHand`, 3.9.28).
     private var caretByHand = false
     private var ownCaretMoveAt = Date.distantPast
+    /// Our own last edit: a text change reported this soon after is ours.
+    private var ownEditAt = Date.distantPast
     /// The candidates of the last swipe, kept so a rejected word can be
     /// replaced by tapping the next one.
     private var lastCandidates: [String] = []
@@ -133,6 +135,43 @@ final class KeyboardViewController: UIInputViewController {
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
         rearmShiftIfSentenceStart()
+        caretMaybeMoved()
+    }
+
+    /// A custom keyboard is told about a caret moved by hand through
+    /// `textDidChange`, not `selectionDidChange` (owner 2026-11-16: after the
+    /// caret was moved the bar stayed empty). The glided word no longer right
+    /// before the caret means the caret moved: the glide's alternatives would
+    /// land at the new place, so they go, and the bar offers words for the
+    /// word the caret is in now. Looked at twice, 0.15 s apart, because some
+    /// apps report the text before the cursor late.
+    private func caretMaybeMoved(confirmed: Bool = false) {
+        guard Date().timeIntervalSince(ownCaretMoveAt) > 0.4, decoding == 0,
+              confirmed || Date().timeIntervalSince(ownEditAt) > 0.3 else { return }
+        if let word = lastSwipedWord, (contextBefore ?? "").hasSuffix(word + swipeSuffix) { return }
+        if lastSwipedWord == nil && !pendingSpace && completingPrefix == nil && tappedWord == nil {
+            // Nothing of ours to drop; still, the bar follows the caret.
+            if !confirmed { refreshCompletions() }
+            return
+        }
+        guard confirmed else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                self?.caretMaybeMoved(confirmed: true)
+            }
+            return
+        }
+        // Our own typing keeps `tappedWord` in step with the text; a caret
+        // that moved leaves it behind.
+        if lastSwipedWord == nil, let t = tappedWord,
+           Script.toLatin(trailingWord(contextBefore ?? "")).hasSuffix(t) { return }
+        caretByHand = true
+        lastCandidates = []
+        lastSwipedWord = nil
+        swipeSuffix = ""
+        tappedWord = nil
+        pendingSpace = false
+        stopAfterGlide = false
+        refreshCompletions()
     }
 
     /// The user moved the cursor: the Polish Glagolitic word we were building
@@ -147,16 +186,7 @@ final class KeyboardViewController: UIInputViewController {
     /// words for where the caret is now.
     override func selectionDidChange(_ textInput: UITextInput?) {
         super.selectionDidChange(textInput)
-        // Our own caret moves (a wiped suffix, a word replaced from inside)
-        // report here too; they are not the user's.
-        guard Date().timeIntervalSince(ownCaretMoveAt) > 0.4 else { return }
-        caretByHand = true
-        lastCandidates = []
-        lastSwipedWord = nil
-        tappedWord = nil
-        pendingSpace = false
-        stopAfterGlide = false
-        refreshCompletions()
+        caretMaybeMoved()
     }
 
     /// A whole word in the current script; in Polish Glagolitic with the
@@ -699,10 +729,15 @@ final class KeyboardViewController: UIInputViewController {
     /// character goes, as always.
     private func pressBackspace() {
         caretByHand = false
+        ownEditAt = Date()
         let before = lastSwipedWord
-        tapBackspace()
+        let wiped = tapBackspace()
         trimAfterWipe = nil
-        guard let word = before, lastSwipedWord == nil else { return }
+        // Only when this press WIPED the glided word. A plain one-letter
+        // delete also drops the glide state - after the caret was moved by
+        // hand - and putting the stem back then wrote it into the middle of
+        // another word (owner 2026-11-16: `E|ssen` + ⌫ -> `EEssesen`).
+        guard wiped, let word = before else { return }
         let guesses = lastCandidates
         restoreTrimmed(word)
         let stem = Script.out(String(Script.toLatin(word).dropLast()))
@@ -788,7 +823,9 @@ final class KeyboardViewController: UIInputViewController {
         refreshCompletions()
     }
 
-    @objc private func tapBackspace() {
+    /// True when it wiped a glided word whole.
+    @discardableResult
+    private func tapBackspace() -> Bool {
         defer { rearmShiftIfSentenceStart() }
         glagWord = nil
         // Right after a swipe (no other key in between) backspace means "wrong
@@ -813,7 +850,7 @@ final class KeyboardViewController: UIInputViewController {
             rest.append(latin)
             lastCandidates = rest
             showSuggestions(rest, current: nil)
-            return
+            return true
         }
         lastSwipedWord = nil
         swipeSuffix = ""
@@ -821,6 +858,7 @@ final class KeyboardViewController: UIInputViewController {
         tappedWord = tappedWord.map { String($0.dropLast()) }
         textDocumentProxy.deleteBackward()
         refreshCompletions()
+        return false
     }
     @objc private func tapSpace() { insert(" ") }
     @objc private func tapReturn() { insert("\n") }
@@ -1160,6 +1198,7 @@ final class KeyboardViewController: UIInputViewController {
         guard let ch = latin.first else { return }
         recased = nil
         caretByHand = false
+        ownEditAt = Date()
         if decoding > 0 { queuedKeys.append { [weak self] in self?.insert(latin) }; return }
         // A letter right after a glide EXTENDS the glided word only if the two
         // together can still grow into a word. The window is now just a
@@ -1691,15 +1730,38 @@ extension KeyboardViewController: SwipeHost {
             b.titleLabel?.minimumScaleFactor = 0.7
             b.setTitleColor(.label, for: .normal)
             b.addTarget(self, action: #selector(tapSuggestion(_:)), for: .touchUpInside)
+            // Owner 2026-11-16: right after a glide or ⌫ a tap on the bar
+            // sometimes does nothing. Every touch is logged to measure why.
+            for (ev, name) in [(UIControl.Event.touchDown, "down"), (.touchUpOutside, "upOutside"),
+                               (.touchCancel, "cancel"), (.touchUpInside, "up")] {
+                b.addAction(UIAction { [weak self, weak b] _ in
+                    guard let self, let b else { return }
+                    let i = self.suggestionButtons.firstIndex(of: b) ?? -1
+                    swipeLog.notice("isv-bar: \(name, privacy: .public) slot \(i, privacy: .public) word \(i >= 0 ? (self.slotWords[i] ?? "-") : "?", privacy: .public) enabled \(b.isEnabled, privacy: .public) decoding \(self.decoding, privacy: .public) swiped \(self.lastSwipedWord ?? "-", privacy: .public) prefix \(self.completingPrefix ?? "-", privacy: .public)")
+                }, for: ev)
+            }
             stack.addArrangedSubview(b)
             return b
         }
 
         view.addSubview(stack)
         suggestionBar = stack
+        // Hide the keyboard (owner 2026-11-16), at the right end of the bar as
+        // on most keyboards.
+        let hide = UIButton(type: .system)
+        hide.setImage(UIImage(systemName: "keyboard.chevron.compact.down"), for: .normal)
+        hide.tintColor = .secondaryLabel
+        hide.accessibilityLabel = "Hide keyboard"
+        hide.translatesAutoresizingMaskIntoConstraints = false
+        hide.addAction(UIAction { [weak self] _ in self?.dismissKeyboard() }, for: .touchUpInside)
+        view.addSubview(hide)
         NSLayoutConstraint.activate([
+            hide.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -3),
+            hide.centerYAnchor.constraint(equalTo: stack.centerYAnchor),
+            hide.widthAnchor.constraint(equalToConstant: 40),
+            hide.heightAnchor.constraint(equalToConstant: Self.suggestionBarHeight),
             stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 3),
-            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -3),
+            stack.trailingAnchor.constraint(equalTo: hide.leadingAnchor, constant: -2),
             stack.topAnchor.constraint(equalTo: view.topAnchor, constant: 2),
             stack.heightAnchor.constraint(equalToConstant: Self.suggestionBarHeight),
         ])
@@ -1708,6 +1770,7 @@ extension KeyboardViewController: SwipeHost {
     /// `current` is the index of the word now in the text, marked bold; nil
     /// after a rejected swipe, when none of them is.
     fileprivate func showSuggestions(_ words: [String], current: Int? = 0) {
+        swipeLog.notice("isv-bar: show \(words.joined(separator: "|"), privacy: .public)")
         slotWords = suggestionButtons.indices.map { i in
             i < words.count && !words[i].isEmpty ? words[i] : nil
         }
@@ -1726,6 +1789,7 @@ extension KeyboardViewController: SwipeHost {
 
     @objc fileprivate func tapSuggestion(_ sender: UIButton) {
         glagWord = nil
+        ownEditAt = Date()
         guard let i = suggestionButtons.firstIndex(of: sender),
               let word = slotWords[i], !word.isEmpty else { return }
         if word.hasPrefix(Self.savePrefix) {
@@ -1778,6 +1842,7 @@ extension KeyboardViewController: SwipeHost {
     fileprivate func commitSwipe(_ word: String) {
         glagWord = nil
         caretByHand = false
+        ownEditAt = Date()
         tappedWord = nil
         let cased = isUppercase ? word.prefix(1).uppercased() + word.dropFirst() : word
         let before = contextBefore ?? ""
@@ -1799,6 +1864,15 @@ extension KeyboardViewController: SwipeHost {
     fileprivate func replaceLastSwipedWord(with word: String) {
         glagWord = nil
         guard let previous = lastSwipedWord else { return }
+        // The caret moved since the glide: deleting `previous.count` letters
+        // here would eat the text at the new place (Android `E Essensssen`).
+        guard (contextBefore ?? "").hasSuffix(previous + swipeSuffix) else {
+            lastSwipedWord = nil
+            swipeSuffix = ""
+            pendingSpace = false
+            commitSwipe(word)
+            return
+        }
         for _ in 0..<(previous.count + swipeSuffix.count) { textDocumentProxy.deleteBackward() }
         // Exactly as tapped. Copying the old word's capital here is why
         // tapping `dobra` under a wrongly capitalised `Dobra` changed nothing;
@@ -1974,3 +2048,4 @@ extension KeyboardViewController: SwipeHost {
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
     }
 }
+
