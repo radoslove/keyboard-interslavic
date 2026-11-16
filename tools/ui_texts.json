@@ -1608,7 +1608,8 @@
   },
   "words_remove": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Odstrani",
    "en": "Remove",
@@ -1628,7 +1629,8 @@
   },
   "words_removed": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Odstranjeno",
    "en": "Removed",
@@ -1750,7 +1752,8 @@
   },
   "learn_head": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Učenje",
    "en": "Learning",
@@ -1758,15 +1761,17 @@
   },
   "learn_body": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
-   "isv": "Slova, ktore hčeš naučiti se: dodaj je niže abo klikni na slovo pod poljem za pisanje v ✎. Karta pokazyvaje slovo: pomysli, čto ono znači, potom pokaži odgovor i ocěni, kako dobro go znaješ.",
+   "isv": "Slova, ktore hčeš naučiti se: dodaj je niže abo klikni na slovo pod poljem za pisanje v ✎. Karta pokazyvaje slovo: pomysli, čto ono znači, potom pokaži odpověd i ocěni, kako dobro go znaješ.",
    "en": "Words you want to learn: add them below, or tap a word under the writing box in ✎. Each card shows the word; check yourself against the translation and say how well you knew it.",
    "pl": "Słowa, których chcesz się nauczyć: dodaj je poniżej albo stuknij słowo pod polem pisania w ✎. Karta pokazuje słowo; sprawdź się z tłumaczeniem i oceń, jak dobrze je znałeś."
   },
   "learn_due": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Za povtarjanje tutčas: {k}",
    "en": "To review now: {k}",
@@ -1774,7 +1779,8 @@
   },
   "learn_start": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Povtarjaj",
    "en": "Review",
@@ -1782,15 +1788,17 @@
   },
   "learn_show": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
-   "isv": "Pokaži odgovor",
+   "isv": "Pokaži odpověd",
    "en": "Show answer",
    "pl": "Pokaż odpowiedź"
   },
   "learn_g0": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Ne znajem",
    "en": "Don't know",
@@ -1798,7 +1806,8 @@
   },
   "learn_g1": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Srědnje",
    "en": "So-so",
@@ -1806,7 +1815,8 @@
   },
   "learn_g2": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Znajem",
    "en": "Know",
@@ -1814,7 +1824,8 @@
   },
   "learn_done": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Dočasno jest vse povtorjeno.",
    "en": "All reviewed for now.",
@@ -1822,7 +1833,8 @@
   },
   "learn_all": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Vse kategorije",
    "en": "All",
@@ -1830,7 +1842,8 @@
   },
   "learn_nocat": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Bez kategorije",
    "en": "No category",
@@ -1838,7 +1851,8 @@
   },
   "learn_cat": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Kategorija",
    "en": "Category",
@@ -1846,7 +1860,8 @@
   },
   "learn_note": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Zapiska",
    "en": "Note",
@@ -1854,7 +1869,8 @@
   },
   "learn_ex": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Priklad",
    "en": "Example",
@@ -1862,7 +1878,8 @@
   },
   "learn_save": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Zapiši",
    "en": "Save",
@@ -1870,7 +1887,8 @@
   },
   "learn_cancel": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Anuluj",
    "en": "Cancel",
@@ -1878,7 +1896,8 @@
   },
   "learn_nogloss": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "V slovniku nema prěklada — dopiši svoju zapisku.",
    "en": "No dictionary gloss — add your own note.",
@@ -1886,7 +1905,8 @@
   },
   "learn_add_hint": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "novo slovo",
    "en": "new word",
@@ -1894,7 +1914,8 @@
   },
   "learn_add": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "＋ Za učenje",
    "en": "＋ Learn",
@@ -1902,7 +1923,8 @@
   },
   "learn_added": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Dodano za učenje",
    "en": "Added to learning",
@@ -1910,7 +1932,8 @@
   },
   "learn_deck_head": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Za učenje",
    "en": "To learn",
@@ -1918,7 +1941,8 @@
   },
   "learn_tr": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Prěklad",
    "en": "Translation",
@@ -1926,7 +1950,8 @@
   },
   "learn_notr": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "dopiši prěklad",
    "en": "add a translation",
@@ -1934,7 +1959,8 @@
   },
   "learn_unlearn": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Odstrani iz učenja",
    "en": "Remove from learning",
@@ -1942,7 +1968,8 @@
   },
   "learn_empty": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Ješče ničto ne jest dodano za učenje.",
    "en": "Nothing to learn yet.",
@@ -1950,7 +1977,8 @@
   },
   "learn_my_body": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Slova dodane čipom ＋ v pasu prědloženij: klaviatura jih ne znala. Odstrani slovo i klaviatura go prěstane prědlagati; ＋ Za učenje go doda do kart.",
    "en": "Words added with ＋ in the suggestion bar: the keyboard did not know them. Remove one and the keyboard stops suggesting it; ＋ Learn puts it among the cards.",
@@ -1958,7 +1986,8 @@
   },
   "try_learn": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Klikni na slovo za učenje:",
    "en": "Tap a word to learn it:",

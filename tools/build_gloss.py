@@ -117,8 +117,11 @@ def main():
             kept = [head] + [k for k in keys[1:] if count.get(k, 0) <= SHARED_MAX and k not in AUX and
                              # a headword of its own that begins differently
                              # (`by`, `bym` under `polemizować`) is not this
-                             # word's form; `jest` keeps its own entry
-                             not (len(k) <= 3 and k in heads and k[:2] != head[:2])]
+                             # word's form; `jest` keeps its own entry. The
+                             # FIRST letter decides, not the first two: those
+                             # threw `mam` and `ma` out of `mieć` ("ja mam" was
+                             # not translated, owner 2026-11-16).
+                             not (len(k) <= 3 and k in heads and k[0] != head[0])]
             out.append((kept, v))
         return out
     for l in gloss:

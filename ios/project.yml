@@ -15,7 +15,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "0.6.33"
+    MARKETING_VERSION: "0.6.36"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
@@ -45,7 +45,15 @@ targets:
   InterslavicKeyboard:
     type: application
     platform: iOS
-    sources: [App, Shared]
+    sources:
+      - App
+      - Shared
+      # The word translator's Wiktionary data (CC BY-SA 4.0, tools/build_gloss.py),
+      # the SAME files as Android - read from there, not copied (11 MB). APP ONLY:
+      # never in the keyboard extension (its memory limit; owner 2026-11-15).
+      - path: ../android-app/app/src/main/assets
+        includes: ["gloss_*.tsv"]
+        buildPhase: resources
     # One App Group for the app and both keyboards: the words added with `＋`,
     # the theme and the script. A keyboard reaches it only with Full Access.
     entitlements:

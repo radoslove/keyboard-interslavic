@@ -7,14 +7,51 @@ import MessageUI
 @main
 struct InterslavicKeyboardApp: App {
     var body: some Scene {
-        WindowGroup { SetupView() }
+        WindowGroup { RootView() }
+    }
+}
+
+/// ⚙ keyboard settings | ✎ write | 🎓 learn, as a bar at the TOP like Android
+/// `SetupActivity.tabBar`, with big icons (owner 2026-11-16: the system tab bar
+/// at the bottom was barely visible, and the settings come FIRST - they are
+/// what the app is for, the rest is a bonus). The last tab stays chosen; a new
+/// install opens on ⚙. All three views stay alive, so the text typed in ✎
+/// survives a look at ⚙.
+struct RootView: View {
+    @State private var tab = UserDefaults.standard.string(forKey: "app_tab") ?? "set"
+    private let tabs = [("set", "⚙"), ("try", "✎"), ("learn", "🎓")]
+
+    private func page(_ key: String, _ v: some View) -> some View {
+        v.opacity(tab == key ? 1 : 0)
+            .allowsHitTesting(tab == key)
+            .accessibilityHidden(tab != key)
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 8) {
+                ForEach(tabs, id: \.0) { key, icon in
+                    Button { tab = key } label: {
+                        Text(icon).font(.system(size: 30))
+                            .frame(maxWidth: .infinity, minHeight: 50)
+                    }
+                    .buttonStyle(.bordered)
+                    .opacity(tab == key ? 1 : 0.45)
+                }
+            }
+            .padding(.horizontal, 12).padding(.top, 4).padding(.bottom, 6)
+            ZStack {
+                page("set", SetupView(active: tab == "set"))
+                page("try", TryView(active: tab == "try"))
+                page("learn", LearnView(active: tab == "learn"))
+            }
+        }
+        .onChange(of: tab) { UserDefaults.standard.set($0, forKey: "app_tab") }
     }
 }
 
 struct SetupView: View {
-    @State private var sample = ""
-    @FocusState private var typing: Bool
-    @State private var words: [String: [String]] = [:]
+    var active = true
     @State private var theme = Shared.theme
     @State private var script = Shared.store.string(forKey: "script") ?? "latin"
     @Environment(\.scenePhase) private var phase
@@ -32,15 +69,10 @@ struct SetupView: View {
     @State private var mailFile: Outgoing?
     @State private var shareFile: Outgoing?
 
-    /// The keyboards this app carries, in the order of the list.
-    private let languages = [("isv", "Medžuslovjansky"), ("pl", "Polski"), ("cs", "češsky"),
-                             ("sk", "slovačsky"), ("sl", "slovenečsky"),
-                             ("hr", "hrvatsky"), ("sr", "srbsky"), ("bs", "bosnijsky"),
-                             ("mk", "makedonsky"), ("ru", "russky"), ("uk", "ukrajinsky"), ("bg", "bulgarsky"), ("be", "bělorussky"), ("sla", "praslovjansky"),
-                             ("nb", "norvežsky"), ("en", "English")]
+    // The keyboard's languages and the `＋` words moved to 🎓 (`LearnView`,
+    // `AppLangs`), as on Android 3.9.44.
 
     private func reload() {
-        words = Dictionary(uniqueKeysWithValues: languages.map { ($0.0, Shared.userWords($0.0)) })
         logCount = Shared.gestureLines().count
         newCount = Shared.counts(Shared.newWordsKey).count
         usageCount = Shared.counts(Shared.usageKey).count
@@ -106,16 +138,7 @@ struct SetupView: View {
     var body: some View {
         NavigationStack {
             List {
-                // Test box. The same trick Keyman uses: it separates "the
-                // keyboard is broken" from "the keyboard is not switched on",
-                // which are indistinguishable from the outside.
-                Section(Ui.head("try_head")) {
-                    TextField(Ui.t("try_hint"), text: $sample, axis: .vertical)
-                        .focused($typing)
-                        .lineLimit(2...4)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
-                }
+                // The test box moved to ✎ (`TryView`).
                 Section(Ui.head("on_head")) {
                     ForEach(1...4, id: \.self) { n in
                         VStack(alignment: .leading, spacing: 2) {
@@ -179,30 +202,7 @@ struct SetupView: View {
                 } header: {
                     Text(Ui.head("collect_head"))
                 }
-                // One section for every language's own words: only languages that
-                // HAVE words get rows, one explanation for all (owner 2026-11-13:
-                // sixteen empty sections were clutter).
-                Section {
-                    let filled = languages.filter { !(words[$0.0] ?? []).isEmpty }
-                    if filled.isEmpty {
-                        Text(Ui.head("words_none")).foregroundStyle(.secondary)
-                    }
-                    ForEach(filled, id: \.0) { code, name in
-                        let list = words[code] ?? []
-                        Text(name).font(.subheadline.bold()).foregroundStyle(.secondary)
-                        ForEach(list, id: \.self) { Text($0) }
-                            .onDelete { rows in
-                                var l = list
-                                l.remove(atOffsets: rows)
-                                Shared.setUserWords(l, code)
-                                reload()
-                            }
-                    }
-                } header: {
-                    Text(Ui.head("words_head"))
-                } footer: {
-                    Text(Ui.body("ios_words_body"))
-                }
+                // "My words" moved to 🎓 (`LearnView`), as on Android 3.9.44.
                 Section(Ui.head("privacy_head")) {
                     note("privacy_body")
                 }
@@ -238,6 +238,7 @@ struct SetupView: View {
             }
             .navigationTitle("Interslove")
             .onAppear(perform: reload)
+            .onChange(of: active) { if $0 { reload() } }
             .onChange(of: phase) { if $0 == .active { reload() } }
             .sheet(item: $mailFile) { f in
                 MailView(file: f.url, subject: f.subject,
