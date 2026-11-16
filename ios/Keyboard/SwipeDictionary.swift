@@ -96,21 +96,40 @@ final class SwipeDictionary {
     /// The most frequent words starting with `prefix` (folded key indices),
     /// for the bar while typing by taps. Scans the 26 buckets of the first
     /// letter - a few thousand entries, well under a frame.
-    func completions(prefix: [Int], limit: Int) -> [(freq: UInt8, word: String)] {
+    func completions(prefix: [Int], limit: Int, umlautBlind: Bool = false,
+                     penalty: Int = 0) -> [(freq: Int, word: String)] {
         guard let first = prefix.first else { return [] }
-        var best: [(freq: UInt8, offset: Int, length: Int)] = []
-        for last in 0..<keyCount {
-            forEachEntry(first: first, last: last) { e in
-                guard e.keys.count >= prefix.count else { return }
-                for i in 1..<prefix.count where Int(e.keys[i]) != prefix[i] { return }
-                if best.count >= limit * 4, let worst = best.last, e.freq <= worst.freq { return }
-                best.append((e.freq, e.wordOffset, e.wordLength))
-                best.sort { $0.freq > $1.freq }
-                if best.count > limit * 4 { best.removeLast() }
+        // German (Android `Dictionary.suggest`, 3.9.21): typed `fur` also
+        // offers `für` - `ü ö ä` (keys 26-28) read as `u o a`. A word matched
+        // only that way pays `umlautSuggestPenalty` frequency points.
+        func plain(_ k: Int) -> Int { umlautBlind ? (Self.plainUmlaut[k] ?? k) : k }
+        var firsts = [first]
+        if umlautBlind { for (u, p) in Self.plainUmlaut where p == first { firsts.append(u) } }
+        var best: [(freq: Int, offset: Int, length: Int)] = []
+        for f in firsts {
+            for last in 0..<keyCount {
+                forEachEntry(first: f, last: last) { e in
+                    guard e.keys.count >= prefix.count else { return }
+                    var blind = Int(e.keys[0]) != prefix[0]
+                    for i in 1..<prefix.count where Int(e.keys[i]) != prefix[i] {
+                        guard umlautBlind, plain(Int(e.keys[i])) == plain(prefix[i]) else { return }
+                        blind = true
+                    }
+                    let score = Int(e.freq) - penalty - (blind ? Self.umlautSuggestPenalty : 0)
+                    if best.count >= limit * 4, let worst = best.last, score <= worst.freq { return }
+                    best.append((score, e.wordOffset, e.wordLength))
+                    best.sort { $0.freq > $1.freq }
+                    if best.count > limit * 4 { best.removeLast() }
+                }
             }
         }
         return best.map { ($0.freq, word(at: $0.offset, length: $0.length)) }
     }
+
+    /// German key indices `ü ö ä` -> `u o a`.
+    static let plainUmlaut: [Int: Int] = [26: 20, 27: 14, 28: 0]
+    /// Android `UMLAUT_SUGGEST_PENALTY`: 30 frequency points.
+    static let umlautSuggestPenalty = 30
 
     /// Whether any word starts with `prefix` (folded key indices) - the word
     /// itself counts. Stops at the first hit, so a live prefix costs almost
@@ -141,7 +160,7 @@ final class SwipeDictionary {
             if let k = Layout.swipeIndex(ch) { keys.append(k); continue }
             // Macedonian's internal Latin: ǉ ǌ ǆ are single letters on the
             // digraph keys, which Unicode does not decompose (Android foldBase).
-            let byHand: [Character: String] = ["ł": "l", "đ": "d", "ǉ": "q", "ǌ": "w", "ǆ": "x"]
+            let byHand: [Character: String] = ["ł": "l", "đ": "d", "ǉ": "q", "ǌ": "w", "ǆ": "x", "ß": "s"]
             var base = byHand[ch]
                 ?? String(ch).folding(options: .diacriticInsensitive, locale: nil)
             if Layout.swipeIndex("æ") != nil { base = ch == "ä" ? "æ" : ch == "ö" ? "ø" : base }
@@ -149,6 +168,19 @@ final class SwipeDictionary {
             keys.append(k)
         }
         return keys.isEmpty ? nil : keys
+    }
+
+    /// Whether this form is in the wordlist WITH this case (German `essen`
+    /// and `Essen` are two words).
+    func containsExactCase(_ word: String) -> Bool {
+        guard let k = Self.keys(of: word), let first = k.first, let last = k.last else { return false }
+        var found = false
+        forEachEntry(first: first, last: last) { e in
+            guard !found, e.keys.count == k.count else { return }
+            for i in 0..<k.count where Int(e.keys[i]) != k[i] { return }
+            if self.word(at: e.wordOffset, length: e.wordLength) == word { found = true }
+        }
+        return found
     }
 
     /// Whether this exact form (ignoring case) is in the wordlist.

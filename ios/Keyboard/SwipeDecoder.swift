@@ -81,6 +81,34 @@ struct SwipeDecoder {
     /// lifted on `r` still loses to `her` - on iOS `e` is already inside the
     /// hard radius, so that one is shape + frequency, not the gate.
     var softEnd = true
+
+    /// German (Android 3.9.18-3.9.24, `Dictionary.umlautPartners`): `ü ö ä` are
+    /// keys 26-28, and a word holding one has two more routes - over `u o a`
+    /// (paying `umlautRoutePen`, so on the same shape `wurde` beats `würde` and
+    /// `würde` stays next in the strip) and over `ue oe ae`, the typewriter
+    /// spelling, free. The best of the three scores.
+    var umlautKeys = false
+    /// Key widths. Android pays 10 px for the a-o-u route, half its 20-px soft
+    /// end; here the soft end is 0.2, so 0.1. ⚠ Not yet measured on iOS.
+    var umlautRoutePen: Double = 0.1
+    var ueRoutePen: Double = 0.0
+    private static let keyUe: UInt8 = 26, keyOe: UInt8 = 27, keyAe: UInt8 = 28
+    private static let keyU: UInt8 = 20, keyO: UInt8 = 14, keyA: UInt8 = 0
+
+    private static func plainUmlaut(_ k: UInt8) -> UInt8? {
+        switch k { case keyUe: return keyU; case keyOe: return keyO; case keyAe: return keyA; default: return nil }
+    }
+    /// The `u o a` route and the `ue oe ae` route, nil when the word has no umlaut.
+    static func umlautRoutes(_ keys: UnsafeBufferPointer<UInt8>) -> ([UInt8], [UInt8])? {
+        guard keys.contains(where: { $0 >= keyUe }) else { return nil }
+        var plain: [UInt8] = [], ue: [UInt8] = []
+        plain.reserveCapacity(keys.count); ue.reserveCapacity(keys.count + 2)
+        for k in keys {
+            if let p = plainUmlaut(k) { plain.append(p); ue.append(p); ue.append(keyE) }
+            else { plain.append(k); ue.append(k) }
+        }
+        return (plain, ue)
+    }
     var softEndPenalty: Double = 0.2
     static let softEndReach: Double = 1.8
 
@@ -189,6 +217,15 @@ struct SwipeDecoder {
                 return (sum / Double(Self.samples)).squareRoot() / Double(keyWidth)
             }
             let plain = one(keys)
+            if umlautKeys, let (aou, ue) = Self.umlautRoutes(keys) {
+                var best = plain
+                for (route, pen) in [(aou, umlautRoutePen), (ue, ueRoutePen)] {
+                    if let r = route.withUnsafeBufferPointer({ one($0) }) {
+                        best = min(best ?? r + pen, r + pen)
+                    }
+                }
+                return best
+            }
             guard digraphKeys, let route = Self.digraphRoute(keys, dzh: dzh),
                   let alt = route.withUnsafeBufferPointer({ one($0) })
             else { return plain }
@@ -219,6 +256,26 @@ struct SwipeDecoder {
                 softLast[hit.key] = softEndPenalty
                 lastKeys.append(hit.key)
             }
+        }
+        if umlautKeys {
+            // A glide over `u o a` may be a word filed under `ü ö ä`, and one
+            // ending on `e` may be the `ue` route of a word ending in an umlaut.
+            let partner: [Int: Int] = [Int(Self.keyU): Int(Self.keyUe), Int(Self.keyO): Int(Self.keyOe),
+                                       Int(Self.keyA): Int(Self.keyAe)]
+            for k in firstKeys { if let p = partner[k] { firstKeys.append(p) } }
+            for k in lastKeys {
+                let pen = softLast[k]
+                var add: [Int] = []
+                if let p = partner[k] { add.append(p) }
+                if k == Int(Self.keyE) { add += [Int(Self.keyUe), Int(Self.keyOe), Int(Self.keyAe)] }
+                for p in add where !lastKeys.contains(p) {
+                    lastKeys.append(p)
+                    if let pen { softLast[p] = min(softLast[p] ?? pen, pen) }
+                }
+            }
+            var seenF = Set<Int>(), seenL = Set<Int>()
+            firstKeys = firstKeys.filter { seenF.insert($0).inserted }
+            lastKeys = lastKeys.filter { seenL.insert($0).inserted }
         }
         if polishGlag {
             // A glide starting or ending on v may be a word filed under w.

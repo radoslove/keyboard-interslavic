@@ -19,10 +19,36 @@ enum Layout {
         ("sk", "slovačsky"), ("sl", "slovenečsky"), ("hr", "hrvatsky"),
         ("sr", "srbsky"), ("bs", "bosnijsky"), ("mk", "makedonsky"),
         ("ru", "russky"), ("uk", "ukrajinsky"), ("bg", "bulgarsky"), ("be", "bělorussky"), ("sla", "praslovjansky"), ("nb", "norvežsky"),
-        ("en", "English"),
+        ("en", "English"), ("de", "němečsky"), ("it", "italijanjsky"),
     ]
 
     static func name(_ code: String) -> String { all.first { $0.code == code }?.name ?? code }
+
+    /// The space bar's name: every living language in ITSELF (owner 2026-11-15,
+    /// Android `Lang.label`); the Interslavic names stay in the ⚙ list only.
+    /// Proto-Slavic has no living speaker, so it keeps its Interslavic name.
+    static func label(_ code: String) -> String {
+        switch code {
+        case "pl": return "Polski"
+        case "nb": return "Norsk"
+        case "en": return "English"
+        case "de": return "Deutsch"
+        case "it": return "Italiano"
+        case "cs": return "Čeština"
+        case "sk": return "Slovenčina"
+        case "sl": return "Slovenščina"
+        case "hr": return "Hrvatski"
+        case "sr": return "Srpski"
+        case "bs": return "Bosanski"
+        case "mk": return "Македонски"
+        case "ru": return "Русский"
+        case "uk": return "Українська"
+        case "bg": return "Български"
+        case "be": return "Беларуская"
+        case "sla": return "Praslovjansky"
+        default: return "Medžuslovjansky"
+        }
+    }
 
     /// The ticked languages, in list order; never empty. First run: Interslavic
     /// plus the phone's own language if the keyboard has it.
@@ -133,6 +159,13 @@ enum Layout {
                     "d": ["ď"]]
         case "en":
             return [:]
+        case "de":
+            // Android `Layout.deOwn`: `ß` held on `s`; `ü ö ä` are keys.
+            return ["s": ["ß"]]
+        case "it":
+            // Android `Layout.itOwn`, ordered by how often each is written
+            // (subtitles: è 2.6 M, à 1.1 M, ì 1.0 M, ò 0.6 M, ù 0.5 M, é 0.5 M).
+            return ["a": ["à"], "e": ["è", "é"], "i": ["ì"], "o": ["ò"], "u": ["ù"]]
         case "nb":
             // Android `Layout.nbOwn` (3.5.8): æ ø å have keys of their own;
             // held, they give the Swedish/Danish neighbours.
@@ -221,6 +254,13 @@ enum Layout {
         if language == "nb" {
             return [Array("qwertyuiopå"), Array("asdfghjkløæ"), Array("zxcvbnm")]  // Android `nbRows`
         }
+        // German (Android `deQwertzRows` / `deQwertyRows`): `ü ö ä` are keys of
+        // their own where every German keyboard has them, rows of 11.
+        if language == "de" {
+            return qwertz
+                ? [Array("qwertzuiopü"), Array("asdfghjklöä"), Array("yxcvbnm")]
+                : [Array("qwertyuiopü"), Array("asdfghjklöä"), Array("zxcvbnm")]
+        }
         // Serbian Cyrillic (JUS I.K1.003) and Macedonian: the Latin QWERTZ grid
         // with `љ` `њ` on `q` `w` and `џ` on the `x` position; no `y`
         // (Android `srCyrillicRows`, `mkCyrillicRows`).
@@ -305,7 +345,7 @@ enum Layout {
     /// own keyboards: QWERTZ for Czech, Slovak, Slovenian, Croatian and Serbian. Only `y` and `z` swap, so the
     /// grid stays the same; the decoder reads key centres from the buttons and
     /// the wordlist stores letters, not positions.
-    static let qwertzByDefault: Set<String> = ["cs", "sk", "sl", "hr", "sr", "bs"]
+    static let qwertzByDefault: Set<String> = ["cs", "sk", "sl", "hr", "sr", "bs", "de"]
     /// Not for Norwegian (rows of 11) nor Macedonian, which is Cyrillic only
     /// and has its own grid (Android `KeyRows.offered`).
     static var qwertzOffered: Bool { !["nb", "mk", "ru", "uk", "bg", "be", "sla"].contains(language) }
@@ -328,22 +368,28 @@ enum Layout {
 
     /// How many key widths a letter row spans. Fixed by the LATIN top row, so
     /// shift and backspace grow instead of the letters when a script drops keys.
-    static var rowUnits: Int { language == "nb" ? 11 : 10 }
+    static var rowUnits: Int { ["nb", "de"].contains(language) ? 11 : 10 }
 
     /// The keys a swipe can cross, in the order of the wordlist's key indices:
     /// a-z, then the language's own letter keys (`build_swipe_dictionary.py`).
-    static var swipeKeys: [Character] { language == "nb" ? nbKeys : latinKeys }
+    static var swipeKeys: [Character] {
+        language == "nb" ? nbKeys : language == "de" ? deKeys : latinKeys
+    }
     private static let latinKeys = Array("abcdefghijklmnopqrstuvwxyz")
     private static let nbKeys = latinKeys + Array("åøæ")
+    /// German: `ü ö ä` are key indices 26-28 (`build_swipe_dictionary.py de`).
+    private static let deKeys = latinKeys + Array("üöä")
 
     /// Index of a key letter in `swipeKeys`, nil for anything else.
     static func swipeIndex(_ ch: Character) -> Int? {
-        (language == "nb" ? nbIndex : latinIndex)[ch]
+        (language == "nb" ? nbIndex : language == "de" ? deIndex : latinIndex)[ch]
     }
     private static let latinIndex: [Character: Int] =
         Dictionary(uniqueKeysWithValues: latinKeys.enumerated().map { ($1, $0) })
     private static let nbIndex: [Character: Int] =
         Dictionary(uniqueKeysWithValues: nbKeys.enumerated().map { ($1, $0) })
+    private static let deIndex: [Character: Int] =
+        Dictionary(uniqueKeysWithValues: deKeys.enumerated().map { ($1, $0) })
 
     /// `123` - rows 1-2 as on the system keyboard. Row 3 sits between `#+=`
     /// and backspace and runs from the rarest mark to the most used, so `?`
@@ -381,7 +427,10 @@ enum Layout {
                 "i": ["ia", "iu", "ię", "ią"], "w": ["ę", "ię", "ą", "ią"],
                 // v: the hard yer Ⱏ (l + Ⱏ = ł, otherwise a bare Ⱏ)
                 "v": [Script.hardYerMark],
-                "a": ["ą", "ią", "ia"],   // ę ię ą ią also under the keys they contain (owner 0.6.30) "c": ["ć", "cz"], "d": ["dź", "ď", "dż", "ḍ"],
+                // ę ię ą ią also under the keys they contain (owner 0.6.30)
+                "a": ["ą", "ią", "ia"],
+                "c": ["ć", "cz"],
+                "d": ["dź", "ď", "dż", "ḍ"],
                 "e": ["ę", "ię"], "h": ["ch"], "l": ["ł"], "n": ["ń"],
                 "o": ["ó", "ō"], "r": ["rz"], "s": ["ś", "sz", "szcz"], "z": ["ż", "ź"],
             ]

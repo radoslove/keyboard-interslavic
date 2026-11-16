@@ -58,6 +58,13 @@ final class KeyboardViewController: UIInputViewController {
     /// owes one to whatever comes next. A trailing space doubled up with the
     /// space bar habit (`Kako  se`) and sat between a word and its punctuation.
     private var pendingSpace = false
+    /// `.` `!` `?` typed where a glide owed its space (Android smart space):
+    /// the sentence has ended even though no space follows yet.
+    private var stopAfterGlide = false
+    /// The caret was last moved by hand: the word before it is finished, so
+    /// Shift re-cases it (Android `caretByHand`, 3.9.28).
+    private var caretByHand = false
+    private var ownCaretMoveAt = Date.distantPast
     /// The candidates of the last swipe, kept so a rejected word can be
     /// replaced by tapping the next one.
     private var lastCandidates: [String] = []
@@ -133,6 +140,23 @@ final class KeyboardViewController: UIInputViewController {
     override func selectionWillChange(_ textInput: UITextInput?) {
         super.selectionWillChange(textInput)
         glagWord = nil
+    }
+
+    /// The caret moved by hand: the glide's alternatives would land at the new
+    /// place (Android 3.9.27, `E Essensssen`), so they go, and the bar offers
+    /// words for where the caret is now.
+    override func selectionDidChange(_ textInput: UITextInput?) {
+        super.selectionDidChange(textInput)
+        // Our own caret moves (a wiped suffix, a word replaced from inside)
+        // report here too; they are not the user's.
+        guard Date().timeIntervalSince(ownCaretMoveAt) > 0.4 else { return }
+        caretByHand = true
+        lastCandidates = []
+        lastSwipedWord = nil
+        tappedWord = nil
+        pendingSpace = false
+        stopAfterGlide = false
+        refreshCompletions()
     }
 
     /// A whole word in the current script; in Polish Glagolitic with the
@@ -424,7 +448,14 @@ final class KeyboardViewController: UIInputViewController {
     /// The language being typed, lowercase, through the script like every
     /// label (`меджусловјанскы` in Cyrillic). One extension types every
     /// language now, so this - not the system's list - says which one is on.
-    private static var spaceLabel: String { Script.out(Layout.name(Layout.language).lowercased()) }
+    /// The language's own name (Android `Lang.label`). A name already in
+    /// Cyrillic stays as it is; a Latin one follows the script (`Srpski` ->
+    /// `Српски`, the Interslavic name in Cyrillic or Glagolitic).
+    private static var spaceLabel: String {
+        let name = Layout.label(Layout.language)
+        return name.unicodeScalars.contains { $0.value >= 0x400 && $0.value < 0x530 }
+            ? name : Script.out(name)
+    }
 
     /// Polish Glagolitic draws its labels in our own font (bundled, UIAppFonts);
     /// everything else, and any letter the font lacks, stays the system font.
@@ -554,6 +585,16 @@ final class KeyboardViewController: UIInputViewController {
         textDocumentProxy.documentContextBeforeInput?.replacingOccurrences(of: Script.wideSpace, with: " ")
     }
 
+    /// Italian elision (Android `Lang.ELISION`, `KeyboardView.elidedBefore`):
+    /// a letter and an apostrophe right before the cursor (`dell'`, `l’`) take
+    /// the next word WITHOUT a space - after a typed letter's owed space, a
+    /// word from the bar and a glide alike.
+    private var elidedBefore: Bool {
+        guard Layout.language == "it" else { return false }
+        let tail = Array((contextBefore ?? "").suffix(2))
+        return tail.count == 2 && tail[0].isLetter && (tail[1] == "'" || tail[1] == "’")
+    }
+
     private var contextAfter: String? {
         textDocumentProxy.documentContextAfterInput?.replacingOccurrences(of: Script.wideSpace, with: " ")
     }
@@ -657,6 +698,7 @@ final class KeyboardViewController: UIInputViewController {
     /// as typed text (remembered in `trimAfterWipe` for a hold); otherwise one
     /// character goes, as always.
     private func pressBackspace() {
+        caretByHand = false
         let before = lastSwipedWord
         tapBackspace()
         trimAfterWipe = nil
@@ -733,6 +775,7 @@ final class KeyboardViewController: UIInputViewController {
         if !stem.isEmpty { put(stem) }
         if !wipedSuffix.isEmpty {
             put(wipedSuffix)
+            ownCaretMoveAt = Date()
             textDocumentProxy.adjustTextPosition(byCharacterOffset: -wipedSuffix.count)
         }
         wipedSuffix = ""
@@ -926,7 +969,7 @@ final class KeyboardViewController: UIInputViewController {
 
         func header(_ text: String) -> UILabel {
             let l = UILabel()
-            l.text = Script.out(text)
+            l.text = text
             l.font = .systemFont(ofSize: 14, weight: .semibold)
             l.textColor = .secondaryLabel
             return l
@@ -952,7 +995,7 @@ final class KeyboardViewController: UIInputViewController {
 
         // Languages (owner 2026-11-11): one keyboard in the system's list,
         // the languages ticked here, 🌐 steps through them. At least one stays.
-        column.addArrangedSubview(header("Jezyki"))
+        column.addArrangedSubview(header(Self.pt("langs_head")))
         let on = Layout.enabled
         // Interslavic first, the rest alphabetically by the code shown, so a
         // language is easy to find (owner 2026-11-11, variant B).
@@ -977,7 +1020,7 @@ final class KeyboardViewController: UIInputViewController {
             }))
         }
 
-        column.addArrangedSubview(header("Tema"))
+        column.addArrangedSubview(header(Self.pt("theme_head")))
         let themes: [(String, Shared.Theme)] = [("◐", .auto), ("☀", .light), ("☾", .dark)]
         column.addArrangedSubview(choiceRow(themes.map { icon, t in
             (icon, Shared.theme == t, { [weak self] in
@@ -988,7 +1031,7 @@ final class KeyboardViewController: UIInputViewController {
         }))
 
         if Layout.qwertzOffered {
-            column.addArrangedSubview(header("Razloženje klaviatury"))
+            column.addArrangedSubview(header(Self.pt("layout_head")))
             column.addArrangedSubview(choiceRow([false, true].map { z in
                 (z ? "QWERTZ" : "QWERTY", Layout.qwertz == z, { [weak self] in
                     Layout.qwertz = z
@@ -997,8 +1040,27 @@ final class KeyboardViewController: UIInputViewController {
             }))
         }
 
+        // Capitals (Android 3.9.26): the switches of the app's screen, here too.
+        column.addArrangedSubview(header(Self.pt("caps_sw")))
+        column.addArrangedSubview(choiceRow([true, false].map { on in
+            (on ? "Aa" : "aa", Shared.flag("auto_cap") == on, { [weak self] in
+                Shared.setFlag("auto_cap", on)
+                self?.rearmShiftIfSentenceStart()
+                self?.buildKeyboard()
+            })
+        }))
+        if Layout.language == "de" {
+            column.addArrangedSubview(header(Self.pt("de_nouns_sw")))
+            column.addArrangedSubview(choiceRow([true, false].map { on in
+                (on ? "Haus" : "haus", Shared.flag("de_nouns") == on, { [weak self] in
+                    Shared.setFlag("de_nouns", on)
+                    self?.buildKeyboard()
+                })
+            }))
+        }
+
         if Script.modes.count > 1 {
-            column.addArrangedSubview(header("Pismo"))
+            column.addArrangedSubview(header(Self.pt("script_head")))
             column.addArrangedSubview(choiceRow(Script.modes.map { m in
                 (Script.label(m), Script.mode == m, { [weak self] in
                     Script.set(m)
@@ -1007,7 +1069,7 @@ final class KeyboardViewController: UIInputViewController {
             }))
         }
 
-        column.addArrangedSubview(header("Moje slova"))
+        column.addArrangedSubview(header(Self.pt("words_head")))
         let words = swipeInput.userWords
         if words.isEmpty {
             let l = UILabel()
@@ -1097,6 +1159,7 @@ final class KeyboardViewController: UIInputViewController {
     private func insert(_ latin: String) {
         guard let ch = latin.first else { return }
         recased = nil
+        caretByHand = false
         if decoding > 0 { queuedKeys.append { [weak self] in self?.insert(latin) }; return }
         // A letter right after a glide EXTENDS the glided word only if the two
         // together can still grow into a word. The window is now just a
@@ -1120,11 +1183,12 @@ final class KeyboardViewController: UIInputViewController {
             swipeInput.learn(from: Script.toLatin(kept))
             wordKept(Script.toLatin(kept))
         }
+        stopAfterGlide = pendingSpace && ".!?".contains(ch)
         if pendingSpace {
             // A letter right after a swipe extends that word (`pisem` + `s`);
             // a letter later starts the next word and gets the owed space.
             // Space and punctuation simply cancel it.
-            if ch.isLetter && !extendsSwipe { put(" ") }
+            if ch.isLetter && !extendsSwipe && !elidedBefore { put(" ") }
             pendingSpace = false
         }
         // Track a word typed letter by letter: that is the sign a swipe did
@@ -1202,6 +1266,16 @@ final class KeyboardViewController: UIInputViewController {
                   proxy.documentContextBeforeInput?.hasSuffix(last) == true {
             for _ in 0..<last.count { proxy.deleteBackward() }
             text = last
+        } else if proxy.selectedText?.isEmpty ?? true,
+                  pendingSpace || lastSwipedWord != nil || caretByHand,
+                  let word = Optional(trailingWord(contextBefore ?? "")),
+                  !word.isEmpty, word.allSatisfy(\.isLetter),
+                  (contextAfter?.first.map { !$0.isLetter } ?? true) {
+            // A FINISHED word right before the caret - glided, taken from the
+            // bar, or reached by moving the caret - is re-cased too, without
+            // selecting it: Haus -> HAUS -> haus -> Haus (Android 3.9.28).
+            for _ in 0..<word.count { proxy.deleteBackward() }
+            text = word
         } else {
             recased = nil
             return false
@@ -1316,6 +1390,9 @@ final class KeyboardViewController: UIInputViewController {
     private static func saveForm(_ word: String, after before: String) -> String? {
         guard word.count >= 3, SwipeDictionary.keys(of: word.lowercased()) != nil,
               let first = word.first else { return nil }
+        // German: a capital marks a noun, not a name - kept as typed
+        // (Android 3.9.29, `Madchen` mid-line got no chip).
+        if Layout.language == "de" { return word.dropFirst().contains(where: \.isUppercase) ? nil : word }
         if first.isLowercase { return word }
         guard first.isUppercase, !word.dropFirst().contains(where: \.isUppercase),
               sentenceStart(before) else { return nil }
@@ -1355,9 +1432,13 @@ final class KeyboardViewController: UIInputViewController {
         let lines = before.trimmingCharacters(in: .whitespacesAndNewlines)
         let atStart = before.isEmpty ? !textDocumentProxy.hasText : lines.isEmpty
         let afterStop = lines.last.map { ".!?".contains($0) } ?? false
-        let gap = before.last.map { $0 == " " || $0.isNewline } ?? false
-        // Only act on a real transition, or every keystroke rebuilds the view.
-        let wanted: ShiftState = (atStart || (afterStop && gap)) ? .on : .off
+        // `.` right after a glide: the space is owed to the next word, so there
+        // is no gap yet - and the next glide came out lowercase (Android 3.9.26,
+        // `Bis Morgen. guten`). The owed space counts as the gap.
+        let gap = (before.last.map { $0 == " " || $0.isNewline } ?? false)
+            || (stopAfterGlide && before.last.map { ".!?".contains($0) } == true)
+        // Settings: the capital at the start of a sentence can be turned off.
+        let wanted: ShiftState = (atStart || (afterStop && gap)) && Shared.flag("auto_cap") ? .on : .off
         if wanted != shift {
             #if DEBUG
             // Why shift switched: the tail the proxy reported at that moment.
@@ -1662,7 +1743,11 @@ extension KeyboardViewController: SwipeHost {
             // space owed before the next word, backspace takes it whole.
             completingPrefix = nil
             tappedWord = nil
-            for _ in 0..<typed.count { textDocumentProxy.deleteBackward() }
+            // Caret put back inside a word (`E|ssen`): the letters after it
+            // belong to the word being replaced (Android 3.9.31, `essenssen`).
+            let tail = (contextAfter ?? "").prefix { $0.isLetter }.count
+            if tail > 0 { ownCaretMoveAt = Date(); textDocumentProxy.adjustTextPosition(byCharacterOffset: tail) }
+            for _ in 0..<(typed.count + tail) { textDocumentProxy.deleteBackward() }
             let shown = outWord(word)
             put(shown)
             lastSwipedWord = shown
@@ -1692,12 +1777,13 @@ extension KeyboardViewController: SwipeHost {
     /// Puts a decoded word in, spacing it from whatever came before.
     fileprivate func commitSwipe(_ word: String) {
         glagWord = nil
+        caretByHand = false
         tappedWord = nil
         let cased = isUppercase ? word.prefix(1).uppercased() + word.dropFirst() : word
         let before = contextBefore ?? ""
         let after = contextAfter ?? ""
-        let lead = pendingSpace
-            || (before.last.map { !$0.isWhitespace && !Self.openers.contains($0) } ?? false)
+        let lead = !elidedBefore && (pendingSpace
+            || (before.last.map { !$0.isWhitespace && !Self.openers.contains($0) } ?? false))
         // Swiped into the middle of text, right before a word: bring the space
         // after it too, or it glues on (`Dobramožlivost`).
         let trail = after.first.map { $0.isLetter || $0.isNumber } ?? false
@@ -1722,6 +1808,58 @@ extension KeyboardViewController: SwipeHost {
         lastSwipedWord = shown
         pendingSpace = swipeSuffix.isEmpty
     }
+
+    /// German: `wir leben` but `das Leben` - one glide, two words. The word
+    /// in front decides when it is telling (Android `germanCaseByContext`,
+    /// 3.9.25); with the nouns switch off every candidate goes in lowercase.
+    private func germanCaseByContext(_ words: [String]) -> [String] {
+        guard Layout.language == "de", !words.isEmpty else { return words }
+        if !Shared.flag("de_nouns") {
+            var out: [String] = []
+            for w in words { let l = w.prefix(1).lowercased() + w.dropFirst(); if !out.contains(l) { out.append(l) } }
+            return out
+        }
+        guard let dict = swipeInput.dictionary, let twin = SwipeInput.caseTwin(words[0], dict) else { return words }
+        let before = contextBefore ?? ""
+        let prev = String(before.reversed().drop { !$0.isLetter }.prefix { $0.isLetter }.reversed()).lowercased()
+        let wantCap: Bool
+        if Self.deBeforeNoun.contains(prev) { wantCap = true }
+        else if Self.deBeforeLower.contains(prev) { wantCap = false }
+        else { return words }
+        let pick = (words[0].first?.isUppercase == wantCap) ? words[0] : twin
+        return [pick] + words.filter { $0 != pick }
+    }
+
+    /// A text of the ⚙ panel in the KEYBOARD's language (Android `pt`,
+    /// 3.9.29): German on the German keyboard, Interslavic on the Interslavic
+    /// and Proto-Slavic ones, English where a language has none.
+    private static func pt(_ key: String) -> String {
+        guard let row = PanelTexts.text[key] else { return key }
+        let code: String
+        switch Layout.language {
+        case "isv", "sla": code = "isv"
+        case "sr": code = Script.mode == .cyrillic ? "sr-Cyrl" : "sr"
+        default: code = Layout.language
+        }
+        let t = row[code] ?? row["en"] ?? key
+        // Interslavic in Cyrillic or Glagolitic, as before.
+        return code == "isv" ? Script.out(t) : t
+    }
+
+    /// Android `DE_BEFORE_NOUN`: after these a glide's case twin is the noun.
+    private static let deBeforeNoun: Set<String> = [
+        "der", "die", "das", "den", "dem", "des", "ein", "eine", "einen", "einem", "einer", "eines",
+        "kein", "keine", "keinen", "keinem", "keiner", "mein", "meine", "meinen", "meinem", "meiner",
+        "dein", "deine", "deinen", "deinem", "sein", "seine", "seinen", "seinem", "unser", "unsere",
+        "dieser", "diese", "dieses", "diesen", "diesem", "jeder", "jede", "jedes", "guten", "gute",
+        "zum", "zur", "im", "am", "vom", "beim", "ins", "ans", "fürs",
+    ]
+    /// Android `DE_BEFORE_LOWER`: after these it is the lowercase word.
+    private static let deBeforeLower: Set<String> = [
+        "ich", "du", "er", "es", "wir", "man", "will", "willst", "wollen", "kann", "kannst",
+        "können", "muss", "musst", "müssen", "soll", "sollst", "sollen", "darf", "dürfen",
+        "möchte", "möchten", "mag", "zu", "nicht", "gern", "gerne", "bis",
+    ]
 
     // MARK: SwipeHost
 
@@ -1812,10 +1950,11 @@ extension KeyboardViewController: SwipeHost {
         showSuggestions([])
     }
 
-    func swipeDidFinish(candidates: [String]) {
+    func swipeDidFinish(candidates found: [String]) {
         glagWord = nil
         decoding = max(0, decoding - 1)
         defer { if decoding == 0 { flushQueuedKeys() } }
+        let candidates = germanCaseByContext(found)
         guard let best = candidates.first else {
             glideMissed()
             return

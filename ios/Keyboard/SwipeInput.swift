@@ -111,7 +111,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     private weak var host: SwipeHost?
     private let recognizer = SwipeGestureRecognizer()
     private let trail = CAShapeLayer()
-    private var dictionary: SwipeDictionary?
+    private(set) var dictionary: SwipeDictionary?
 
     /// Where this user's touches sit above the key they mean, in key widths.
     /// Learned from words they KEPT, so a thumb that lands high (or a phone
@@ -294,6 +294,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
             decoder.digraphKeys = digraph
             decoder.dzhKey = dzh
             decoder.polishGlag = polishGlag
+            decoder.umlautKeys = lang == "de"
             let started = CFAbsoluteTimeGetCurrent()
             let found = decoder.decode(path: path, times: times)
             let decodeMs = (CFAbsoluteTimeGetCurrent() - started) * 1000
@@ -383,9 +384,15 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
                       size: Int = 4) -> [String] {
         guard let best = found.first else { return [] }
         var out = [best.word]
+        // German writes `essen` and `Essen` as two words with one glide, so a
+        // case-only twin is not a duplicate there (Android 3.9.25).
+        let german = Layout.language == "de"
         func add(_ w: String) {
-            if out.count < size, !out.contains(where: { $0.lowercased() == w.lowercased() }) { out.append(w) }
+            if out.count < size, !out.contains(where: { german ? $0 == w : $0.lowercased() == w.lowercased() }) {
+                out.append(w)
+            }
         }
+        if german, let twin = caseTwin(best.word, dictionary) { add(twin) }
         for c in found.dropFirst() where c.score - best.score <= alternativeMargin { add(c.word) }
         let lower = best.word.lowercased()
         if let keys = SwipeDictionary.keys(of: lower) {
@@ -398,6 +405,14 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
             if (dictionary.frequency(of: c.word) ?? 0) >= farAlternativeFreq { add(c.word) }
         }
         return out
+    }
+
+    /// German: the same word with the other first-letter case, when the list
+    /// has it (`essen` <-> `Essen`), else nil (Android `caseTwin`).
+    static func caseTwin(_ word: String, _ dictionary: SwipeDictionary) -> String? {
+        guard let c = word.first else { return nil }
+        let t = (c.isUppercase ? c.lowercased() : c.uppercased()) + word.dropFirst()
+        return t != word && dictionary.containsExactCase(t) ? t : nil
     }
 
     /// The word did not come from this gesture (a completion was tapped, or it
@@ -469,7 +484,18 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
             for w in mine where w.hasPrefix(lower) && w != lower && out.count < limit {
                 out.append(w)
             }
-            for hit in dictionary.completions(prefix: keys, limit: limit) {
+            // German: `fuer` is also read as `für` (the typewriter spelling),
+            // ranked like an umlaut-blind match (Android `ueToUmlaut`).
+            let german = Layout.language == "de"
+            var hits = dictionary.completions(prefix: keys, limit: limit, umlautBlind: german)
+            if german, lower.contains("ue") || lower.contains("oe") || lower.contains("ae"),
+               let ue = SwipeDictionary.keys(of: lower.replacingOccurrences(of: "ue", with: "ü")
+                    .replacingOccurrences(of: "oe", with: "ö").replacingOccurrences(of: "ae", with: "ä")) {
+                hits += dictionary.completions(prefix: ue, limit: limit, umlautBlind: true,
+                                               penalty: SwipeDictionary.umlautSuggestPenalty)
+                hits.sort { $0.freq > $1.freq }
+            }
+            for hit in hits {
                 let w = hit.word
                 if exact && !w.lowercased().hasPrefix(lower) { continue }
                 if w.lowercased() == lower || out.contains(w) { continue }

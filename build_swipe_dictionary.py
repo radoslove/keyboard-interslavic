@@ -43,6 +43,7 @@ lets the decoder work in plain key indices and still emit correct orthography.
 
 import re
 import struct
+import unicodedata
 import sys
 from pathlib import Path
 
@@ -128,7 +129,13 @@ if LANG in ("nb", "isc"):
     # the Swedish/Danish ä ö held on æ ø fold to those keys.
     FOLD = {"é": "e", "è": "e", "ê": "e", "ó": "o", "ò": "o", "ô": "o",
             "à": "a", "ä": "æ", "ö": "ø"}
-ALPHA = "abcdefghijklmnopqrstuvwxyz" + ("åøæ" if LANG in ("nb", "isc") else "")
+if LANG == "de":
+    # German: ü ö ä are KEYS (rows of 11, Android 3.9.18+), key indices 26-28;
+    # `ß` is held on `s`. Loanword accents (Café, Señor) fold to their base
+    # through NFD below. Case is kept in the display form: nouns stay capital.
+    FOLD = {"ß": "s"}
+ALPHA = "abcdefghijklmnopqrstuvwxyz" + (
+    "åøæ" if LANG in ("nb", "isc") else "üöä" if LANG == "de" else "")
 KEYS = len(ALPHA)
 INDEX = {c: i for i, c in enumerate(ALPHA)}
 
@@ -140,6 +147,8 @@ def fold(word):
         if ch == "'":
             continue               # Ukrainian apostrophe: written, never drawn
         ch = FOLD.get(ch, ch)
+        if ch not in INDEX and LANG == "de":
+            ch = unicodedata.normalize("NFD", ch)[0]
         if ch not in INDEX:
             return None
         out.append(INDEX[ch])

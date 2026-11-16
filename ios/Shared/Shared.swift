@@ -20,6 +20,12 @@ enum Shared {
         fullAccess ? (UserDefaults(suiteName: group) ?? .standard) : .standard
     }
 
+    /// An on/off setting that is ON until turned off (`auto_cap`: the capital
+    /// at the start of a sentence; `de_nouns`: German nouns with a capital),
+    /// the same keys as Android's preferences.
+    static func flag(_ key: String) -> Bool { store.object(forKey: key) as? Bool ?? true }
+    static func setFlag(_ key: String, _ on: Bool) { store.set(on, forKey: key) }
+
     /// The `＋` words of one language, lowercase, one list per language - also
     /// in the keyboard's own defaults now that one extension types them all.
     /// The old Interslavic list without Full Access (`userWords`) is adopted by
