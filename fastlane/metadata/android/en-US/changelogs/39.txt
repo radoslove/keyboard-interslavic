@@ -1,0 +1,10 @@
+German, Italian and Polish in Glagolitic; a word translator and learning cards in the app.
+
+- New languages: German (QWERTZ, nouns with a capital, ß held on s) and
+  Italian (accented vowels held on their vowel; dell', l' take the next word
+  with no space).
+- Polish can be typed in Glagolitic, letter by letter or with swipe.
+- After a swipe the bar offers the other likely words and endings.
+- The app has three tabs: a try box with simple word-by-word translation
+  (from Wiktionary, offline), learning cards for your own words, and settings.
+- Optional gesture log, off by default, to send with an error report.
