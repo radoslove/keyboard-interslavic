@@ -299,6 +299,44 @@ class SetupActivity : Activity() {
             )
             addView(page)
         }
+        // From API 35 the window is drawn edge to edge: without these insets
+        // the top of the page sat under the status bar and the bottom under
+        // the navigation bar. The background still fills the whole screen.
+        if (android.os.Build.VERSION.SDK_INT >= 35) {
+            scroll.clipToPadding = false
+            scroll.setOnApplyWindowInsetsListener { v, insets ->
+                val bars = insets.getInsets(
+                    android.view.WindowInsets.Type.systemBars() or
+                        android.view.WindowInsets.Type.displayCutout())
+                // Edge to edge, the window is no longer resized for the
+                // keyboard: the keyboard's height goes into the bottom padding,
+                // so the page can still scroll the focused box above it.
+                val ime = insets.getInsets(android.view.WindowInsets.Type.ime())
+                v.setPadding(bars.left, bars.top, bars.right, maxOf(bars.bottom, ime.bottom))
+                // Keyboard just appeared: once the new padding is laid out,
+                // bring the focused box (its top, where the caret is) into view.
+                val f = v.findFocus()
+                if (ime.bottom > 0 && f != null && f !== v) {
+                    val sv = v as ScrollView
+                    sv.viewTreeObserver.addOnGlobalLayoutListener(object :
+                        android.view.ViewTreeObserver.OnGlobalLayoutListener {
+                        override fun onGlobalLayout() {
+                            sv.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                            val r = android.graphics.Rect(0, 0, f.width, f.height)
+                            sv.offsetDescendantRectToMyCoords(f, r)
+                            // Bottom edge of what the keyboard leaves visible, in content px.
+                            val bottomVisible = sv.scrollY + sv.height - sv.paddingBottom
+                            val room = (resources.displayMetrics.density * 140).toInt()
+                            if (r.top + room > bottomVisible) {
+                                val target = r.top + room - (sv.height - sv.paddingBottom)
+                                sv.smoothScrollTo(0, minOf(target, r.top - sv.paddingTop).coerceAtLeast(0))
+                            }
+                        }
+                    })
+                }
+                insets
+            }
+        }
         setContentView(scroll)
     }
 

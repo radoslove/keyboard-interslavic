@@ -49,7 +49,30 @@ class ImeService : InputMethodService() {
         builtScript = Script.mode(this)
         builtLangs = Lang.enabled(this) + Lang.current(this)
         builtTheme = Theme.choice(this)
-        return KeyboardView(this, this).also { view = it }
+        return KeyboardView(this, this).also { kv ->
+            view = kv
+            // From API 35 the keyboard window reaches under the navigation bar:
+            // lift the keys above it, the keyboard's background fills the strip.
+            if (android.os.Build.VERSION.SDK_INT >= 35) {
+                val base = kv.paddingBottom
+                fun lift(v: View, insets: android.view.WindowInsets) {
+                    val nav = insets.getInsets(android.view.WindowInsets.Type.navigationBars())
+                    if (v.paddingBottom != base + nav.bottom)
+                        v.setPadding(v.paddingLeft, v.paddingTop, v.paddingRight, base + nav.bottom)
+                }
+                kv.setOnApplyWindowInsetsListener { v, insets -> lift(v, insets); insets }
+                // A view swapped in later (language or script switch) gets no
+                // fresh insets from the system - the window's did not change -
+                // so it reads the current ones when it is attached.
+                kv.addOnAttachStateChangeListener(object : View.OnAttachStateChangeListener {
+                    override fun onViewAttachedToWindow(v: View) {
+                        v.rootWindowInsets?.let { lift(v, it) }
+                        v.requestApplyInsets()
+                    }
+                    override fun onViewDetachedFromWindow(v: View) {}
+                })
+            }
+        }
     }
 
     /** A script or languages chosen in the settings take effect the next time the keyboard opens. */

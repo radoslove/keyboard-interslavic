@@ -30,7 +30,7 @@ val diagnosticsProps = Properties().apply {
 // Two apps are built from this one code (product flavors below), each with its
 // own test number: flavor -> (TEST_BASE, TEST_BUILD, label prefix).
 val TESTS = mapOf(
-    "interslove" to Triple("3.10", 2, "Interslove test"),
+    "interslove" to Triple("3.10", 6, "Interslove test"),
     "isc" to Triple("0.1", 36, "ISC test"),
 )
 
@@ -49,7 +49,7 @@ fun javaString(value: String): String = "\"" + value
 
 android {
     namespace = "com.radoslove.interslavic"
-    compileSdk = 34
+    compileSdk = 36
 
     buildFeatures {
         buildConfig = true
@@ -57,7 +57,7 @@ android {
 
     defaultConfig {
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 36
         buildConfigField("String", "CRASH_REPORT_URL", "\"\"")
         buildConfigField("String", "GESTURE_REPORT_URLS", "\"\"")
     }
