@@ -1,0 +1,94 @@
+set	id	isv	en	pl	nb	cs	sk	sl	hr	sr	bs	mk	ru	uk	bg	be
+greet	#	Pozdravy	Greetings	Powitania	Hilsener	Pozdravy	Pozdravy	Pozdravi	Pozdravi	Pozdravi	Pozdravi	Поздрави	Приветствия	Привітання	Поздрави	Прывітанні
+greet	hello	Pozdrav!	hello	cześć	hei	ahoj	ahoj	živjo	bok	zdravo	zdravo	здраво	привет	привіт	здравей	прывітанне
+greet	good_morning	Dobro jutro!	good morning	dzień dobry	god morgen	dobré ráno	dobré ráno	dobro jutro	dobro jutro	dobro jutro	dobro jutro	добро утро	доброе утро	доброго ранку	добро утро	добрай раніцы
+greet	good_evening	Dobry večer!	good evening	dobry wieczór	god kveld	dobrý večer	dobrý večer	dober večer	dobra večer	dobro veče	dobra večer	добра вечер	добрый вечер	добрий вечір	добър вечер	добры вечар
+greet	good_night	Dobru noč!	good night	dobranoc	god natt	dobrou noc	dobrú noc	lahko noč	laku noć	laku noć	laku noć	добра ноќ	спокойной ночи	на добраніч	лека нощ	дабранач
+greet	goodbye	Do viděnja!	goodbye	do widzenia	ha det	na shledanou	dovidenia	nasvidenje	doviđenja	doviđenja	doviđenja	довидување	до свидания	до побачення	довиждане	да пабачэння
+greet	please	prosim	please	proszę	vær så snill	prosím	prosím	prosim	molim	molim	molim	ве молам	пожалуйста	будь ласка	моля	калі ласка
+greet	thank_you	Dekujem	thank you	dziękuję	takk	děkuji	ďakujem	hvala	hvala	hvala	hvala	благодарам	спасибо	дякую	благодаря	дзякуй
+greet	sorry	Izvinite	sorry	przepraszam	unnskyld	promiňte	prepáčte	oprostite	oprostite	izvinite	izvinite	извинете	извините	вибачте	извинете	прабачце
+greet	yes	tak	yes	tak	ja	ano	áno	ja	da	da	da	да	да	так	да	так
+greet	no	ne	no	nie	nei	ne	nie	ne	ne	ne	ne	не	нет	ні	не	не
+greet	how_are_you	Kako se imaš?	how are you?	jak się masz?	hvordan har du det?	jak se máš?	ako sa máš?	kako si?	kako si?	kako si?	kako si?	како си?	как дела?	як справи?	как си?	як справы?
+num	#	Čisla	Numbers	Liczby	Tall	Čísla	Čísla	Števila	Brojevi	Brojevi	Brojevi	Броеви	Числа	Числа	Числа	Лікі
+num	one	jedin	one	jeden	en	jeden	jeden	ena	jedan	jedan	jedan	еден	один	один	един	адзін
+num	two	dva	two	dwa	to	dva	dva	dva	dva	dva	dva	два	два	два	два	два
+num	three	tri	three	trzy	tre	tři	tri	tri	tri	tri	tri	три	три	три	три	тры
+num	four	četyri	four	cztery	fire	čtyři	štyri	štiri	četiri	četiri	četiri	четири	четыре	чотири	четири	чатыры
+num	five	pet	five	pięć	fem	pět	päť	pet	pet	pet	pet	пет	пять	п'ять	пет	пяць
+num	six	šest	six	sześć	seks	šest	šesť	šest	šest	šest	šest	шест	шесть	шість	шест	шэсць
+num	seven	sedm	seven	siedem	sju	sedm	sedem	sedem	sedam	sedam	sedam	седум	семь	сім	седем	сем
+num	eight	osm	eight	osiem	åtte	osm	osem	osem	osam	osam	osam	осум	восемь	вісім	осем	восем
+num	nine	devet	nine	dziewięć	ni	devět	deväť	devet	devet	devet	devet	девет	девять	дев'ять	девет	дзевяць
+num	ten	deset	ten	dziesięć	ti	deset	desať	deset	deset	deset	deset	десет	десять	десять	десет	дзесяць
+num	hundred	sto	hundred	sto	hundre	sto	sto	sto	sto	sto	sto	сто	сто	сто	сто	сто
+days	#	Dni	Days	Dni	Dager	Dny	Dni	Dnevi	Dani	Dani	Dani	Денови	Дни	Дні	Дни	Дні
+days	monday	ponedělok	Monday	poniedziałek	mandag	pondělí	pondelok	ponedeljek	ponedjeljak	ponedeljak	ponedjeljak	понеделник	понедельник	понеділок	понеделник	панядзелак
+days	tuesday	vtorok	Tuesday	wtorek	tirsdag	úterý	utorok	torek	utorak	utorak	utorak	вторник	вторник	вівторок	вторник	аўторак
+days	wednesday	srěda	Wednesday	środa	onsdag	středa	streda	sreda	srijeda	sreda	srijeda	среда	среда	середа	сряда	серада
+days	thursday	četvrtok	Thursday	czwartek	torsdag	čtvrtek	štvrtok	četrtek	četvrtak	četvrtak	četvrtak	четврток	четверг	четвер	четвъртък	чацвер
+days	friday	petok	Friday	piątek	fredag	pátek	piatok	petek	petak	petak	petak	петок	пятница	п'ятниця	петък	пятніца
+days	saturday	subota	Saturday	sobota	lørdag	sobota	sobota	sobota	subota	subota	subota	сабота	суббота	субота	събота	субота
+days	sunday	nedělja	Sunday	niedziela	søndag	neděle	nedeľa	nedelja	nedjelja	nedelja	nedjelja	недела	воскресенье	неділя	неделя	нядзеля
+days	today	dnes	today	dziś	i dag	dnes	dnes	danes	danas	danas	danas	денес	сегодня	сьогодні	днес	сёння
+days	tomorrow	zautra	tomorrow	jutro	i morgen	zítra	zajtra	jutri	sutra	sutra	sutra	утре	завтра	завтра	утре	заўтра
+days	yesterday	včera	yesterday	wczoraj	i går	včera	včera	včeraj	jučer	juče	jučer	вчера	вчера	вчора	вчера	учора
+colors	#	Barvy	Colours	Kolory	Farger	Barvy	Farby	Barve	Boje	Boje	Boje	Бои	Цвета	Кольори	Цветове	Колеры
+colors	red	črveny	red	czerwony	rød	červený	červený	rdeč	crven	crven	crven	црвен	красный	червоний	червен	чырвоны
+colors	blue	modry	blue	niebieski	blå	modrý	modrý	moder	plav	plav	plav	син	синий	синій	син	сіні
+colors	green	zeleny	green	zielony	grønn	zelený	zelený	zelen	zelen	zelen	zelen	зелен	зелёный	зелений	зелен	зялёны
+colors	yellow	žolty	yellow	żółty	gul	žlutý	žltý	rumen	žut	žut	žut	жолт	жёлтый	жовтий	жълт	жоўты
+colors	white	běly	white	biały	hvit	bílý	biely	bel	bijel	beo	bijel	бел	белый	білий	бял	белы
+colors	black	črny	black	czarny	svart	černý	čierny	črn	crn	crn	crn	црн	чёрный	чорний	черен	чорны
+colors	grey	sivy	grey	szary	grå	šedý	sivý	siv	siv	siv	siv	сив	серый	сірий	сив	шэры
+colors	brown	kaštanovy	brown	brązowy	brun	hnědý	hnedý	rjav	smeđ	braon	smeđ	кафеав	коричневый	коричневий	кафяв	карычневы
+colors	pink	rozovy	pink	różowy	rosa	růžový	ružový	rožnat	ružičast	ružičast	ružičast	розов	розовый	рожевий	розов	ружовы
+colors	purple	fioletovy	purple	fioletowy	lilla	fialový	fialový	vijoličen	ljubičast	ljubičast	ljubičast	виолетов	фиолетовый	фіолетовий	лилав	фіялетавы
+family	#	Rodina	Family	Rodzina	Familie	Rodina	Rodina	Družina	Obitelj	Porodica	Porodica	Семејство	Семья	Родина	Семейство	Сям'я
+family	mother	mati	mother	matka	mor	matka	matka	mati	majka	majka	majka	мајка	мать	мати	майка	маці
+family	father	otec	father	ojciec	far	otec	otec	oče	otac	otac	otac	татко	отец	батько	баща	бацька
+family	brother	brat	brother	brat	bror	bratr	brat	brat	brat	brat	brat	брат	брат	брат	брат	брат
+family	sister	sestra	sister	siostra	søster	sestra	sestra	sestra	sestra	sestra	sestra	сестра	сестра	сестра	сестра	сястра
+family	son	syn	son	syn	sønn	syn	syn	sin	sin	sin	sin	син	сын	син	син	сын
+family	daughter	dočerka	daughter	córka	datter	dcera	dcéra	hči	kći	ćerka	kćerka	ќерка	дочь	донька	дъщеря	дачка
+family	grandmother	babica	grandmother	babcia	bestemor	babička	babka	babica	baka	baba	nana	баба	бабушка	бабуся	баба	бабуля
+family	grandfather	děd	grandfather	dziadek	bestefar	dědeček	dedko	dedek	djed	deda	djed	дедо	дедушка	дідусь	дядо	дзядуля
+family	husband	muž	husband	mąż	mann	manžel	manžel	mož	muž	muž	muž	маж	муж	чоловік	мъж	муж
+family	wife	žena	wife	żona	kone	manželka	manželka	žena	žena	žena	žena	жена	жена	дружина	жена	жонка
+family	child	děte	child	dziecko	barn	dítě	dieťa	otrok	dijete	dete	dijete	дете	ребёнок	дитина	дете	дзіця
+food	#	Jedivo	Food	Jedzenie	Mat	Jídlo	Jedlo	Hrana	Hrana	Hrana	Hrana	Храна	Еда	Їжа	Храна	Ежа
+food	bread	hlěb	bread	chleb	brød	chléb	chlieb	kruh	kruh	hleb	hljeb	леб	хлеб	хліб	хляб	хлеб
+food	water	voda	water	woda	vann	voda	voda	voda	voda	voda	voda	вода	вода	вода	вода	вада
+food	milk	mlěko	milk	mleko	melk	mléko	mlieko	mleko	mlijeko	mleko	mlijeko	млеко	молоко	молоко	мляко	малако
+food	meat	meso	meat	mięso	kjøtt	maso	mäso	meso	meso	meso	meso	месо	мясо	м'ясо	месо	мяса
+food	fish	ryba	fish	ryba	fisk	ryba	ryba	riba	riba	riba	riba	риба	рыба	риба	риба	рыба
+food	cheese	syr	cheese	ser	ost	sýr	syr	sir	sir	sir	sir	сирење	сыр	сир	сирене	сыр
+food	apple	jabloko	apple	jabłko	eple	jablko	jablko	jabolko	jabuka	jabuka	jabuka	јаболко	яблоко	яблуко	ябълка	яблык
+food	egg	jajce	egg	jajko	egg	vejce	vajce	jajce	jaje	jaje	jaje	јајце	яйцо	яйце	яйце	яйка
+food	coffee	kava	coffee	kawa	kaffe	káva	káva	kava	kava	kafa	kahva	кафе	кофе	кава	кафе	кава
+food	tea	čaj	tea	herbata	te	čaj	čaj	čaj	čaj	čaj	čaj	чај	чай	чай	чай	чай
+food	soup	supa	soup	zupa	suppe	polévka	polievka	juha	juha	supa	supa	супа	суп	суп	супа	суп
+food	salt	solj	salt	sól	salt	sůl	soľ	sol	sol	so	so	сол	соль	сіль	сол	соль
+home	#	Dom	Home	Dom	Hjem	Domov	Domov	Dom	Dom	Dom	Dom	Дом	Дом	Дім	Дом	Дом
+home	house	dom	house	dom	hus	dům	dom	hiša	kuća	kuća	kuća	куќа	дом	будинок	къща	дом
+home	room	komnata	room	pokój	rom	pokoj	izba	soba	soba	soba	soba	соба	комната	кімната	стая	пакой
+home	door	dveri	door	drzwi	dør	dveře	dvere	vrata	vrata	vrata	vrata	врата	дверь	двері	врата	дзверы
+home	window	okno	window	okno	vindu	okno	okno	okno	prozor	prozor	prozor	прозорец	окно	вікно	прозорец	акно
+home	table	stol	table	stół	bord	stůl	stôl	miza	stol	sto	sto	маса	стол	стіл	маса	стол
+home	chair	stolka	chair	krzesło	stol	židle	stolička	stol	stolica	stolica	stolica	стол	стул	стілець	стол	крэсла
+home	bed	lože	bed	łóżko	seng	postel	posteľ	postelja	krevet	krevet	krevet	кревет	кровать	ліжко	легло	ложак
+home	kitchen	kuhnja	kitchen	kuchnia	kjøkken	kuchyně	kuchyňa	kuhinja	kuhinja	kuhinja	kuhinja	кујна	кухня	кухня	кухня	кухня
+home	key	ključ	key	klucz	nøkkel	klíč	kľúč	ključ	ključ	ključ	ključ	клуч	ключ	ключ	ключ	ключ
+home	bathroom	kupaljnja	bathroom	łazienka	bad	koupelna	kúpeľňa	kopalnica	kupaonica	kupatilo	kupatilo	бања	ванная	ванна кімната	баня	ванная
+time	#	Čas	Time	Czas	Tid	Čas	Čas	Čas	Vrijeme	Vreme	Vrijeme	Време	Время	Час	Време	Час
+time	day	denj	day	dzień	dag	den	deň	dan	dan	dan	dan	ден	день	день	ден	дзень
+time	night	noč	night	noc	natt	noc	noc	noč	noć	noć	noć	ноќ	ночь	ніч	нощ	ноч
+time	week	tydenj	week	tydzień	uke	týden	týždeň	teden	tjedan	nedelja	sedmica	недела	неделя	тиждень	седмица	тыдзень
+time	month	měsec	month	miesiąc	måned	měsíc	mesiac	mesec	mjesec	mesec	mjesec	месец	месяц	місяць	месец	месяц
+time	year	rok	year	rok	år	rok	rok	leto	godina	godina	godina	година	год	рік	година	год
+time	hour	časina	hour	godzina	time	hodina	hodina	ura	sat	sat	sat	час	час	година	час	гадзіна
+time	minute	minuta	minute	minuta	minutt	minuta	minúta	minuta	minuta	minut	minuta	минута	минута	хвилина	минута	хвіліна
+time	morning	jutro	morning	rano	morgen	ráno	ráno	jutro	jutro	jutro	jutro	утро	утро	ранок	сутрин	раніца
+time	evening	večer	evening	wieczór	kveld	večer	večer	večer	večer	veče	večer	вечер	вечер	вечір	вечер	вечар
+time	now	tutčas	now	teraz	nå	teď	teraz	zdaj	sada	sada	sada	сега	сейчас	зараз	сега	цяпер

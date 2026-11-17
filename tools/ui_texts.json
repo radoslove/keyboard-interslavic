@@ -1757,7 +1757,19 @@
    ],
    "isv": "Učenje",
    "en": "Learning",
-   "pl": "Nauka"
+   "pl": "Nauka",
+   "nb": "Læring",
+   "cs": "Učení",
+   "sk": "Učenie",
+   "sl": "Učenje",
+   "hr": "Učenje",
+   "sr": "Učenje",
+   "bs": "Učenje",
+   "mk": "Учење",
+   "ru": "Изучение",
+   "uk": "Навчання",
+   "bg": "Учене",
+   "be": "Навучанне"
   },
   "learn_body": {
    "platforms": [
@@ -1766,7 +1778,19 @@
    ],
    "isv": "Slova, ktore hčeš naučiti se: dodaj je niže abo klikni na slovo pod poljem za pisanje v ✎. Karta pokazyvaje slovo: pomysli, čto ono znači, potom pokaži odpověd i ocěni, kako dobro go znaješ.",
    "en": "Words you want to learn: add them below, or tap a word under the writing box in ✎. Each card shows the word; check yourself against the translation and say how well you knew it.",
-   "pl": "Słowa, których chcesz się nauczyć: dodaj je poniżej albo stuknij słowo pod polem pisania w ✎. Karta pokazuje słowo; sprawdź się z tłumaczeniem i oceń, jak dobrze je znałeś."
+   "pl": "Słowa, których chcesz się nauczyć: dodaj je poniżej albo stuknij słowo pod polem pisania w ✎. Karta pokazuje słowo; sprawdź się z tłumaczeniem i oceń, jak dobrze je znałeś.",
+   "nb": "Ord du vil lære: legg dem til nedenfor, eller trykk på et ord under skrivefeltet i ✎. Hvert kort viser ordet; sjekk deg selv mot oversettelsen og si hvor godt du kunne det.",
+   "cs": "Slova, která se chceš naučit: přidej je níže nebo klepni na slovo pod polem pro psaní v ✎. Každá kartička ukazuje slovo; zkontroluj si to podle překladu a ohodnoť, jak dobře jsi ho znal.",
+   "sk": "Slová, ktoré sa chceš naučiť: pridaj ich nižšie alebo ťukni na slovo pod poľom na písanie v ✎. Každá kartička ukazuje slovo; skontroluj si to podľa prekladu a ohodnoť, ako dobre si ho poznal.",
+   "sl": "Besede, ki se jih želiš naučiti: dodaj jih spodaj ali tapni besedo pod poljem za pisanje v ✎. Vsaka kartica pokaže besedo; preveri se ob prevodu in oceni, kako dobro si jo poznal.",
+   "hr": "Riječi koje želiš naučiti: dodaj ih ispod ili dodirni riječ ispod polja za pisanje u ✎. Svaka kartica pokazuje riječ; provjeri se prema prijevodu i ocijeni koliko si je dobro znao.",
+   "sr": "Reči koje želiš da naučiš: dodaj ih ispod ili dodirni reč ispod polja za pisanje u ✎. Svaka kartica prikazuje reč; proveri se prema prevodu i oceni koliko si je dobro znao.",
+   "bs": "Riječi koje želiš naučiti: dodaj ih ispod ili dodirni riječ ispod polja za pisanje u ✎. Svaka kartica prikazuje riječ; provjeri se prema prijevodu i ocijeni koliko si je dobro znao.",
+   "mk": "Зборови што сакаш да ги научиш: додај ги подолу или допри збор под полето за пишување во ✎. Секоја картичка го покажува зборот; провери се според преводот и оцени колку добро го знаеше.",
+   "ru": "Слова, которые хочешь выучить: добавь их ниже или нажми на слово под полем ввода в ✎. Каждая карточка показывает слово; проверь себя по переводу и оцени, насколько хорошо ты его знал.",
+   "uk": "Слова, які хочеш вивчити: додай їх нижче або торкнися слова під полем введення в ✎. Кожна картка показує слово; перевір себе за перекладом і оціни, наскільки добре ти його знав.",
+   "bg": "Думи, които искаш да научиш: добави ги по-долу или докосни дума под полето за писане в ✎. Всяка карта показва думата; провери се по превода и оцени колко добре си я знаел.",
+   "be": "Словы, якія хочаш вывучыць: дадай іх ніжэй або націсні на слова пад полем уводу ў ✎. Кожная картка паказвае слова; правер сябе па перакладзе і ацані, наколькі добра ты яго ведаў."
   },
   "learn_due": {
    "platforms": [
@@ -1775,7 +1799,19 @@
    ],
    "isv": "Za povtarjanje tutčas: {k}",
    "en": "To review now: {k}",
-   "pl": "Do powtórki teraz: {k}"
+   "pl": "Do powtórki teraz: {k}",
+   "nb": "Til repetisjon nå: {k}",
+   "cs": "K opakování teď: {k}",
+   "sk": "Na opakovanie teraz: {k}",
+   "sl": "Za ponavljanje zdaj: {k}",
+   "hr": "Za ponavljanje sada: {k}",
+   "sr": "Za ponavljanje sada: {k}",
+   "bs": "Za ponavljanje sada: {k}",
+   "mk": "За повторување сега: {k}",
+   "ru": "К повторению сейчас: {k}",
+   "uk": "До повторення зараз: {k}",
+   "bg": "За преговор сега: {k}",
+   "be": "Да паўтарэння зараз: {k}"
   },
   "learn_start": {
    "platforms": [
@@ -1784,7 +1820,39 @@
    ],
    "isv": "Povtarjaj",
    "en": "Review",
-   "pl": "Powtarzaj"
+   "pl": "Powtarzaj",
+   "nb": "Repeter",
+   "cs": "Opakovat",
+   "sk": "Opakovať",
+   "sl": "Ponavljaj",
+   "hr": "Ponavljaj",
+   "sr": "Ponavljaj",
+   "bs": "Ponavljaj",
+   "mk": "Повторувај",
+   "ru": "Повторить",
+   "uk": "Повторити",
+   "bg": "Преговори",
+   "be": "Паўтарыць"
+  },
+  "learn_study": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Uči se",
+   "en": "Study",
+   "pl": "Ucz się",
+   "nb": "Øv",
+   "cs": "Učit se",
+   "sk": "Učiť sa",
+   "sl": "Uči se",
+   "hr": "Uči",
+   "sr": "Uči",
+   "bs": "Uči",
+   "mk": "Учи",
+   "ru": "Учить",
+   "uk": "Вчити",
+   "bg": "Учи",
+   "be": "Вучыць"
   },
   "learn_show": {
    "platforms": [
@@ -1793,7 +1861,19 @@
    ],
    "isv": "Pokaži odpověd",
    "en": "Show answer",
-   "pl": "Pokaż odpowiedź"
+   "pl": "Pokaż odpowiedź",
+   "nb": "Vis svaret",
+   "cs": "Zobrazit odpověď",
+   "sk": "Zobraziť odpoveď",
+   "sl": "Pokaži odgovor",
+   "hr": "Prikaži odgovor",
+   "sr": "Prikaži odgovor",
+   "bs": "Prikaži odgovor",
+   "mk": "Прикажи одговор",
+   "ru": "Показать ответ",
+   "uk": "Показати відповідь",
+   "bg": "Покажи отговора",
+   "be": "Паказаць адказ"
   },
   "learn_g0": {
    "platforms": [
@@ -1802,7 +1882,19 @@
    ],
    "isv": "Ne znajem",
    "en": "Don't know",
-   "pl": "Nie wiem"
+   "pl": "Nie wiem",
+   "nb": "Kan ikke",
+   "cs": "Nevím",
+   "sk": "Neviem",
+   "sl": "Ne vem",
+   "hr": "Ne znam",
+   "sr": "Ne znam",
+   "bs": "Ne znam",
+   "mk": "Не знам",
+   "ru": "Не знаю",
+   "uk": "Не знаю",
+   "bg": "Не знам",
+   "be": "Не ведаю"
   },
   "learn_g1": {
    "platforms": [
@@ -1811,7 +1903,19 @@
    ],
    "isv": "Srědnje",
    "en": "So-so",
-   "pl": "Średnio"
+   "pl": "Średnio",
+   "nb": "Middels",
+   "cs": "Napůl",
+   "sk": "Napoly",
+   "sl": "Delno",
+   "hr": "Donekle",
+   "sr": "Donekle",
+   "bs": "Donekle",
+   "mk": "Делумно",
+   "ru": "Так себе",
+   "uk": "Так собі",
+   "bg": "Донякъде",
+   "be": "Так сабе"
   },
   "learn_g2": {
    "platforms": [
@@ -1820,7 +1924,19 @@
    ],
    "isv": "Znajem",
    "en": "Know",
-   "pl": "Wiem"
+   "pl": "Wiem",
+   "nb": "Kan",
+   "cs": "Vím",
+   "sk": "Viem",
+   "sl": "Vem",
+   "hr": "Znam",
+   "sr": "Znam",
+   "bs": "Znam",
+   "mk": "Знам",
+   "ru": "Знаю",
+   "uk": "Знаю",
+   "bg": "Знам",
+   "be": "Ведаю"
   },
   "learn_done": {
    "platforms": [
@@ -1829,7 +1945,19 @@
    ],
    "isv": "Dočasno jest vse povtorjeno.",
    "en": "All reviewed for now.",
-   "pl": "Na teraz wszystko powtórzone."
+   "pl": "Na teraz wszystko powtórzone.",
+   "nb": "Alt er repetert for nå.",
+   "cs": "Zatím je vše zopakováno.",
+   "sk": "Zatiaľ je všetko zopakované.",
+   "sl": "Za zdaj je vse ponovljeno.",
+   "hr": "Za sada je sve ponovljeno.",
+   "sr": "Za sada je sve ponovljeno.",
+   "bs": "Za sada je sve ponovljeno.",
+   "mk": "Засега сè е повторено.",
+   "ru": "Пока всё повторено.",
+   "uk": "Поки що все повторено.",
+   "bg": "Засега всичко е преговорено.",
+   "be": "Пакуль усё паўторана."
   },
   "learn_all": {
    "platforms": [
@@ -1838,7 +1966,19 @@
    ],
    "isv": "Vse kategorije",
    "en": "All",
-   "pl": "Wszystkie"
+   "pl": "Wszystkie",
+   "nb": "Alle",
+   "cs": "Všechny",
+   "sk": "Všetky",
+   "sl": "Vse",
+   "hr": "Sve",
+   "sr": "Sve",
+   "bs": "Sve",
+   "mk": "Сите",
+   "ru": "Все",
+   "uk": "Усі",
+   "bg": "Всички",
+   "be": "Усе"
   },
   "learn_nocat": {
    "platforms": [
@@ -1847,7 +1987,19 @@
    ],
    "isv": "Bez kategorije",
    "en": "No category",
-   "pl": "Bez kategorii"
+   "pl": "Bez kategorii",
+   "nb": "Uten kategori",
+   "cs": "Bez kategorie",
+   "sk": "Bez kategórie",
+   "sl": "Brez kategorije",
+   "hr": "Bez kategorije",
+   "sr": "Bez kategorije",
+   "bs": "Bez kategorije",
+   "mk": "Без категорија",
+   "ru": "Без категории",
+   "uk": "Без категорії",
+   "bg": "Без категория",
+   "be": "Без катэгорыі"
   },
   "learn_cat": {
    "platforms": [
@@ -1856,7 +2008,19 @@
    ],
    "isv": "Kategorija",
    "en": "Category",
-   "pl": "Kategoria"
+   "pl": "Kategoria",
+   "nb": "Kategori",
+   "cs": "Kategorie",
+   "sk": "Kategória",
+   "sl": "Kategorija",
+   "hr": "Kategorija",
+   "sr": "Kategorija",
+   "bs": "Kategorija",
+   "mk": "Категорија",
+   "ru": "Категория",
+   "uk": "Категорія",
+   "bg": "Категория",
+   "be": "Катэгорыя"
   },
   "learn_note": {
    "platforms": [
@@ -1865,7 +2029,19 @@
    ],
    "isv": "Zapiska",
    "en": "Note",
-   "pl": "Notatka"
+   "pl": "Notatka",
+   "nb": "Notat",
+   "cs": "Poznámka",
+   "sk": "Poznámka",
+   "sl": "Opomba",
+   "hr": "Bilješka",
+   "sr": "Beleška",
+   "bs": "Bilješka",
+   "mk": "Белешка",
+   "ru": "Заметка",
+   "uk": "Нотатка",
+   "bg": "Бележка",
+   "be": "Нататка"
   },
   "learn_ex": {
    "platforms": [
@@ -1874,7 +2050,19 @@
    ],
    "isv": "Priklad",
    "en": "Example",
-   "pl": "Przykład"
+   "pl": "Przykład",
+   "nb": "Eksempel",
+   "cs": "Příklad",
+   "sk": "Príklad",
+   "sl": "Primer",
+   "hr": "Primjer",
+   "sr": "Primer",
+   "bs": "Primjer",
+   "mk": "Пример",
+   "ru": "Пример",
+   "uk": "Приклад",
+   "bg": "Пример",
+   "be": "Прыклад"
   },
   "learn_save": {
    "platforms": [
@@ -1883,7 +2071,19 @@
    ],
    "isv": "Zapiši",
    "en": "Save",
-   "pl": "Zapisz"
+   "pl": "Zapisz",
+   "nb": "Lagre",
+   "cs": "Uložit",
+   "sk": "Uložiť",
+   "sl": "Shrani",
+   "hr": "Spremi",
+   "sr": "Sačuvaj",
+   "bs": "Sačuvaj",
+   "mk": "Зачувај",
+   "ru": "Сохранить",
+   "uk": "Зберегти",
+   "bg": "Запази",
+   "be": "Захаваць"
   },
   "learn_cancel": {
    "platforms": [
@@ -1892,7 +2092,19 @@
    ],
    "isv": "Anuluj",
    "en": "Cancel",
-   "pl": "Anuluj"
+   "pl": "Anuluj",
+   "nb": "Avbryt",
+   "cs": "Zrušit",
+   "sk": "Zrušiť",
+   "sl": "Prekliči",
+   "hr": "Odustani",
+   "sr": "Otkaži",
+   "bs": "Otkaži",
+   "mk": "Откажи",
+   "ru": "Отмена",
+   "uk": "Скасувати",
+   "bg": "Отказ",
+   "be": "Скасаваць"
   },
   "learn_nogloss": {
    "platforms": [
@@ -1901,7 +2113,19 @@
    ],
    "isv": "V slovniku nema prěklada — dopiši svoju zapisku.",
    "en": "No dictionary gloss — add your own note.",
-   "pl": "Brak glosy ze słownika, dopisz własną notatkę."
+   "pl": "Brak glosy ze słownika, dopisz własną notatkę.",
+   "nb": "Ingen forklaring i ordboka — skriv ditt eget notat.",
+   "cs": "Ve slovníku chybí výklad — doplň vlastní poznámku.",
+   "sk": "V slovníku chýba výklad — doplň vlastnú poznámku.",
+   "sl": "V slovarju ni razlage — dopiši svojo opombo.",
+   "hr": "U rječniku nema objašnjenja — dopiši vlastitu bilješku.",
+   "sr": "U rečniku nema objašnjenja — dopiši svoju belešku.",
+   "bs": "U rječniku nema objašnjenja — dopiši svoju bilješku.",
+   "mk": "Во речникот нема објаснување — допиши своја белешка.",
+   "ru": "В словаре нет толкования — допиши свою заметку.",
+   "uk": "У словнику немає тлумачення — допиши власну нотатку.",
+   "bg": "В речника няма тълкуване — допиши своя бележка.",
+   "be": "У слоўніку няма тлумачэння — дапішы ўласную нататку."
   },
   "learn_add_hint": {
    "platforms": [
@@ -1910,7 +2134,19 @@
    ],
    "isv": "novo slovo",
    "en": "new word",
-   "pl": "nowe słowo"
+   "pl": "nowe słowo",
+   "nb": "nytt ord",
+   "cs": "nové slovo",
+   "sk": "nové slovo",
+   "sl": "nova beseda",
+   "hr": "nova riječ",
+   "sr": "nova reč",
+   "bs": "nova riječ",
+   "mk": "нов збор",
+   "ru": "новое слово",
+   "uk": "нове слово",
+   "bg": "нова дума",
+   "be": "новае слова"
   },
   "learn_add": {
    "platforms": [
@@ -1919,7 +2155,19 @@
    ],
    "isv": "＋ Za učenje",
    "en": "＋ Learn",
-   "pl": "＋ Do nauki"
+   "pl": "＋ Do nauki",
+   "nb": "＋ Lær",
+   "cs": "＋ K učení",
+   "sk": "＋ Na učenie",
+   "sl": "＋ Za učenje",
+   "hr": "＋ Za učenje",
+   "sr": "＋ Za učenje",
+   "bs": "＋ Za učenje",
+   "mk": "＋ За учење",
+   "ru": "＋ К изучению",
+   "uk": "＋ До вивчення",
+   "bg": "＋ За учене",
+   "be": "＋ Да вывучэння"
   },
   "learn_added": {
    "platforms": [
@@ -1928,7 +2176,19 @@
    ],
    "isv": "Dodano za učenje",
    "en": "Added to learning",
-   "pl": "Dodano do nauki"
+   "pl": "Dodano do nauki",
+   "nb": "Lagt til i Læring",
+   "cs": "Přidáno k učení",
+   "sk": "Pridané na učenie",
+   "sl": "Dodano za učenje",
+   "hr": "Dodano za učenje",
+   "sr": "Dodato za učenje",
+   "bs": "Dodano za učenje",
+   "mk": "Додадено за учење",
+   "ru": "Добавлено к изучению",
+   "uk": "Додано до вивчення",
+   "bg": "Добавено за учене",
+   "be": "Дададзена да вывучэння"
   },
   "learn_deck_head": {
    "platforms": [
@@ -1937,7 +2197,59 @@
    ],
    "isv": "Za učenje",
    "en": "To learn",
-   "pl": "Do nauki"
+   "pl": "Do nauki",
+   "nb": "Ord å lære",
+   "cs": "K naučení",
+   "sk": "Na naučenie",
+   "sl": "Za učenje",
+   "hr": "Za učenje",
+   "sr": "Za učenje",
+   "bs": "Za učenje",
+   "mk": "За учење",
+   "ru": "К изучению",
+   "uk": "До вивчення",
+   "bg": "За учене",
+   "be": "Да вывучэння"
+  },
+  "learn_sets_head": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Gotove sbirky",
+   "en": "Ready sets",
+   "pl": "Gotowe zestawy",
+   "nb": "Ferdige sett",
+   "cs": "Hotové sady",
+   "sk": "Hotové sady",
+   "sl": "Pripravljeni nabori",
+   "hr": "Gotovi skupovi",
+   "sr": "Gotovi skupovi",
+   "bs": "Gotovi skupovi",
+   "mk": "Готови збирки",
+   "ru": "Готовые наборы",
+   "uk": "Готові набори",
+   "bg": "Готови набори",
+   "be": "Гатовыя наборы"
+  },
+  "learn_sets_body": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Sbirka vhodi v učenje ako kategorija. Slovo k njej dodaš tako: izberi ju medžu kategorijami vyše i dodaj slovo; svoju sbirku stvoriš, kogdy daš kartě novu kategoriju (✎ pri kartě).",
+   "en": "A set goes into learning as a category. To add a word to it, choose it among the categories above and add the word; for a set of your own, give a card a new category (✎ on the card).",
+   "pl": "Zestaw trafia do nauki jako kategoria. Żeby dopisać do niego słowo, wybierz go wśród kategorii powyżej i dodaj słowo; własny zestaw założysz, wpisując karcie nową kategorię (✎ przy karcie).",
+   "nb": "Et sett legges til i Læring som en kategori. For å legge til et ord i det, velg det blant kategoriene ovenfor og legg til ordet; vil du ha et eget sett, gi et kort en ny kategori (✎ på kortet).",
+   "cs": "Sada se přidá k učení jako kategorie. Chceš-li do ní přidat slovo, vyber ji mezi kategoriemi výše a přidej slovo; vlastní sadu založíš tak, že kartičce zadáš novou kategorii (✎ u kartičky).",
+   "sk": "Sada sa pridá na učenie ako kategória. Ak do nej chceš pridať slovo, vyber ju medzi kategóriami vyššie a pridaj slovo; vlastnú sadu založíš tak, že kartičke zadáš novú kategóriu (✎ pri kartičke).",
+   "sl": "Nabor se doda za učenje kot kategorija. Če mu želiš dodati besedo, ga izberi med kategorijami zgoraj in dodaj besedo; svoj nabor ustvariš tako, da kartici vpišeš novo kategorijo (✎ ob kartici).",
+   "hr": "Skup ulazi u učenje kao kategorija. Da bi mu dodao riječ, odaberi ga među kategorijama iznad i dodaj riječ; vlastiti skup stvorit ćeš tako da kartici upišeš novu kategoriju (✎ uz karticu).",
+   "sr": "Skup ulazi u učenje kao kategorija. Da bi mu dodao reč, izaberi ga među kategorijama iznad i dodaj reč; svoj skup napravićeš tako što ćeš kartici upisati novu kategoriju (✎ pored kartice).",
+   "bs": "Skup ulazi u učenje kao kategorija. Da bi mu dodao riječ, izaberi ga među kategorijama iznad i dodaj riječ; vlastiti skup napravit ćeš tako što ćeš kartici upisati novu kategoriju (✎ pored kartice).",
+   "mk": "Збирката влегува во учењето како категорија. За да додадеш збор во неа, избери ја меѓу категориите погоре и додај го зборот; своја збирка ќе направиш така што на картичката ќе ѝ впишеш нова категорија (✎ кај картичката).",
+   "ru": "Набор добавляется в изучение как категория. Чтобы добавить в него слово, выбери его среди категорий выше и добавь слово; чтобы создать свой набор, задай карточке новую категорию (✎ у карточки).",
+   "uk": "Набір додається до вивчення як категорія. Щоб додати до нього слово, вибери його серед категорій вище й додай слово; щоб створити власний набір, задай картці нову категорію (✎ біля картки).",
+   "bg": "Наборът влиза в ученето като категория. За да добавиш дума към него, избери го сред категориите по-горе и добави думата; собствен набор ще създадеш, като зададеш на карта нова категория (✎ до картата).",
+   "be": "Набор дадаецца ў вывучэнне як катэгорыя. Каб дадаць у яго слова, выберы яго сярод катэгорый вышэй і дадай слова; каб стварыць уласны набор, задай картцы новую катэгорыю (✎ каля карткі)."
   },
   "learn_tr": {
    "platforms": [
@@ -1946,7 +2258,19 @@
    ],
    "isv": "Prěklad",
    "en": "Translation",
-   "pl": "Tłumaczenie"
+   "pl": "Tłumaczenie",
+   "nb": "Oversettelse",
+   "cs": "Překlad",
+   "sk": "Preklad",
+   "sl": "Prevod",
+   "hr": "Prijevod",
+   "sr": "Prevod",
+   "bs": "Prijevod",
+   "mk": "Превод",
+   "ru": "Перевод",
+   "uk": "Переклад",
+   "bg": "Превод",
+   "be": "Пераклад"
   },
   "learn_notr": {
    "platforms": [
@@ -1955,7 +2279,19 @@
    ],
    "isv": "dopiši prěklad",
    "en": "add a translation",
-   "pl": "dopisz tłumaczenie"
+   "pl": "dopisz tłumaczenie",
+   "nb": "legg til en oversettelse",
+   "cs": "doplň překlad",
+   "sk": "doplň preklad",
+   "sl": "dodaj prevod",
+   "hr": "dodaj prijevod",
+   "sr": "dodaj prevod",
+   "bs": "dodaj prijevod",
+   "mk": "додај превод",
+   "ru": "добавь перевод",
+   "uk": "додай переклад",
+   "bg": "добави превод",
+   "be": "дадай пераклад"
   },
   "learn_unlearn": {
    "platforms": [
@@ -1964,7 +2300,19 @@
    ],
    "isv": "Odstrani iz učenja",
    "en": "Remove from learning",
-   "pl": "Usuń z nauki"
+   "pl": "Usuń z nauki",
+   "nb": "Fjern fra læring",
+   "cs": "Odebrat z učení",
+   "sk": "Odobrať z učenia",
+   "sl": "Odstrani iz učenja",
+   "hr": "Ukloni iz učenja",
+   "sr": "Ukloni iz učenja",
+   "bs": "Ukloni iz učenja",
+   "mk": "Отстрани од учење",
+   "ru": "Убрать из изучения",
+   "uk": "Прибрати з вивчення",
+   "bg": "Премахни от ученето",
+   "be": "Прыбраць з вывучэння"
   },
   "learn_empty": {
    "platforms": [
@@ -1973,7 +2321,19 @@
    ],
    "isv": "Ješče ničto ne jest dodano za učenje.",
    "en": "Nothing to learn yet.",
-   "pl": "Nic jeszcze nie dodano do nauki."
+   "pl": "Nic jeszcze nie dodano do nauki.",
+   "nb": "Ingenting å lære ennå.",
+   "cs": "Zatím tu není nic k učení.",
+   "sk": "Zatiaľ tu nie je nič na učenie.",
+   "sl": "Za učenje še ni ničesar.",
+   "hr": "Još nema ničega za učenje.",
+   "sr": "Još nema ničega za učenje.",
+   "bs": "Još nema ničega za učenje.",
+   "mk": "Сè уште нема ништо за учење.",
+   "ru": "Пока нечего учить.",
+   "uk": "Ще нічого не додано до вивчення.",
+   "bg": "Още няма нищо за учене.",
+   "be": "Пакуль няма чаго вучыць."
   },
   "learn_my_body": {
    "platforms": [
@@ -1982,7 +2342,19 @@
    ],
    "isv": "Slova dodane čipom ＋ v pasu prědloženij: klaviatura jih ne znala. Odstrani slovo i klaviatura go prěstane prědlagati; ＋ Za učenje go doda do kart.",
    "en": "Words added with ＋ in the suggestion bar: the keyboard did not know them. Remove one and the keyboard stops suggesting it; ＋ Learn puts it among the cards.",
-   "pl": "Słowa dodane ＋ na pasku podpowiedzi: klawiatura ich nie znała. Usuń słowo, a klawiatura przestanie je podpowiadać; ＋ Do nauki dokłada je do kart."
+   "pl": "Słowa dodane ＋ na pasku podpowiedzi: klawiatura ich nie znała. Usuń słowo, a klawiatura przestanie je podpowiadać; ＋ Do nauki dokłada je do kart.",
+   "nb": "Ord lagt til med ＋ i forslagslinjen: tastaturet kjente dem ikke. Fjern et ord, så slutter tastaturet å foreslå det; ＋ Lær legger det blant kortene.",
+   "cs": "Slova přidaná tlačítkem ＋ na liště návrhů: klávesnice je neznala. Odstraň slovo a klávesnice ho přestane navrhovat; ＋ K učení ho přidá mezi kartičky.",
+   "sk": "Slová pridané tlačidlom ＋ na lište návrhov: klávesnica ich nepoznala. Odstráň slovo a klávesnica ho prestane navrhovať; ＋ Na učenie ho pridá medzi kartičky.",
+   "sl": "Besede, dodane z gumbom ＋ v vrstici predlogov: tipkovnica jih ni poznala. Odstrani besedo in tipkovnica je ne bo več predlagala; ＋ Za učenje jo doda med kartice.",
+   "hr": "Riječi dodane gumbom ＋ na traci prijedloga: tipkovnica ih nije poznavala. Ukloni riječ i tipkovnica će je prestati predlagati; ＋ Za učenje je dodaje među kartice.",
+   "sr": "Reči dodate čipom ＋ na traci s predlozima: tastatura ih nije poznavala. Ukloni reč i tastatura će prestati da je predlaže; ＋ Za učenje je dodaje među kartice.",
+   "bs": "Riječi dodane čipom ＋ na traci s prijedlozima: tastatura ih nije poznavala. Ukloni riječ i tastatura će je prestati predlagati; ＋ Za učenje je dodaje među kartice.",
+   "mk": "Зборови додадени со копчето ＋ во лентата со предлози: тастатурата не ги знаеше. Отстрани збор и тастатурата ќе престане да го предлага; ＋ За учење го додава меѓу картичките.",
+   "ru": "Слова, добавленные кнопкой ＋ на панели подсказок: клавиатура их не знала. Удали слово, и клавиатура перестанет его предлагать; ＋ К изучению добавит его к карточкам.",
+   "uk": "Слова, додані кнопкою ＋ на панелі підказок: клавіатура їх не знала. Видали слово, і клавіатура перестане його пропонувати; ＋ До вивчення додасть його до карток.",
+   "bg": "Думи, добавени с бутона ＋ в лентата с предложения: клавиатурата не ги е познавала. Премахни дума и клавиатурата ще спре да я предлага; ＋ За учене я добавя към картите.",
+   "be": "Словы, дададзеныя кнопкай ＋ на панэлі падказак: клавіятура іх не ведала. Выдалі слова, і клавіятура перастане яго прапаноўваць; ＋ Да вывучэння дадасць яго да картак."
   },
   "try_learn": {
    "platforms": [
@@ -1991,7 +2363,19 @@
    ],
    "isv": "Klikni na slovo za učenje:",
    "en": "Tap a word to learn it:",
-   "pl": "Stuknij słowo, żeby się go uczyć:"
+   "pl": "Stuknij słowo, żeby się go uczyć:",
+   "nb": "Trykk på et ord for å lære det:",
+   "cs": "Klepni na slovo, které se chceš učit:",
+   "sk": "Ťukni na slovo, ktoré sa chceš učiť:",
+   "sl": "Tapni besedo, ki se jo želiš učiti:",
+   "hr": "Dodirni riječ koju želiš učiti:",
+   "sr": "Dodirni reč koju želiš da učiš:",
+   "bs": "Dodirni riječ koju želiš učiti:",
+   "mk": "Допри збор за да го учиш:",
+   "ru": "Нажми на слово, чтобы его выучить:",
+   "uk": "Торкнися слова, щоб його вчити:",
+   "bg": "Докосни дума, за да я учиш:",
+   "be": "Націсні на слова, каб яго вучыць:"
   }
  }
 }
