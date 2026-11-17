@@ -92,10 +92,10 @@ def main():
             out.append(f'KBD\t{KBD_NAME}\t"{DISPLAY}"')
             continue
         if line.startswith("COPYRIGHT\t"):
-            out.append('COPYRIGHT\t"(c) 2026 Radoslove"')
+            out.append('COPYRIGHT\t"(c) 2026 Interslove"')
             continue
         if line.startswith("COMPANY\t"):
-            out.append('COMPANY\t"Radoslove"')
+            out.append('COMPANY\t"Interslove"')
             continue
         if line.startswith("LOCALENAME\t"):
             out.append(f'LOCALENAME\t"{LOCALENAME}"')

@@ -105,4 +105,4 @@ END;
   <a href='https://github.com/radoslove/keyboard-interslavic'>github.com/radoslove/keyboard-interslavic</a>
 </p>
 
-<p>© Radoslove · MIT</p>
+<p>© Interslove · MIT</p>

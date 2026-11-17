@@ -2,7 +2,7 @@
 'use strict';
 var definitions = {
   defaults: {
-    version: "18.0.249",
+    version: "18.0.253",
     applyCasing: function defaultApplyCasing(casing, text) {
     switch (casing) {
         case 'lower':

@@ -15,9 +15,11 @@ inside the Keyman app they already have.
 
 ## Identity
 
-Submit as **Radoslove** — same identity as the public repo and the Codeberg
-dictionary PR. The PRs must be opened by the maintainer; the work below is staged,
-not sent.
+Publisher name inside both packages: **Interslove** (author and copyright).
+The model ID still starts with `radoslove.` - decide before the first
+submission, because a published ID cannot change.
+
+The PRs must be opened by the maintainer; the work below is staged, not sent.
 
 ---
 

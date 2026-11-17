@@ -23,9 +23,34 @@
       <use href="#h" transform="rotate(90)  translate(0 -86)" fill="#FFFFFF"/>
     </g>
     <!-- text -->
-    <text x="410" y="205" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="62" fill="#FFFFFF">Medžuslovjansky</text>
-    <text x="412" y="260" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="600" font-size="36" fill="#F5C400">Interslavic keyboard</text>
-    <text x="412" y="314" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="500" font-size="27" fill="#FFFFFF" fill-opacity="0.9">č š ž ě  ·  swipe  ·  offline  ·  open source</text>
-    <text x="412" y="376" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="500" font-size="22" fill="#FFFFFF" fill-opacity="0.6">by Radoslove</text>
+    <text x="412" y="132" font-family="Segoe UI Historic, sans-serif" font-size="50" fill="#FFFFFF" fill-opacity="0.95">Ⰻⱀⱅⰵⱃⱄⰾⱁⰲⰵ</text>
+    <text x="408" y="200" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="64" fill="#FFFFFF">Interslove</text>
+    <text x="414" y="344" font-family="Segoe UI Historic, sans-serif" font-size="48" letter-spacing="5" fill="#FFFFFF" fill-opacity="0.95">ᛁᚾᛏᛖᚱᛊᛚᛟᚹᛖ</text>
+    <text x="412" y="248" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="600" font-size="30" fill="#F5C400">Many languages and alphabets</text>
+    <text x="412" y="286" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="500" font-size="23" fill="#FFFFFF" fill-opacity="0.85">swipe  ·  offline  ·  open source</text>
+    <rect x="414" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="426" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="446" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="470" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="490" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="522" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="542" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="554" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="578" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="598" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="610" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="622" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="642" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="654" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="678" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="690" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="710" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="734" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="758" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="790" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="802" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="814" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="826" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <rect x="858" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
   </g>
 </svg>

@@ -171,22 +171,25 @@ internal fun SetupActivity.addGlossMirror(root: LinearLayout, box: android.widge
     var to = targets.firstOrNull { it == prefs.getString("gloss_target_$from", null) }
         ?: targets.firstOrNull { it in Lang.enabled(this) && it != from } ?: targets.first()
     var table: Map<String, String>? = null
+    // The translation is plain text with a thin line on its left, not a box:
+    // a box looked like the writing field under it and could not be typed
+    // into. It shows only once there is something to translate.
     val out = TextView(this).apply {
         textSize = 20f
         setTextColor(cText)
         setTextIsSelectable(true)
-        minLines = 2
-        text = "…"
-        setPadding((14 * d).toInt(), (10 * d).toInt(), (14 * d).toInt(), (10 * d).toInt())
-        background = android.graphics.drawable.GradientDrawable().apply {
-            cornerRadius = 14 * d
-            setColor(col("#EEF2F5", "#1E2A31"))
+        visibility = View.GONE
+        setPadding((12 * d).toInt(), (2 * d).toInt(), (4 * d).toInt(), (2 * d).toInt())
+        val line = android.graphics.drawable.GradientDrawable().apply { setColor(cGloss) }
+        background = android.graphics.drawable.LayerDrawable(arrayOf(line)).apply {
+            setLayerWidth(0, (3 * d).toInt())
+            setLayerGravity(0, Gravity.START or Gravity.FILL_VERTICAL)
         }
     }
     // The translated words as buttons too: what is typed is often already
     // known, so a card can be made from either side. The card is in the
-    // target language and the
-    // typed word is its translation. Same as iOS 0.6.36.
+    // target language, with the typed word as its translation. Same as
+    // iOS 0.6.36.
     val tChips = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
     val tScroll = android.widget.HorizontalScrollView(this).apply {
         isHorizontalScrollBarEnabled = false
@@ -238,6 +241,7 @@ internal fun SetupActivity.addGlossMirror(root: LinearLayout, box: android.widge
             if (!known) sb.setSpan(android.text.style.ForegroundColorSpan(cGloss), a, sb.length, 0)
         }
         out.text = sb
+        out.visibility = if (typed.isBlank()) View.GONE else View.VISIBLE
         glossedRow(t, typed)
     }
     val row = LinearLayout(this).apply {

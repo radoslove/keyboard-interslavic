@@ -59,7 +59,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "keyman", "isv_latin", "source")
 
 KEYBOARD_NAME = "Medžuslovjansky (latinica)"
-COPYRIGHT = "© Radoslove"
+COPYRIGHT = "© Interslove"
 KEYBOARD_VERSION = "1.6"
 
 # --- the canonical table -------------------------------------------------

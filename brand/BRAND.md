@@ -1,4 +1,4 @@
-# Brand kit — Radoslove · Medžuslovjansky keyboard
+# Brand kit — Interslove keyboard
 
 *Status 2026-09-03: v1, rendered from `brand/src/*.svg` by `brand/render.sh` into `brand/out/`.
 **Default: variant B (hearts)** — it is the app icon, the launcher icon and the mark on the feature graphic. A and C stay in `src/` as alternates.*
@@ -8,7 +8,7 @@
 | Mark | Used for | File |
 |---|---|---|
 | **App icon** (variant **B hearts** = chosen; A / C alternates) | Play Store icon, Android launcher, F-Droid / IzzyOnDroid, GitHub social preview | `out/icon_{a,b,c}_*_512.png` |
-| **Radoslove publisher mark** (white R + red heart on navy) | GitHub/Codeberg avatar of `radoslove`, Play developer page, any "by Radoslove" signature | `out/radoslove_avatar_512.png` |
+| **Repository mark** (white R + red heart on navy) | avatar of the GitHub/Codeberg account only — the publisher shown in stores and inside the apps is **Interslove** | `out/radoslove_avatar_512.png` |
 
 Same navy, same typeface, same flat style — the publisher mark and the app icon read as siblings without being the same thing.
 
@@ -20,7 +20,7 @@ Same navy, same typeface, same flat style — the publisher mark and the app ico
 | Navy dark | `#0B1F5C` | **app icon background (B)** = `ic_launcher_background`, gradient end |
 | Blue accent | `#3A66D9` | the blue heart (variant B) — lighter so it survives on navy |
 | Yellow | `#F5C400` | háček in variant A, subtitle on the feature graphic |
-| Red | `#D5262C` | háček on the keycap (C), the Radoslove heart |
+| Red | `#D5262C` | háček on the keycap (C), the heart of the repository mark |
 | White | `#FFFFFF` | letters, keycap |
 
 Never use the extended-alphabet letters anywhere in brand text (house style §1) — the brand shows **č** because it is the first of the four standard letters.
@@ -48,8 +48,8 @@ Helvetica Neue Bold (macOS system font, rendered by Quick Look). Fallback order 
 | Phone screenshots | 2–8, 16:9 or 9:16, 320–3840 px | Capture the keyboard with synthetic sample text: long-press č, swipe trail, prediction bar, settings |
 | Short description | ≤80 chars | `fastlane/metadata/android/en-US/short_description.txt` |
 | Full description | ≤4000 chars | `fastlane/metadata/android/en-US/full_description.txt` |
-| Privacy policy URL | public URL | `https://github.com/radoslove/keyboard-interslavic/blob/main/PRIVACY.md` |
-| Developer avatar | — | `out/radoslove_avatar_512.png` (also set as GitHub org avatar) |
+| Privacy policy URL | public URL | `https://interslove.vercel.app/#privacy` (same text as `PRIVACY.md`) |
+| Developer name / avatar | — | **Interslove**; avatar = the app icon `out/icon_b_hearts_512.png` |
 
 ## Android launcher icon (in the app)
 
