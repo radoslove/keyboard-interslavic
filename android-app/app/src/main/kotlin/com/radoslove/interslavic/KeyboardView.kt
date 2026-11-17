@@ -913,7 +913,7 @@ class KeyboardView(
         // its `-`.
         b.addView(functionKey("😀", 0.9f) { emoji = true; symbols = false; render() })
         b.addView(spaceKey(if (scripts) 3.45f else 4.65f))
-        b.addView(symbolKey('.', 0.9f, Layout.periodLetterHold))
+        b.addView(symbolKey('.', 0.9f, Layout.periodHold(Lang.current(context))))
         b.addView(functionKey("⏎", 1.4f) { enter() })
         addView(b)
     }
@@ -2288,6 +2288,9 @@ class KeyboardView(
             if (latin.drop(1).any { it.isUpperCase() }) return null
             return latin
         }
+        // A name the list already has with its capital (Spanish `María`).
+        if (Lang.current(context) in Lang.CASED &&
+            Dictionary.contains(lower.replaceFirstChar { it.uppercaseChar() })) return null
         val first = latin.first()
         if (!first.isUpperCase()) return lower
         if (latin.drop(1).any { it.isUpperCase() }) return null

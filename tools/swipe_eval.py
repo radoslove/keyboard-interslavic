@@ -92,6 +92,11 @@ DE = LANG == "de"
 if DE:
     LATIN_ROWS = (["qwertzuiopü", "asdfghjklöä", "yxcvbnm"] if QWERTZ
                   else ["qwertyuiopü", "asdfghjklöä", "zxcvbnm"])
+# Spanish (2026-11-17): `ñ` is a key at the end of the middle row, so that row
+# has 10 keys like the top one (Layout.esRows).
+ES = LANG == "es"
+if ES:
+    LATIN_ROWS = ["qwertyuiop", "asdfghjklñ", "zxcvbnm"]
 DIGRAPH_KEYS = SCRIPT != "latin"
 # Serbian Cyrillic (JUS I.K1.003, added 2026-11-10) differs from the Interslavic
 # one in both directions: the national layout is QWERTZ, and `џ` is a LETTER
@@ -118,7 +123,7 @@ ROWS = (["qwertzuiop", "asdfghjkl", "xcvbnm"] if MK
 
 def build_centers():
     c = {}
-    if DE:
+    if DE or ES:
         for r, row in enumerate(ROWS[:2]):
             for i, ch in enumerate(row):
                 c[ch] = ((i + 0.5) * BOARD_W / len(row), (r + 0.5) * KEY_H)
@@ -233,6 +238,11 @@ def folds(w):
             return (plain,)
         # ...and over `ue` `oe` `ae`, the old typewriter spelling
         return (plain, bare, plain.translate(_UMLAUT_E))
+    if LANG == "es":
+        # Spanish: `ñ` is a key, and the plain `n` reaches the word too
+        # (Dictionary.BASE_ROUTE), paying the same UMLAUT_PEN.
+        bare = plain.replace("ñ", "n")
+        return (plain,) if bare == plain else (plain, bare)
     if not DIGRAPH_KEYS:
         return (plain,)
     collapsed = _collapse(w)
@@ -727,7 +737,7 @@ def decode(path, buckets, n=3, mode="pivot", lift_comp=0.0):
             if ideal is None:
                 continue
             score = -shape_dist(rp, ideal) + freq_term(fr) - doubles(folded) * DOUBLE_W - end_pen
-            if LANG == "de" and folded != fold_word(w):
+            if LANG in ("de", "es") and folded != fold_word(w):
                 # German: the a-o-u route (same length) or the ue/oe/ae route (longer)
                 score -= UMLAUT_PEN if len(folded) == len(fold_word(w)) else UE_PEN
             if pivots:

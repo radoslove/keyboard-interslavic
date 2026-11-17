@@ -61,7 +61,7 @@ object Ui {
     fun langName(ui: String, lang: String): String {
         val own = when (lang) {
             Lang.ISV -> "Medžuslovjansky"; Lang.ISC -> "Mellomskandinavisk"; Lang.PL -> "Polski"
-            Lang.NB -> "Norsk bokmål"; Lang.DE -> "Deutsch"; Lang.IT -> "Italiano"; Lang.CS -> "Čeština"; Lang.SK -> "Slovenčina"; Lang.SL -> "Slovenščina"; Lang.HR -> "Hrvatski"; Lang.SR -> "Srpski"; Lang.BS -> "Bosanski"; Lang.MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"; Lang.RU -> "Русский"; Lang.UK -> "Українська"; Lang.BG -> "Български"; Lang.BE -> "Беларуская"; Lang.SLA -> "Praslovjansky"; else -> "English"
+            Lang.NB -> "Norsk bokmål"; Lang.DE -> "Deutsch"; Lang.IT -> "Italiano"; Lang.ES -> "Español"; Lang.CS -> "Čeština"; Lang.SK -> "Slovenčina"; Lang.SL -> "Slovenščina"; Lang.HR -> "Hrvatski"; Lang.SR -> "Srpski"; Lang.BS -> "Bosanski"; Lang.MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"; Lang.RU -> "Русский"; Lang.UK -> "Українська"; Lang.BG -> "Български"; Lang.BE -> "Беларуская"; Lang.SLA -> "Praslovjansky"; else -> "English"
         }
         val gloss = mapOf(
             Lang.ISV to mapOf("pl" to "międzysłowiański", "nb" to "interslavisk", "en" to "Interslavic"),
@@ -71,6 +71,7 @@ object Ui {
             Lang.EN to mapOf(MS to "anglijsky", "pl" to "angielski", "nb" to "engelsk"),
             Lang.DE to mapOf(MS to "němečsky", "pl" to "niemiecki", "nb" to "tysk", "en" to "German"),
             Lang.IT to mapOf(MS to "italijanjsky", "pl" to "włoski", "nb" to "italiensk", "en" to "Italian"),
+            Lang.ES to mapOf(MS to "španjsky", "pl" to "hiszpański", "nb" to "spansk", "en" to "Spanish"),
             Lang.CS to mapOf(MS to "češsky", "pl" to "czeski", "nb" to "tsjekkisk", "en" to "Czech"),
             Lang.SK to mapOf(MS to "slovačsky", "pl" to "słowacki", "nb" to "slovakisk", "en" to "Slovak"),
             Lang.SL to mapOf(MS to "slovenečsky", "pl" to "słoweński", "nb" to "slovensk", "en" to "Slovenian"),

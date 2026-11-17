@@ -76,6 +76,10 @@ if LANG == "sk":
     FOLD = {"á": "a", "ä": "a", "č": "c", "ď": "d", "é": "e", "í": "i",
             "ĺ": "l", "ľ": "l", "ň": "n", "ó": "o", "ô": "o", "ŕ": "r",
             "š": "s", "ť": "t", "ú": "u", "ý": "y", "ž": "z"}
+if LANG == "es":
+    # Spanish: the acute vowels and `ü` held on their vowel (Android
+    # Layout.esOwn); `ñ` is a key of its own and is not folded.
+    FOLD = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u"}
 if LANG == "it":
     # Italian: the accented vowels held on their vowel (Android Layout.itOwn).
     FOLD = {"à": "a", "è": "e", "é": "e", "ì": "i", "í": "i", "î": "i",

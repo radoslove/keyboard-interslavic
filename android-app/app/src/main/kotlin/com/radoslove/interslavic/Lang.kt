@@ -48,6 +48,15 @@ object Lang {
      *  (2.6 million in the subtitle counts against 0.5 for `é`). Elided forms
      *  (`dell'`, `quest'`) are words of the list and glue to the next word. */
     const val IT = "it"
+    /** Spanish (2026-11-17): Slavs living in Spain (at least 0.55 million).
+     *  QWERTY with `ñ` as a key of its own at the end of the middle row, as on
+     *  the Spanish layout; `á é í ó ú` held on their vowel, `ü` on u. */
+    const val ES = "es"
+
+    /** Languages whose wordlist holds capitalised words, read case-blind by the
+     *  glide and the completions: German nouns (`Haus`) and Spanish proper
+     *  names (`María`, `España`), so a name is offered, not typed by hand. */
+    val CASED = setOf(DE, ES)
     const val CS = "cs"
     const val SK = "sk"
     const val SL = "sl"
@@ -177,7 +186,7 @@ object Lang {
 
     private fun fromLocale(code: String): String? = when (code) {
         "pl" -> PL; "cs" -> CS; "sk" -> SK; "sl" -> SL; "hr" -> HR
-        "sr" -> SR; "bs" -> BS; "mk" -> MK; "ru" -> RU; "uk" -> UK; "bg" -> BG; "be" -> BE; "de" -> DE; "it" -> IT
+        "sr" -> SR; "bs" -> BS; "mk" -> MK; "ru" -> RU; "uk" -> UK; "bg" -> BG; "be" -> BE; "de" -> DE; "it" -> IT; "es" -> ES
         "nb", "no", "nn" -> NB
         "en" -> EN
         else -> null
@@ -221,6 +230,7 @@ object Lang {
         DE -> "Deutsch"
         // Every living language by its own name, never the Interslavic one.
         IT -> "Italiano"
+        ES -> "Español"
         CS -> "Čeština"
         // Added with the languages themselves (2026-11-10): without a row here
         // the space bar fell back to the app's own name, so a phone typing

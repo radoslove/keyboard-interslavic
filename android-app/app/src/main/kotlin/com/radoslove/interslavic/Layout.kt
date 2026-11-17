@@ -156,6 +156,14 @@ object Layout {
      *  keeps `periodHold`), `–` on its `-`. */
     val periodLetterHold = listOf(",", "?", "!", "-", "'", "\"", ":", ";")
 
+    /** Spanish opens questions and exclamations with `¿` `¡`: they go right
+     *  after their closing pair, by importance, and the two least used of the
+     *  common list (`:` `;`) make room - eight cells, as everywhere. */
+    private val periodLetterHoldEs = listOf(",", "?", "¿", "!", "¡", "-", "'", "\"")
+
+    fun periodHold(lang: String): List<String> =
+        if (lang == Lang.ES) periodLetterHoldEs else periodLetterHold
+
     /** Held on `,`: the rest of the sentence punctuation. Unused since the
      *  comma key left the bottom row - kept, not deleted,
      *  for the day a comma key comes back; iOS keeps its `commaAccents` too. */
@@ -192,6 +200,13 @@ object Layout {
     /** German: `ü ö ä` are keys of their own, where every
      *  German keyboard has them, rows of 11 like Norwegian. QWERTZ is the
      *  default ([KeyRows.QWERTZ_BY_DEFAULT]); QWERTY swaps `y` and `z` only. */
+    /** Spanish: `ñ` is a key, at the end of the middle row (Spanish layout). */
+    private val esRows: List<String> = listOf(
+        "qwertyuiop",
+        "asdfghjklñ",
+        "zxcvbnm",
+    )
+
     private val deQwertzRows: List<String> = listOf(
         "qwertzuiopü",
         "asdfghjklöä",
@@ -206,6 +221,13 @@ object Layout {
     /** Italian: the accented vowels held on their vowel, ordered by how often
      *  they are written (subtitle counts: è 2.6 M, à 1.1 M, ì 1.0 M, ò 0.6 M,
      *  ù 0.5 M, é 0.5 M - `perché`), so the upward flick on `e` gives `è`. */
+    /** Spanish: the acute vowels held on their vowel, `ü` (pingüino) after
+     *  `ú`. `ñ` is a key, not a hold. */
+    private val esOwn: Map<Char, List<String>> = mapOf(
+        'a' to listOf("á"), 'e' to listOf("é"), 'i' to listOf("í"),
+        'o' to listOf("ó"), 'u' to listOf("ú", "ü"),
+    )
+
     private val itOwn: Map<Char, List<String>> = mapOf(
         'a' to listOf("à"), 'e' to listOf("è", "é"), 'i' to listOf("ì"),
         'o' to listOf("ò"), 'u' to listOf("ù"),
@@ -327,6 +349,7 @@ object Layout {
         qwertz: Boolean = false,
     ): List<String> = when {
         lang == Lang.DE -> if (qwertz) deQwertzRows else deQwertyRows
+        lang == Lang.ES -> esRows
         lang == Lang.NB || lang == Lang.ISC -> nbRows
         script != Script.Mode.LATIN && lang == Lang.SR -> srCyrillicRows
         lang == Lang.MK -> mkCyrillicRows
@@ -412,6 +435,7 @@ object Layout {
         Lang.NB, Lang.ISC -> nbOwn
         Lang.DE -> deOwn
         Lang.IT -> itOwn
+        Lang.ES -> esOwn
         Lang.EN -> emptyMap()
         else -> isvOwn
     }
@@ -457,7 +481,7 @@ object KeyRows {
 
     /** Languages where the choice exists at all. */
     fun offered(lang: String) =
-        lang != Lang.NB && lang != Lang.ISC && lang !in Lang.SINGLE_LETTER_KEYS
+        lang != Lang.NB && lang != Lang.ISC && lang != Lang.ES && lang !in Lang.SINGLE_LETTER_KEYS
 
     private const val PREFS = "isv_collector"
     private fun key(lang: String) = "qwertz_$lang"

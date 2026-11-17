@@ -224,8 +224,8 @@ object Dictionary {
             val cls0 = sameKey[prefix[k]] ?: prefix[k].toString()
             // German nouns start with a capital in the list, and the typed
             // prefix arrives lowercased: search both cases of the first letter.
-            val cls1 = if (current == Lang.DE) cls0 + umlautPartners(cls0) else cls0
-            val cls = if (k == 0 && current == Lang.DE)
+            val cls1 = if (current in BASE_ROUTE) cls0 + umlautPartners(cls0) else cls0
+            val cls = if (k == 0 && current in Lang.CASED)
                 cls1 + String(CharArray(cls1.length) { cls1[it].uppercaseChar() }) else cls1
             if (out.size * cls.length > 24) break
             val next = ArrayList<String>(out.size * cls.length)
@@ -334,7 +334,7 @@ object Dictionary {
     // German keeps its nouns capitalised in the wordlist (`Haus`), and a key
     // has no case: read the letter case-blind, German only, so nothing
     // changes for the languages that were here before (2026-11-14).
-    val c = if (current == Lang.DE) c0.lowercaseChar() else c0
+    val c = if (current in Lang.CASED) c0.lowercaseChar() else c0
     return when (c) {
         'č', 'ć' -> 'c'; 'š', 'ś' -> 's'; 'ž', 'ż', 'ź' -> 'z'; 'ě', 'ę', 'é', 'è', 'ê' -> 'e'
         'ą', 'à', 'á' -> 'a'; 'ł', 'ľ', 'ĺ' -> 'l'; 'ń', 'ň' -> 'n'; 'ó', 'ò', 'ô' -> 'o'
@@ -437,19 +437,30 @@ object Dictionary {
      *  a plain twin). Same px as END_SOFT. */
     private const val UMLAUT_ROUTE_PEN = 10.0
 
-    /** The letters [cls] lacks of the pairs a/ä, o/ö, u/ü. */
+    /**
+     * Languages whose letters with a mark sit on keys of their OWN (German
+     * `ä ö ü`, Spanish `ñ`): a glide over the plain letter (`a o u`, `n`)
+     * reaches those words too, paying [UMLAUT_ROUTE_PEN], so `mañana` drawn
+     * over `n` still comes out. A held letter needs no such route - it folds
+     * onto its base key anyway ([foldBase]).
+     */
+    private val BASE_ROUTE = setOf(Lang.DE, Lang.ES)
+
+    /** The letters [cls] lacks of the pairs a/ä, o/ö, u/ü (German), n/ñ (Spanish). */
     private fun umlautPartners(cls: String): String {
         val sb = StringBuilder()
         for (c in cls) {
-            val p = when (c) { 'a' -> 'ä'; 'o' -> 'ö'; 'u' -> 'ü'; 'ä' -> 'a'; 'ö' -> 'o'; 'ü' -> 'u'; else -> null }
+            val p = when (c) { 'a' -> 'ä'; 'o' -> 'ö'; 'u' -> 'ü'; 'ä' -> 'a'; 'ö' -> 'o'; 'ü' -> 'u'
+                'n' -> 'ñ'; 'ñ' -> 'n'; else -> null }
             if (p != null && cls.indexOf(p) < 0 && sb.indexOf(p.toString()) < 0) sb.append(p)
         }
         return sb.toString()
     }
 
-    private fun plainUmlaut(c: Char): Char = when (c) { 'ä' -> 'a'; 'ö' -> 'o'; 'ü' -> 'u'; else -> c }
+    private fun plainUmlaut(c: Char): Char = when (c) { 'ä' -> 'a'; 'ö' -> 'o'; 'ü' -> 'u'; 'ñ' -> 'n'; else -> c }
     private fun hasUmlaut(folded: String): Boolean =
-        folded.indexOf('ä') >= 0 || folded.indexOf('ö') >= 0 || folded.indexOf('ü') >= 0
+        folded.indexOf('ä') >= 0 || folded.indexOf('ö') >= 0 || folded.indexOf('ü') >= 0 ||
+            folded.indexOf('ñ') >= 0
     private fun plainUmlauts(folded: String): String =
         String(CharArray(folded.length) { plainUmlaut(folded[it]) })
     /** The third route: `ue` `oe` `ae`, the old typewriter spelling (2026-11-14). One key longer than the word. */
@@ -512,7 +523,7 @@ object Dictionary {
             tmp.getOrPut(a) { ArrayList() }.add(i)
             val b = foldBase(w.first())
             if (b != a) tmp.getOrPut(b) { ArrayList() }.add(i)
-            if (current == Lang.DE) {
+            if (current in BASE_ROUTE) {
                 val u = plainUmlaut(a)
                 if (u != a && u != b) tmp.getOrPut(u) { ArrayList() }.add(i)
             }
@@ -552,7 +563,9 @@ object Dictionary {
         scoresOut: MutableList<Double>? = null,
     ): List<String> {
         if (!ready) return emptyList()
-        val umlauts = current == Lang.DE
+        val umlauts = current in BASE_ROUTE
+        // The `ue` `oe` `ae` route is German typewriter spelling only.
+        val ue = current == Lang.DE
         // A word whose last letter is one key past where the finger stopped is
         // not thrown out but pays [softLastPen] px (2026-11-12: a glide for
         // `here` ended on `r` after a short retreat; its shape beat `her`, and
@@ -561,11 +574,11 @@ object Dictionary {
             if (lastKeys.isEmpty() || foldLast(w) in lastKeys ||
                 (digraphKeys && foldBase(w.last()) in lastKeys) ||
                 (umlauts && plainUmlaut(foldLast(w)) in lastKeys) ||
-                (umlauts && foldLast(w) != plainUmlaut(foldLast(w)) && 'e' in lastKeys)) return 0.0
+                (ue && foldLast(w) != plainUmlaut(foldLast(w)) && 'e' in lastKeys)) return 0.0
             return if (foldLast(w) in softLastKeys ||
                 (digraphKeys && foldBase(w.last()) in softLastKeys) ||
                 (umlauts && plainUmlaut(foldLast(w)) in softLastKeys) ||
-                (umlauts && foldLast(w) != plainUmlaut(foldLast(w)) && 'e' in softLastKeys)) softLastPen
+                (ue && foldLast(w) != plainUmlaut(foldLast(w)) && 'e' in softLastKeys)) softLastPen
             else Double.NEGATIVE_INFINITY
         }
 
@@ -611,8 +624,10 @@ object Dictionary {
             if (umlauts && hasUmlaut(folded)) {
                 val alt = coarse(plainUmlauts(folded)) - UMLAUT_ROUTE_PEN
                 if (alt > geo) geo = alt
-                val altE = coarse(ueRoute(folded)) - UE_ROUTE_PEN
-                if (altE > geo) geo = altE
+                if (ue) {
+                    val altE = coarse(ueRoute(folded)) - UE_ROUTE_PEN
+                    if (altE > geo) geo = altE
+                }
             }
             if (geo == Double.NEGATIVE_INFINITY) continue
             val s = geo + freqTerm(e.freq) - ep
@@ -652,7 +667,7 @@ object Dictionary {
                 val plainU = plainUmlauts(folded)
                 val alt = fine(plainU) - UMLAUT_ROUTE_PEN
                 val viaE = ueRoute(folded)
-                val altE = fine(viaE) - UE_ROUTE_PEN
+                val altE = if (ue) fine(viaE) - UE_ROUTE_PEN else Double.NEGATIVE_INFINITY
                 if (alt >= altE && alt > geo) { geo = alt; folded = plainU }
                 else if (altE > alt && altE > geo) { geo = altE; folded = viaE }
             }
@@ -695,7 +710,7 @@ object Dictionary {
     // uniformly from 412 k forms it is a wash (61 % both ways) and on the rare
     // half it costs nothing, so the gain is real but narrow - it buys the
     // frequent words, which is what running text is made of.
-    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN, Lang.PL, Lang.CS, Lang.DE, Lang.IT)
+    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN, Lang.PL, Lang.CS, Lang.DE, Lang.IT, Lang.ES)
 
     private fun freqTerm(f: Int): Double {
         val log = Math.log((f + 1).toDouble()) * FREQ_W
