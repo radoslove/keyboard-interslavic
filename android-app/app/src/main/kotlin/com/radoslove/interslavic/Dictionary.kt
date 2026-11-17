@@ -363,6 +363,10 @@ object Dictionary {
         'ŭ' -> 'u'
         // Italian `ù` (and the rare `î` `û`), held on u and i.
         'ù', 'û' -> 'u'; 'î' -> 'i'
+        // French: ç on c, â on a, ÿ on y, the ligatures œ on o and æ on a
+        // (Norwegian `æ` is a key of its own and stays).
+        'ç' -> 'c'; 'â' -> 'a'; 'ÿ' -> 'y'; 'œ' -> 'o'
+        'æ' -> if (current == Lang.NB || current == Lang.ISC) 'æ' else 'a'
         // Norwegian: ä and ö are held on æ and ø, which are keys of their own.
         // Everywhere else (Slovak `ä`) they sit on a and o - folding Slovak `ä`
         // onto a key the keyboard does not have took every such word out of the
@@ -405,7 +409,8 @@ object Dictionary {
         var i = 0
         while (i < w.length) {
             // The Ukrainian apostrophe (`п'ять`) is written, never drawn.
-            if (w[i] == '\'') { i++; continue }
+            // The French hyphen (`peut-être`) neither.
+            if (w[i] == '\'' || w[i] == '-') { i++; continue }
             val pair = pairKey(w, i)
             if (pair != null) { sb.append(pair); i += 2 } else { sb.append(foldBase(w[i])); i++ }
         }
@@ -419,7 +424,7 @@ object Dictionary {
      *  because then it equals [foldWord] and is never computed twice. */
     private fun foldPlain(w: String): String {
         val sb = StringBuilder(w.length)
-        for (c in w) if (c != '\'') sb.append(foldBase(c))
+        for (c in w) if (c != '\'' && c != '-') sb.append(foldBase(c))
         return sb.toString()
     }
 
@@ -710,7 +715,7 @@ object Dictionary {
     // uniformly from 412 k forms it is a wash (61 % both ways) and on the rare
     // half it costs nothing, so the gain is real but narrow - it buys the
     // frequent words, which is what running text is made of.
-    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN, Lang.PL, Lang.CS, Lang.DE, Lang.IT, Lang.ES)
+    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN, Lang.PL, Lang.CS, Lang.DE, Lang.IT, Lang.ES, Lang.FR)
 
     private fun freqTerm(f: Int): Double {
         val log = Math.log((f + 1).toDouble()) * FREQ_W

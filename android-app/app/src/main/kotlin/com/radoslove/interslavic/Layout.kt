@@ -207,6 +207,19 @@ object Layout {
         "zxcvbnm",
     )
 
+    /** French AZERTY, as on French phone keyboards: `q` and `m` in the middle
+     *  row (10 keys), `w x c v b n` below, shift and backspace 2.0 wide each
+     *  ([row3Side]) so every row still spans ten key widths. */
+    private val frAzertyRows: List<String> = listOf(
+        "azertyuiop",
+        "qsdfghjklm",
+        "wxcvbn",
+    )
+
+    /** Width of shift and of backspace in the third letter row. */
+    fun row3Side(lang: String, national: Boolean): Float =
+        if (lang == Lang.FR && national) 2f else 1.5f
+
     private val deQwertzRows: List<String> = listOf(
         "qwertzuiopü",
         "asdfghjklöä",
@@ -226,6 +239,14 @@ object Layout {
     private val esOwn: Map<Char, List<String>> = mapOf(
         'a' to listOf("á"), 'e' to listOf("é"), 'i' to listOf("í"),
         'o' to listOf("ó"), 'u' to listOf("ú", "ü"),
+    )
+
+    /** French: every mark held on its base letter, the most written first
+     *  (é before è ê ë; à before â; ç alone on c; œ æ on o and a). */
+    private val frOwn: Map<Char, List<String>> = mapOf(
+        'e' to listOf("é", "è", "ê", "ë"), 'a' to listOf("à", "â", "æ"),
+        'c' to listOf("ç"), 'u' to listOf("ù", "û", "ü"), 'i' to listOf("î", "ï"),
+        'o' to listOf("ô", "œ"), 'y' to listOf("ÿ"),
     )
 
     private val itOwn: Map<Char, List<String>> = mapOf(
@@ -350,6 +371,7 @@ object Layout {
     ): List<String> = when {
         lang == Lang.DE -> if (qwertz) deQwertzRows else deQwertyRows
         lang == Lang.ES -> esRows
+        lang == Lang.FR -> if (qwertz) frAzertyRows else latinRows
         lang == Lang.NB || lang == Lang.ISC -> nbRows
         script != Script.Mode.LATIN && lang == Lang.SR -> srCyrillicRows
         lang == Lang.MK -> mkCyrillicRows
@@ -436,6 +458,7 @@ object Layout {
         Lang.DE -> deOwn
         Lang.IT -> itOwn
         Lang.ES -> esOwn
+        Lang.FR -> frOwn
         Lang.EN -> emptyMap()
         else -> isvOwn
     }
@@ -477,7 +500,11 @@ object Layout {
 object KeyRows {
 
     /** Languages whose national keyboard is QWERTZ. */
-    val QWERTZ_BY_DEFAULT = setOf(Lang.CS, Lang.SK, Lang.SL, Lang.HR, Lang.SR, Lang.BS, Lang.DE)
+    val QWERTZ_BY_DEFAULT = setOf(Lang.CS, Lang.SK, Lang.SL, Lang.HR, Lang.SR, Lang.BS, Lang.DE, Lang.FR)
+
+    /** The name of the NATIONAL layout the switch turns on: QWERTZ, or AZERTY
+     *  for French. The stored flag stays "qwertz" - it means "national". */
+    fun nationalName(lang: String) = if (lang == Lang.FR) "AZERTY" else "QWERTZ"
 
     /** Languages where the choice exists at all. */
     fun offered(lang: String) =

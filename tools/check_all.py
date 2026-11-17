@@ -53,11 +53,14 @@ FLOORS = {
     "it": 81.4,
     # Spanish, 2026-11-17 (Android 3.10.15): `ñ` key, linear frequency, 453 names.
     "es": 75.5,
+    # French, 2026-11-17 (Android 3.10.23): AZERTY, linear frequency, names.
+    "fr": 77.7,
 }
 # Languages measured with the settings the phone uses for them.
 SEED_ENV = {"de": {"SWIPE_ROWS": "qwertz", "SWIPE_LINEAR": "isc,nb,en,pl,cs,de"},
             "it": {"SWIPE_LINEAR": "isc,nb,en,pl,cs,de,it", "SWIPE_DOUBLE_W": "3"},
-            "es": {"SWIPE_LINEAR": "isc,nb,en,pl,cs,de,it,es"}}
+            "es": {"SWIPE_LINEAR": "isc,nb,en,pl,cs,de,it,es"},
+            "fr": {"SWIPE_ROWS": "azerty", "SWIPE_LINEAR": "isc,nb,en,pl,cs,de,it,es,fr"}}
 FLOOR_MARGIN = 4.0
 
 

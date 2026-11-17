@@ -97,6 +97,12 @@ if DE:
 ES = LANG == "es"
 if ES:
     LATIN_ROWS = ["qwertyuiop", "asdfghjklñ", "zxcvbnm"]
+# French (2026-11-17): AZERTY by default (SWIPE_ROWS=azerty), 10 + 10 + 6 keys,
+# shift and backspace 2.0 wide (Layout.row3Side); QWERTY is the plain grid.
+FR = LANG == "fr"
+AZERTY = os.environ.get("SWIPE_ROWS", "qwerty") == "azerty"
+if FR and AZERTY:
+    LATIN_ROWS = ["azertyuiop", "qsdfghjklm", "wxcvbn"]
 DIGRAPH_KEYS = SCRIPT != "latin"
 # Serbian Cyrillic (JUS I.K1.003, added 2026-11-10) differs from the Interslavic
 # one in both directions: the national layout is QWERTZ, and `џ` is a LETTER
@@ -123,12 +129,13 @@ ROWS = (["qwertzuiop", "asdfghjkl", "xcvbnm"] if MK
 
 def build_centers():
     c = {}
-    if DE or ES:
+    if DE or ES or (FR and AZERTY):
+        side = 2.0 if FR else 1.5
         for r, row in enumerate(ROWS[:2]):
             for i, ch in enumerate(row):
                 c[ch] = ((i + 0.5) * BOARD_W / len(row), (r + 0.5) * KEY_H)
         for i, ch in enumerate(ROWS[2]):
-            c[ch] = ((1.5 + i + 0.5) * BOARD_W / 10.0, 2.5 * KEY_H)
+            c[ch] = ((side + i + 0.5) * BOARD_W / 10.0, 2.5 * KEY_H)
         return c
     units = float(len(LATIN_ROWS[0]))     # a letter row spans ten key widths
     # row 0: 10 keys fill the width; a shorter row is padded at both ends
@@ -177,11 +184,16 @@ for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê",
                    # Belarusian ў (u-short) `ŭ`, held on u.
                    ("ŭ", "u"),
                    # Italian ù (and the rare î û), held on u and i.
-                   ("ùû", "u"), ("î", "i")]:
+                   ("ùû", "u"), ("î", "i"),
+                   # French: ç â ÿ, the ligatures œ on o and æ on a (Norwegian
+                   # æ is a key). Mirrors Dictionary.foldBase.
+                   ("ç", "c"), ("â", "a"), ("ÿ", "y"), ("œ", "o")] + (
+                      [] if LANG in ("nb", "isc") else [("æ", "a")]):
     for _ch in _src:
         _FOLD[_ch] = _dst
 # The Ukrainian apostrophe is written but never drawn: it folds to nothing.
 _FOLD["'"] = ""
+_FOLD["-"] = ""   # the French hyphen (`peut-être`) is not drawn either
 # German: ä ö ü are keys (not folded), ß is held on s. Mirrors Dictionary.foldBase.
 if LANG == "de":
     for _ch in "äöü":
@@ -190,7 +202,7 @@ if LANG == "de":
 
 
 def fold(ch):
-    if LANG == "de":
+    if LANG in ("de", "fr"):
         ch = ch.lower()       # German nouns are capitalised in the list (`Haus`)
     return _FOLD.get(ch, ch)
 

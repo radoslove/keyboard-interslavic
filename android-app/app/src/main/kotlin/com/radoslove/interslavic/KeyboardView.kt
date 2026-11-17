@@ -867,7 +867,7 @@ class KeyboardView(
             val pad = (full[index].length - row.length) / 2f
             if (index == 2) {
                 val glyph = if (capsLocked) "⇪" else "⇧"
-                val sk = functionKey(glyph, 1.5f + pad) { onShiftTap() }
+                val sk = functionKey(glyph, Layout.row3Side(lang, qwertz) + pad) { onShiftTap() }
                 when {
                     capsLocked -> sk.setBackgroundColor(cShiftLock)  // locked: stronger
                     shift -> sk.setBackgroundColor(cShiftOne)         // one-shot: light
@@ -878,7 +878,7 @@ class KeyboardView(
             }
             row.forEach { ch -> rv.addView(letterKey(ch)) }
             if (index == 2) {
-                rv.addView(backspaceKey(1.5f + pad))
+                rv.addView(backspaceKey(Layout.row3Side(lang, qwertz) + pad))
             } else if (pad > 0f) {
                 rv.addView(spacer(pad))
             }
@@ -1045,7 +1045,7 @@ class KeyboardView(
             val z = KeyRows.isQwertz(context, lang)
             choices(listOf(
                 Triple("QWERTY", !z, { KeyRows.set(context, lang, false); render() }),
-                Triple("QWERTZ", z, { KeyRows.set(context, lang, true); render() }),
+                Triple(KeyRows.nationalName(lang), z, { KeyRows.set(context, lang, true); render() }),
             ))
         }
 

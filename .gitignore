@@ -39,6 +39,8 @@ keystore.properties
 !/dictionary/sources_it/README.md
 /dictionary/sources_es/*
 !/dictionary/sources_es/README.md
+/dictionary/sources_fr/*
+!/dictionary/sources_fr/README.md
 /dictionary/sources_sl/*
 !/dictionary/sources_sl/README.md
 /dictionary/sources_hr/*

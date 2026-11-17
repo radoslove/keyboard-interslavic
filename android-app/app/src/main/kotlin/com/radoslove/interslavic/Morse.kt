@@ -120,7 +120,7 @@ object Morse {
             Lang.BS to latin + SERBO_CROATIAN_LATIN,
             Lang.SR to latin + SERBO_CROATIAN_LATIN,
             Lang.DE to latin + GERMAN,
-            Lang.EN to latin, Lang.IT to latin, Lang.ES to latin, Lang.NB to latin,
+            Lang.EN to latin, Lang.IT to latin, Lang.ES to latin, Lang.FR to latin, Lang.NB to latin,
             Lang.RU to RUSSIAN + PUNCT + ITU.filterKeys { it[0].isDigit() },
             Lang.UK to UKRAINIAN + PUNCT + ITU.filterKeys { it[0].isDigit() },
             Lang.BG to BULGARIAN + PUNCT + ITU.filterKeys { it[0].isDigit() },

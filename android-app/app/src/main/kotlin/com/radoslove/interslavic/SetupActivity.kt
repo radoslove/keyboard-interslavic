@@ -192,7 +192,7 @@ class SetupActivity : Activity() {
         section(root, "layout_head", "layout_body")
         for (lang in Lang.ALL.filter { KeyRows.offered(it) }) {
             root.addView(Switch(this).apply {
-                text = "${langName(lang)} · QWERTZ"
+                text = "${langName(lang)} · ${KeyRows.nationalName(lang)}"
                 textSize = 17f
                 isChecked = KeyRows.isQwertz(this@SetupActivity, lang)
                 setOnCheckedChangeListener { _, on -> KeyRows.set(this@SetupActivity, lang, on) }

@@ -1,0 +1,21 @@
+# French elided forms the wordlist keeps (tools/build_fr_wordlist.py).
+#
+# FrequencyWords splits `l'homme` at the apostrophe, so `l'` arrives as a word
+# of its own and hunspell rejects it. These are the elisions of French grammar:
+# the full form exists (le/la, je, de, que, ne, te, me, se, ce, si) and French
+# writes the short one before a vowel or a mute h. The keyboard writes the next
+# word straight after the apostrophe (Lang.ELISION).
+c'
+l'
+j'
+d'
+qu'
+n'
+t'
+m'
+s'
+quelqu'
+jusqu'
+lorsqu'
+puisqu'
+quoiqu'

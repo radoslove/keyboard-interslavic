@@ -52,11 +52,17 @@ object Lang {
      *  QWERTY with `ñ` as a key of its own at the end of the middle row, as on
      *  the Spanish layout; `á é í ó ú` held on their vowel, `ü` on u. */
     const val ES = "es"
+    /** French (2026-11-17): Slavs living in France and Belgium (0.33-0.64
+     *  million). AZERTY by default, QWERTY as the switch ([KeyRows]); the
+     *  accented letters held on their base letter, `é` first. Elides like
+     *  Italian (`l'homme`, `qu'il`), and keeps hyphenated words whole
+     *  (`peut-être`, `avez-vous`) - the glide draws neither `'` nor `-`. */
+    const val FR = "fr"
 
     /** Languages whose wordlist holds capitalised words, read case-blind by the
      *  glide and the completions: German nouns (`Haus`) and Spanish proper
      *  names (`María`, `España`), so a name is offered, not typed by hand. */
-    val CASED = setOf(DE, ES)
+    val CASED = setOf(DE, ES, FR)
     const val CS = "cs"
     const val SK = "sk"
     const val SL = "sl"
@@ -112,7 +118,7 @@ object Lang {
 
     /** Languages that ELIDE: a word ending in an apostrophe (`dell'`, `l'`)
      *  takes the next word straight after it, no space (`dell'anno`). */
-    val ELISION = setOf(IT)
+    val ELISION = setOf(IT, FR)
 
     /** This app's own language ([App.MAIN]): `isv` in Interslove, `isc` in Mellomskandinavisk. */
     const val MAIN = App.MAIN
@@ -186,7 +192,7 @@ object Lang {
 
     private fun fromLocale(code: String): String? = when (code) {
         "pl" -> PL; "cs" -> CS; "sk" -> SK; "sl" -> SL; "hr" -> HR
-        "sr" -> SR; "bs" -> BS; "mk" -> MK; "ru" -> RU; "uk" -> UK; "bg" -> BG; "be" -> BE; "de" -> DE; "it" -> IT; "es" -> ES
+        "sr" -> SR; "bs" -> BS; "mk" -> MK; "ru" -> RU; "uk" -> UK; "bg" -> BG; "be" -> BE; "de" -> DE; "it" -> IT; "es" -> ES; "fr" -> FR
         "nb", "no", "nn" -> NB
         "en" -> EN
         else -> null
@@ -231,6 +237,7 @@ object Lang {
         // Every living language by its own name, never the Interslavic one.
         IT -> "Italiano"
         ES -> "Español"
+        FR -> "Français"
         CS -> "Čeština"
         // Added with the languages themselves (2026-11-10): without a row here
         // the space bar fell back to the app's own name, so a phone typing
