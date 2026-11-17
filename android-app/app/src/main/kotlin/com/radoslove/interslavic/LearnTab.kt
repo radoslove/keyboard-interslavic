@@ -441,6 +441,10 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
         fill(topicGrid, tiles)
         fill(alphaGrid, alphaTiles)
         alphaHead.visibility = if (alphaTiles.isEmpty()) View.GONE else View.VISIBLE
+        // Only the scripts this language has: Spanish is "ABC · ·−", not all four.
+        alphaHead.text = (Script.offered(lang).take(1) + Script.choices(lang).drop(1).filter { m ->
+            Alphabets.sets(lang).any { it.first == Alphabets.title(lang, m) }
+        }).joinToString(" · ") { Script.name(it) }
 
         wordsHead.text = (if (learnShowWords) "▾ " else "▸ ") + t("learn_words") + " (${shown.size})"
         wordsBox.visibility = if (learnShowWords) View.VISIBLE else View.GONE
