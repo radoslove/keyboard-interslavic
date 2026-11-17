@@ -52,3 +52,50 @@ object Sets {
             w to (target?.let { r.cells[it] } ?: r.cells["en"] ?: "")
         }
 }
+
+/**
+ * Alphabet sets: the letters of a language shown in another of its scripts
+ * (Interslavic in Cyrillic and Glagolitic, Polish in Glagolitic, Serbian in
+ * Cyrillic, every language with a Morse table in Morse), the letter itself as
+ * the answer. Built from the keyboard's own conversion, so nothing is stored.
+ */
+object Alphabets {
+
+    private val LETTERS = mapOf(
+        Lang.ISV to "a b c č ć d dž đ e ě f g h i j k l lj m n nj o p r s š t u v y z ž",
+        Lang.PL to "a ą b c ć d e ę f g h i j k l ł m n ń o ó p r s ś t u w y z ź ż",
+        Lang.CS to "a á b c č d ď e é ě f g h i í j k l m n ň o ó p r ř s š t ť u ú ů v y ý z ž",
+        Lang.SK to "a á ä b c č d ď e é f g h i í j k l ĺ ľ m n ň o ó ô p r ŕ s š t ť u ú v y ý z ž",
+        Lang.SL to "a b c č d e f g h i j k l m n o p r s š t u v z ž",
+        Lang.HR to "a b c č ć d dž đ e f g h i j k l lj m n nj o p r s š t u v z ž",
+        Lang.BS to "a b c č ć d dž đ e f g h i j k l lj m n nj o p r s š t u v z ž",
+        Lang.SR to "a b c č ć d dž đ e f g h i j k l lj m n nj o p r s š t u v z ž",
+        Lang.EN to "a b c d e f g h i j k l m n o p q r s t u v w x y z",
+        Lang.NB to "a b c d e f g h i j k l m n o p q r s t u v w x y z æ ø å",
+        Lang.RU to "а б в г д е ё ж з и й к л м н о п р с т у ф х ц ч ш щ ъ ы ь э ю я",
+        Lang.UK to "а б в г ґ д е є ж з и і ї й к л м н о п р с т у ф х ц ч ш щ ь ю я",
+        Lang.BG to "а б в г д е ж з и й к л м н о п р с т у ф х ц ч ш щ ъ ь ю я",
+    )
+
+    /** A name that needs no translation: "ABC → ⰀⰁⰂ". */
+    fun title(lang: String, m: Script.Mode) =
+        Script.name(Script.offered(lang).first()) + " → " + Script.name(m)
+
+    /** For [lang]: (title, [(letter in the other script, letter)]) per script. */
+    fun sets(lang: String): List<Pair<String, List<Pair<String, String>>>> {
+        val letters = LETTERS[lang]?.split(' ') ?: return emptyList()
+        val native = Script.offered(lang).first()
+        return Script.choices(lang).filter { it != native }.mapNotNull { m ->
+            val seen = HashSet<String>()
+            val cards = letters.mapNotNull { l ->
+                val front = if (m == Script.Mode.MORSE) {
+                    if (l.length != 1) null else Morse.code(l[0], lang)
+                } else Script.convert(l, m, lang)
+                // A letter whose code is its base letter's (Morse č = c) would
+                // make the same card twice: the first one keeps it.
+                front?.takeIf { it.isNotBlank() && it != l && seen.add(it) }?.let { it to l }
+            }
+            if (cards.isEmpty()) null else title(lang, m) to cards
+        }
+    }
+}
