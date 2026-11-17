@@ -187,7 +187,9 @@ for _src, _dst in [("čć", "c"), ("šś", "s"), ("žżź", "z"), ("ěęéèê",
                    ("ùû", "u"), ("î", "i"),
                    # French: ç â ÿ, the ligatures œ on o and æ on a (Norwegian
                    # æ is a key). Mirrors Dictionary.foldBase.
-                   ("ç", "c"), ("â", "a"), ("ÿ", "y"), ("œ", "o")] + (
+                   ("ç", "c"), ("â", "a"), ("ÿ", "y"), ("œ", "o"),
+                   # Romanian ă ș ț (and the cedilla ş ţ). Mirrors foldBase.
+                   ("ă", "a"), ("șş", "s"), ("țţ", "t")] + (
                       [] if LANG in ("nb", "isc") else [("æ", "a")]):
     for _ch in _src:
         _FOLD[_ch] = _dst
@@ -202,7 +204,7 @@ if LANG == "de":
 
 
 def fold(ch):
-    if LANG in ("de", "fr"):
+    if LANG in ("de", "fr", "nl", "ro"):
         ch = ch.lower()       # German nouns are capitalised in the list (`Haus`)
     return _FOLD.get(ch, ch)
 

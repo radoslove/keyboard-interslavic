@@ -366,6 +366,8 @@ object Dictionary {
         // French: ç on c, â on a, ÿ on y, the ligatures œ on o and æ on a
         // (Norwegian `æ` is a key of its own and stays).
         'ç' -> 'c'; 'â' -> 'a'; 'ÿ' -> 'y'; 'œ' -> 'o'
+        // Romanian: ă on a, ș ț on s t (and the old cedilla ş ţ with them).
+        'ă' -> 'a'; 'ș', 'ş' -> 's'; 'ț', 'ţ' -> 't'
         'æ' -> if (current == Lang.NB || current == Lang.ISC) 'æ' else 'a'
         // Norwegian: ä and ö are held on æ and ø, which are keys of their own.
         // Everywhere else (Slovak `ä`) they sit on a and o - folding Slovak `ä`
@@ -715,7 +717,7 @@ object Dictionary {
     // uniformly from 412 k forms it is a wash (61 % both ways) and on the rare
     // half it costs nothing, so the gain is real but narrow - it buys the
     // frequent words, which is what running text is made of.
-    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN, Lang.PL, Lang.CS, Lang.DE, Lang.IT, Lang.ES, Lang.FR)
+    private val LINEAR_FREQ = setOf(Lang.ISC, Lang.NB, Lang.EN, Lang.PL, Lang.CS, Lang.DE, Lang.IT, Lang.ES, Lang.FR, Lang.NL, Lang.RO)
 
     private fun freqTerm(f: Int): Double {
         val log = Math.log((f + 1).toDouble()) * FREQ_W

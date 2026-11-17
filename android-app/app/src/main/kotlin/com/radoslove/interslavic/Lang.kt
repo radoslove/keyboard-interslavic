@@ -58,11 +58,23 @@ object Lang {
      *  Italian (`l'homme`, `qu'il`), and keeps hyphenated words whole
      *  (`peut-être`, `avez-vous`) - the glide draws neither `'` nor `-`. */
     const val FR = "fr"
+    /** Dutch (2026-11-17): Slavs living in the Netherlands and Flanders
+     *  (0.46-0.71 million). QWERTY, as Dutch keyboards are; the marks held on
+     *  their base letter by how much they are written (`ë` before `é`:
+     *  ideeën, België). The apostrophe stays inside the word (`auto's`,
+     *  `zo'n`) and is not drawn in the glide. */
+    const val NL = "nl"
+    /** Romanian (2026-11-17): Slavs living in Romania (0.23 million, nearly
+     *  all Ukrainians under temporary protection). QWERTY, `ă â` held on a,
+     *  `î` on i, `ș` on s, `ț` on t (comma below; the old cedilla `ş ţ` of
+     *  the subtitle sources is folded onto it). Hyphenated forms (`s-a`,
+     *  `într-o`, `spune-mi`) stay whole and the glide does not draw `-`. */
+    const val RO = "ro"
 
     /** Languages whose wordlist holds capitalised words, read case-blind by the
      *  glide and the completions: German nouns (`Haus`) and Spanish proper
      *  names (`María`, `España`), so a name is offered, not typed by hand. */
-    val CASED = setOf(DE, ES, FR)
+    val CASED = setOf(DE, ES, FR, NL, RO)
     const val CS = "cs"
     const val SK = "sk"
     const val SL = "sl"
@@ -114,7 +126,7 @@ object Lang {
     val SINGLE_LETTER_KEYS = setOf(MK, RU, UK, BG, SLA, BE)
 
     /** Languages that write an apostrophe INSIDE words (`п'ять`, `сям'я`). */
-    val APOSTROPHE_IN_WORD = setOf(UK, BE)
+    val APOSTROPHE_IN_WORD = setOf(UK, BE, NL)
 
     /** Languages that ELIDE: a word ending in an apostrophe (`dell'`, `l'`)
      *  takes the next word straight after it, no space (`dell'anno`). */
@@ -192,7 +204,7 @@ object Lang {
 
     private fun fromLocale(code: String): String? = when (code) {
         "pl" -> PL; "cs" -> CS; "sk" -> SK; "sl" -> SL; "hr" -> HR
-        "sr" -> SR; "bs" -> BS; "mk" -> MK; "ru" -> RU; "uk" -> UK; "bg" -> BG; "be" -> BE; "de" -> DE; "it" -> IT; "es" -> ES; "fr" -> FR
+        "sr" -> SR; "bs" -> BS; "mk" -> MK; "ru" -> RU; "uk" -> UK; "bg" -> BG; "be" -> BE; "de" -> DE; "it" -> IT; "es" -> ES; "fr" -> FR; "nl" -> NL; "ro" -> RO
         "nb", "no", "nn" -> NB
         "en" -> EN
         else -> null
@@ -238,6 +250,8 @@ object Lang {
         IT -> "Italiano"
         ES -> "Español"
         FR -> "Français"
+        NL -> "Nederlands"
+        RO -> "Română"
         CS -> "Čeština"
         // Added with the languages themselves (2026-11-10): without a row here
         // the space bar fell back to the app's own name, so a phone typing

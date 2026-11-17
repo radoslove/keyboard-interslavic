@@ -249,6 +249,22 @@ object Layout {
         'o' to listOf("ô", "œ"), 'y' to listOf("ÿ"),
     )
 
+    /** Dutch: the marks held on their base letter, ordered by the weight of
+     *  the forms that carry them in the wordlist (ë 14 173, ï 6 115,
+     *  é 5 184, è 1 446, ö 975, ü 723, ó 583, á 389, ç 283). */
+    private val nlOwn: Map<Char, List<String>> = mapOf(
+        'e' to listOf("ë", "é", "è", "ê"), 'i' to listOf("ï", "í", "î"),
+        'o' to listOf("ö", "ó", "ô"), 'u' to listOf("ü", "ú", "û"),
+        'a' to listOf("á", "à"), 'c' to listOf("ç"),
+    )
+
+    /** Romanian: the marks on their base letter, by the weight of the forms
+     *  that carry them (ă 505 028 before â 85 826 on a). */
+    private val roOwn: Map<Char, List<String>> = mapOf(
+        'a' to listOf("ă", "â"), 'i' to listOf("î"),
+        's' to listOf("ș"), 't' to listOf("ț"),
+    )
+
     private val itOwn: Map<Char, List<String>> = mapOf(
         'a' to listOf("à"), 'e' to listOf("è", "é"), 'i' to listOf("ì"),
         'o' to listOf("ò"), 'u' to listOf("ù"),
@@ -459,6 +475,8 @@ object Layout {
         Lang.IT -> itOwn
         Lang.ES -> esOwn
         Lang.FR -> frOwn
+        Lang.NL -> nlOwn
+        Lang.RO -> roOwn
         Lang.EN -> emptyMap()
         else -> isvOwn
     }

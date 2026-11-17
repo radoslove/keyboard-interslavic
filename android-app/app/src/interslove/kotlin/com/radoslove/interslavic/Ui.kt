@@ -61,7 +61,7 @@ object Ui {
     fun langName(ui: String, lang: String): String {
         val own = when (lang) {
             Lang.ISV -> "Medžuslovjansky"; Lang.ISC -> "Mellomskandinavisk"; Lang.PL -> "Polski"
-            Lang.NB -> "Norsk bokmål"; Lang.DE -> "Deutsch"; Lang.IT -> "Italiano"; Lang.ES -> "Español"; Lang.FR -> "Français"; Lang.CS -> "Čeština"; Lang.SK -> "Slovenčina"; Lang.SL -> "Slovenščina"; Lang.HR -> "Hrvatski"; Lang.SR -> "Srpski"; Lang.BS -> "Bosanski"; Lang.MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"; Lang.RU -> "Русский"; Lang.UK -> "Українська"; Lang.BG -> "Български"; Lang.BE -> "Беларуская"; Lang.SLA -> "Praslovjansky"; else -> "English"
+            Lang.NB -> "Norsk bokmål"; Lang.DE -> "Deutsch"; Lang.IT -> "Italiano"; Lang.ES -> "Español"; Lang.FR -> "Français"; Lang.NL -> "Nederlands"; Lang.RO -> "Română"; Lang.CS -> "Čeština"; Lang.SK -> "Slovenčina"; Lang.SL -> "Slovenščina"; Lang.HR -> "Hrvatski"; Lang.SR -> "Srpski"; Lang.BS -> "Bosanski"; Lang.MK -> "\u041c\u0430\u043a\u0435\u0434\u043e\u043d\u0441\u043a\u0438"; Lang.RU -> "Русский"; Lang.UK -> "Українська"; Lang.BG -> "Български"; Lang.BE -> "Беларуская"; Lang.SLA -> "Praslovjansky"; else -> "English"
         }
         val gloss = mapOf(
             Lang.ISV to mapOf("pl" to "międzysłowiański", "nb" to "interslavisk", "en" to "Interslavic"),
@@ -73,6 +73,8 @@ object Ui {
             Lang.IT to mapOf(MS to "italijanjsky", "pl" to "włoski", "nb" to "italiensk", "en" to "Italian"),
             Lang.ES to mapOf(MS to "španjsky", "pl" to "hiszpański", "nb" to "spansk", "en" to "Spanish"),
             Lang.FR to mapOf(MS to "francuzsky", "pl" to "francuski", "nb" to "fransk", "en" to "French"),
+            Lang.NL to mapOf(MS to "holandsky", "pl" to "niderlandzki", "nb" to "nederlandsk", "en" to "Dutch"),
+            Lang.RO to mapOf(MS to "rumunjsky", "pl" to "rumuński", "nb" to "rumensk", "en" to "Romanian"),
             Lang.CS to mapOf(MS to "češsky", "pl" to "czeski", "nb" to "tsjekkisk", "en" to "Czech"),
             Lang.SK to mapOf(MS to "slovačsky", "pl" to "słowacki", "nb" to "slovakisk", "en" to "Slovak"),
             Lang.SL to mapOf(MS to "slovenečsky", "pl" to "słoweński", "nb" to "slovensk", "en" to "Slovenian"),
