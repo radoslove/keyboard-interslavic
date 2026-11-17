@@ -28,7 +28,10 @@ import android.content.Context
  */
 object Script {
 
-    enum class Mode { LATIN, CYRILLIC, GLAGOLITIC }
+    /** MORSE is chosen like the others but is never what [mode] returns: in
+     *  Morse the keyboard works in the language's own first script and
+     *  [Morse.Conn] turns the text into dots and dashes at the editor. */
+    enum class Mode { LATIN, CYRILLIC, GLAGOLITIC, MORSE }
 
     private const val PREFS = "isv_collector"
     private const val KEY = "script"
@@ -59,6 +62,11 @@ object Script {
         else -> listOf(Mode.LATIN)
     }
 
+    /** What the script key and the panels offer: the alphabets, then Morse
+     *  for every language that has a Morse table. */
+    fun choices(lang: String): List<Mode> =
+        offered(lang) + if (Morse.has(lang)) listOf(Mode.MORSE) else emptyList()
+
     /** Each language remembers its own script. Interslavic keeps the old key, so
      *  nobody's chosen alphabet is lost to this change. */
     private fun prefKey(lang: String) = if (lang == Lang.ISV) KEY else KEY + "_" + lang
@@ -68,16 +76,35 @@ object Script {
     fun mode(context: Context): Mode = mode(context, Lang.current(context))
 
     fun mode(context: Context, lang: String): Mode {
-        val can = offered(lang)
+        val c = chosen(context, lang)
+        return if (c == Mode.MORSE) offered(lang).first() else c
+    }
+
+    /** The choice itself, Morse included. */
+    fun chosen(context: Context): Mode = chosen(context, Lang.current(context))
+
+    fun chosen(context: Context, lang: String): Mode {
+        val can = choices(lang)
         // One script = that script, which for Macedonian is Cyrillic, not Latin.
         if (can.size < 2) return can.first()
         val m = when (context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
             .getString(prefKey(lang), "latin")) {
             "cyrillic" -> Mode.CYRILLIC
             "glagolitic" -> Mode.GLAGOLITIC
+            "morse" -> Mode.MORSE
             else -> Mode.LATIN
         }
-        return if (m in can) m else Mode.LATIN
+        return if (m in can) m else can.first()
+    }
+
+    /** The keyboard writes Morse now. */
+    fun morse(context: Context): Boolean = chosen(context) == Mode.MORSE
+
+    /** How a letter (in the keyboard's Latin) is shown on a key or in a
+     *  popup: in the script, and in Morse the letter over its code. */
+    fun label(context: Context, latin: String): String {
+        val shown = out(context, latin)
+        return if (morse(context)) Morse.keyLabel(shown, Lang.current(context)) else shown
     }
 
     fun setMode(context: Context, mode: Mode) {
@@ -87,18 +114,23 @@ object Script {
 
     /** The next script this language has, wrapping round; the script key next to 🌐. */
     fun next(context: Context): Mode {
-        val can = offered(Lang.current(context))
-        val m = can[(can.indexOf(mode(context)) + 1) % can.size]
+        val can = choices(Lang.current(context))
+        val m = can[(can.indexOf(chosen(context)) + 1) % can.size]
         setMode(context, m)
         return m
     }
 
     /** The label of the script key: the first three letters of the current alphabet,
      *  the same convention as `?123`/`ABC` and the ABC/АБВ switch on Serbian keyboards. */
-    fun keyLabel(context: Context): String = when (mode(context)) {
+    fun keyLabel(context: Context): String = name(chosen(context))
+
+    /** ABC / АБВ / ⰀⰁⰂ / ·−− (Morse for "W", the shortest code that looks
+     *  like Morse at a glance and is not one of the letters' own). */
+    fun name(m: Mode): String = when (m) {
         Mode.LATIN -> "ABC"
         Mode.CYRILLIC -> "АБВ"
         Mode.GLAGOLITIC -> "ⰀⰁⰂ"
+        Mode.MORSE -> "·−"
     }
 
     // ---- Cyrillic: a flat table, two-letter keys tried first -------------------
@@ -239,6 +271,7 @@ object Script {
 
     fun convert(latin: String, m: Mode, lang: String = Lang.ISV): String = when {
         latin.isEmpty() || m == Mode.LATIN -> latin
+        m == Mode.MORSE -> Morse.encode(convert(latin, offered(lang).first(), lang), lang)
         m == Mode.CYRILLIC -> cyrillic(latin, cyrTable(lang))
         lang == Lang.PL -> glagoliticPL(latin)
         else -> glagolitic(latin)
@@ -321,6 +354,7 @@ object Script {
 
     fun back(s: String, m: Mode, lang: String = Lang.ISV): String {
         if (m == Mode.LATIN || s.isEmpty()) return s
+        if (m == Mode.MORSE) return back(Morse.decode(s, lang), offered(lang).first(), lang)
         if (m == Mode.GLAGOLITIC && lang == Lang.PL) return backPolish(s)
         val rev = when {
             m == Mode.CYRILLIC && lang == Lang.SR -> REVERSE_SR

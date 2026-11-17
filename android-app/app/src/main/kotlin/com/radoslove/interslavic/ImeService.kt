@@ -46,7 +46,7 @@ class ImeService : InputMethodService() {
     private var builtTheme: String? = null
 
     override fun onCreateInputView(): View {
-        builtScript = Script.mode(this)
+        builtScript = Script.chosen(this)
         builtLangs = Lang.enabled(this) + Lang.current(this)
         builtTheme = Theme.choice(this)
         return KeyboardView(this, this).also { kv ->
@@ -82,7 +82,7 @@ class ImeService : InputMethodService() {
         Dictionary.ensureLoaded(this)
         val langs = Lang.enabled(this) + Lang.current(this)
         if (builtScript != null &&
-            (Script.mode(this) != builtScript || langs != builtLangs || Theme.choice(this) != builtTheme)) {
+            (Script.chosen(this) != builtScript || langs != builtLangs || Theme.choice(this) != builtTheme)) {
             setInputView(onCreateInputView())
         }
         super.onStartInputView(info, restarting)

@@ -239,6 +239,7 @@ class KeyboardView(
     private val conn: InputConnection?
         get() {
             val ic = service.currentInputConnection ?: return null
+            if (Script.morse(context)) return Morse.Conn(ic, Lang.current(context))
             return if (Script.rewritesWord(context)) WideSpace(ic) else ic
         }
 
@@ -446,6 +447,8 @@ class KeyboardView(
             canvas.drawRoundRect(left, top, right, bottom, r, r, previewBg)
             canvas.drawRoundRect(left, top, right, bottom, r, r, previewBorder)
             previewTxt.textSize = dp(28).toFloat()
+            val tw = previewTxt.measureText(t)
+            if (tw > w - dp(8)) previewTxt.textSize = previewTxt.textSize * (w - dp(8)) / tw
             val fm = previewTxt.fontMetrics
             canvas.drawText(t, previewCx, (top + bottom) / 2f - (fm.ascent + fm.descent) / 2f, previewTxt)
         }
@@ -470,7 +473,7 @@ class KeyboardView(
                     canvas.drawRoundRect(l + 2f, popupTop + 2f, l + popupCell - 2f, popupBottom - 2f, r, r, popupSelBg)
                     previewTxt.color = Color.WHITE
                 } else previewTxt.color = cText
-                val label = Script.out(context, items[i])
+                val label = Script.label(context, items[i]).replace('\n', ' ')
                 // Shrink a label that does not fit its cell instead of letting it
                 // spill over (down to 0.4, as on iOS).
                 previewTxt.textSize = fullSize
@@ -697,7 +700,8 @@ class KeyboardView(
 
     private fun showKeyPreview(tv: TextView) {
         val row = tv.parent as? android.view.View ?: return
-        previewText = tv.text?.toString()
+        // Morse keys carry the letter over the code: the bubble shows the code.
+        previewText = tv.text?.toString()?.substringAfter('\n')
         previewCx = row.left + tv.left + tv.width / 2f
         previewKeyTop = (row.top + tv.top).toFloat()
         previewKeyW = tv.width.toFloat()
@@ -886,7 +890,7 @@ class KeyboardView(
         val isv = Lang.current(context) == Lang.ISV
         // The script key belongs to every language written in more than one
         // alphabet - Interslavic (three) and Serbian (two) so far.
-        val scripts = Script.offered(Lang.current(context)).size > 1
+        val scripts = Script.choices(Lang.current(context)).size > 1
         val b = makeRow()
         b.addView(numericKey(1.2f))
         b.addView(globeKey(0.95f))
@@ -1063,16 +1067,12 @@ class KeyboardView(
             ))
         }
 
-        val canScripts = Script.offered(lang)
+        val canScripts = Script.choices(lang)
         if (canScripts.size > 1) {
             header(pt("script_head"))
-            val m = Script.mode(context)
+            val m = Script.chosen(context)
             choices(canScripts.map { mode ->
-                val label = when (mode) {
-                    Script.Mode.LATIN -> "ABC"
-                    Script.Mode.CYRILLIC -> "АБВ"
-                    Script.Mode.GLAGOLITIC -> "ⰀⰁⰂ"
-                }
+                val label = Script.name(mode)
                 Triple(label, m == mode,
                     { Script.setMode(context, mode); render(); refreshSuggestions() })
             })
@@ -1386,8 +1386,14 @@ class KeyboardView(
 
     private fun letterKey(ch: Char): TextView {
         // Label in the chosen script; the key itself stays the Latin letter `ch`.
-        val label = Script.out(context, keyText(ch))
+        val label = Script.label(context, keyText(ch))
         val tv = baseKey(label, 1f)
+        // Morse: the letter over its code, two lines (Morse.keyLabel).
+        if (Script.morse(context)) {
+            tv.maxLines = 2
+            if (android.os.Build.VERSION.SDK_INT >= 26)
+                tv.setAutoSizeTextTypeUniformWithConfiguration(7, 18, 1, TypedValue.COMPLEX_UNIT_SP)
+        }
         val lang = Lang.current(context)
         val latin = Script.mode(context) == Script.Mode.LATIN
         // Whether this key has a letter of the keyboard's OWN on it (flick target).

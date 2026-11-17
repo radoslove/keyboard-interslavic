@@ -128,11 +128,9 @@ internal fun SetupActivity.addLanguageRow(root: LinearLayout) {
  */
 internal fun SetupActivity.addScriptRow(root: LinearLayout, box: android.widget.EditText, at: Int) {
     val lang = Lang.current(this)
-    val modes = Script.offered(lang)
+    val modes = Script.choices(lang)
     if (modes.size < 2) return
-    fun label(m: Script.Mode) = when (m) {
-        Script.Mode.LATIN -> "ABC"; Script.Mode.CYRILLIC -> "АБВ"; Script.Mode.GLAGOLITIC -> "ⰀⰁⰂ"
-    }
+    fun label(m: Script.Mode) = Script.name(m)
     val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
     val buttons = ArrayList<Button>()
     for (m in modes) buttons.add(Button(this).apply {
@@ -140,9 +138,9 @@ internal fun SetupActivity.addScriptRow(root: LinearLayout, box: android.widget.
         isAllCaps = false
         textSize = 16f
         narrow(this)
-        alpha = if (m == Script.mode(this@addScriptRow, lang)) 1f else 0.45f
+        alpha = if (m == Script.chosen(this@addScriptRow, lang)) 1f else 0.45f
         setOnClickListener {
-            val old = Script.mode(this@addScriptRow, lang)
+            val old = Script.chosen(this@addScriptRow, lang)
             if (m == old) return@setOnClickListener
             val latin = Script.back(box.text?.toString().orEmpty(), old, lang)
             Script.setMode(this@addScriptRow, m)
@@ -228,6 +226,8 @@ internal fun SetupActivity.addGlossMirror(root: LinearLayout, box: android.widge
     fun update() {
         val t = table ?: return
         var typed = box.text?.toString().orEmpty()
+        // Morse is read back to the language's own letters first.
+        if (Script.chosen(this, from) == Script.Mode.MORSE) typed = Morse.decode(typed, from)
         // Serbian entries are Cyrillic; Latin typing is read as Cyrillic.
         if (from == Lang.SR && Script.mode(this, from) == Script.Mode.LATIN)
             typed = Script.convert(typed, Script.Mode.CYRILLIC, Lang.SR)
@@ -349,6 +349,7 @@ internal fun SetupActivity.addLearnChips(root: LinearLayout, box: android.widget
     fun update() {
         chips.removeAllViews()
         var typed = box.text?.toString().orEmpty()
+        if (Script.chosen(this, lang) == Script.Mode.MORSE) typed = Morse.decode(typed, lang)
         if (lang == Lang.PL && Script.mode(this, lang) == Script.Mode.GLAGOLITIC)
             typed = Script.back(typed, Script.Mode.GLAGOLITIC, Lang.PL)
         val words = token.findAll(typed).map { it.value }
