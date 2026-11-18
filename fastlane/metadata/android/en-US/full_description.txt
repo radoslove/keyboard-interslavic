@@ -1,12 +1,16 @@
-A native keyboard (input method) for Interslavic — the zonal auxiliary Slavic language, medžuslovjansky.
+Interslove is one keyboard for 22 languages that helps you learn while you write.
 
-Standard orthography only (č š ž ě): the four diacritic letters are on a long-press of their base key (hold c → č, s → š, z → ž, e → ě), and the digraphs dž lj nj on d l n. A prediction bar and glide (swipe) typing come from a built-in Interslavic dictionary.
+Words you add go to the learning tab as cards: don't know, so-so, know. The alphabets and ready word sets are there to practise too. A simple word-by-word translator shows what a word means.
 
-Privacy:
-* Nothing leaves your phone. No account, no e-mail, no phone number, no sign-up.
-* The keyboard needs no "Full Access" to type.
-* Word collection and the popularity ranking are optional, opt-in, on-device only, OFF by default, and never send anything automatically — any export is a file you hand on yourself.
+Write without diacritics and the bar shows the correct form: type "clovek", get "člověk". Letters with diacritics also sit on a long press of their base key. Every language has swipe (glide) typing and word suggestions from a large dictionary built for it. Latin-script languages start on their usual layout (AZERTY, QWERTY or QWERTZ), and AZERTY and QWERTZ can be switched to QWERTY.
 
-Free and open source. No trackers, no ads, no proprietary libraries — the swipe engine is our own, not Google's gesture blob.
+Switch the script and the same keys write Interslavic in Cyrillic, Glagolitic or Latin, Polish in Glagolitic, and Serbian in either of its alphabets. Morse code is one more script, in 19 languages. A new alphabet is learned by writing ordinary words.
 
-Interslavic itself belongs to no one; this is a free tool to help spread it.
+The 22 languages are Belarusian, Bosnian, Bulgarian, Croatian, Czech, Dutch, English, French, German, Interslavic, Italian, Macedonian, Norwegian, Polish, Proto-Slavic, Romanian, Russian, Serbian (Latin and Cyrillic), Slovak, Slovenian, Spanish and Ukrainian. Tick the ones you write in and switch between them by sliding a finger along the space bar.
+
+Privacy
+• The keyboard has no internet permission. Nothing leaves your phone on its own.
+• No account, no e-mail, no phone number, no sign-up.
+• Words the keyboard did not know can be sent to the dictionary with one button, only when you press it, as an e-mail you send yourself.
+
+Free and open source. No ads, no trackers, and the swipe engine is our own.

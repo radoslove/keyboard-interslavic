@@ -1,1 +1,1 @@
-Interslavic keyboard: standard letters, prediction and swipe, fully offline.
+An offline keyboard for 22 languages that turns your words into learning cards.

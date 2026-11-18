@@ -1,0 +1,9 @@
+Dutch, French, Romanian and Spanish; Morse code as a script; a learning tab.
+
+- New languages: Dutch (auto's, zo'n), French (AZERTY or QWERTY, l' and
+  qu' take the next word), Romanian (ș ț, s-a, într-o) and Spanish
+  (ñ key), each with names of people and places.
+- Morse code as an extra script for 19 languages.
+- The app's learning tab: cards for your own words, the alphabets and
+  ready word sets.
+- Holding the globe offers the Interslove app next to the keyboard picker.
