@@ -45,13 +45,18 @@ private var learnStudy = false
  */
 private val learnLine = ArrayList<Learn.Card>()
 private val learnFirstGrade = HashMap<String, Int>()
+/** How often each card was not known in this pass: it then comes back a little later each time. */
+private val learnMisses = HashMap<String, Int>()
 private val learnRecent = ArrayList<Int>()
 private var learnSinceNew = 0
 private var learnCurrent: Learn.Card? = null
 private const val PACE_LEARNING = 3
 private const val PACE_EVERY = 8
+/** Each card in play beyond [PACE_LEARNING] puts this many more cards before the next new one. */
+private const val PACE_SLOWER = 4
 private const val PACE_BACK_0 = 2
 private const val PACE_BACK_1 = 5
+private const val PACE_REST = 4
 /** Morse taught by families: dots, dashes, a dash added, their mirrors, the rest. */
 private const val MORSE_ORDER = "eishtmoauvndbwgkrjpzqcylfx"
 
@@ -71,6 +76,7 @@ private fun learnStart(cards: List<Learn.Card>) {
     learnQueue = (old + missed.sortedBy { rank(it) } + new.sortedBy { rank(it) }).toMutableList()
     learnLine.clear()
     learnFirstGrade.clear()
+    learnMisses.clear()
     learnRecent.clear()
     learnSinceNew = 0
     learnCurrent = null
@@ -81,7 +87,8 @@ private fun learnNext(): Learn.Card? {
     val pool = learnQueue ?: return null
     val struggling = learnRecent.takeLast(5).count { it == 0 } >= 3
     val takeNew = pool.isNotEmpty() && (learnLine.isEmpty() ||
-        learnLine.size <= PACE_LEARNING || (!struggling && learnSinceNew >= PACE_EVERY))
+        learnLine.size <= PACE_LEARNING ||
+        (!struggling && learnSinceNew >= PACE_EVERY + PACE_SLOWER * (learnLine.size - PACE_LEARNING)))
     return if (takeNew) {
         learnSinceNew = 0
         pool.removeAt(0)
@@ -379,8 +386,13 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
                     if (!learnStudy && first != null && first < 2 && card.due - System.currentTimeMillis() < 3_600_000L)
                         Learn.grade(this@buildLearnTab, card, 1)
                 } else {
-                    val back = if (g == 0) PACE_BACK_0 else PACE_BACK_1
-                    learnLine.add(minOf(back, learnLine.size), card)
+                    // Not to drill one card to boredom: every miss in this pass
+                    // puts it one place further back, and after PACE_REST misses
+                    // it waits at the end of the pass.
+                    val misses = (learnMisses[key] ?: 0) + 1
+                    learnMisses[key] = misses
+                    val back = (if (g == 0) PACE_BACK_0 else PACE_BACK_1) + misses - 1
+                    learnLine.add(if (misses >= PACE_REST) learnLine.size else minOf(back, learnLine.size), card)
                 }
                 learnRevealed = false
                 showCard()
