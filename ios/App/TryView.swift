@@ -171,7 +171,7 @@ struct TryView: View {
                     Text(Ui.head("try_head"))
                 }
             }
-            .navigationTitle("Interslove")
+            .brandTitle(Ui.t("tab_write"))
             .overlay(alignment: .bottom) {
                 if let t = toast {
                     Text(t).padding(.horizontal, 14).padding(.vertical, 8)

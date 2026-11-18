@@ -20,6 +20,8 @@ struct InterslavicKeyboardApp: App {
 /// survives a look at ⚙.
 struct RootView: View {
     @State private var tab = UserDefaults.standard.string(forKey: "app_tab") ?? "set"
+    /// The screen's language chosen in ⚙: every tab is rebuilt in it.
+    @AppStorage("ui_lang") private var uiLang = ""
     private let tabs = [("set", "⚙"), ("try", "✎"), ("learn", "🎓")]
 
     private func page(_ key: String, _ v: some View) -> some View {
@@ -46,6 +48,7 @@ struct RootView: View {
                 page("try", TryView(active: tab == "try"))
                 page("learn", LearnView(active: tab == "learn"))
             }
+            .id(uiLang)
         }
         .onChange(of: tab) { UserDefaults.standard.set($0, forKey: "app_tab") }
     }
@@ -54,6 +57,7 @@ struct RootView: View {
 struct SetupView: View {
     var active = true
     @State private var theme = Shared.theme
+    @State private var uiLang = Ui.chosen
     @State private var script = Shared.store.string(forKey: "script") ?? "latin"
     @Environment(\.scenePhase) private var phase
     @State private var collectNew = Shared.collectNewOn
@@ -143,6 +147,7 @@ struct SetupView: View {
         NavigationStack {
             List {
                 // The test box moved to ✎ (`TryView`).
+                // The tab's name is the big title (`brandTitle`); sections keep their own heads.
                 Section(Ui.head("on_head")) {
                     ForEach(1...4, id: \.self) { n in
                         VStack(alignment: .leading, spacing: 2) {
@@ -170,7 +175,13 @@ struct SetupView: View {
                 if Ui.current == "pl" {
                     Section(Ui.head("glag_pl_head")) { note("glag_pl_body") }
                 }
+                // The app's own language first: the screen everything else is read in.
                 Section {
+                    Picker(Ui.t("ui_lang_pick"), selection: $uiLang) {
+                        Text(Ui.t("theme_auto")).tag("")
+                        ForEach(Ui.names, id: \.0) { Text($0.1).tag($0.0) }
+                    }
+                    .onChange(of: uiLang) { Ui.choose($0) }
                     Picker(Ui.t("script_pick"), selection: $script) {
                         Text(Ui.t("script_latin")).tag("latin")
                         Text(Ui.t("script_cyrillic")).tag("cyrillic")
@@ -183,8 +194,6 @@ struct SetupView: View {
                         Text(Ui.t("theme_dark")).tag(Shared.Theme.dark)
                     }
                     .onChange(of: theme) { Shared.theme = $0 }
-                } header: {
-                    Text(Ui.head("settings_head"))
                 } footer: {
                     if let a = Ui.gloss("script_pick"), let b = Ui.gloss("theme_pick") { Text("\(a) · \(b)") }
                 }
@@ -247,7 +256,7 @@ struct SetupView: View {
                         }
                 }
             }
-            .navigationTitle("Interslove")
+            .brandTitle(Ui.t("settings_head"))
             .onAppear(perform: reload)
             .onChange(of: active) { if $0 { reload() } }
             .onChange(of: phase) { if $0 == .active { reload() } }

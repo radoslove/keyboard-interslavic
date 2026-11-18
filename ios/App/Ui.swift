@@ -8,7 +8,33 @@ import Foundation
 /// The texts live in `tools/ui_texts.json`, shared with Android, and
 /// `tools/build_ui_texts.py` writes them into `UiTexts.swift`.
 enum Ui {
-    static let current: String = pick(Locale.preferredLanguages.first ?? "")
+    /// The screen's language: the one chosen in ⚙ (`ui_lang`), else the
+    /// phone's. Interslavic is no iOS language, so only the app can offer it
+    /// (owner 261118: "ustawienia główne w różnych językach").
+    static var current: String { chosenOrPhone }
+    private static var chosenOrPhone = resolve()
+
+    static var chosen: String { UserDefaults.standard.string(forKey: "ui_lang") ?? "" }
+
+    /// "" = as the phone.
+    static func choose(_ l: String) {
+        UserDefaults.standard.set(l, forKey: "ui_lang")
+        chosenOrPhone = resolve()
+    }
+
+    private static func resolve() -> String {
+        let c = chosen
+        return languages.contains(c) ? c : pick(Locale.preferredLanguages.first ?? "")
+    }
+
+    /// Each language by its own name, for the chooser.
+    static let names: [(String, String)] = [
+        ("isv", "Medžuslovjansky"), ("be", "Беларуская"), ("bs", "Bosanski"), ("bg", "Български"),
+        ("cs", "Čeština"), ("en", "English"), ("hr", "Hrvatski"), ("mk", "Македонски"),
+        ("nb", "Norsk bokmål"), ("pl", "Polski"), ("ru", "Русский"), ("sk", "Slovenčina"),
+        ("sl", "Slovenščina"), ("sr", "Srpski (latinica)"), ("sr-Cyrl", "Српски (ћирилица)"),
+        ("uk", "Українська"),
+    ]
 
     /// `sr-Latn-RS` -> `sr`, `sr-RS` / `sr-Cyrl` -> `sr-Cyrl` (iOS writes
     /// Serbian in Cyrillic unless Latin is chosen), `nn`/`no` -> `nb`.

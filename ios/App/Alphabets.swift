@@ -11,17 +11,20 @@ enum Layout {
 /// The scripts a language offers, Morse last - Android `Script.choices`.
 enum Scripts {
     enum Choice: Hashable {
-        case script(Script.Mode), morse
+        case script(Script.Mode), runes(Runes.Row), morse
         var name: String {
             switch self {
             case .script(let m): return Script.label(m)
+            case .runes(let r): return Runes.label(r)
             case .morse: return Script.morseLabel
             }
         }
     }
 
     static func choices(_ lang: String) -> [Choice] {
-        Script.offered(lang).map { .script($0) } + (Morse.has(lang) ? [.morse] : [])
+        Script.offered(lang).map { .script($0) }
+            + (Runes.has(lang) ? Runes.Row.allCases.map { .runes($0) } : [])
+            + (Morse.has(lang) ? [.morse] : [])
     }
 
     /// [latin] in script [m] of [lang]: a word card read in Cyrillic or Glagolitic.
@@ -33,8 +36,8 @@ enum Scripts {
 
 /// Alphabet sets - Android `Alphabets` (`Sets.kt`, 3.10.30): the letters of a
 /// language shown in another of its scripts (Interslavic in Cyrillic and
-/// Glagolitic, Polish in Glagolitic, Serbian in Cyrillic, every language with a
-/// Morse table in Morse), the letter itself as the answer. Built from the
+/// Glagolitic, Polish in Glagolitic, Serbian in Cyrillic, Norwegian in both rune
+/// rows, every language with a Morse table in Morse), the letter itself as the answer. Built from the
 /// keyboard's own conversion, so nothing is stored.
 enum Alphabets {
     private static let letters: [String: String] = [
@@ -64,17 +67,75 @@ enum Alphabets {
         Script.label(Script.offered(lang)[0]) + " → " + c.name
     }
 
+    /// Every script [lang] can be written in, its own first.
+    /// For learning, both rune rows are offered to every language written in
+    /// Latin letters (owner 261118), not only Norwegian as on the keyboard:
+    /// a letter with an accent takes its base letter's rune (č -> ᛍ).
+    static func scripts(_ lang: String) -> [Scripts.Choice] {
+        guard let ls = letters[lang] else { return [] }
+        var out = Scripts.choices(lang)
+        let latin = ls.unicodeScalars.contains { (97...122).contains($0.value) }
+        if latin, !out.contains(where: { if case .runes = $0 { return true }; return false }) {
+            let at = out.firstIndex(of: .morse) ?? out.count
+            out.insert(contentsOf: Runes.Row.allCases.map { .runes($0) }, at: at)
+        }
+        return out
+    }
+
+    /// Letter [l] of [lang] in script [c]; nil when the script has no sign for it.
+    private static func render(_ l: String, _ c: Scripts.Choice, _ lang: String) -> String? {
+        let f: String?
+        switch c {
+        case .script(let m): f = m == Script.offered(lang)[0] ? l : Scripts.convert(l, m, lang)
+        case .runes(let r): f = l.count == 1 ? String(Runes.rune(l.first!, r)) : nil
+        case .morse: f = l.count == 1 ? Morse.code(l.first!, lang) : nil
+        }
+        guard let s = f, !s.trimmingCharacters(in: .whitespaces).isEmpty else { return nil }
+        return s
+    }
+
+    /// "ABC → ⰀⰁⰂ", from any script to any other.
+    static func title(_ from: Scripts.Choice, _ to: Scripts.Choice) -> String { from.name + " → " + to.name }
+
+    /// Cards from script [from] to [to]: the letter in [to] on the front, in
+    /// [from] as the answer. Letters sharing one sign (runic ᛁ = e i j, Morse
+    /// c = č) make one card with every letter in the answer.
+    static func pair(_ lang: String, _ from: Scripts.Choice, _ to: Scripts.Choice) -> [(String, String)] {
+        guard from != to, let ls = letters[lang]?.split(separator: " ").map(String.init) else { return [] }
+        var order: [String] = [], by: [String: [String]] = [:]
+        for l in ls {
+            guard let f = render(l, to, lang), let b = render(l, from, lang), f != b else { continue }
+            if by[f] == nil { order.append(f) }
+            if !(by[f]?.contains(b) ?? false) { by[f, default: []].append(b) }
+        }
+        return order.map { ($0, by[$0]!.joined(separator: " / ")) }
+    }
+
     /// For [lang]: (title, [(letter in the other script, letter)]) per script.
     static func sets(_ lang: String) -> [(String, [(String, String)])] {
         guard let ls = letters[lang]?.split(separator: " ").map(String.init) else { return [] }
         let native = Scripts.Choice.script(Script.offered(lang)[0])
         return Scripts.choices(lang).filter { $0 != native }.compactMap { c in
+            // Runes: several letters can share one rune (younger futhark: e i j
+            // are all ᛁ), so one card per rune, its letters together as the answer.
+            if case .runes(let r) = c {
+                var order: [String] = [], by: [String: [String]] = [:]
+                for l in ls where l.count == 1 {
+                    let f = String(Runes.rune(l.first!, r))
+                    guard f != l else { continue }
+                    if by[f] == nil { order.append(f) }
+                    by[f, default: []].append(l)
+                }
+                let cards = order.map { ($0, by[$0]!.joined(separator: " / ")) }
+                return cards.isEmpty ? nil : (title(lang, c), cards)
+            }
             var seen = Set<String>()
             let cards: [(String, String)] = ls.compactMap { l in
                 let front: String?
                 switch c {
                 case .morse: front = l.count == 1 ? Morse.code(l.first!, lang) : nil
                 case .script(let m): front = Scripts.convert(l, m, lang)
+                case .runes: front = nil
                 }
                 // A letter whose code is its base letter's (Morse č = c) would
                 // make the same card twice: the first one keeps it.

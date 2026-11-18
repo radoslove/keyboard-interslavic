@@ -1460,6 +1460,26 @@
    "bg": "Светла",
    "be": "Светлая"
   },
+  "ui_lang_pick": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Jezyk aplikacije",
+   "en": "App language",
+   "pl": "Język aplikacji",
+   "nb": "Appspråk",
+   "cs": "Jazyk aplikace",
+   "sk": "Jazyk aplikácie",
+   "sl": "Jezik aplikacije",
+   "hr": "Jezik aplikacije",
+   "sr": "Jezik aplikacije",
+   "bs": "Jezik aplikacije",
+   "mk": "Јазик на апликацијата",
+   "ru": "Язык приложения",
+   "uk": "Мова застосунку",
+   "bg": "Език на приложението",
+   "be": "Мова праграмы"
+  },
   "theme_pick": {
    "platforms": [
     "ios"
@@ -1771,6 +1791,46 @@
    "be": "Нямецкая: назоўнікі з вялікай літары",
    "de": "Deutsch: Nomen großschreiben"
   },
+  "tab_keyboard": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Klaviatura",
+   "en": "Keyboard",
+   "pl": "Klawiatura",
+   "nb": "Tastatur",
+   "cs": "Klávesnice",
+   "sk": "Klávesnica",
+   "sl": "Tipkovnica",
+   "hr": "Tipkovnica",
+   "sr": "Tastatura",
+   "bs": "Tastatura",
+   "mk": "Тастатура",
+   "ru": "Клавиатура",
+   "uk": "Клавіатура",
+   "bg": "Клавиатура",
+   "be": "Клавіятура"
+  },
+  "tab_write": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Pisanje",
+   "en": "Writing",
+   "pl": "Pisanie",
+   "nb": "Skriving",
+   "cs": "Psaní",
+   "sk": "Písanie",
+   "sl": "Pisanje",
+   "hr": "Pisanje",
+   "sr": "Pisanje",
+   "bs": "Pisanje",
+   "mk": "Пишување",
+   "ru": "Ввод",
+   "uk": "Письмо",
+   "bg": "Писане",
+   "be": "Увод"
+  },
   "learn_head": {
    "platforms": [
     "android",
@@ -1797,21 +1857,81 @@
     "android",
     "ios"
    ],
-   "isv": "Slova, ktore hčeš naučiti se: dodaj je niže abo klikni na slovo pod poljem za pisanje v ✎. Karta pokazyvaje slovo: pomysli, čto ono znači, potom pokaži odpověd i ocěni, kako dobro go znaješ.",
-   "en": "Words you want to learn: add them below, or tap a word under the writing box in ✎. Each card shows the word; check yourself against the translation and say how well you knew it.",
-   "pl": "Słowa, których chcesz się nauczyć: dodaj je poniżej albo stuknij słowo pod polem pisania w ✎. Karta pokazuje słowo; sprawdź się z tłumaczeniem i oceń, jak dobrze je znałeś.",
-   "nb": "Ord du vil lære: legg dem til nedenfor, eller trykk på et ord under skrivefeltet i ✎. Hvert kort viser ordet; sjekk deg selv mot oversettelsen og si hvor godt du kunne det.",
-   "cs": "Slova, která se chceš naučit: přidej je níže nebo klepni na slovo pod polem pro psaní v ✎. Každá kartička ukazuje slovo; zkontroluj si to podle překladu a ohodnoť, jak dobře jsi ho znal.",
-   "sk": "Slová, ktoré sa chceš naučiť: pridaj ich nižšie alebo ťukni na slovo pod poľom na písanie v ✎. Každá kartička ukazuje slovo; skontroluj si to podľa prekladu a ohodnoť, ako dobre si ho poznal.",
-   "sl": "Besede, ki se jih želiš naučiti: dodaj jih spodaj ali tapni besedo pod poljem za pisanje v ✎. Vsaka kartica pokaže besedo; preveri se ob prevodu in oceni, kako dobro si jo poznal.",
-   "hr": "Riječi koje želiš naučiti: dodaj ih ispod ili dodirni riječ ispod polja za pisanje u ✎. Svaka kartica pokazuje riječ; provjeri se prema prijevodu i ocijeni koliko si je dobro znao.",
-   "sr": "Reči koje želiš da naučiš: dodaj ih ispod ili dodirni reč ispod polja za pisanje u ✎. Svaka kartica prikazuje reč; proveri se prema prevodu i oceni koliko si je dobro znao.",
-   "bs": "Riječi koje želiš naučiti: dodaj ih ispod ili dodirni riječ ispod polja za pisanje u ✎. Svaka kartica prikazuje riječ; provjeri se prema prijevodu i ocijeni koliko si je dobro znao.",
-   "mk": "Зборови што сакаш да ги научиш: додај ги подолу или допри збор под полето за пишување во ✎. Секоја картичка го покажува зборот; провери се според преводот и оцени колку добро го знаеше.",
-   "ru": "Слова, которые хочешь выучить: добавь их ниже или нажми на слово под полем ввода в ✎. Каждая карточка показывает слово; проверь себя по переводу и оцени, насколько хорошо ты его знал.",
-   "uk": "Слова, які хочеш вивчити: додай їх нижче або торкнися слова під полем введення в ✎. Кожна картка показує слово; перевір себе за перекладом і оціни, наскільки добре ти його знав.",
-   "bg": "Думи, които искаш да научиш: добави ги по-долу или докосни дума под полето за писане в ✎. Всяка карта показва думата; провери се по превода и оцени колко добре си я знаел.",
-   "be": "Словы, якія хочаш вывучыць: дадай іх ніжэй або націсні на слова пад полем уводу ў ✎. Кожная картка паказвае слова; правер сябе па перакладзе і ацані, наколькі добра ты яго ведаў."
+   "isv": "Slova za učenje: dodaj je niže abo klikni na slovo pod poljem za pisanje v ✎. Na kartě pomysli, čto ono znači, i ocěni se.",
+   "en": "Words to learn: add them below, or tap a word under the writing box in ✎. On each card, recall the meaning and rate yourself.",
+   "pl": "Słowa do nauki: dodaj je poniżej albo stuknij słowo pod polem pisania w ✎. Na karcie przypomnij sobie znaczenie i oceń się.",
+   "nb": "Ord å lære: legg dem til nedenfor, eller trykk på et ord under skrivefeltet i ✎. På kortet: kom på betydningen og vurder deg selv.",
+   "cs": "Slova k naučení: přidej je níže nebo klepni na slovo pod polem pro psaní v ✎. Na kartičce si vybav význam a ohodnoť se.",
+   "sk": "Slová na učenie: pridaj ich nižšie alebo ťukni na slovo pod poľom na písanie v ✎. Na kartičke si spomeň na význam a ohodnoť sa.",
+   "sl": "Besede za učenje: dodaj jih spodaj ali tapni besedo pod poljem za pisanje v ✎. Na kartici se spomni pomena in se oceni.",
+   "hr": "Riječi za učenje: dodaj ih ispod ili dodirni riječ ispod polja za pisanje u ✎. Na kartici se sjeti značenja i ocijeni se.",
+   "sr": "Reči za učenje: dodaj ih ispod ili dodirni reč ispod polja za pisanje u ✎. Na kartici se seti značenja i oceni se.",
+   "bs": "Riječi za učenje: dodaj ih ispod ili dodirni riječ ispod polja za pisanje u ✎. Na kartici se sjeti značenja i ocijeni se.",
+   "mk": "Зборови за учење: додај ги подолу или допри збор под полето за пишување во ✎. На картичката сети се на значењето и оцени се.",
+   "ru": "Слова для изучения: добавь их ниже или нажми на слово под полем ввода в ✎. На карточке вспомни значение и оцени себя.",
+   "uk": "Слова для вивчення: додай їх нижче або торкнися слова під полем введення в ✎. На картці пригадай значення й оціни себе.",
+   "bg": "Думи за учене: добави ги по-долу или докосни дума под полето за писане в ✎. На картата спомни си значението и оцени се.",
+   "be": "Словы для вывучэння: дадай іх ніжэй або націсні на слова пад полем уводу ў ✎. На картцы ўзгадай значэнне і ацані сябе."
+  },
+  "learn_alpha_body": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Pisma za učenje: izberi, iz ktorogo pisma na ktore, i klikni ＋. Na kartě pomysli, ktora to jest bukva, i ocěni se.",
+   "en": "Scripts to learn: pick the script to start from and the one to learn, and tap ＋. On each card, recall the letter and rate yourself.",
+   "pl": "Pisma do nauki: wybierz, z którego pisma na które, i stuknij ＋. Na karcie przypomnij sobie literę i oceń się.",
+   "nb": "Skrifter å lære: velg fra hvilken skrift til hvilken, og trykk på ＋. På kortet: kom på bokstaven og vurder deg selv.",
+   "cs": "Písma k naučení: vyber, ze kterého písma do kterého, a klepni na ＋. Na kartičce si vybav písmeno a ohodnoť se.",
+   "sk": "Písma na učenie: vyber, z ktorého písma do ktorého, a ťukni na ＋. Na kartičke si spomeň na písmeno a ohodnoť sa.",
+   "sl": "Pisave za učenje: izberi, iz katere pisave v katero, in tapni ＋. Na kartici se spomni črke in se oceni.",
+   "hr": "Pisma za učenje: odaberi iz kojeg pisma u koje i dodirni ＋. Na kartici se sjeti slova i ocijeni se.",
+   "sr": "Pisma za učenje: izaberi iz kog pisma u koje i dodirni ＋. Na kartici se seti slova i oceni se.",
+   "bs": "Pisma za učenje: odaberi iz kojeg pisma u koje i dodirni ＋. Na kartici se sjeti slova i ocijeni se.",
+   "mk": "Писма за учење: избери од кое писмо во кое и допри ＋. На картичката сети се на буквата и оцени се.",
+   "ru": "Алфавиты для изучения: выбери, с какого алфавита на какой, и нажми ＋. На карточке вспомни букву и оцени себя.",
+   "uk": "Абетки для вивчення: обери, з якої абетки на яку, і торкнися ＋. На картці пригадай літеру й оціни себе.",
+   "bg": "Писмености за учене: избери, от кое писмо на кое, и докосни ＋. На картата спомни си буквата и оцени се.",
+   "be": "Пісьменнасці для вывучэння: выберы, з якога пісьма на якое, і націсні ＋. На картцы ўзгадай літару і ацані сябе."
+  },
+  "learn_my_letters": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Moje bukvy",
+   "en": "My letters",
+   "pl": "Moje litery",
+   "nb": "Mine bokstaver",
+   "cs": "Moje písmena",
+   "sk": "Moje písmená",
+   "sl": "Moje črke",
+   "hr": "Moja slova",
+   "sr": "Moja slova",
+   "bs": "Moja slova",
+   "mk": "Мои букви",
+   "ru": "Мои буквы",
+   "uk": "Мої літери",
+   "bg": "Моите букви",
+   "be": "Мае літары"
+  },
+  "learn_kbd_words": {
+   "platforms": [
+    "ios"
+   ],
+   "isv": "Slova iz klaviatury",
+   "en": "Words from the keyboard",
+   "pl": "Słowa z klawiatury",
+   "nb": "Ord fra tastaturet",
+   "cs": "Slova z klávesnice",
+   "sk": "Slová z klávesnice",
+   "sl": "Besede s tipkovnice",
+   "hr": "Riječi s tipkovnice",
+   "sr": "Reči sa tastature",
+   "bs": "Riječi s tastature",
+   "mk": "Зборови од тастатурата",
+   "ru": "Слова с клавиатуры",
+   "uk": "Слова з клавіатури",
+   "bg": "Думи от клавиатурата",
+   "be": "Словы з клавіятуры"
   },
   "learn_due": {
    "platforms": [
