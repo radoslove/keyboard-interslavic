@@ -17,6 +17,9 @@ import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 
+/** The app's privacy policy (website, section "privacy"). */
+internal const val PRIVACY_URL = "https://interslove.vercel.app/#privacy"
+
 /**
  * The container app (android_PLAN.md M3). Its whole job is the collection
  * consent surface the keyboard cannot show itself: an opt-in switch (default
@@ -258,6 +261,14 @@ class SetupActivity : Activity() {
             }
         })
 
+        // The privacy policy, linked from inside the app as Google Play asks
+        // ("on your store listing and within your app", 2026-11-18). The page
+        // opens in the browser: the keyboard itself has no network permission.
+        root.addView(Button(this).apply {
+            text = t("privacy_link")
+            setOnClickListener { openPrivacyPolicy() }
+        })
+
         // Gesture log for error reports (iOS 0.6.11): not for
         // everyday use, so hidden behind five taps on the version line; kept on
         // the phone, sent only by the user's own mail.
@@ -417,6 +428,15 @@ class SetupActivity : Activity() {
     /** The log as ONE file `interslove-gesty_<RRMMDD_HHMM>.json` - a hyphen
      *  after `interslove`, so the word-batch reader on the server does not take
      *  it for a batch of words (iOS `sendLog`). */
+    private fun openPrivacyPolicy() {
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(PRIVACY_URL)))
+        } catch (_: android.content.ActivityNotFoundException) {
+            // No browser at all: show the address, so it can be typed elsewhere.
+            Toast.makeText(this, PRIVACY_URL, Toast.LENGTH_LONG).show()
+        }
+    }
+
     private fun sendGestureLog() {
         if (GestureLog.lines(this).isEmpty()) { toast(t("log_empty")); return }
         val stamp = java.text.SimpleDateFormat("yyMMdd_HHmm", java.util.Locale.ROOT).format(java.util.Date())

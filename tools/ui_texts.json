@@ -530,6 +530,26 @@
    "bg": "Приложението изпраща дневника на жестовете само през собствената ти поща, когато докоснеш „Изпрати“.",
    "be": "Праграма адпраўляе журнал жэстаў толькі тваёй поштай, калі ты націскаеш «Адправіць»."
   },
+  "privacy_link": {
+   "platforms": [
+    "android"
+   ],
+   "isv": "Politika privatnosti",
+   "en": "Privacy policy",
+   "pl": "Polityka prywatności",
+   "nb": "Personvernerklæring",
+   "cs": "Zásady ochrany osobních údajů",
+   "sk": "Pravidlá ochrany súkromia",
+   "sl": "Pravilnik o zasebnosti",
+   "hr": "Pravila o privatnosti",
+   "sr": "Politika privatnosti",
+   "bs": "Politika privatnosti",
+   "mk": "Политика за приватност",
+   "ru": "Политика конфиденциальности",
+   "uk": "Політика конфіденційності",
+   "bg": "Политика за поверителност",
+   "be": "Палітыка прыватнасці"
+  },
   "log_send": {
    "platforms": [
     "ios",

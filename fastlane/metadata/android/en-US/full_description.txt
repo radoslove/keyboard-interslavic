@@ -10,7 +10,7 @@ The 22 languages are Belarusian, Bosnian, Bulgarian, Croatian, Czech, Dutch, Eng
 
 Privacy
 • The keyboard has no internet permission. Nothing leaves your phone on its own.
-• No account, no e-mail, no phone number, no sign-up.
+• No account and no sign-up: no e-mail or phone number is needed.
 • Words the keyboard did not know can be sent to the dictionary with one button, only when you press it, as an e-mail you send yourself.
 
 Free and open source. No ads, no trackers, and the swipe engine is our own.
