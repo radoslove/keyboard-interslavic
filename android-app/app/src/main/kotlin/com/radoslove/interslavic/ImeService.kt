@@ -161,7 +161,7 @@ class ImeService : InputMethodService() {
         setInputView(onCreateInputView())
     }
 
-    fun openSettings() {
+    fun openApp() {
         requestHideSelf(0)
         startActivity(
             Intent(this, SetupActivity::class.java)

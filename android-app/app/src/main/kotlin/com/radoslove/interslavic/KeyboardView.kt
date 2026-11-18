@@ -473,7 +473,19 @@ class KeyboardView(
                     canvas.drawRoundRect(l + 2f, popupTop + 2f, l + popupCell - 2f, popupBottom - 2f, r, r, popupSelBg)
                     previewTxt.color = Color.WHITE
                 } else previewTxt.color = cText
-                val label = Script.label(context, items[i]).replace('\n', ' ')
+                if (items[i] == APP_ITEM) {
+                    val icon = appIcon
+                    if (icon != null) {
+                        val s = minOf(popupCell, popupBottom - popupTop) * 0.72f
+                        val cx = l + popupCell / 2f
+                        val cy = (popupTop + popupBottom) / 2f
+                        icon.setBounds((cx - s / 2f).toInt(), (cy - s / 2f).toInt(),
+                            (cx + s / 2f).toInt(), (cy + s / 2f).toInt())
+                        icon.draw(canvas)
+                        continue
+                    }
+                }
+                val label = (if (items[i] == APP_ITEM) "⚙" else Script.label(context, items[i])).replace('\n', ' ')
                 // Shrink a label that does not fit its cell instead of letting it
                 // spill over (down to 0.4, as on iOS).
                 previewTxt.textSize = fullSize
@@ -573,6 +585,15 @@ class KeyboardView(
     // which showed nothing but the key's own letter (`з`, not `ж`) above the
     // finger. Items are kept Latin and drawn through Script, like key labels.
     private var popupItems: List<String>? = null
+
+    /** The strip item that opens the WHOLE app (settings, ✎, 🎓), drawn as the
+     *  app's own launcher icon instead of a glyph (owner 2026-11-18: a gear
+     *  said "settings" only). One private-use character, so the width rules
+     *  that measure items as text treat it as a single letter. */
+    private val APP_ITEM = "\uE000"
+    private val appIcon: android.graphics.drawable.Drawable? by lazy {
+        try { context.packageManager.getApplicationIcon(context.packageName) } catch (_: Throwable) { null }
+    }
     private var popupLeft = 0f
     private var popupTop = 0f
     private var popupBottom = 0f
@@ -1291,7 +1312,7 @@ class KeyboardView(
      *  a foreign keyboard, so it must not need aiming. The gear is one slide
      *  to the right. */
     private fun globeKey(weight: Float): TextView {
-        val gear = "⚙"
+        val gear = APP_ITEM
         val picker = "🌐"
         val tv = baseKey("🌐", weight)
         // The view's own long-press machinery competes with ours for the hold.
@@ -1320,7 +1341,7 @@ class KeyboardView(
                     // The system rotates the languages (subtypes) and tells the
                     // service, which rebuilds the keyboard for the new one.
                     when (closePopup()) {
-                        gear -> service.openSettings()
+                        gear -> service.openApp()
                         picker -> service.switchIme()
                         else -> if (!service.nextLanguage()) service.switchIme()
                     }
@@ -2448,8 +2469,11 @@ class KeyboardView(
     private fun logRefused() {
         val why = refused
         refused = null
+        // From MIN_GLIDE_KEYS, the length at which a glide counts at all
+        // (was 1.5 keys): 2026-11-18 a first `tutaj` was not caught and left
+        // no line, so every exit that drops a travelling touch is logged.
         if (why != null && refusedPts.size >= 9 &&
-            trailLength(ArrayList(refusedPts)) > keyWidth(computeCenters()) * 1.5f) {
+            trailLength(ArrayList(refusedPts)) > keyWidth(computeCenters()) * MIN_GLIDE_KEYS) {
             GestureLog.committed(ArrayList(refusedPts), computeCenters(), emptyList(), "", -1,
                 Lang.current(context), Script.mode(context).name.lowercase())
             GestureLog.resolve("refused_$why", null)
@@ -2608,6 +2632,13 @@ class KeyboardView(
                     // other letter of both non-Latin scripts.
                     val base = Layout.keyText(start, Script.mode(context), Lang.current(context))
                     val cased = if (up) base.replaceFirstChar { it.uppercaseChar() } else base
+                    if (pts.size >= 9) {
+                        // A touch that moved, typed as one letter: logged, so a
+                        // glide cut short this way shows up as `tap_short`.
+                        GestureLog.committed(pts, computeCenters(), emptyList(), cased, -1,
+                            Lang.current(context), Script.mode(context).name.lowercase())
+                        GestureLog.resolve("tap_short", null)
+                    }
                     commit(Script.out(context, cased), cased)
                 } else if (pts.size >= 9) {
                     decodeSwipe(pts)                         // >= 3 points = a real glide
@@ -2621,6 +2652,14 @@ class KeyboardView(
                 }
             }
             MotionEvent.ACTION_CANCEL -> {
+                // The system took the touch away mid-glide: nothing is typed,
+                // and until 2026-11-18 nothing was logged either.
+                val pts = ArrayList(trailPts)
+                if (pts.size >= 9) {
+                    GestureLog.committed(pts, computeCenters(), emptyList(), "", -1,
+                        Lang.current(context), Script.mode(context).name.lowercase())
+                    GestureLog.resolve("cancelled", null)
+                }
                 swiping = false
                 swipeStartKey = null
                 trailPts.clear()
