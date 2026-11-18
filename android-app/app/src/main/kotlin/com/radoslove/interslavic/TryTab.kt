@@ -141,13 +141,16 @@ internal fun SetupActivity.addScriptRow(root: LinearLayout, box: android.widget.
         alpha = if (m == Script.chosen(this@addScriptRow, lang)) 1f else 0.45f
         setOnClickListener {
             val old = Script.chosen(this@addScriptRow, lang)
-            if (m == old) return@setOnClickListener
+            // Tapping the alphabet already on turns it off: back to the
+            // language's own script, as a switch is expected to behave.
+            val to = if (m == old) modes.first() else m
+            if (to == old) return@setOnClickListener
             val latin = Script.back(box.text?.toString().orEmpty(), old, lang)
-            Script.setMode(this@addScriptRow, m)
-            box.setText(Script.convert(latin, m, lang))
+            Script.setMode(this@addScriptRow, to)
+            box.setText(Script.convert(latin, to, lang))
             box.setSelection(box.text?.length ?: 0)
             ImeService.running?.rebuildView(false)
-            for (b in buttons) b.alpha = if (b === this) 1f else 0.45f
+            for ((i, b) in buttons.withIndex()) b.alpha = if (modes[i] == to) 1f else 0.45f
         }
         row.addView(this)
     })

@@ -33,6 +33,63 @@ private var learnRevealed = false
 private var learnJustDone = false
 /** The running pass is "study" (every card, outside the schedule), not a review. */
 private var learnStudy = false
+
+/*
+ * Pacing inside one pass. The cards not shown yet wait in [learnQueue]; the
+ * ones already met wait in [learnLine], each put back a few places ahead
+ * after its grade, so a card not known comes back soon and a known one later.
+ * A new card comes in while few are still being learned, and now and then
+ * anyway so a pass does not turn into one long drill, unless the last
+ * answers were mostly "don't know". "Know" ends a card's pass; it comes
+ * back the next day at the earliest. Nothing blocks: the numbers only set the order.
+ */
+private val learnLine = ArrayList<Learn.Card>()
+private val learnFirstGrade = HashMap<String, Int>()
+private val learnRecent = ArrayList<Int>()
+private var learnSinceNew = 0
+private var learnCurrent: Learn.Card? = null
+private const val PACE_LEARNING = 3
+private const val PACE_EVERY = 8
+private const val PACE_BACK_0 = 2
+private const val PACE_BACK_1 = 5
+/** Morse taught by families: dots, dashes, a dash added, their mirrors, the rest. */
+private const val MORSE_ORDER = "eishtmoauvndbwgkrjpzqcylfx"
+
+private fun learnKey(c: Learn.Card) = c.lang + "\t" + c.word
+
+private fun learnStart(cards: List<Learn.Card>) {
+    // Alphabet cards whose answer is a letter: Morse in families, not A to Z.
+    fun rank(c: Learn.Card): Int {
+        if (!c.cat.endsWith(Script.name(Script.Mode.MORSE))) return 0
+        val i = MORSE_ORDER.indexOf(c.tr.lowercase().firstOrNull() ?: ' ')
+        return if (c.tr.length == 1 && i >= 0) i else MORSE_ORDER.length
+    }
+    // Learned cards due again first, then the ones missed before (never
+    // learned yet), then the new ones in teaching order.
+    val (old, rest) = cards.partition { it.reps > 0 }
+    val (missed, new) = rest.partition { !it.isNew }
+    learnQueue = (old + missed.sortedBy { rank(it) } + new.sortedBy { rank(it) }).toMutableList()
+    learnLine.clear()
+    learnFirstGrade.clear()
+    learnRecent.clear()
+    learnSinceNew = 0
+    learnCurrent = null
+}
+
+/** The next card of the pass, or null when it is over. */
+private fun learnNext(): Learn.Card? {
+    val pool = learnQueue ?: return null
+    val struggling = learnRecent.takeLast(5).count { it == 0 } >= 3
+    val takeNew = pool.isNotEmpty() && (learnLine.isEmpty() ||
+        learnLine.size <= PACE_LEARNING || (!struggling && learnSinceNew >= PACE_EVERY))
+    return if (takeNew) {
+        learnSinceNew = 0
+        pool.removeAt(0)
+    } else {
+        learnSinceNew++
+        learnLine.removeFirstOrNull()
+    }
+}
 /** The language being learned; null = the keyboard's current language. */
 private var learnLang: String? = null
 /** Whether the word lists under the card are opened. */
@@ -94,7 +151,8 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
 
     // Topics as tiles: own categories and ready sets in one place; a set not
     // taken yet is a tile with ＋.
-    root.addView(header(t("learn_topics")))
+    val topicsHead = header(t("learn_topics"))
+    root.addView(topicsHead)
     val topicGrid = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
     root.addView(topicGrid)
     // Alphabets apart from the word topics; the heading needs no translation.
@@ -203,7 +261,7 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
                 maxLines = 1
                 isEnabled = cards.isNotEmpty()
                 setOnClickListener {
-                    learnQueue = cards.toMutableList()
+                    learnStart(cards)
                     learnStudy = study
                     learnRevealed = false
                     learnJustDone = false
@@ -213,13 +271,13 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
             cardBox.addView(buttons)
             return
         }
-        if (q.isEmpty()) {
+        val card = learnCurrent ?: learnNext()?.also { learnCurrent = it }
+        if (card == null) {
             learnQueue = null
             learnJustDone = true
             refresh()
             return
         }
-        val card = q.first()
         cardBox.addView(small(lname(card.lang) + if (card.cat.isNotEmpty()) " · ${card.cat}" else ""))
         // Reading practice: a word card can be shown in another script of its
         // language (Interslavic in Cyrillic or Glagolitic, Polish in Glagolitic).
@@ -303,10 +361,27 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
             setOnClickListener {
                 // Studying ahead of the schedule must not stretch the intervals, so
                 // there only "don't know" counts: a forgotten word is due again soon.
-                if (!learnStudy || g == 0) Learn.grade(this@buildLearnTab, card, g)
-                q.removeAt(0)
-                // "Don't know" comes back at the end of the same review.
-                if (g == 0) q.add(card)
+                val key = learnKey(card)
+                val first = learnFirstGrade[key]
+                // Only the first answer of a pass sets the schedule; the repeats
+                // inside the pass only bring a forgotten card back sooner.
+                if (first == null) {
+                    learnFirstGrade[key] = g
+                    if (!learnStudy || g == 0) Learn.grade(this@buildLearnTab, card, g)
+                } else if (g == 0) Learn.grade(this@buildLearnTab, card, 0)
+                learnRecent.add(g)
+                learnCurrent = null
+                // "Know" ends the card's pass: it comes back the next day at
+                // the earliest, then less and less often.
+                if (g == 2) {
+                    // Learned in this pass: a card once forgotten here starts
+                    // again from one day, not from a minute.
+                    if (!learnStudy && first != null && first < 2 && card.due - System.currentTimeMillis() < 3_600_000L)
+                        Learn.grade(this@buildLearnTab, card, 1)
+                } else {
+                    val back = if (g == 0) PACE_BACK_0 else PACE_BACK_1
+                    learnLine.add(minOf(back, learnLine.size), card)
+                }
                 learnRevealed = false
                 showCard()
                 refresh()
@@ -441,6 +516,8 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
         fill(topicGrid, tiles)
         fill(alphaGrid, alphaTiles)
         alphaHead.visibility = if (alphaTiles.isEmpty()) View.GONE else View.VISIBLE
+        // A language with no word set and no cards yet: no empty heading.
+        topicsHead.visibility = if (tiles.isEmpty()) View.GONE else View.VISIBLE
         // Only the scripts this language has: Spanish is "ABC · ·−", not all four.
         alphaHead.text = (Script.offered(lang).take(1) + Script.choices(lang).drop(1).filter { m ->
             Alphabets.sets(lang).any { it.first == Alphabets.title(lang, m) }
@@ -460,6 +537,8 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
                     Learn.drop(this, c)
                     toast("${t("learn_unlearn")}: ${c.word}")
                     learnQueue?.removeAll { it.lang == c.lang && it.word == c.word }
+                    learnLine.removeAll { it.lang == c.lang && it.word == c.word }
+                    if (learnCurrent?.let { it.lang == c.lang && it.word == c.word } == true) learnCurrent = null
                     refresh()
                     showCard()
                 }))
