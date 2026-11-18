@@ -591,6 +591,7 @@ final class KeyboardViewController: UIInputViewController {
         let latin = Layout.keyText(shift == .off ? ch : Character(ch.uppercased()),
                                    latin: Script.mode == .latin)
         // Morse: the letter over its code, so the keys can be learned.
+        if let r = Script.runes { return Runes.encode(Script.out(latin), r) }
         return Script.morse ? Morse.keyLabel(Script.out(latin), Layout.language) : Script.out(latin)
     }
 
@@ -627,7 +628,7 @@ final class KeyboardViewController: UIInputViewController {
     /// The text field; in Morse it holds dots and dashes and `Doc` reads and
     /// writes it in letters (Android `Morse.Conn`).
     private var doc: Doc {
-        Doc(proxy: textDocumentProxy, morse: Script.morse ? Layout.language : nil)
+        Doc(proxy: textDocumentProxy, morse: Script.morse ? Layout.language : nil, runes: Script.runes)
     }
 
     private var contextBefore: String? {
@@ -1130,19 +1131,13 @@ final class KeyboardViewController: UIInputViewController {
 
         if Script.choiceCount > 1 {
             column.addArrangedSubview(header(Self.pt("script_head")))
-            var choices = Script.modes.map { m in
-                (Script.label(m), !Script.morse && Script.mode == m, { [weak self] in
-                    Script.set(m)
+            let now = Script.choice
+            column.addArrangedSubview(choiceRow(Script.choices.map { c in
+                (Script.choiceLabel(c), c == now, { [weak self] in
+                    Script.setChoice(c)
                     self?.buildKeyboard()
                 })
-            }
-            if Morse.has(Layout.language) {
-                choices.append((Script.morseLabel, Script.morse, { [weak self] in
-                    Script.setMorse()
-                    self?.buildKeyboard()
-                }))
-            }
-            column.addArrangedSubview(choiceRow(choices))
+            }))
         }
 
         column.addArrangedSubview(header(Self.pt("words_head")))

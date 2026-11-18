@@ -204,6 +204,8 @@ struct Doc {
     let proxy: UITextDocumentProxy
     /// The language whose table to use, nil when not writing Morse.
     let morse: String?
+    /// The rune row, nil when not writing runes (Norwegian only).
+    var runes: Runes.Row? = nil
 
     /// The Morse text before the cursor, from its first whole piece: a long
     /// context may start in the middle of a code.
@@ -214,16 +216,19 @@ struct Doc {
     }
 
     var documentContextBeforeInput: String? {
+        if let r = runes { return proxy.documentContextBeforeInput.map { Runes.read($0, r) } }
         guard let lang = morse else { return proxy.documentContextBeforeInput }
         return proxy.documentContextBeforeInput == nil ? nil : Morse.decode(rawBefore, lang)
     }
 
     var documentContextAfterInput: String? {
+        if let r = runes { return proxy.documentContextAfterInput.map { Runes.decodeLossy($0, r) } }
         guard let lang = morse else { return proxy.documentContextAfterInput }
         return proxy.documentContextAfterInput.map { Morse.decode($0, lang) }
     }
 
     var selectedText: String? {
+        if let r = runes { return proxy.selectedText.map { Runes.decodeLossy($0, r) } }
         guard let lang = morse else { return proxy.selectedText }
         return proxy.selectedText.map { Morse.decode($0, lang) }
     }
@@ -231,6 +236,11 @@ struct Doc {
     var hasText: Bool { proxy.hasText }
 
     func insertText(_ s: String) {
+        if let r = runes {
+            Runes.wrote(s, after: proxy.documentContextBeforeInput ?? "", r)
+            proxy.insertText(Runes.encode(s, r))
+            return
+        }
         guard let lang = morse, !s.isEmpty else { proxy.insertText(s); return }
         let prev = proxy.documentContextBeforeInput?.last
         proxy.insertText(Morse.encode(s, lang, glyphBefore: prev.map { !($0 == " " || $0 == "\n" || $0 == "\t") } ?? false))
@@ -238,6 +248,11 @@ struct Doc {
 
     /// One LETTER back: its code and the gap before it.
     func deleteBackward() {
+        if runes != nil {
+            proxy.deleteBackward()      // one rune = one letter
+            if !Runes.tail.isEmpty { Runes.tail.removeLast() }
+            return
+        }
         guard let lang = morse else { proxy.deleteBackward(); return }
         let raw = rawBefore
         guard let last = Morse.pieces(raw, lang).last else { proxy.deleteBackward(); return }
@@ -246,6 +261,7 @@ struct Doc {
 
     /// The caret by `n` letters.
     func adjustTextPosition(byCharacterOffset n: Int) {
+        if runes != nil { Runes.tail = ""; proxy.adjustTextPosition(byCharacterOffset: n); return }
         guard let lang = morse, n != 0 else { proxy.adjustTextPosition(byCharacterOffset: n); return }
         if n < 0 {
             let raw = rawBefore

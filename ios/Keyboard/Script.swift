@@ -68,24 +68,41 @@ enum Script {
     }
     static func setMorse() { Shared.store.set("morse", forKey: key) }
 
-    /// What the script key and the ⚙ panel offer: the alphabets, then Morse.
-    static var choiceCount: Int { modes.count + (Morse.has(Layout.language) ? 1 : 0) }
+    /// Runes (Norwegian only, 261118), chosen like Morse: two rows.
+    static var runes: Runes.Row? {
+        guard Runes.has(Layout.language) else { return nil }
+        return Runes.Row(rawValue: Shared.store.string(forKey: key) ?? "")
+    }
+
+    /// What the script key and the ⚙ panel offer, in order: the alphabets,
+    /// the rune rows, Morse - as the stored values.
+    static var choices: [String] {
+        modes.map(\.rawValue)
+            + (Runes.has(Layout.language) ? Runes.Row.allCases.map(\.rawValue) : [])
+            + (Morse.has(Layout.language) ? ["morse"] : [])
+    }
+    static var choiceCount: Int { choices.count }
+    /// The choice in use now.
+    static var choice: String { morse ? "morse" : runes?.rawValue ?? mode.rawValue }
+    static func setChoice(_ c: String) { Shared.store.set(c, forKey: key) }
+    static func choiceLabel(_ c: String) -> String {
+        if c == "morse" { return morseLabel }
+        if let r = Runes.Row(rawValue: c) { return Runes.label(r) }
+        return Mode(rawValue: c).map(label) ?? c
+    }
 
     /// The next choice, wrapping round; the script key next to 🌐.
     @discardableResult
     static func next() -> Mode {
-        let can = modes
-        if morse { set(can[0]); return can[0] }
-        let i = can.firstIndex(of: mode) ?? 0
-        if i + 1 < can.count { set(can[i + 1]); return can[i + 1] }
-        if Morse.has(Layout.language) { setMorse(); return can[0] }
-        set(can[0])
-        return can[0]
+        let all = choices
+        let i = all.firstIndex(of: choice) ?? 0
+        setChoice(all[(i + 1) % all.count])
+        return mode
     }
 
     /// The first three letters of the current alphabet - the same convention
     /// as `ABC` on `123` and the ABC/АБВ switch of Serbian keyboards.
-    static var keyLabel: String { morse ? morseLabel : label(mode) }
+    static var keyLabel: String { choiceLabel(choice) }
     /// `·−` (Morse for "A"; Android shows the same on its key).
     static let morseLabel = "·−"
 

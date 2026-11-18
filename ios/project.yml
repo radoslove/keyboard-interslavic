@@ -15,7 +15,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "0.6.41"
+    MARKETING_VERSION: "0.6.42"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
@@ -53,6 +53,8 @@ targets:
       # the `Layout.language` they read). The same files, not copies.
       - path: Keyboard/Script.swift
       - path: Keyboard/Morse.swift
+      # Script.swift now offers the Norwegian rune rows (keyboard 0.6.42).
+      - path: Keyboard/Runes.swift
       # The word translator's Wiktionary data (CC BY-SA 4.0, tools/build_gloss.py),
       # the SAME files as Android - read from there, not copied (11 MB). APP ONLY:
       # never in the keyboard extension (its memory limit).
