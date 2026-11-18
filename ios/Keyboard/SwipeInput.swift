@@ -46,6 +46,10 @@ final class SwipeGestureRecognizer: UIGestureRecognizer {
     /// the slowest sample near each end as its anchor (Android 3.6.0).
     private(set) var times: [Double] = []
     private var origin: CGPoint = .zero
+    /// A touch that travelled but typed no word (Android 3.10.39, 2026-11-18:
+    /// a first `tutaj` was not caught and left no line). Called with the exit
+    /// (`tap_short`, `cancelled`) so the gesture log shows it.
+    var onDrop: ((String, [CGPoint], [Double]) -> Void)?
     /// The finger the swipe follows. Another one touching down mid-swipe
     /// must not teleport the trail (Android 3.5.30, swipePointerId).
     private weak var finger: UITouch?
@@ -89,11 +93,18 @@ final class SwipeGestureRecognizer: UIGestureRecognizer {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesEnded(touches, with: event)
         guard let touch = finger, touches.contains(touch) else { return }
-        state = (state == .began || state == .changed) ? .ended : .failed
+        let gliding = state == .began || state == .changed
+        // A touch that moved, typed as one letter.
+        if !gliding && points.count >= 9 { onDrop?("tap_short", points, times) }
+        state = gliding ? .ended : .failed
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesCancelled(touches, with: event)
+        // The system took the touch away mid-glide: nothing is typed.
+        if (state == .began || state == .changed) && points.count >= 9 {
+            onDrop?("cancelled", points, times)
+        }
         state = .cancelled
     }
 
@@ -176,6 +187,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
 
         recognizer.addTarget(self, action: #selector(handle(_:)))
         recognizer.delegate = self
+        recognizer.onDrop = { [weak self] exit, path, times in self?.logDrop(exit, path, times) }
         // The keys must not also act on a touch that turned into a word.
         recognizer.cancelsTouchesInView = true
         // A tap must reach its key the moment the finger lifts. With the default
@@ -220,7 +232,27 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
     // MARK: - Gesture
 
     func gestureRecognizerShouldBegin(_ g: UIGestureRecognizer) -> Bool {
-        host?.swipeCanBegin ?? false
+        let ok = host?.swipeCanBegin ?? false
+        if !ok, let r = g as? SwipeGestureRecognizer { logDrop("refused_begin", r.points, r.times) }
+        return ok
+    }
+
+    /// A gesture that ended without a decode, in the gesture log with no words
+    /// and its exit, like Android's `GestureLog.resolve(exit)`.
+    private func logDrop(_ exit: String, _ path: [CGPoint], _ times: [Double]) {
+        guard Shared.gestureLogOn, let host else { return }
+        let (centres, keyWidth) = host.swipeKeyCentres
+        Shared.appendGesture([
+            "t": Date().timeIntervalSince1970,
+            "lang": Layout.language, "script": "\(Script.mode)",
+            "kw": Double(keyWidth),
+            "keys": centres.map { [Double($0.x), Double($0.y)] },
+            "path": path.map { [Double($0.x), Double($0.y)] },
+            "ms": times.map { $0 - (times.first ?? 0) },
+            "words": [String](),
+            "exit": exit,
+        ])
+        swipeLog.notice("isv-swipe: dropped \(exit, privacy: .public), \(path.count, privacy: .public) points")
     }
 
     func gestureRecognizer(_ g: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
@@ -294,7 +326,11 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
             decoder.digraphKeys = digraph
             decoder.dzhKey = dzh
             decoder.polishGlag = polishGlag
-            decoder.umlautKeys = lang == "de"
+            // German `ü ö ä` and Spanish `ñ`: keys of their own, also reached
+            // over the plain letter (Android `BASE_ROUTE`).
+            decoder.umlautKeys = lang == "de" || lang == "es"
+            decoder.umlautPairs = lang == "es" ? SwipeDecoder.spanishPairs : SwipeDecoder.germanPairs
+            decoder.ueRoute = lang == "de"
             let started = CFAbsoluteTimeGetCurrent()
             let found = decoder.decode(path: path, times: times)
             let decodeMs = (CFAbsoluteTimeGetCurrent() - started) * 1000
@@ -486,7 +522,9 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
             // German: `fuer` is also read as `für` (the typewriter spelling),
             // ranked like an umlaut-blind match (Android `ueToUmlaut`).
             let german = Layout.language == "de"
-            var hits = dictionary.completions(prefix: keys, limit: limit, umlautBlind: german)
+            // `manana` also offers `mañana` (Spanish `ñ` like a German umlaut).
+            var hits = dictionary.completions(prefix: keys, limit: limit,
+                                              umlautBlind: german || Layout.language == "es")
             if german, lower.contains("ue") || lower.contains("oe") || lower.contains("ae"),
                let ue = SwipeDictionary.keys(of: lower.replacingOccurrences(of: "ue", with: "ü")
                     .replacingOccurrences(of: "oe", with: "ö").replacingOccurrences(of: "ae", with: "ä")) {

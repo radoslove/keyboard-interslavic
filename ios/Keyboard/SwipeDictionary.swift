@@ -102,9 +102,10 @@ final class SwipeDictionary {
         // German (Android `Dictionary.suggest`, 3.9.21): typed `fur` also
         // offers `für` - `ü ö ä` (keys 26-28) read as `u o a`. A word matched
         // only that way pays `umlautSuggestPenalty` frequency points.
-        func plain(_ k: Int) -> Int { umlautBlind ? (Self.plainUmlaut[k] ?? k) : k }
+        let pairs = Self.plainUmlaut     // read once: it follows the language
+        func plain(_ k: Int) -> Int { umlautBlind ? (pairs[k] ?? k) : k }
         var firsts = [first]
-        if umlautBlind { for (u, p) in Self.plainUmlaut where p == first { firsts.append(u) } }
+        if umlautBlind { for (u, p) in pairs where p == first { firsts.append(u) } }
         var best: [(freq: Int, offset: Int, length: Int)] = []
         for f in firsts {
             for last in 0..<keyCount {
@@ -126,8 +127,11 @@ final class SwipeDictionary {
         return best.map { ($0.freq, word(at: $0.offset, length: $0.length)) }
     }
 
-    /// German key indices `ü ö ä` -> `u o a`.
-    static let plainUmlaut: [Int: Int] = [26: 20, 27: 14, 28: 0]
+    /// Own key indices -> their plain letter: German `ü ö ä` -> `u o a`,
+    /// Spanish `ñ` -> `n` (Android `plainUmlaut`).
+    static var plainUmlaut: [Int: Int] {
+        Layout.language == "es" ? [26: 13] : [26: 20, 27: 14, 28: 0]
+    }
     /// Android `UMLAUT_SUGGEST_PENALTY`: 30 frequency points.
     static let umlautSuggestPenalty = 30
 
@@ -153,6 +157,9 @@ final class SwipeDictionary {
         for ch in word.lowercased() {
             // The Ukrainian apostrophe (`п'ять`) is written, never drawn.
             if ch == "'" { continue }
+            // French, Dutch, Romanian: `peut-être`, `s-a` - the hyphen is
+            // written, never drawn (`build_swipe_dictionary.py`).
+            if ch == "-", ["fr", "nl", "ro"].contains(Layout.language) { continue }
             // A letter that IS a key (Norwegian å ø æ) stays itself; held
             // accents fold to their base key. `ł` is not `l` plus a diacritic
             // to Unicode, so it is folded by hand; ä ö fold to æ ø where those
@@ -160,7 +167,9 @@ final class SwipeDictionary {
             if let k = Layout.swipeIndex(ch) { keys.append(k); continue }
             // Macedonian's internal Latin: ǉ ǌ ǆ are single letters on the
             // digraph keys, which Unicode does not decompose (Android foldBase).
-            let byHand: [Character: String] = ["ł": "l", "đ": "d", "ǉ": "q", "ǌ": "w", "ǆ": "x", "ß": "s"]
+            // French `œ` `æ` are ligatures, not letters with a mark, to Unicode.
+            let byHand: [Character: String] = ["ł": "l", "đ": "d", "ǉ": "q", "ǌ": "w", "ǆ": "x", "ß": "s",
+                                               "œ": "o", "æ": "a"]
             var base = byHand[ch]
                 ?? String(ch).folding(options: .diacriticInsensitive, locale: nil)
             if Layout.swipeIndex("æ") != nil { base = ch == "ä" ? "æ" : ch == "ö" ? "ø" : base }

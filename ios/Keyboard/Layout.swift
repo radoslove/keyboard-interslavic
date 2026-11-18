@@ -20,6 +20,9 @@ enum Layout {
         ("sr", "srbsky"), ("bs", "bosnijsky"), ("mk", "makedonsky"),
         ("ru", "russky"), ("uk", "ukrajinsky"), ("bg", "bulgarsky"), ("be", "bělorussky"), ("sla", "praslovjansky"), ("nb", "norvežsky"),
         ("en", "English"), ("de", "němečsky"), ("it", "italijanjsky"),
+        // Android `Ui.kt` names (owner 261118: holandsky; rumunjsky = the
+        // canon's `rumuńsky` in standard spelling).
+        ("es", "španjsky"), ("fr", "francuzsky"), ("nl", "holandsky"), ("ro", "rumunjsky"),
     ]
 
     static func name(_ code: String) -> String { all.first { $0.code == code }?.name ?? code }
@@ -34,6 +37,10 @@ enum Layout {
         case "en": return "English"
         case "de": return "Deutsch"
         case "it": return "Italiano"
+        case "es": return "Español"
+        case "fr": return "Français"
+        case "nl": return "Nederlands"
+        case "ro": return "Română"
         case "cs": return "Čeština"
         case "sk": return "Slovenčina"
         case "sl": return "Slovenščina"
@@ -166,6 +173,21 @@ enum Layout {
             // Android `Layout.itOwn`, ordered by how often each is written
             // (subtitles: è 2.6 M, à 1.1 M, ì 1.0 M, ò 0.6 M, ù 0.5 M, é 0.5 M).
             return ["a": ["à"], "e": ["è", "é"], "i": ["ì"], "o": ["ò"], "u": ["ù"]]
+        case "es":
+            // Android `Layout.esOwn`: the acute vowels on their vowel, `ü`
+            // (pingüino) after `ú`; `ñ` is a key, not a hold.
+            return ["a": ["á"], "e": ["é"], "i": ["í"], "o": ["ó"], "u": ["ú", "ü"]]
+        case "fr":
+            // Android `Layout.frOwn`: the most written first (é before è ê ë).
+            return ["e": ["é", "è", "ê", "ë"], "a": ["à", "â", "æ"], "c": ["ç"],
+                    "u": ["ù", "û", "ü"], "i": ["î", "ï"], "o": ["ô", "œ"], "y": ["ÿ"]]
+        case "nl":
+            // Android `Layout.nlOwn`, by the weight of the forms carrying them.
+            return ["e": ["ë", "é", "è", "ê"], "i": ["ï", "í", "î"], "o": ["ö", "ó", "ô"],
+                    "u": ["ü", "ú", "û"], "a": ["á", "à"], "c": ["ç"]]
+        case "ro":
+            // Android `Layout.roOwn`: ă before â on a (505 028 vs 85 826 forms).
+            return ["a": ["ă", "â"], "i": ["î"], "s": ["ș"], "t": ["ț"]]
         case "nb":
             // Android `Layout.nbOwn` (3.5.8): æ ø å have keys of their own;
             // held, they give the Swedish/Danish neighbours.
@@ -218,6 +240,16 @@ enum Layout {
     static let periodLetterAccents: [String] =
         [",", "?", "!", "-", "'", "\"", ":", ";"]
 
+    /// Spanish opens questions and exclamations with `¿` `¡`: right after
+    /// their closing pair, and `:` `;` make room - eight cells, as everywhere
+    /// (Android `periodLetterHoldEs`).
+    static let periodLetterAccentsEs: [String] =
+        [",", "?", "¿", "!", "¡", "-", "'", "\""]
+
+    static var periodLetterHold: [String] {
+        language == "es" ? periodLetterAccentsEs : periodLetterAccents
+    }
+
     /// Held on `,`: the rest of the sentence punctuation.
     static let commaAccents: [String] = [":", ";", "-", "–", "(", ")"]
 
@@ -267,6 +299,17 @@ enum Layout {
         // Proto-Slavic too: `ъ` on `q`, `ь` on `f`, every other key its letter.
         if ["ru", "uk", "bg", "be", "sla"].contains(language) {
             return [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")]
+        }
+        // Spanish: `ñ` is a key, at the end of the middle row (Android `esRows`).
+        if language == "es" {
+            return [Array("qwertyuiop"), Array("asdfghjklñ"), Array("zxcvbnm")]
+        }
+        // French AZERTY, as on French phone keyboards (Android `frAzertyRows`);
+        // the national switch gives plain QWERTY.
+        if language == "fr" {
+            return qwertz
+                ? [Array("azertyuiop"), Array("qsdfghjklm"), Array("wxcvbn")]
+                : [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")]
         }
         // Polish in Glagolitic keeps the Polish Latin grid: every key writes its
         // own letter and the script turns whole words (cz, rz, sia) into Glagolitic.
@@ -344,16 +387,23 @@ enum Layout {
     /// own keyboards: QWERTZ for Czech, Slovak, Slovenian, Croatian and Serbian. Only `y` and `z` swap, so the
     /// grid stays the same; the decoder reads key centres from the buttons and
     /// the wordlist stores letters, not positions.
-    static let qwertzByDefault: Set<String> = ["cs", "sk", "sl", "hr", "sr", "bs", "de"]
+    static let qwertzByDefault: Set<String> = ["cs", "sk", "sl", "hr", "sr", "bs", "de", "fr"]
+    /// The NATIONAL layout the switch turns on: QWERTZ, or AZERTY for French.
+    /// The stored flag stays `qwertz_` - it means "national" (Android `KeyRows.nationalName`).
+    static var nationalName: String { language == "fr" ? "AZERTY" : "QWERTZ" }
     /// Not for Norwegian (rows of 11) nor Macedonian, which is Cyrillic only
     /// and has its own grid (Android `KeyRows.offered`).
-    static var qwertzOffered: Bool { !["nb", "mk", "ru", "uk", "bg", "be", "sla"].contains(language) }
+    static var qwertzOffered: Bool { !["nb", "mk", "ru", "uk", "bg", "be", "sla", "es"].contains(language) }
 
     /// Languages whose keys each write ONE letter, so the Interslavic digraph
     /// routes (`lj` `nj` over `q` `w`) must stay off.
     /// Languages that write an apostrophe INSIDE words (`п'ять`, `сям'я`);
     /// Android `Lang.APOSTROPHE_IN_WORD`.
-    static var apostropheInWord: Bool { ["uk", "be"].contains(language) }
+    static var apostropheInWord: Bool { ["uk", "be", "nl"].contains(language) }
+
+    /// Elision (Android `Lang.ELISION`): after `dell'` / `l'` the next word
+    /// follows without a space.
+    static var elision: Bool { ["it", "fr"].contains(language) }
 
     static var singleLetterKeys: Bool { ["mk", "ru", "uk", "bg", "be", "sla", "pl"].contains(language) }
     static var qwertz: Bool {
@@ -372,16 +422,18 @@ enum Layout {
     /// The keys a swipe can cross, in the order of the wordlist's key indices:
     /// a-z, then the language's own letter keys (`build_swipe_dictionary.py`).
     static var swipeKeys: [Character] {
-        language == "nb" ? nbKeys : language == "de" ? deKeys : latinKeys
+        language == "nb" ? nbKeys : language == "de" ? deKeys : language == "es" ? esKeys : latinKeys
     }
     private static let latinKeys = Array("abcdefghijklmnopqrstuvwxyz")
     private static let nbKeys = latinKeys + Array("åøæ")
     /// German: `ü ö ä` are key indices 26-28 (`build_swipe_dictionary.py de`).
     private static let deKeys = latinKeys + Array("üöä")
+    /// Spanish: `ñ` is key index 26 (`build_swipe_dictionary.py es`).
+    private static let esKeys = latinKeys + Array("ñ")
 
     /// Index of a key letter in `swipeKeys`, nil for anything else.
     static func swipeIndex(_ ch: Character) -> Int? {
-        (language == "nb" ? nbIndex : language == "de" ? deIndex : latinIndex)[ch]
+        (language == "nb" ? nbIndex : language == "de" ? deIndex : language == "es" ? esIndex : latinIndex)[ch]
     }
     private static let latinIndex: [Character: Int] =
         Dictionary(uniqueKeysWithValues: latinKeys.enumerated().map { ($1, $0) })
@@ -389,6 +441,8 @@ enum Layout {
         Dictionary(uniqueKeysWithValues: nbKeys.enumerated().map { ($1, $0) })
     private static let deIndex: [Character: Int] =
         Dictionary(uniqueKeysWithValues: deKeys.enumerated().map { ($1, $0) })
+    private static let esIndex: [Character: Int] =
+        Dictionary(uniqueKeysWithValues: esKeys.enumerated().map { ($1, $0) })
 
     /// `123` - rows 1-2 as on the system keyboard. Row 3 sits between `#+=`
     /// and backspace and runs from the rarest mark to the most used, so `?`
@@ -441,7 +495,7 @@ enum Layout {
             for f in foreign where !all.contains(f) { all.append(f) }
         }
         if !all.isEmpty { return all.map { cased($0, uppercase) } }
-        if key == "." { return periodLetterAccents }
+        if key == "." { return periodLetterHold }
         if key == "," { return commaAccents }
         return nil
     }

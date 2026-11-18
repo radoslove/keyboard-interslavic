@@ -15,7 +15,7 @@ options:
 
 settings:
   base:
-    MARKETING_VERSION: "0.6.36"
+    MARKETING_VERSION: "0.6.41"
     CURRENT_PROJECT_VERSION: "1"
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
@@ -48,11 +48,16 @@ targets:
     sources:
       - App
       - Shared
+      # The keyboard's script and Morse conversion, for the alphabet cards and
+      # word cards read in another script (`App/Alphabets.swift` gives them
+      # the `Layout.language` they read). The same files, not copies.
+      - path: Keyboard/Script.swift
+      - path: Keyboard/Morse.swift
       # The word translator's Wiktionary data (CC BY-SA 4.0, tools/build_gloss.py),
       # the SAME files as Android - read from there, not copied (11 MB). APP ONLY:
       # never in the keyboard extension (its memory limit).
       - path: ../android-app/app/src/main/assets
-        includes: ["gloss_*.tsv"]
+        includes: ["gloss_*.tsv", "learn_sets.tsv"]
         buildPhase: resources
     # One App Group for the app and both keyboards: the words added with `＋`,
     # the theme and the script. A keyboard reaches it only with Full Access.

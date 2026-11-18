@@ -60,18 +60,34 @@ enum Script {
 
     static func set(_ m: Mode) { Shared.store.set(m.rawValue, forKey: key) }
 
-    /// The next script this language has, wrapping round; the script key next to 🌐.
+    /// Morse (Android `Mode.MORSE`, 3.10.9): chosen like a script, stored in
+    /// the same key, but never what `mode` returns - in Morse the keyboard works
+    /// in the language's first script and `Doc` writes dots and dashes.
+    static var morse: Bool {
+        Morse.has(Layout.language) && Shared.store.string(forKey: key) == "morse"
+    }
+    static func setMorse() { Shared.store.set("morse", forKey: key) }
+
+    /// What the script key and the ⚙ panel offer: the alphabets, then Morse.
+    static var choiceCount: Int { modes.count + (Morse.has(Layout.language) ? 1 : 0) }
+
+    /// The next choice, wrapping round; the script key next to 🌐.
     @discardableResult
     static func next() -> Mode {
         let can = modes
-        let m = can[((can.firstIndex(of: mode) ?? 0) + 1) % can.count]
-        set(m)
-        return m
+        if morse { set(can[0]); return can[0] }
+        let i = can.firstIndex(of: mode) ?? 0
+        if i + 1 < can.count { set(can[i + 1]); return can[i + 1] }
+        if Morse.has(Layout.language) { setMorse(); return can[0] }
+        set(can[0])
+        return can[0]
     }
 
     /// The first three letters of the current alphabet - the same convention
     /// as `ABC` on `123` and the ABC/АБВ switch of Serbian keyboards.
-    static var keyLabel: String { label(mode) }
+    static var keyLabel: String { morse ? morseLabel : label(mode) }
+    /// `·−` (Morse for "A"; Android shows the same on its key).
+    static let morseLabel = "·−"
 
     static func label(_ m: Mode) -> String {
         switch m {

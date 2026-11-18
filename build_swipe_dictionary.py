@@ -80,6 +80,24 @@ if LANG == "es":
     # Spanish: the acute vowels and `ü` held on their vowel (Android
     # Layout.esOwn); `ñ` is a key of its own and is not folded.
     FOLD = {"á": "a", "é": "e", "í": "i", "ó": "o", "ú": "u", "ü": "u"}
+if LANG == "fr":
+    # French (Android Layout.frOwn, Dictionary.foldBase): every mark held on
+    # its base letter, the ligatures on o and a. `'` and `-` are written but
+    # never drawn (`peut-être`, `aujourd'hui`).
+    FOLD = {"é": "e", "è": "e", "ê": "e", "ë": "e", "à": "a", "â": "a",
+            "æ": "a", "ç": "c", "ù": "u", "û": "u", "ü": "u", "î": "i",
+            "ï": "i", "ô": "o", "œ": "o", "ÿ": "y"}
+if LANG == "nl":
+    # Dutch (Android Layout.nlOwn): the marks held on their base letter; the
+    # apostrophe inside a word (`auto's`, `zo'n`) and `-` are not drawn.
+    FOLD = {"ë": "e", "é": "e", "è": "e", "ê": "e", "ï": "i", "í": "i",
+            "î": "i", "ö": "o", "ó": "o", "ô": "o", "ü": "u", "ú": "u",
+            "û": "u", "á": "a", "à": "a", "ç": "c"}
+if LANG == "ro":
+    # Romanian (Android Layout.roOwn): ă â on a, î on i, ș ț on s t, the old
+    # cedilla ş ţ with them; `-` (`s-a`, `într-o`) is not drawn.
+    FOLD = {"ă": "a", "â": "a", "î": "i", "ș": "s", "ş": "s", "ț": "t",
+            "ţ": "t"}
 if LANG == "it":
     # Italian: the accented vowels held on their vowel (Android Layout.itOwn).
     FOLD = {"à": "a", "è": "e", "é": "e", "ì": "i", "í": "i", "î": "i",
@@ -139,7 +157,8 @@ if LANG == "de":
     # through NFD below. Case is kept in the display form: nouns stay capital.
     FOLD = {"ß": "s"}
 ALPHA = "abcdefghijklmnopqrstuvwxyz" + (
-    "åøæ" if LANG in ("nb", "isc") else "üöä" if LANG == "de" else "")
+    "åøæ" if LANG in ("nb", "isc") else "üöä" if LANG == "de"
+    else "ñ" if LANG == "es" else "")
 KEYS = len(ALPHA)
 INDEX = {c: i for i, c in enumerate(ALPHA)}
 
@@ -150,6 +169,8 @@ def fold(word):
     for ch in word.lower():
         if ch == "'":
             continue               # Ukrainian apostrophe: written, never drawn
+        if ch == "-" and LANG in ("fr", "nl", "ro"):
+            continue               # peut-être, s-a: written, never drawn
         ch = FOLD.get(ch, ch)
         if ch not in INDEX and LANG == "de":
             ch = unicodedata.normalize("NFD", ch)[0]

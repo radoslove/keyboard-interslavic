@@ -4,12 +4,13 @@ The Keyman package (`keyman/isv_latin.kmp`) is stage 1 and works today. This is
 the replacement track, and it exists for two reasons that are worth stating
 plainly, because neither is "swipe":
 
-1. **No Full Access.** Since iOS 16 the Keyman system keyboard renders blank
-   until the user grants Full Access — a permission that, by design, lets a
-   keyboard transmit what you type. Our own extension declares
-   `RequestsOpenAccess: false`, so it *cannot* send anything anywhere. For a
-   project whose pitch is "no registration, no account, no e-mail", that is the
-   honest end of the story rather than an asterisk.
+1. **Full Access is optional.** Since iOS 16 the Keyman system keyboard renders
+   blank until the user grants Full Access. Our extension types fully without
+   it. It does ask for Full Access (`RequestsOpenAccess: true` since 0.4.0) for
+   one reason only: the App Group that lets the app and the keyboard share the
+   user's own words, the settings and the opt-in word collection. Neither the
+   keyboard nor the app contains any network code; anything shared leaves the
+   phone only when the user sends it from the app by e-mail.
 2. **No prerequisite.** One install instead of "first install Keyman, then find
    Install From File".
 
@@ -17,8 +18,8 @@ Swipe is the third reason and the expensive one — see below.
 
 ## State
 
-Test builds run daily on an iPhone 13 since 2026-10-07 (`0.1.x` → `0.2.1`); not in
-the App Store or TestFlight yet.
+Test builds run daily on an iPhone 13 since 2026-10-07; public beta through
+TestFlight, not in the App Store yet.
 
 | Piece | State |
 |---|---|

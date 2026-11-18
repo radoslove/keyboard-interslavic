@@ -30,6 +30,10 @@ final class KeyboardViewController: UIInputViewController {
     private var showingEmoji = false
     /// The settings panel in place of the letters (hold `123` -> ⚙).
     private var showingSettings = false
+    /// The ⚙ panel's scroll view and where it stood; back to the top only when
+    /// the panel is opened again.
+    private weak var settingsScroll: UIScrollView?
+    private var settingsOffset: CGFloat = 0
     private var rowsStack: UIStackView!
     private var letterButtons: [UIButton] = []
     private var popup: UIView?
@@ -206,6 +210,9 @@ final class KeyboardViewController: UIInputViewController {
     // MARK: - Building
 
     private func buildKeyboard() {
+        // ⚙ keeps its place while something in it is ticked: every tick
+        // rebuilds the panel, which used to jump back to the top (owner 261118).
+        if showingSettings, let s = settingsScroll { settingsOffset = s.contentOffset.y }
         rowsStack?.removeFromSuperview()
         letterButtons.removeAll()
         noGlideKeys.removeAll()
@@ -347,7 +354,7 @@ final class KeyboardViewController: UIInputViewController {
         var weights: [(UIView, CGFloat)] = []
         // A language with more than one alphabet carries the script key, and
         // its space is narrower by the key's 1.2 (Interslavic, Serbian).
-        let scripts = Script.modes.count > 1
+        let scripts = Script.choiceCount > 1
 
         // The emoji panel has the bottom row of `123`: ABC back, space, and a
         // backspace, since the letter row that holds one is gone.
@@ -523,6 +530,11 @@ final class KeyboardViewController: UIInputViewController {
     private func characterKey(_ ch: Character) -> UIButton {
         let b = styledKey(title(for: ch))
         if ch.isLetter && !showingNumeric { b.titleLabel?.font = Self.glagFont(22) }
+        if ch.isLetter && !showingNumeric && Script.morse {
+            b.titleLabel?.numberOfLines = 2
+            b.titleLabel?.textAlignment = .center
+            b.titleLabel?.font = .systemFont(ofSize: 15)
+        }
         b.accessibilityIdentifier = String(ch)
         b.addTarget(self, action: #selector(tapCharacter(_:)), for: .touchUpInside)
         // Without this a key looks dead while you press it, and a keyboard that
@@ -578,7 +590,8 @@ final class KeyboardViewController: UIInputViewController {
         guard !showingNumeric, ch.isLetter else { return String(ch) }
         let latin = Layout.keyText(shift == .off ? ch : Character(ch.uppercased()),
                                    latin: Script.mode == .latin)
-        return Script.out(latin)
+        // Morse: the letter over its code, so the keys can be learned.
+        return Script.morse ? Morse.keyLabel(Script.out(latin), Layout.language) : Script.out(latin)
     }
 
     private var isUppercase: Bool { shift != .off }
@@ -607,26 +620,32 @@ final class KeyboardViewController: UIInputViewController {
     /// and `contextAfter` read U+2002 back as " ", one character for one, so
     /// counts for deleteBackward stay right.
     private func put(_ s: String) {
-        textDocumentProxy.insertText(Script.rewritesWord
+        doc.insertText(Script.rewritesWord
             ? s.replacingOccurrences(of: " ", with: Script.wideSpace) : s)
     }
 
-    private var contextBefore: String? {
-        textDocumentProxy.documentContextBeforeInput?.replacingOccurrences(of: Script.wideSpace, with: " ")
+    /// The text field; in Morse it holds dots and dashes and `Doc` reads and
+    /// writes it in letters (Android `Morse.Conn`).
+    private var doc: Doc {
+        Doc(proxy: textDocumentProxy, morse: Script.morse ? Layout.language : nil)
     }
 
-    /// Italian elision (Android `Lang.ELISION`, `KeyboardView.elidedBefore`):
+    private var contextBefore: String? {
+        doc.documentContextBeforeInput?.replacingOccurrences(of: Script.wideSpace, with: " ")
+    }
+
+    /// Italian and French elision (Android `Lang.ELISION`, `KeyboardView.elidedBefore`):
     /// a letter and an apostrophe right before the cursor (`dell'`, `l’`) take
     /// the next word WITHOUT a space - after a typed letter's owed space, a
     /// word from the bar and a glide alike.
     private var elidedBefore: Bool {
-        guard Layout.language == "it" else { return false }
+        guard Layout.elision else { return false }
         let tail = Array((contextBefore ?? "").suffix(2))
         return tail.count == 2 && tail[0].isLetter && (tail[1] == "'" || tail[1] == "’")
     }
 
     private var contextAfter: String? {
-        textDocumentProxy.documentContextAfterInput?.replacingOccurrences(of: Script.wideSpace, with: " ")
+        doc.documentContextAfterInput?.replacingOccurrences(of: Script.wideSpace, with: " ")
     }
 
     // MARK: - Actions
@@ -750,7 +769,7 @@ final class KeyboardViewController: UIInputViewController {
         let stem = hold.stem
         if !stem.isEmpty, (contextBefore ?? "").hasSuffix(stem) {
             glagWord = nil
-            for _ in 0..<stem.count { textDocumentProxy.deleteBackward() }
+            for _ in 0..<stem.count { doc.deleteBackward() }
         }
         tappedWord = nil
         completingPrefix = nil
@@ -788,11 +807,11 @@ final class KeyboardViewController: UIInputViewController {
         defer { rearmShiftIfSentenceStart(); refreshCompletions() }
         if count > 0 {
             glagWord = nil
-            for _ in 0..<count { textDocumentProxy.deleteBackward() }
+            for _ in 0..<count { doc.deleteBackward() }
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
             return i > 0
         }
-        if floor > 0 { textDocumentProxy.deleteBackward() }   // the line break, then the line above
+        if floor > 0 { doc.deleteBackward() }   // the line break, then the line above
         return floor > 1
     }
 
@@ -811,7 +830,7 @@ final class KeyboardViewController: UIInputViewController {
         if !wipedSuffix.isEmpty {
             put(wipedSuffix)
             ownCaretMoveAt = Date()
-            textDocumentProxy.adjustTextPosition(byCharacterOffset: -wipedSuffix.count)
+            doc.adjustTextPosition(byCharacterOffset: -wipedSuffix.count)
         }
         wipedSuffix = ""
         swipeSuffix = ""
@@ -837,7 +856,7 @@ final class KeyboardViewController: UIInputViewController {
         // eat whatever sits at the new spot.
         if let word = lastSwipedWord,
            (contextBefore ?? "").hasSuffix(word + swipeSuffix) {
-            for _ in 0..<(word.count + swipeSuffix.count) { textDocumentProxy.deleteBackward() }
+            for _ in 0..<(word.count + swipeSuffix.count) { doc.deleteBackward() }
             wipedSuffix = swipeSuffix
             swipeSuffix = ""
             lastSwipedWord = nil
@@ -856,7 +875,7 @@ final class KeyboardViewController: UIInputViewController {
         swipeSuffix = ""
         pendingSpace = false
         tappedWord = tappedWord.map { String($0.dropLast()) }
-        textDocumentProxy.deleteBackward()
+        doc.deleteBackward()
         refreshCompletions()
         return false
     }
@@ -974,6 +993,8 @@ final class KeyboardViewController: UIInputViewController {
 
     private func openSettings() {
         showingSettings = true
+        settingsOffset = 0
+        settingsScroll = nil
         showingEmoji = false
         showingNumeric = false
         showingSymbols = false
@@ -993,6 +1014,16 @@ final class KeyboardViewController: UIInputViewController {
     private func settingsPanel() -> UIView {
         let scroll = UIScrollView()
         scroll.showsVerticalScrollIndicator = true
+        settingsScroll = scroll
+        let keep = settingsOffset
+        if keep > 0 {
+            DispatchQueue.main.async { [weak scroll] in
+                guard let scroll else { return }
+                scroll.layoutIfNeeded()
+                let top = max(0, scroll.contentSize.height - scroll.bounds.height)
+                scroll.contentOffset.y = min(keep, top)
+            }
+        }
         let column = UIStackView()
         column.axis = .vertical
         column.spacing = 6
@@ -1071,7 +1102,7 @@ final class KeyboardViewController: UIInputViewController {
         if Layout.qwertzOffered {
             column.addArrangedSubview(header(Self.pt("layout_head")))
             column.addArrangedSubview(choiceRow([false, true].map { z in
-                (z ? "QWERTZ" : "QWERTY", Layout.qwertz == z, { [weak self] in
+                (z ? Layout.nationalName : "QWERTY", Layout.qwertz == z, { [weak self] in
                     Layout.qwertz = z
                     self?.buildKeyboard()
                 })
@@ -1097,14 +1128,21 @@ final class KeyboardViewController: UIInputViewController {
             }))
         }
 
-        if Script.modes.count > 1 {
+        if Script.choiceCount > 1 {
             column.addArrangedSubview(header(Self.pt("script_head")))
-            column.addArrangedSubview(choiceRow(Script.modes.map { m in
-                (Script.label(m), Script.mode == m, { [weak self] in
+            var choices = Script.modes.map { m in
+                (Script.label(m), !Script.morse && Script.mode == m, { [weak self] in
                     Script.set(m)
                     self?.buildKeyboard()
                 })
-            }))
+            }
+            if Morse.has(Layout.language) {
+                choices.append((Script.morseLabel, Script.morse, { [weak self] in
+                    Script.setMorse()
+                    self?.buildKeyboard()
+                }))
+            }
+            column.addArrangedSubview(choiceRow(choices))
         }
 
         column.addArrangedSubview(header(Self.pt("words_head")))
@@ -1267,7 +1305,7 @@ final class KeyboardViewController: UIInputViewController {
                 let shown = String(word[cut...])
                 prev = (Script.toLatin(shown), shown)
             }
-            for _ in prev.shown { textDocumentProxy.deleteBackward() }
+            for _ in prev.shown { doc.deleteBackward() }
             let joined = Script.softenPL(prev.latin + latin)
             let now = Script.out(joined)
             put(now)
@@ -1278,7 +1316,7 @@ final class KeyboardViewController: UIInputViewController {
             if Script.rewritesWord, let w = glagWord {
                 let fixed = Script.splitPrefixD(w.latin, known: swipeInput.knowsWord)
                 if fixed != w.latin {
-                    for _ in w.shown { textDocumentProxy.deleteBackward() }
+                    for _ in w.shown { doc.deleteBackward() }
                     put(Script.out(fixed))
                 }
             }
@@ -1297,7 +1335,7 @@ final class KeyboardViewController: UIInputViewController {
     /// Re-cases the selection, or the word the previous press re-cased.
     /// False when there is nothing to re-case and Shift should act as Shift.
     private func cycleCase() -> Bool {
-        let proxy = textDocumentProxy
+        let proxy = doc
         let text: String
         if let sel = proxy.selectedText, sel.contains(where: \.isLetter) {
             text = sel
@@ -1469,7 +1507,7 @@ final class KeyboardViewController: UIInputViewController {
         // test mark at the start of a line armed it again each time (log
         // 17:38, `chciałbym \n\n` -> on). A new line after `.` `!` `?` still is.
         let lines = before.trimmingCharacters(in: .whitespacesAndNewlines)
-        let atStart = before.isEmpty ? !textDocumentProxy.hasText : lines.isEmpty
+        let atStart = before.isEmpty ? !doc.hasText : lines.isEmpty
         let afterStop = lines.last.map { ".!?".contains($0) } ?? false
         // `.` right after a glide: the space is owed to the next word, so there
         // is no gap yet - and the next glide came out lowercase (Android 3.9.26,
@@ -1482,7 +1520,7 @@ final class KeyboardViewController: UIInputViewController {
             #if DEBUG
             // Why shift switched: the tail the proxy reported at that moment.
             GestureFile.note("shift", ["on": wanted == .on, "ctx": String(before.suffix(16)),
-                                       "hasText": textDocumentProxy.hasText, "confirmed": confirmed])
+                                       "hasText": doc.hasText, "confirmed": confirmed])
             #endif
             shift = wanted
             refreshTitles()
@@ -1809,8 +1847,8 @@ extension KeyboardViewController: SwipeHost {
             // Caret put back inside a word (`E|ssen`): the letters after it
             // belong to the word being replaced (Android 3.9.31, `essenssen`).
             let tail = (contextAfter ?? "").prefix { $0.isLetter }.count
-            if tail > 0 { ownCaretMoveAt = Date(); textDocumentProxy.adjustTextPosition(byCharacterOffset: tail) }
-            for _ in 0..<(typed.count + tail) { textDocumentProxy.deleteBackward() }
+            if tail > 0 { ownCaretMoveAt = Date(); doc.adjustTextPosition(byCharacterOffset: tail) }
+            for _ in 0..<(typed.count + tail) { doc.deleteBackward() }
             let shown = outWord(word)
             put(shown)
             lastSwipedWord = shown
@@ -1872,7 +1910,7 @@ extension KeyboardViewController: SwipeHost {
             commitSwipe(word)
             return
         }
-        for _ in 0..<(previous.count + swipeSuffix.count) { textDocumentProxy.deleteBackward() }
+        for _ in 0..<(previous.count + swipeSuffix.count) { doc.deleteBackward() }
         // Exactly as tapped. Copying the old word's capital here is why
         // tapping `dobra` under a wrongly capitalised `Dobra` changed nothing;
         // the bar already shows the candidates in the case they went in.

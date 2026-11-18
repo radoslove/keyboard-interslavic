@@ -92,19 +92,23 @@ struct SwipeDecoder {
     /// end; here the soft end is 0.2, so 0.1. ⚠ Not yet measured on iOS.
     var umlautRoutePen: Double = 0.1
     var ueRoutePen: Double = 0.0
-    private static let keyUe: UInt8 = 26, keyOe: UInt8 = 27, keyAe: UInt8 = 28
-    private static let keyU: UInt8 = 20, keyO: UInt8 = 14, keyA: UInt8 = 0
+    /// Own key -> its plain letter. German `ü ö ä` (26-28) -> `u o a`;
+    /// Spanish `ñ` (26) -> `n` (Android `BASE_ROUTE`, 3.10.16: `mañana`
+    /// drawn over `n` still comes out). Set together with `umlautKeys`.
+    var umlautPairs: [UInt8: UInt8] = germanPairs
+    /// The `ue oe ae` typewriter route: German only.
+    var ueRoute = true
+    static let germanPairs: [UInt8: UInt8] = [26: 20, 27: 14, 28: 0]
+    static let spanishPairs: [UInt8: UInt8] = [26: 13]
 
-    private static func plainUmlaut(_ k: UInt8) -> UInt8? {
-        switch k { case keyUe: return keyU; case keyOe: return keyO; case keyAe: return keyA; default: return nil }
-    }
-    /// The `u o a` route and the `ue oe ae` route, nil when the word has no umlaut.
-    static func umlautRoutes(_ keys: UnsafeBufferPointer<UInt8>) -> ([UInt8], [UInt8])? {
-        guard keys.contains(where: { $0 >= keyUe }) else { return nil }
+    /// The plain route and the `ue oe ae` route, nil when the word has no own key.
+    static func umlautRoutes(_ keys: UnsafeBufferPointer<UInt8>,
+                             pairs: [UInt8: UInt8] = germanPairs) -> ([UInt8], [UInt8])? {
+        guard keys.contains(where: { pairs[$0] != nil }) else { return nil }
         var plain: [UInt8] = [], ue: [UInt8] = []
         plain.reserveCapacity(keys.count); ue.reserveCapacity(keys.count + 2)
         for k in keys {
-            if let p = plainUmlaut(k) { plain.append(p); ue.append(p); ue.append(keyE) }
+            if let p = pairs[k] { plain.append(p); ue.append(p); ue.append(keyE) }
             else { plain.append(k); ue.append(k) }
         }
         return (plain, ue)
@@ -217,9 +221,10 @@ struct SwipeDecoder {
                 return (sum / Double(Self.samples)).squareRoot() / Double(keyWidth)
             }
             let plain = one(keys)
-            if umlautKeys, let (aou, ue) = Self.umlautRoutes(keys) {
+            if umlautKeys, let (aou, ue) = Self.umlautRoutes(keys, pairs: umlautPairs) {
                 var best = plain
-                for (route, pen) in [(aou, umlautRoutePen), (ue, ueRoutePen)] {
+                let routes = ueRoute ? [(aou, umlautRoutePen), (ue, ueRoutePen)] : [(aou, umlautRoutePen)]
+                for (route, pen) in routes {
                     if let r = route.withUnsafeBufferPointer({ one($0) }) {
                         best = min(best ?? r + pen, r + pen)
                     }
@@ -260,14 +265,14 @@ struct SwipeDecoder {
         if umlautKeys {
             // A glide over `u o a` may be a word filed under `ü ö ä`, and one
             // ending on `e` may be the `ue` route of a word ending in an umlaut.
-            let partner: [Int: Int] = [Int(Self.keyU): Int(Self.keyUe), Int(Self.keyO): Int(Self.keyOe),
-                                       Int(Self.keyA): Int(Self.keyAe)]
+            var partner: [Int: Int] = [:]
+            for (own, base) in umlautPairs { partner[Int(base)] = Int(own) }
             for k in firstKeys { if let p = partner[k] { firstKeys.append(p) } }
             for k in lastKeys {
                 let pen = softLast[k]
                 var add: [Int] = []
                 if let p = partner[k] { add.append(p) }
-                if k == Int(Self.keyE) { add += [Int(Self.keyUe), Int(Self.keyOe), Int(Self.keyAe)] }
+                if ueRoute, k == Int(Self.keyE) { add += umlautPairs.keys.map { Int($0) } }
                 for p in add where !lastKeys.contains(p) {
                     lastKeys.append(p)
                     if let pen { softLast[p] = min(softLast[p] ?? pen, pen) }
