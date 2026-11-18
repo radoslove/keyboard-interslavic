@@ -532,7 +532,8 @@
   },
   "privacy_link": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Politika privatnosti",
    "en": "Privacy policy",
@@ -1856,7 +1857,8 @@
   },
   "learn_study": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Uči se",
    "en": "Study",
@@ -2273,7 +2275,8 @@
   },
   "learn_topics": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Temy",
    "en": "Topics",
@@ -2293,7 +2296,8 @@
   },
   "learn_words": {
    "platforms": [
-    "android"
+    "android",
+    "ios"
    ],
    "isv": "Slova",
    "en": "Words",

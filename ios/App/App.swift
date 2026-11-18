@@ -1,5 +1,6 @@
 import SwiftUI
 import MessageUI
+import SafariServices
 
 /// Container app. On iOS a keyboard cannot ship on its own - it needs a host
 /// app - so this exists mostly to carry the extension and tell the user how to
@@ -68,6 +69,9 @@ struct SetupView: View {
     /// reached the sheet and showed an empty page (iPhone 13, 2026-11-13).
     @State private var mailFile: Outgoing?
     @State private var shareFile: Outgoing?
+    /// The privacy policy, shown inside the app (owner 261118: a window
+    /// with the page, not a jump out to Safari).
+    @State private var webPage: Outgoing?
 
     // The keyboard's languages and the `＋` words moved to 🎓 (`LearnView`,
     // `AppLangs`), as on Android 3.9.44.
@@ -203,9 +207,6 @@ struct SetupView: View {
                     Text(Ui.head("collect_head"))
                 }
                 // "My words" moved to 🎓 (`LearnView`), as on Android 3.9.44.
-                Section(Ui.head("privacy_head")) {
-                    note("privacy_body")
-                }
                 // The gesture log is for error reports, not for everyday use:
                 // hidden until the version line is tapped five times, and
                 // shown for good once recording is on.
@@ -223,6 +224,16 @@ struct SetupView: View {
                         Text(Ui.head("log_head"))
                     } footer: {
                         Text(Ui.body("log_body") + "\n\n" + Ui.body("log_privacy"))
+                    }
+                }
+                // Privacy LAST, right above the version line, where one looks for
+                // it (owner 261118: between the sections it could not be found).
+                Section(Ui.head("privacy_head")) {
+                    note("privacy_body")
+                    // The full policy, linked from inside the app as the stores
+                    // ask (Android 3.10.1, `PRIVACY_URL`).
+                    Button(Ui.t("privacy_link")) {
+                        webPage = Outgoing(url: URL(string: "https://interslove.vercel.app/#privacy")!)
                     }
                 }
                 Section {
@@ -245,6 +256,7 @@ struct SetupView: View {
                          body: "Interslove \(appVersion) (iOS) · \(f.url.lastPathComponent)")
             }
             .sheet(item: $shareFile) { f in ShareSheet(items: [f.url]) }
+            .sheet(item: $webPage) { p in WebSheet(url: p.url).ignoresSafeArea() }
         }
     }
 }
@@ -285,6 +297,13 @@ private struct ShareSheet: UIViewControllerRepresentable {
         UIActivityViewController(activityItems: items, applicationActivities: nil)
     }
     func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
+}
+
+/// A web page in a window over the app, with Safari's own Done button.
+private struct WebSheet: UIViewControllerRepresentable {
+    let url: URL
+    func makeUIViewController(context: Context) -> SFSafariViewController { SFSafariViewController(url: url) }
+    func updateUIViewController(_ vc: SFSafariViewController, context: Context) {}
 }
 
 private struct Outgoing: Identifiable {
