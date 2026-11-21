@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package>
+  <System>
+    <KeymanDeveloperVersion>18.0.253.0</KeymanDeveloperVersion>
+    <FileVersion>7.0</FileVersion>
+  </System>
+  <Options>
+    <ReadMeFile>readme.htm</ReadMeFile>
+    <LicenseFile>..\LICENSE.md</LicenseFile>
+    <WelcomeFile>welcome.htm</WelcomeFile>
+    <FollowKeyboardVersion/>
+  </Options>
+  <Info>
+    <Name URL="https://github.com/radoslove/keyboard-interslavic">Glagolitic (Polish)</Name>
+    <Copyright URL="">© Interslove</Copyright>
+    <Author URL="">Interslove</Author>
+    <Description URL="https://github.com/radoslove/keyboard-interslavic">Polish in Glagolitic: type Polish as usual (AltGr letters as on the Polish programmer's layout), the keyboard writes Glagolitic - cz, sz, rz, dz and ja/ia join by context.</Description>
+  </Info>
+  <Files>
+    <File><Name>..\build\pl_glag.kmx</Name></File>
+    <File><Name>welcome.htm</Name></File>
+    <File><Name>readme.htm</Name></File>
+    <File><Name>..\LICENSE.md</Name></File>
+  </Files>
+  <Keyboards>
+    <Keyboard>
+      <ID>pl_glag</ID>
+      <Languages>
+        <Language ID="pl-Glag">Polish (Glagolitic)</Language>
+      </Languages>
+    </Keyboard>
+  </Keyboards>
+</Package>
