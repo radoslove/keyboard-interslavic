@@ -27,7 +27,9 @@ ROOT = os.path.join(HERE, "..")
 SRC = os.path.join(ROOT, "dictionary", "sources_wikt", "pl-extract.jsonl.gz")
 OUT = os.path.join(ROOT, "android-app", "app", "src", "main", "assets")
 
-LANGS = ["cs", "sk", "sl", "hr", "sr", "bs", "mk", "ru", "uk", "bg", "be", "nb", "en", "de"]
+# Every keyboard language the Polish Wiktionary defines in Polish (es fr it nl ro
+# added 261118). Not isv: its glosses need the dictionary team's consent.
+LANGS = ["be", "bg", "bs", "cs", "de", "en", "es", "fr", "hr", "it", "mk", "nb", "nl", "ro", "ru", "sk", "sl", "sr", "uk"]
 PL_MAX_ENTRIES = 15000
 # A form listed under more entries than this is an auxiliary, not a form of each.
 SHARED_MAX = 8
@@ -38,6 +40,14 @@ FORM_OF = re.compile(r"(?:od:?|zaimka osobowego)\s+(\w+)\s*$")
 KEEP_ALL = {"być", "byt", "biti", "byť", "быть", "бути", "быць", "съм", "sein", "werden", "be"}
 # English, kept to the entries its keyboard list ranks highest (size).
 EN_MAX_ENTRIES = 20000
+
+
+# Plain errors in the source, fixed here until the per-language review keeps
+# its own verdicts (261118, `slawista` sample): (Polish word, language) -> word.
+FIXES = {
+    ("krzak", "uk"): "кущ",   # Wiktionary had the Polish word in Cyrillic letters, "Кшак"
+    ("teraz", "nb"): "nå",    # Wiktionary had "nu" (Danish, old Riksmål), not bokmål
+}
 
 
 GRAMMAR = re.compile(r"\b(lp|lm|forma|czasownika|przymiotnika|rzeczownika|zaimka|czas przeszły|"
@@ -98,6 +108,9 @@ def main():
                     tl, tw = t.get("lang_code"), t.get("word", "")
                     if tl in gloss and tl not in tr and tw and len(tw) <= 30:
                         tr[tl] = tw.split(",")[0].strip()
+                for (pw, tl), fixed in FIXES.items():
+                    if word.lower() == pw and tl in tr:
+                        tr[tl] = fixed
                 trans.append(([k.lower() for k in keys], tr))
                 # A Polish FORM page (`mam`: "1. os. lp od: mieć", `mną`: "... zaimka
                 # osobowego ja") names the lemmas the form belongs to.

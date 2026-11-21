@@ -25,6 +25,11 @@ object Ui {
     private const val PREFS = "isv_collector"
     private const val KEY = "ui_language"
 
+    /** No in-app language chooser in the isc app (SetupActivity hides it). */
+    val PICK = emptyList<Pair<String, String>>()
+    fun chosen(context: Context): String = ""
+    fun choose(context: Context, lang: String) {}
+
     fun current(context: Context): String {
         val saved = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, null)
         if (saved != null && saved in ALL) return saved

@@ -102,16 +102,29 @@ private var learnLang: String? = null
 /** Whether the word lists under the card are opened. */
 private var learnShowWords = false
 private var learnShowMine = false
+private var learnShowLetters = false
 /** The script word cards are shown in (null = the language's own), to practise reading. */
 private var learnScript: Script.Mode? = null
+/** The tab shows words (false) or alphabets (true); kept between launches (iOS `learn_alpha_mode`). */
+private var learnAlphaMode: Boolean? = null
+/** The two alphabet wheels: from which script, into which. */
+private var learnAlphaFrom: Script.Mode? = null
+private var learnAlphaTo: Script.Mode? = null
+/** The filter value for every alphabet card at once. */
+private const val ALL_ALPHA = "\u0001alphabets"
 
 /** Wiktionary glosses already looked up ("" = none), "lang\tword" -> gloss. */
 private val learnGlosses = HashMap<String, String>()
 private var learnLooking = false
 
+private fun isAlphabet(c: Learn.Card) = c.cat.contains(" → ")
+private fun isAlphaFilter(f: String?) = f != null && (f == ALL_ALPHA || f.contains(" → "))
+
 internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
     val d = resources.displayMetrics.density
     val ui = Ui.current(this)
+    val prefs = getSharedPreferences("isv_collector", android.content.Context.MODE_PRIVATE)
+    if (learnAlphaMode == null) learnAlphaMode = prefs.getBoolean("learn_alpha_mode", false)
     fun lname(lang: String) = Ui.langName(ui, lang)
     fun small(s: String, size: Float = 13.5f) = TextView(this).apply {
         text = s
@@ -142,36 +155,32 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
         }.start()
     }
 
-    root.addView(header(t("learn_head")))
-    root.addView(small(t("learn_body")))
-
     // One language at a time: the cards, the review and new words follow the
-    // language chosen here (the keyboard switches with it, the screen follows).
+    // language chosen with 🌐 (the keyboard switches with it, the screen follows).
+    // Alphabet cards of every language are there too, each kept under its own
+    // language: alphabets do not depend on the language being learned.
     fun curLang(): String = learnLang ?: Lang.current(this)
-    fun langCards() = Learn.cards(this).filter { it.lang == curLang() }
-    val langButton = Button(this).apply {
-        isAllCaps = false
-        textSize = 18f
-        gravity = Gravity.START or Gravity.CENTER_VERTICAL
+    fun langCards() = Learn.cards(this).filter { it.lang == curLang() || isAlphabet(it) }
+    /** The topic a card is shown under: its category, and for an alphabet of
+     *  another language that language's code in front ("NB · ABC → ᚠᚢᚦ"). */
+    fun topic(c: Learn.Card) = if (isAlphabet(c) && c.lang != curLang()) "${c.lang.uppercase()} · ${c.cat}" else c.cat
+    /** Words and alphabets never mix: "all" is every word, the alphabets have
+     *  their own "all" (owner 261118: learning alphabets, the words barged in). */
+    fun filtered(all: List<Learn.Card>) = when (val f = learnFilter) {
+        null -> all.filter { !isAlphabet(it) }
+        ALL_ALPHA -> all.filter { isAlphabet(it) }
+        else -> all.filter { topic(it) == f }
     }
-    root.addView(langButton)
+    fun pick(f: String?) {
+        learnFilter = f; learnQueue = null; learnCurrent = null; learnJustDone = false
+        refresh()
+    }
 
-    // Topics as tiles: own categories and ready sets in one place; a set not
-    // taken yet is a tile with ＋.
-    val topicsHead = header(t("learn_topics"))
-    root.addView(topicsHead)
-    val topicGrid = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-    root.addView(topicGrid)
-    // Alphabets apart from the word topics; the heading needs no translation.
-    val alphaHead = header("ABC · АБВ · ⰀⰁⰂ · ·−")
-    root.addView(alphaHead)
-    val alphaGrid = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-    root.addView(alphaGrid)
-
+    // The review first, high up: what the tab is for (iOS 261118).
     val dueLine = TextView(this).apply {
         textSize = 17f
         setTextColor(cText)
-        setPadding(0, (10 * d).toInt(), 0, 0)
+        setPadding(0, (4 * d).toInt(), 0, 0)
     }
     root.addView(dueLine)
     val cardBox = LinearLayout(this).apply {
@@ -180,8 +189,49 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
     }
     root.addView(cardBox)
 
-    // The word lists stay folded until asked for: on first sight the tab is
-    // language, topics and the card, nothing else.
+    // Then what to learn: words of a language, or alphabets.
+    val modeRow = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        setPadding(0, (8 * d).toInt(), 0, (4 * d).toInt())
+    }
+    root.addView(modeRow)
+    val modeButtons = listOf(false to t("learn_words"), true to "ABC · ⰀⰁⰂ · ᚠᚢᚦ · ·−").map { (on, label) ->
+        Button(this).apply {
+            text = label
+            isAllCaps = false
+            textSize = 15f
+            maxLines = 1
+            // The scripts' label is long: it shrinks to fit rather than being cut.
+            androidx.core.widget.TextViewCompat.setAutoSizeTextTypeUniformWithConfiguration(
+                this, 9, 15, 1, android.util.TypedValue.COMPLEX_UNIT_SP)
+            setOnClickListener {
+                if (learnAlphaMode == on) return@setOnClickListener
+                learnAlphaMode = on
+                prefs.edit().putBoolean("learn_alpha_mode", on).apply()
+                learnScript = null
+                pick(if (on) ALL_ALPHA else null)
+            }
+        }.also { modeRow.addView(it, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)) }
+    }
+
+    // ---- Words ----
+    val wordsSec = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+    root.addView(wordsSec)
+    wordsSec.addView(small(t("learn_body")))
+    val langButton = Button(this).apply {
+        isAllCaps = false
+        textSize = 18f
+        gravity = Gravity.START or Gravity.CENTER_VERTICAL
+    }
+    wordsSec.addView(langButton)
+    // Topics as tiles: own categories and ready sets in one place; a set not
+    // taken yet is a tile with ＋.
+    val topicsHead = header(t("learn_topics"))
+    wordsSec.addView(topicsHead)
+    val topicGrid = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+    wordsSec.addView(topicGrid)
+
+    // The lists stay folded until asked for.
     fun fold(toggle: () -> Unit) = TextView(this).apply {
         textSize = 19f
         setTextColor(cText)
@@ -189,9 +239,9 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
         setOnClickListener { toggle() }
     }
     val wordsHead = fold { learnShowWords = !learnShowWords; refresh() }
-    root.addView(wordsHead)
+    wordsSec.addView(wordsHead)
     val wordsBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-    root.addView(wordsBox)
+    wordsSec.addView(wordsBox)
 
     // Add a word to the chosen language (and topic, when one is chosen).
     val addRow = LinearLayout(this).apply {
@@ -216,9 +266,9 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
             // The gloss is looked up for display, not copied into the card:
             // a card's own translation is the user's, the gloss keeps its credit.
             Learn.add(this@buildLearnTab, lang, w, null)
-            // With a topic chosen, the new word goes into it: that is how a
-            // ready set or one's own topic grows.
-            learnFilter?.takeIf { it.isNotEmpty() }?.let { cat ->
+            // With a word topic chosen, the new word goes into it: that is how a
+            // ready set or one's own topic grows. Never into an alphabet.
+            learnFilter?.takeIf { it.isNotEmpty() && !isAlphaFilter(it) }?.let { cat ->
                 val c = Learn.card(this@buildLearnTab, lang, w)
                 if (c.cat.isEmpty()) { c.cat = cat; Learn.update(this@buildLearnTab, c) }
             }
@@ -231,16 +281,118 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
     wordsBox.addView(deckBox)
 
     val mineHead = fold { learnShowMine = !learnShowMine; refresh() }
-    root.addView(mineHead)
+    wordsSec.addView(mineHead)
     val mineSection = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
     mineSection.addView(small(t("learn_my_body")))
     val myBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
     mineSection.addView(myBox)
-    root.addView(mineSection)
+    wordsSec.addView(mineSection)
 
-    fun filtered(all: List<Learn.Card>) = when (val f = learnFilter) {
-        null -> all
-        else -> all.filter { it.cat == f }
+    // ---- Alphabets ----
+    val alphaSec = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+    root.addView(alphaSec)
+    // No heading: the mode switch above already names the alphabets, and the
+    // wheels below show them (owner 261121).
+    alphaSec.addView(small(t("learn_alpha_body")))
+    // Two wheels: the script to start from, the script to learn. No language
+    // wheel: the letters are the language being learned (🌐), Interslavic when
+    // that one has a single script (owner 261118: "języki się wpierdalają").
+    fun wheel() = android.widget.NumberPicker(this).apply {
+        wrapSelectorWheel = false
+        descendantFocusability = ViewGroup.FOCUS_BLOCK_DESCENDANTS
+    }
+    val fromWheel = wheel()
+    val toWheel = wheel()
+    alphaSec.addView(LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+        addView(fromWheel, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+        addView(TextView(this@buildLearnTab).apply {
+            text = "→"
+            textSize = 20f
+            setTextColor(cGloss)
+            setPadding((8 * d).toInt(), 0, (8 * d).toInt(), 0)
+        })
+        addView(toWheel, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+    })
+    val pairRow = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+    }
+    alphaSec.addView(pairRow)
+    // "All alphabets" on its own line: next to a long pair name it was pushed
+    // off the screen.
+    val allRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+    alphaSec.addView(allRow)
+    val lettersHead = fold { learnShowLetters = !learnShowLetters; refresh() }
+    alphaSec.addView(lettersHead)
+    val lettersBox = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+    alphaSec.addView(lettersBox)
+
+    /** The letters' language and its scripts, as the wheels show them now. */
+    fun alphaSrc() = curLang().let { if (Alphabets.scripts(it).size > 1) it else Lang.ISV }
+    fun alphaAll() = Alphabets.scripts(alphaSrc())
+    fun alphaFrom() = alphaAll().let { all -> all.firstOrNull { it == learnAlphaFrom } ?: all.first() }
+    // Both wheels hold every script (owner 261121): a right wheel without the
+    // left one's script shifted under the finger when the left one turned,
+    // and runes -> Latin landed on Morse.
+    fun alphaTos() = alphaAll()
+    fun alphaTo() = alphaAll().let { all -> all.firstOrNull { it == learnAlphaTo }
+        ?: all.firstOrNull { it != alphaFrom() } ?: all.first() }
+    fun shownAs(src: String, name: String) = if (src == curLang()) name else "${src.uppercase()} · $name"
+    fun taken(src: String, name: String): Int {
+        val t = shownAs(src, name)
+        return langCards().count { topic(it) == t }
+    }
+
+    // A turned wheel landing on a pair already taken shows its cards; one not
+    // taken shows every alphabet. Waits until the wheel stops.
+    val handler = android.os.Handler(mainLooper)
+    val follow = Runnable {
+        val src = alphaSrc()
+        val name = Alphabets.title(alphaFrom(), alphaTo())
+        when {
+            taken(src, name) > 0 -> pick(shownAs(src, name))
+            langCards().any { isAlphabet(it) } -> pick(ALL_ALPHA)
+            else -> refresh()
+        }
+    }
+    fun followSoon() { handler.removeCallbacks(follow); handler.postDelayed(follow, 350) }
+    fromWheel.setOnValueChangedListener { _, _, n ->
+        val all = alphaAll()
+        val f = all.getOrNull(n) ?: return@setOnValueChangedListener
+        learnAlphaFrom = f
+        if (learnAlphaTo == null) learnAlphaTo = alphaTo()
+        followSoon()
+    }
+    toWheel.setOnValueChangedListener { _, _, n ->
+        learnAlphaFrom = alphaFrom()
+        learnAlphaTo = alphaTos().getOrNull(n) ?: return@setOnValueChangedListener
+        followSoon()
+    }
+    fun setWheel(p: android.widget.NumberPicker, labels: Array<String>, v: Int) {
+        if (!(p.displayedValues?.contentEquals(labels) ?: false)) {
+            p.displayedValues = null
+            p.minValue = 0
+            p.maxValue = labels.size - 1
+            p.displayedValues = labels
+        }
+        if (p.value != v) p.value = v
+    }
+
+    /** A ready set or an alphabet into the cards, under [from]'s language
+     *  (an alphabet of another language stays that language's). */
+    fun take(name: String, pairs: List<Pair<String, String>>, from: String) {
+        for ((w, tr) in pairs) {
+            val c = Learn.card(this, from, w)
+            c.deck = true
+            if (c.tr.isEmpty()) c.tr = tr
+            if (c.cat.isEmpty()) c.cat = name
+            Learn.update(this, c)
+        }
+        val shown = shownAs(from, name)
+        toast("${t("learn_added")}: $shown")
+        pick(shown)
     }
 
     fun showCard() {
@@ -255,12 +407,12 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
                 setTextColor(cText)
             })
             // Review takes the cards due now; study goes through every card of the
-            // chosen category in random order, so there is always something to do
-            // after the review is over.
+            // chosen topic in random order, so there is always something to do
+            // after the review is over - except what was known today already.
             val buttons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
             for ((key, cards, study) in listOf(
                 Triple("learn_start", due, false),
-                Triple("learn_study", shown.shuffled(), true),
+                Triple("learn_study", shown.filter { !Learn.knownToday(this, it) }.shuffled(), true),
             )) buttons.addView(Button(this).apply {
                 text = t(key)
                 isAllCaps = false
@@ -290,7 +442,7 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
         // language (Interslavic in Cyrillic or Glagolitic, Polish in Glagolitic).
         // Alphabet cards are already in their script.
         val scripts = Script.offered(card.lang)
-        val alphabetCard = card.cat.contains(" → ")
+        val alphabetCard = isAlphabet(card)
         if (scripts.size > 1 && !alphabetCard) cardBox.addView(LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_HORIZONTAL
@@ -304,10 +456,11 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
             })
         })
         val mode = learnScript?.takeIf { it in scripts && !alphabetCard }
+        val morse = card.cat.endsWith(Script.name(Script.Mode.MORSE))
         cardBox.addView(TextView(this).apply {
             text = if (mode == null) card.word else Script.convert(card.word, mode, card.lang)
             textSize = 32f
-            setTypeface(typeface, Typeface.BOLD)
+            setTypeface(if (morse) Typeface.MONOSPACE else typeface, Typeface.BOLD)
             setTextColor(cText)
             gravity = Gravity.CENTER_HORIZONTAL
             setPadding(0, (12 * d).toInt(), 0, (12 * d).toInt())
@@ -321,14 +474,9 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
             })
             return
         }
-        // Read in another script: the back first shows the word as written normally.
-        if (mode != null) cardBox.addView(TextView(this).apply {
-            text = card.word
-            textSize = 20f
-            setTextColor(cGloss)
-            gravity = Gravity.CENTER_HORIZONTAL
-        })
-        // The back: the translation to check oneself against.
+        // The back: the translation first (what is checked), the word as
+        // normally written under it when it was read in another script (iOS
+        // 261118; owner: Latin first is no gain for a Pole).
         val tr = trOf(card.lang, card.word, card.tr)
         cardBox.addView(TextView(this).apply {
             text = tr ?: t("learn_notr")
@@ -342,6 +490,13 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
             textSize = 11f
             setTextColor(cGloss)
             gravity = Gravity.CENTER_HORIZONTAL
+        })
+        if (mode != null) cardBox.addView(TextView(this).apply {
+            text = card.word
+            textSize = 18f
+            setTextColor(cGloss)
+            gravity = Gravity.CENTER_HORIZONTAL
+            setPadding(0, (4 * d).toInt(), 0, 0)
         })
         if (card.note.isNotEmpty()) cardBox.addView(TextView(this).apply {
             text = card.note
@@ -366,21 +521,26 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
             textSize = 15f
             maxLines = 1
             setOnClickListener {
-                // Studying ahead of the schedule must not stretch the intervals, so
-                // there only "don't know" counts: a forgotten word is due again soon.
                 val key = learnKey(card)
                 val first = learnFirstGrade[key]
                 // Only the first answer of a pass sets the schedule; the repeats
                 // inside the pass only bring a forgotten card back sooner.
+                // Studying ahead of the schedule must not stretch the intervals,
+                // so there only "don't know" counts - but a card already due is
+                // not studied ahead, so its answer counts (iOS 261118: "h" known
+                // in study, again and again).
                 if (first == null) {
                     learnFirstGrade[key] = g
-                    if (!learnStudy || g == 0) Learn.grade(this@buildLearnTab, card, g)
+                    if (!learnStudy || g == 0 || card.due <= System.currentTimeMillis())
+                        Learn.grade(this@buildLearnTab, card, g)
                 } else if (g == 0) Learn.grade(this@buildLearnTab, card, 0)
                 learnRecent.add(g)
                 learnCurrent = null
                 // "Know" ends the card's pass: it comes back the next day at
-                // the earliest, then less and less often.
+                // the earliest, then less and less often - and not today in
+                // "study" either.
                 if (g == 2) {
+                    Learn.markKnown(this@buildLearnTab, card)
                     // Learned in this pass: a card once forgotten here starts
                     // again from one day, not from a minute.
                     if (!learnStudy && first != null && first < 2 && card.due - System.currentTimeMillis() < 3_600_000L)
@@ -402,8 +562,10 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
         cardBox.addView(row)
     }
 
-    /** One line of a list: the word, its translation under it, buttons on the right. */
-    fun line(word: String, tr: String?, onTap: (() -> Unit)?, vararg buttons: Button) =
+    /** One line of a list: the word, its translation under it, the topic small
+     *  and grey at the right (not glued to the word: a Morse word "·" next to
+     *  " · ABC → ·−" read as one string), buttons last. */
+    fun line(word: String, tr: String?, cat: String, morse: Boolean, onTap: (() -> Unit)?, vararg buttons: Button) =
         LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
@@ -413,6 +575,7 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
                     text = word
                     textSize = 17f
                     setTextColor(cText)
+                    if (morse) setTypeface(Typeface.MONOSPACE, Typeface.BOLD)
                 })
                 addView(TextView(this@buildLearnTab).apply {
                     text = tr ?: "…"
@@ -422,6 +585,15 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
                 })
                 if (onTap != null) setOnClickListener { onTap() }
             }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+            if (cat.isNotEmpty()) addView(TextView(this@buildLearnTab).apply {
+                text = cat
+                textSize = 12f
+                setTextColor(cGloss)
+                maxLines = 1
+                ellipsize = android.text.TextUtils.TruncateAt.END
+                maxWidth = (130 * d).toInt()
+                setPadding((6 * d).toInt(), 0, (4 * d).toInt(), 0)
+            })
             for (b in buttons) addView(b)
         }
 
@@ -432,19 +604,30 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
         setOnClickListener { onClick() }
     }
 
+    fun unlearn(c: Learn.Card) {
+        Learn.drop(this, c)
+        toast("${t("learn_unlearn")}: ${c.word}")
+        learnQueue?.removeAll { it.lang == c.lang && it.word == c.word }
+        learnLine.removeAll { it.lang == c.lang && it.word == c.word }
+        if (learnCurrent?.let { it.lang == c.lang && it.word == c.word } == true) learnCurrent = null
+        refresh()
+        showCard()
+    }
+
     refresh = {
         val every = Learn.cards(this)
         val langs = Lang.enabled(this)
         learnLang = null
+        val alphaMode = learnAlphaMode == true
         fun switchTo(l: String) {
             learnFilter = null
             learnQueue = null
             learnJustDone = false
             val ime = ImeService.running
             if (ime == null || !ime.switchToLanguage(l)) Lang.setCurrent(this, l)
-            if (Ui.current(this) != ui) recreate() else { refresh(); showCard() }
+            if (Ui.current(this) != ui) recreate() else refresh()
         }
-        fun counted(l: String) = lname(l) + every.count { it.lang == l }.let { if (it > 0) " ($it)" else "" }
+        fun counted(l: String) = lname(l) + every.count { it.lang == l && !isAlphabet(it) }.let { if (it > 0) " ($it)" else "" }
         // One button: the language being learned; the list offers the keyboard's
         // languages first, then ＋ the others (turned on in the keyboard when picked).
         langButton.text = "🌐  " + counted(curLang()) + "  ▾"
@@ -462,127 +645,140 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
         }
 
         val all = langCards()
-        val cats = Learn.categories(all)
-        if (learnFilter != null && learnFilter != "" && learnFilter !in cats) learnFilter = null
+        val lang = curLang()
+        // Every topic in use, the language's own first, alphabetically.
+        val topics = all.sortedWith(compareBy({ if (it.lang != lang) 1 else 0 }, { topic(it).lowercase() }))
+            .map { topic(it) }.filter { it.isNotEmpty() }.distinct()
+        val f = learnFilter
+        if (f != null && f != "" && f != ALL_ALPHA && f !in topics) learnFilter = null
+        // The filter belongs to the section shown.
+        if (alphaMode && !isAlphaFilter(learnFilter)) { learnFilter = ALL_ALPHA; learnQueue = null }
+        if (!alphaMode && isAlphaFilter(learnFilter)) { learnFilter = null; learnQueue = null }
         val shown = filtered(all)
         dueLine.text = t("learn_due").replace("{k}", Learn.due(shown).size.toString())
+        for ((i, b) in modeButtons.withIndex()) {
+            val on = (i == 1) == alphaMode
+            b.alpha = if (on) 1f else 0.5f
+            b.setTypeface(null, if (on) Typeface.BOLD else Typeface.NORMAL)
+        }
+        wordsSec.visibility = if (alphaMode) View.GONE else View.VISIBLE
+        alphaSec.visibility = if (alphaMode) View.VISIBLE else View.GONE
 
-        // Tiles: all, every topic in use, no topic, then the ready sets not taken.
-        val lang = curLang()
-        val target = Learn.target(this, lang)?.takeIf { it != lang } ?: if (lang == "en") Lang.PL else "en"
         class Tile(val label: String, val on: Boolean, val tap: () -> Unit)
-        val tiles = ArrayList<Tile>()
-        val alphaTiles = ArrayList<Tile>()
-        fun pick(f: String?) { learnFilter = f; learnQueue = null; learnJustDone = false; refresh(); showCard() }
-        if (all.isNotEmpty()) tiles.add(Tile("${t("learn_all")} (${all.size})", learnFilter == null) { pick(null) })
-        for (c in cats) (if (c.contains(" → ")) alphaTiles else tiles)
-            .add(Tile("$c (${all.count { it.cat == c }})", learnFilter == c) { pick(c) })
-        if (cats.isNotEmpty() && all.any { it.cat.isEmpty() })
-            tiles.add(Tile("${t("learn_nocat")} (${all.count { it.cat.isEmpty() }})", learnFilter == "") { pick("") })
-        for (set in Sets.names(this, lang)) {
-            val name = Sets.title(this, set, ui)
-            if (name in cats) continue
-            tiles.add(Tile("＋ $name", false) {
-                for ((w, tr) in Sets.words(this, set, lang, target)) {
-                    val c = Learn.card(this, lang, w)
-                    c.deck = true
-                    if (c.tr.isEmpty()) c.tr = tr
-                    if (c.cat.isEmpty()) c.cat = name
-                    Learn.update(this, c)
-                }
-                toast("${t("learn_added")}: $name")
-                pick(name)
-            })
-        }
-        // Alphabets: the language's letters in its other scripts, as tiles too.
-        for ((name, cards) in Alphabets.sets(lang)) {
-            if (name in cats) continue
-            alphaTiles.add(Tile("＋ $name", false) {
-                for ((front, letter) in cards) {
-                    val c = Learn.card(this, lang, front)
-                    c.deck = true
-                    if (c.tr.isEmpty()) c.tr = letter
-                    if (c.cat.isEmpty()) c.cat = name
-                    Learn.update(this, c)
-                }
-                toast("${t("learn_added")}: $name")
-                pick(name)
-            })
-        }
         fun fill(grid: LinearLayout, tiles: List<Tile>) {
-        grid.removeAllViews()
-        for (row in tiles.chunked(2)) grid.addView(LinearLayout(this).apply {
-            orientation = LinearLayout.HORIZONTAL
-            for (tile in row) addView(Button(this@buildLearnTab).apply {
-                text = tile.label
-                isAllCaps = false
-                textSize = 15f
-                maxLines = 2
-                alpha = if (tile.on) 1f else 0.6f
-                setTypeface(typeface, if (tile.on) Typeface.BOLD else Typeface.NORMAL)
-                setOnClickListener { tile.tap() }
-            }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
-            if (row.size == 1) addView(View(this@buildLearnTab), LinearLayout.LayoutParams(0, 0, 1f))
-        })
+            grid.removeAllViews()
+            for (row in tiles.chunked(2)) grid.addView(LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                for (tile in row) addView(Button(this@buildLearnTab).apply {
+                    text = tile.label
+                    isAllCaps = false
+                    textSize = 15f
+                    maxLines = 2
+                    alpha = if (tile.on) 1f else 0.6f
+                    setTypeface(typeface, if (tile.on) Typeface.BOLD else Typeface.NORMAL)
+                    setOnClickListener { tile.tap() }
+                }, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+                if (row.size == 1) addView(View(this@buildLearnTab), LinearLayout.LayoutParams(0, 0, 1f))
+            })
         }
-        fill(topicGrid, tiles)
-        fill(alphaGrid, alphaTiles)
-        alphaHead.visibility = if (alphaTiles.isEmpty()) View.GONE else View.VISIBLE
-        // A language with no word set and no cards yet: no empty heading.
-        topicsHead.visibility = if (tiles.isEmpty()) View.GONE else View.VISIBLE
-        // Only the scripts this language has: Spanish is "ABC · ·−", not all four.
-        alphaHead.text = (Script.offered(lang).take(1) + Script.choices(lang).drop(1).filter { m ->
-            Alphabets.sets(lang).any { it.first == Alphabets.title(lang, m) }
-        }).joinToString(" · ") { Script.name(it) }
 
-        wordsHead.text = (if (learnShowWords) "▾ " else "▸ ") + t("learn_words") + " (${shown.size})"
-        wordsBox.visibility = if (learnShowWords) View.VISIBLE else View.GONE
+        if (!alphaMode) {
+            // Tiles: all words, every word topic in use, no topic, then the ready sets not taken.
+            val words = all.filter { !isAlphabet(it) }
+            val target = Learn.target(this, lang)?.takeIf { it != lang } ?: if (lang == "en") Lang.PL else "en"
+            val tiles = ArrayList<Tile>()
+            if (words.isNotEmpty()) tiles.add(Tile("${t("learn_all")} (${words.size})", learnFilter == null) { pick(null) })
+            for (c in topics) if (!c.contains(" → "))
+                tiles.add(Tile("$c (${all.count { topic(it) == c }})", learnFilter == c) { pick(c) })
+            if (topics.any { !it.contains(" → ") } && words.any { it.cat.isEmpty() })
+                tiles.add(Tile("${t("learn_nocat")} (${words.count { it.cat.isEmpty() }})", learnFilter == "") { pick("") })
+            for (set in Sets.names(this, lang)) {
+                val name = Sets.title(this, set, ui)
+                if (name in topics) continue
+                tiles.add(Tile("＋ $name", false) { take(name, Sets.words(this, set, lang, target), lang) })
+            }
+            fill(topicGrid, tiles)
+            // A language with no word set and no cards yet: no empty heading.
+            topicsHead.visibility = if (tiles.isEmpty()) View.GONE else View.VISIBLE
 
-        deckBox.removeAllViews()
-        if (all.isEmpty()) deckBox.addView(small(t("learn_empty")))
-        var lastLang = ""
-        for (c in shown) {
-            val tr = trOf(c.lang, c.word, c.tr) ?: if ("${c.lang}\t${c.word}" in learnGlosses) t("learn_notr") else null
-            deckBox.addView(line(c.word + if (c.cat.isNotEmpty()) "  · ${c.cat}" else "", tr, { learnEdit(c, refresh) },
-                smallButton("✎") { learnEdit(c, refresh) },
-                smallButton("✕") {
-                    Learn.drop(this, c)
-                    toast("${t("learn_unlearn")}: ${c.word}")
-                    learnQueue?.removeAll { it.lang == c.lang && it.word == c.word }
-                    learnLine.removeAll { it.lang == c.lang && it.word == c.word }
-                    if (learnCurrent?.let { it.lang == c.lang && it.word == c.word } == true) learnCurrent = null
+            // "My words": only word cards, never letters; with an alphabet chosen, every word.
+            val wordList = (if (isAlphaFilter(learnFilter)) all else shown).filter { !isAlphabet(it) }
+            wordsHead.text = (if (learnShowWords) "▾ " else "▸ ") + t("words_head") + " (${wordList.size})"
+            wordsBox.visibility = if (learnShowWords) View.VISIBLE else View.GONE
+            deckBox.removeAllViews()
+            if (words.isEmpty()) deckBox.addView(small(t("learn_empty")))
+            for (c in wordList) {
+                val tr = trOf(c.lang, c.word, c.tr) ?: if ("${c.lang}\t${c.word}" in learnGlosses) t("learn_notr") else null
+                deckBox.addView(line(c.word, tr, if (learnFilter == topic(c)) "" else topic(c), false, { learnEdit(c, refresh) },
+                    smallButton("✎") { learnEdit(c, refresh) },
+                    smallButton("✕") { unlearn(c) }))
+            }
+
+            // "Words from the keyboard": the ＋ words, each with its translation;
+            // ＋ Learn puts one among the cards.
+            myBox.removeAllViews()
+            val inDeck = all.map { "${it.lang}\t${it.word}" }.toSet()
+            val mine = UserWords.all(this, lang).sorted().map { lang to it }
+            if (mine.isEmpty()) myBox.addView(small(t("words_none")))
+            mineHead.text = (if (learnShowMine) "▾ " else "▸ ") + t("learn_kbd_words") + " (${mine.size})"
+            mineSection.visibility = if (learnShowMine) View.VISIBLE else View.GONE
+            for ((l, w) in mine) {
+                val key = "$l\t$w"
+                val tr = trOf(l, w) ?: if (key in learnGlosses) "—" else null
+                val buttons = ArrayList<Button>()
+                if (key !in inDeck) buttons.add(smallButton(t("learn_add")) {
+                    Learn.add(this, l, w, null)
+                    toast("${t("learn_added")}: $w")
                     refresh()
-                    showCard()
-                }))
+                })
+                buttons.add(smallButton(t("words_remove")) {
+                    UserWords.remove(this, l, w)
+                    toast("${t("words_removed")}: $w")
+                    refresh()
+                })
+                myBox.addView(line(w, tr, "", false, null, *buttons.toTypedArray()))
+            }
+            lookUp(words.filter { it.tr.isEmpty() }.map { it.lang to it.word } + mine)
+        } else {
+            // The wheels and the pair under them.
+            val src = alphaSrc()
+            val allS = alphaAll()
+            val from = alphaFrom()
+            val tos = alphaTos()
+            val to = alphaTo()
+            setWheel(fromWheel, allS.map { Script.name(it) }.toTypedArray(), allS.indexOf(from))
+            setWheel(toWheel, tos.map { m ->
+                Script.name(m) + if (taken(src, Alphabets.title(from, m)) > 0) "  ✓" else ""
+            }.toTypedArray(), tos.indexOf(to))
+            val name = Alphabets.title(from, to)
+            val pairs = Alphabets.pair(src, from, to)
+            val n = taken(src, name)
+            val alphaCount = all.count { isAlphabet(it) }
+            pairRow.removeAllViews()
+            val label = shownAs(src, name)
+            if (n > 0) pairRow.addView(smallButton("$label ($n)") { pick(label) }.apply {
+                if (learnFilter == label) setTypeface(typeface, Typeface.BOLD)
+            })
+            else if (from != to && pairs.isNotEmpty()) pairRow.addView(smallButton("＋ $label (${pairs.size})") { take(name, pairs, src) })
+            else if (from == to) pairRow.addView(small("${Script.name(from)} = ${Script.name(to)}"))
+            // Every alphabet taken, of whatever language: reviewed apart from words.
+            allRow.removeAllViews()
+            if (alphaCount > 0) allRow.addView(smallButton("${t("learn_all")} ($alphaCount)") { pick(ALL_ALPHA) }.apply {
+                if (learnFilter == ALL_ALPHA) setTypeface(typeface, Typeface.BOLD)
+            })
+
+            // "My letters": the cards of the pair chosen, or all of them.
+            val letterList = (if (isAlphaFilter(learnFilter)) shown else all).filter { isAlphabet(it) }
+                .sortedWith(compareBy({ topic(it) }, { it.tr }))
+            lettersHead.text = (if (learnShowLetters) "▾ " else "▸ ") + t("learn_my_letters") + " (${letterList.size})"
+            lettersBox.visibility = if (learnShowLetters) View.VISIBLE else View.GONE
+            lettersBox.removeAllViews()
+            if (letterList.isEmpty()) lettersBox.addView(small(t("learn_empty")))
+            for (c in letterList) lettersBox.addView(line(c.word, c.tr,
+                if (learnFilter == topic(c)) "" else topic(c), c.cat.endsWith(Script.name(Script.Mode.MORSE)), null,
+                smallButton("✕") { unlearn(c) }))
         }
 
-        // The ＋ words, each with its translation; ＋ Learn puts one among the cards.
-        myBox.removeAllViews()
-        val inDeck = all.map { "${it.lang}\t${it.word}" }.toSet()
-        val mine = ArrayList<Pair<String, String>>()
-        for (w in UserWords.all(this, curLang()).sorted()) mine.add(curLang() to w)
-        if (mine.isEmpty()) myBox.addView(small(t("words_none")))
-        mineHead.text = (if (learnShowMine) "▾ " else "▸ ") + t("words_head") + " (${mine.size})"
-        mineSection.visibility = if (learnShowMine) View.VISIBLE else View.GONE
-        lastLang = ""
-        for ((lang, w) in mine) {
-            val key = "$lang\t$w"
-            val tr = trOf(lang, w) ?: if (key in learnGlosses) "—" else null
-            val buttons = ArrayList<Button>()
-            if (key !in inDeck) buttons.add(smallButton(t("learn_add")) {
-                Learn.add(this, lang, w, null)
-                toast("${t("learn_added")}: $w")
-                refresh()
-            })
-            buttons.add(smallButton(t("words_remove")) {
-                UserWords.remove(this, lang, w)
-                toast("${t("words_removed")}: $w")
-                refresh()
-            })
-            myBox.addView(line(w, tr, null, *buttons.toTypedArray()))
-        }
-
-        lookUp(all.filter { it.tr.isEmpty() }.map { it.lang to it.word } + mine)
         if (learnQueue == null) showCard()
     }
     learnRefresh = refresh

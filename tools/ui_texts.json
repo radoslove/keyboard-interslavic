@@ -921,6 +921,7 @@
   },
   "settings_head": {
    "platforms": [
+    "android",
     "ios"
    ],
    "isv": "Nastrojenja",
@@ -1462,6 +1463,7 @@
   },
   "ui_lang_pick": {
    "platforms": [
+    "android",
     "ios"
    ],
    "isv": "Jezyk aplikacije",
@@ -1813,6 +1815,7 @@
   },
   "tab_write": {
    "platforms": [
+    "android",
     "ios"
    ],
    "isv": "Pisanje",
@@ -1875,6 +1878,7 @@
   },
   "learn_alpha_body": {
    "platforms": [
+    "android",
     "ios"
    ],
    "isv": "Pisma za učenje: izberi, iz ktorogo pisma na ktore, i klikni ＋. Na kartě pomysli, ktora to jest bukva, i ocěni se.",
@@ -1895,6 +1899,7 @@
   },
   "learn_my_letters": {
    "platforms": [
+    "android",
     "ios"
    ],
    "isv": "Moje bukvy",
@@ -1915,6 +1920,7 @@
   },
   "learn_kbd_words": {
    "platforms": [
+    "android",
     "ios"
    ],
    "isv": "Slova iz klaviatury",

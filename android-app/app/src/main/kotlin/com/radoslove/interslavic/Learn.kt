@@ -194,6 +194,33 @@ object Learn {
         else Gloss.word(Gloss.table(context, lang), word, lang, to)
     } catch (_: Throwable) { null }
 
+    /*
+     * A card answered "know" today does not come back today, not even in
+     * "study" (iOS `learn_known_day`): the day is the local one, so it is
+     * back after midnight. Only today's cards are kept.
+     */
+    private const val KNOWN_DAY = "learn_known_day"
+    private const val KNOWN_IDS = "learn_known_ids"
+
+    private fun today(): Long {
+        val c = java.util.Calendar.getInstance()
+        return (c.timeInMillis + c.get(java.util.Calendar.ZONE_OFFSET) + c.get(java.util.Calendar.DST_OFFSET)) / DAY
+    }
+
+    private fun knownIds(context: Context): Set<String> {
+        val p = context.getSharedPreferences("isv_collector", Context.MODE_PRIVATE)
+        return if (p.getLong(KNOWN_DAY, -1) == today()) p.getStringSet(KNOWN_IDS, emptySet()) ?: emptySet()
+        else emptySet()
+    }
+
+    fun knownToday(context: Context, card: Card): Boolean = key(card.lang, card.word) in knownIds(context)
+
+    fun markKnown(context: Context, card: Card) {
+        val ids = knownIds(context) + key(card.lang, card.word)
+        context.getSharedPreferences("isv_collector", Context.MODE_PRIVATE).edit()
+            .putLong(KNOWN_DAY, today()).putStringSet(KNOWN_IDS, HashSet(ids)).apply()
+    }
+
     /** Whole days until [card] is due again; 0 when due now. */
     fun daysLeft(card: Card, now: Long = System.currentTimeMillis()): Int =
         if (card.due <= now) 0 else ((card.due - now + DAY - 1) / DAY).toInt()

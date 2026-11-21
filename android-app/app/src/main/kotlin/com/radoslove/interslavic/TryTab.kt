@@ -14,24 +14,49 @@ import android.widget.TextView
  * translator can grow in its own file; the second tab is the keyboard settings.
  */
 
-/** The try box's text across a language switch (the screen is rebuilt). */
-internal var tryKeptText: String? = null
+/** The try box's text across a language switch (the screen is rebuilt);
+ *  a translation keeps its greyed untranslated words. */
+internal var tryKeptText: CharSequence? = null
 
 /** Reads the try box; set when the tab is built. */
 internal var tryText: () -> String = { "" }
 
+/** What the try tab was built for (languages, current one, its script): the
+ *  settings tab can change these without rebuilding the screen. */
+internal var tryBuiltSig: String? = null
+
+internal fun SetupActivity.trySig(): String {
+    val cur = Lang.current(this)
+    return Lang.enabled(this).sorted().joinToString(",") + "|" + cur + "|" + Script.chosen(this, cur)
+}
+
+/** The last translation in the box, to turn it back exactly instead of
+ *  translating a translation: from [from] ([before]) into [to] ([after]). */
+internal data class TryTurn(val from: String, val before: CharSequence, val to: String, val after: String)
+internal var tryTurn: TryTurn? = null
+
+/** Words of the last translation (lowercase) -> the word they came from, so a
+ *  card made from the box gets its translation. */
+internal var tryPairs: Map<String, String> = emptyMap()
+internal var tryPairsLang: String? = null
+
+/** Called when the keyboard switches language while this screen is open. */
+internal var tryFollow: ((String) -> Unit)? = null
+internal var trySwitching = false
+
 /** Builds the try tab into [root]. */
 internal fun SetupActivity.buildTryTab(root: LinearLayout) {
-        // A box to try the keyboard right here (iOS `try_head`): it tells "the keyboard is broken" from "it is not
-    // switched on", and is a place to write without opening another app -
-    // so it comes FIRST, large and framed, inviting to write.
-    // What the text becomes (gloss, other alphabet) comes FIRST, at the
-    // very top: below the box the keyboard covered it.
-    // No header: the box's own hint says what it is for.
+    // A box to try the keyboard right here (iOS `try_head`): it tells "the
+    // keyboard is broken" from "it is not switched on", and is a place to
+    // write without opening another app.
+    // Owner 261121: the translation goes INTO the box, as the alphabets do -
+    // a translation shown above the box was hidden under the top of the
+    // screen once the keyboard was up. So above the box: the languages (a tap
+    // translates the text and switches the keyboard), then the alphabets.
     val mirrors = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
     root.addView(mirrors)
-    addLanguageRow(root)
     val tryBox = android.widget.EditText(this)
+    addLanguageRow(root, tryBox)
     val frame = FrameLayout(this)
     root.addView(frame)
     frame.addView(tryBox.apply {
@@ -51,15 +76,21 @@ internal fun SetupActivity.buildTryTab(root: LinearLayout) {
             android.text.InputType.TYPE_TEXT_FLAG_MULTI_LINE or
             android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
     })
+    // Attribution the licence asks for, under the box the translation lands in.
+    if (glossReach(Lang.current(this)).isNotEmpty()) root.addView(TextView(this).apply {
+        text = "Wiktionary · CC BY-SA 4.0"
+        textSize = 11f
+        setTextColor(cGloss)
+        setPadding(0, (2 * resources.displayMetrics.density).toInt(), 0, 0)
+    })
 
-    addGlossMirror(mirrors, tryBox)
     addLearnChips(mirrors, tryBox)
     addScriptRow(root, tryBox, root.indexOfChild(frame))
     // A language switched from this screen rebuilds it; the text typed so
     // far comes back, with the keyboard up.
-    tryKeptText?.let {
+    tryKeptText?.takeIf { it.isNotEmpty() }?.let {
         tryBox.setText(it)
-        tryBox.setSelection(it.length)
+        tryBox.setSelection(tryBox.text?.length ?: 0)
         tryBox.requestFocus()
         tryBox.postDelayed({
             (getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager)
@@ -68,8 +99,89 @@ internal fun SetupActivity.buildTryTab(root: LinearLayout) {
     }
     tryKeptText = null
     tryText = { tryBox.text?.toString().orEmpty() }
+    tryBuiltSig = trySig()
+    trySwitching = false
 }
 
+/** The languages [from]'s text can be translated into: Polish into the 19
+ *  of its Wiktionary, the others into Polish and on through Polish into the
+ *  rest. None for a language without a gloss (Interslavic: its dictionary's
+ *  licence is open). */
+internal fun SetupActivity.glossReach(from: String): List<String> = when {
+    from == Lang.PL -> Gloss.targets(this, Lang.PL)
+    !Gloss.has(this, from) -> emptyList()
+    else -> (Gloss.targets(this, Lang.PL) + Lang.PL).filter { it != from }
+}
+
+/** The alphabet a language's gloss entries are written in. */
+private fun glossForm(lang: String) =
+    if (lang == Lang.SR) Script.Mode.CYRILLIC else Script.offered(lang).first()
+
+/** Box text in [lang]'s chosen script -> the alphabet of its gloss entries. */
+private fun SetupActivity.toGlossForm(s: String, lang: String): String {
+    val m = Script.chosen(this, lang)
+    val g = glossForm(lang)
+    return if (m == g) s else Script.convert(Script.back(s, m, lang), g, lang)
+}
+
+/** The other way: gloss text -> [lang]'s chosen script (runes, Morse,
+ *  Glagolitic, Serbian Latin...). */
+private fun SetupActivity.fromGlossForm(s: String, lang: String): String {
+    val m = Script.chosen(this, lang)
+    val g = glossForm(lang)
+    return if (m == g) s else Script.convert(Script.back(s, g, lang), m, lang)
+}
+
+/** [text] (in [from]'s script) translated word by word into [to], in [to]'s
+ *  script. Words with no gloss stay as typed, greyed while the script shows
+ *  them as they are. Sets [tryPairs]. */
+internal fun SetupActivity.translateBox(text: String, from: String, to: String): CharSequence {
+    val src = toGlossForm(text, from)
+    if (to !in glossReach(from)) {
+        // No gloss (Interslavic): the text stays, in the new language's alphabet.
+        tryPairs = emptyMap(); tryPairsLang = null
+        return fromGlossForm(Script.back(src, glossForm(from), from), to)
+    }
+    val tPl = if (from == Lang.PL || to != Lang.PL) Gloss.table(this, Lang.PL) else emptyMap()
+    val tFrom = if (from != Lang.PL) Gloss.table(this, from) else tPl
+    val direct = from == Lang.PL || to == Lang.PL
+    fun one(w: String): String? =
+        if (direct) Gloss.word(tFrom, w, from, to)
+        else Gloss.word(tFrom, w, from, Lang.PL)?.let { pl ->
+            val ps = Gloss.pieces(tPl, pl, Lang.PL, to)
+            if (ps.any { (q, k) -> !k && q.any { it.isLetter() } }) null else ps.joinToString("") { it.first }
+        }
+    // Not Polish on either side: through Polish, word by word.
+    val pieces: List<Pair<String, Boolean>> =
+        if (direct) Gloss.pieces(tFrom, src, from, to)
+        else Gloss.pieces(tFrom, src, from, Lang.PL).flatMap { (p, known) ->
+            if (!known || p.none { it.isLetter() }) listOf(p to known)
+            else Gloss.pieces(tPl, p, Lang.PL, to).let { ps ->
+                // A Polish word with no gloss in [to] would stay Polish: the
+                // typed word is honester then.
+                if (ps.any { (q, k) -> !k && q.any { it.isLetter() } }) listOf(p to false) else ps
+            }
+        }
+    val pairs = HashMap<String, String>()
+    for (m in Regex("\\p{L}+").findAll(src)) {
+        val g = one(m.value) ?: continue
+        val w = if (from == Lang.DE) m.value else m.value.lowercase()
+        val typed = if (from == Lang.SR) Script.back(w, Script.Mode.CYRILLIC, Lang.SR) else w
+        pairs.putIfAbsent(g.lowercase(), typed)
+        if (to == Lang.SR) pairs.putIfAbsent(Script.back(g, Script.Mode.CYRILLIC, Lang.SR).lowercase(), typed)
+    }
+    tryPairs = pairs; tryPairsLang = to
+    val joined = pieces.joinToString("") { it.first }
+    if (Script.chosen(this, to) != glossForm(to)) return fromGlossForm(joined, to)
+    val sb = android.text.SpannableStringBuilder()
+    for ((piece, known) in pieces) {
+        val a = sb.length
+        sb.append(piece)
+        if (!known) sb.setSpan(android.text.style.ForegroundColorSpan(cGloss), a, sb.length,
+            android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    }
+    return sb
+}
 
 /**
  * Under the try box: the same text, live, in another alphabet of the
@@ -91,33 +203,104 @@ internal fun SetupActivity.narrow(b: Button) {
 }
 
 
-internal fun SetupActivity.addLanguageRow(root: LinearLayout) {
-    val on = Lang.enabled(this)
-    if (on.size < 2) return
+internal fun SetupActivity.addLanguageRow(root: LinearLayout, box: android.widget.EditText) {
+    val d = resources.displayMetrics.density
+    // Alphabetical, as every list of languages (owner 261118): the keyboard's
+    // languages, then the ones the text can only be translated into.
+    val on = Lang.enabled(this).sorted()
     val cur = Lang.current(this)
-    val chips = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-    for (l in on) chips.addView(Button(this).apply {
+    val more = glossReach(cur).filter { it !in on }.sorted()
+    if (on.size < 2 && more.isEmpty()) return
+    val chips = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+    }
+    // [l] chosen here ([switch]: the keyboard follows) or on the keyboard
+    // itself (the screen follows): the text is translated either way. From
+    // the language the screen was built for, not the stored one - the
+    // keyboard may have switched it already.
+    fun go(l: String, switch: Boolean) {
+            val from = cur
+            if (l == from) return
+            // The screen is about to be rebuilt for [l]: the keyboard's own
+            // switch, made below, must not start a second one.
+            tryFollow = null
+            trySwitching = true
+            val typed = box.text?.toString().orEmpty()
+            // Back to the language just translated from, text untouched since:
+            // the original comes back, not a translation of a translation.
+            val turn = tryTurn
+            val result: CharSequence =
+                if (turn != null && turn.to == from && turn.from == l && turn.after == typed) turn.before
+                else if (typed.isBlank()) "" else translateBox(typed, from, l)
+            tryTurn = if (typed.isBlank()) null
+                else TryTurn(from, android.text.SpannableString(box.text ?: typed), l, result.toString())
+            // The box is always in the keyboard's language: a translation
+            // language not on the keyboard yet joins it.
+            if (switch && l !in Lang.enabled(this@addLanguageRow)) {
+                Lang.setEnabled(this@addLanguageRow, Lang.enabled(this@addLanguageRow) + l)
+                toast("⌨ ＋ ${l.uppercase()}")
+            }
+            // Through the running keyboard when there is one, so its view and
+            // dictionary follow at once - setting the stored choice alone
+            // left the open keyboard on the old language.
+            if (switch) {
+                val ime = ImeService.running
+                if (ime == null || !ime.switchToLanguage(l)) Lang.setCurrent(this@addLanguageRow, l)
+            }
+            tryKeptText = result
+            recreate()
+    }
+    tryFollow = { go(it, false) }
+    fun chip(l: String, keyboard: Boolean) = Button(this).apply {
         text = l.uppercase()
         isAllCaps = false
         narrow(this)
         textSize = 16f
-        alpha = if (l == cur) 1f else 0.45f
-        setOnClickListener {
-            if (l != Lang.current(this@addLanguageRow)) {
-                // Through the running keyboard when there is one, so its
-                // view and dictionary follow at once - setting the stored
-                // choice alone left the open keyboard on the old language.
-                val ime = ImeService.running
-                if (ime == null || !ime.switchToLanguage(l)) Lang.setCurrent(this@addLanguageRow, l)
-                tryKeptText = tryText()
-                recreate()
-            }
-        }
-    })
-    root.addView(android.widget.HorizontalScrollView(this).apply {
+        alpha = if (l == cur) 1f else if (keyboard) 0.55f else 0.4f
+        if (l == cur) setTypeface(typeface, android.graphics.Typeface.BOLD)
+        setOnClickListener { go(l, true) }
+    }
+    for (l in on) chips.addView(chip(l, true))
+    if (more.isNotEmpty()) {
+        chips.addView(TextView(this).apply {
+            text = "│"
+            textSize = 16f
+            setTextColor(cGloss)
+            setPadding((4 * d).toInt(), 0, (4 * d).toInt(), 0)
+        })
+        for (l in more) chips.addView(chip(l, false))
+    }
+    val row = LinearLayout(this).apply {
+        orientation = LinearLayout.HORIZONTAL
+        gravity = Gravity.CENTER_VERTICAL
+    }
+    val scroll = android.widget.HorizontalScrollView(this).apply {
         isHorizontalScrollBarEnabled = false
         addView(chips)
+    }
+    row.addView(scroll, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
+    row.addView(Button(this).apply {
+        text = "⧉"
+        textSize = 18f
+        narrow(this)
+        setOnClickListener {
+            val cm = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+            cm.setPrimaryClip(android.content.ClipData.newPlainText("Interslove", box.text?.toString().orEmpty()))
+            toast("✓ ${Lang.current(this@addLanguageRow).uppercase()}")
+        }
     })
+    root.addView(row)
+    // The language on now in sight, also when it is far down the alphabet.
+    scroll.post {
+        for (i in 0 until chips.childCount) {
+            val v = chips.getChildAt(i)
+            if (v is Button && v.text.toString() == cur.uppercase()) {
+                scroll.scrollTo(maxOf(0, v.left - scroll.width / 3), 0)
+                break
+            }
+        }
+    }
 }
 
 
@@ -157,177 +340,6 @@ internal fun SetupActivity.addScriptRow(root: LinearLayout, box: android.widget.
     root.addView(row, at)
 }
 
-/**
- * Under the try box: the typed text glossed word by word into another
- * language, offline, from Wiktionary ([Gloss]). Polish
- * glosses into the other keyboard languages, every other language into
- * Polish. Not for Interslavic yet (its dictionary's licence is open).
- */
-internal fun SetupActivity.addGlossMirror(root: LinearLayout, box: android.widget.EditText) {
-    val from = Lang.current(this)
-    val targets = Gloss.targets(this, from)
-    if (targets.isEmpty()) return
-    val prefs = getSharedPreferences("isv_collector", android.content.Context.MODE_PRIVATE)
-    val d = resources.displayMetrics.density
-    var to = targets.firstOrNull { it == prefs.getString("gloss_target_$from", null) }
-        ?: targets.firstOrNull { it in Lang.enabled(this) && it != from } ?: targets.first()
-    var table: Map<String, String>? = null
-    // The translation is plain text with a thin line on its left, not a box:
-    // a box looked like the writing field under it and could not be typed
-    // into. It shows only once there is something to translate.
-    val out = TextView(this).apply {
-        textSize = 20f
-        setTextColor(cText)
-        setTextIsSelectable(true)
-        visibility = View.GONE
-        setPadding((12 * d).toInt(), (2 * d).toInt(), (4 * d).toInt(), (2 * d).toInt())
-        val line = android.graphics.drawable.GradientDrawable().apply { setColor(cGloss) }
-        background = android.graphics.drawable.LayerDrawable(arrayOf(line)).apply {
-            setLayerWidth(0, (3 * d).toInt())
-            setLayerGravity(0, Gravity.START or Gravity.FILL_VERTICAL)
-        }
-    }
-    // The translated words as buttons too: what is typed is often already
-    // known, so a card can be made from either side. The card is in the
-    // target language, with the typed word as its translation. Same as
-    // iOS 0.6.36.
-    val tChips = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-    val tScroll = android.widget.HorizontalScrollView(this).apply {
-        isHorizontalScrollBarEnabled = false
-        setPadding(0, (6 * d).toInt(), 0, 0)
-        addView(tChips)
-    }
-    fun glossedRow(tab: Map<String, String>, typed: String) {
-        tChips.removeAllViews()
-        val known = Learn.cards(this).filter { it.lang == to }.map { it.word.lowercase() }.toSet()
-        val seen = HashSet<String>()
-        for (m in Regex("\\p{L}+").findAll(typed)) {
-            val w = m.value
-            if (w.length < 2) continue
-            var g = Gloss.word(tab, w, from, to) ?: continue
-            if (to != Lang.DE) g = g.lowercase()
-            if (!seen.add(g.lowercase())) continue
-            val src = if (from == Lang.DE) w else w.lowercase()
-            val has = g.lowercase() in known
-            tChips.addView(Button(this).apply {
-                text = if (has) "✓ $g" else "＋ $g"
-                isAllCaps = false
-                textSize = 15f
-                narrow(this)
-                alpha = if (has) 0.5f else 1f
-                setOnClickListener {
-                    if (has) return@setOnClickListener
-                    Learn.add(this@addGlossMirror, to, g, src)
-                    toast("${t("learn_added")}: $g")
-                    glossedRow(tab, typed)
-                    learnRefresh()
-                }
-            })
-        }
-        tScroll.visibility = if (tChips.childCount == 0) View.GONE else View.VISIBLE
-    }
-    fun update() {
-        val t = table ?: return
-        var typed = box.text?.toString().orEmpty()
-        // Morse is read back to the language's own letters first.
-        if (Script.chosen(this, from) == Script.Mode.MORSE) typed = Morse.decode(typed, from)
-        // Serbian entries are Cyrillic; Latin typing is read as Cyrillic.
-        if (from == Lang.SR && Script.mode(this, from) == Script.Mode.LATIN)
-            typed = Script.convert(typed, Script.Mode.CYRILLIC, Lang.SR)
-        // Polish written in Glagolitic is read back to Latin first.
-        if (from == Lang.PL && Script.mode(this, from) == Script.Mode.GLAGOLITIC)
-            typed = Script.back(typed, Script.Mode.GLAGOLITIC, Lang.PL)
-        val sb = android.text.SpannableStringBuilder()
-        for ((piece, known) in Gloss.pieces(t, typed, from, to)) {
-            val a = sb.length
-            sb.append(piece)
-            if (!known) sb.setSpan(android.text.style.ForegroundColorSpan(cGloss), a, sb.length, 0)
-        }
-        out.text = sb
-        out.visibility = if (typed.isBlank()) View.GONE else View.VISIBLE
-        glossedRow(t, typed)
-    }
-    val row = LinearLayout(this).apply {
-        orientation = LinearLayout.HORIZONTAL
-        gravity = Gravity.CENTER_VERTICAL
-        setPadding(0, (10 * d).toInt(), 0, (4 * d).toInt())
-    }
-    // Every target in sight, five to a row (a scrolling row hid Norwegian).
-    val chips = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
-    val allChips = ArrayList<Button>()
-    // ⇄ turns the direction round: the keyboard switches
-    // to the language translated into, the translation becomes the text,
-    // and the old source becomes the target.
-    row.addView(Button(this).apply {
-        text = "${from.uppercase()} ⇄"
-        isAllCaps = false
-        textSize = 15f
-        narrow(this)
-        setOnClickListener {
-            val back = to
-            if (back !in Lang.enabled(this@addGlossMirror))
-                Lang.setEnabled(this@addGlossMirror, Lang.enabled(this@addGlossMirror) + back)
-            prefs.edit().putString("gloss_target_$back", from).apply()
-            val ime = ImeService.running
-            if (ime == null || !ime.switchToLanguage(back)) Lang.setCurrent(this@addGlossMirror, back)
-            tryKeptText = out.text.toString()
-            recreate()
-        }
-    })
-    row.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
-    for (l in targets) allChips.add(Button(this).apply {
-        text = l.uppercase()
-        isAllCaps = false
-        narrow(this)
-        textSize = 16f
-        alpha = if (l == to) 1f else 0.45f
-        setOnClickListener {
-            to = l
-            prefs.edit().putString("gloss_target_$from", l).apply()
-            for (c in allChips) c.alpha = if (c === this) 1f else 0.45f
-            update()
-        }
-    })
-    for (c in allChips) { c.textSize = 14f; c.setPadding((9 * d).toInt(), 0, (9 * d).toInt(), 0) }
-    for (part in allChips.chunked(7)) {
-        val line = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
-        part.forEach { line.addView(it) }
-        chips.addView(line)
-    }
-    row.addView(Button(this).apply {
-        text = "⧉"
-        textSize = 18f
-        narrow(this)
-        setOnClickListener {
-            val cm = getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
-            cm.setPrimaryClip(android.content.ClipData.newPlainText("Interslove", out.text))
-            toast("✓ ${to.uppercase()}")
-        }
-    })
-    root.addView(out)
-    root.addView(row)
-    root.addView(chips)
-    root.addView(tScroll)
-    // Attribution the licence asks for.
-    root.addView(TextView(this).apply {
-        text = "Wiktionary · CC BY-SA 4.0"
-        textSize = 11f
-        setTextColor(cGloss)
-        setPadding(0, (2 * d).toInt(), 0, 0)
-    })
-    box.addTextChangedListener(object : android.text.TextWatcher {
-        override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
-        override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
-        override fun afterTextChanged(s: android.text.Editable?) = update()
-    })
-    // The table is large: read it off the UI thread, then gloss what is there.
-    Thread {
-        val t = Gloss.table(this, from)
-        runOnUiThread { table = t; update() }
-    }.start()
-}
-
-
 /** Under the translation, every word of the box as a button: a tap puts it
  *  among the learning cards (unknown words are met while
  *  reading and writing, not in the `＋` chip, which only collects words the
@@ -353,6 +365,7 @@ internal fun SetupActivity.addLearnChips(root: LinearLayout, box: android.widget
         chips.removeAllViews()
         var typed = box.text?.toString().orEmpty()
         if (Script.chosen(this, lang) == Script.Mode.MORSE) typed = Morse.decode(typed, lang)
+        Script.runeRow(Script.chosen(this, lang))?.let { typed = Runes.decodeLossy(typed, it) }
         if (lang == Lang.PL && Script.mode(this, lang) == Script.Mode.GLAGOLITIC)
             typed = Script.back(typed, Script.Mode.GLAGOLITIC, Lang.PL)
         val words = token.findAll(typed).map { it.value }
@@ -369,7 +382,10 @@ internal fun SetupActivity.addLearnChips(root: LinearLayout, box: android.widget
             setOnClickListener {
                 if (inDeck) return@setOnClickListener
                 val word = if (lang == Lang.DE) w else w.lowercase()
-                Learn.add(this@addLearnChips, lang, word, null)
+                // A word the box was translated into carries the word it
+                // came from as its translation.
+                val from = if (tryPairsLang == lang) tryPairs[word.lowercase()] else null
+                Learn.add(this@addLearnChips, lang, word, from)
                 toast("${t("learn_added")}: $word")
                 update()
                 learnRefresh()

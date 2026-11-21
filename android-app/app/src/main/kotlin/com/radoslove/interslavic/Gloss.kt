@@ -69,13 +69,11 @@ object Gloss {
     /** The languages [from] can be glossed into. */
     fun targets(context: Context, from: String): List<String> = when {
         !has(context, from) -> emptyList()
-        from == Lang.PL -> {
-            val all = listOf(Lang.DE, Lang.EN, Lang.NB, Lang.CS, Lang.SK, Lang.SL, Lang.HR, Lang.SR,
-                Lang.BS, Lang.MK, Lang.RU, Lang.UK, Lang.BG, Lang.BE)
-            // The keyboard's own languages first.
-            val on = Lang.enabled(context)
-            all.filter { it in on } + all.filter { it !in on }
-        }
+        // Every keyboard language the Polish Wiktionary translates into, in
+        // alphabetical order (owner 261118), the keyboard's own ones no longer first.
+        from == Lang.PL -> listOf(Lang.BE, Lang.BG, Lang.BS, Lang.CS, Lang.DE, Lang.EN, Lang.ES,
+            Lang.FR, Lang.HR, Lang.IT, Lang.MK, Lang.NB, Lang.NL, Lang.RO, Lang.RU, Lang.SK,
+            Lang.SL, Lang.SR, Lang.UK)
         else -> listOf(Lang.PL)
     }
 

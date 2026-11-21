@@ -62,6 +62,9 @@ class SetupActivity : Activity() {
         setTheme(if (dark) android.R.style.Theme_DeviceDefault
                  else android.R.style.Theme_DeviceDefault_Light_DarkActionBar)
         super.onCreate(savedInstanceState)
+        // One bar, ours (icon, "Interslove", the tab's name): the system's
+        // action bar above it showed the app's name a second time.
+        actionBar?.hide()
         ui = Ui.current(this)
 
         val pad = (16 * resources.displayMetrics.density).toInt()
@@ -115,6 +118,28 @@ class SetupActivity : Activity() {
             }
             langBoxes[lang] = box
             root.addView(box)
+        }
+
+        // The app's own language: the screen everything else is read in (iOS
+        // 261118). "Automatic" keeps the old way: the keyboard's language, else the phone's.
+        if (Ui.PICK.isNotEmpty()) {
+            section(root, "ui_lang_pick", null)
+            val now = Ui.chosen(this)
+            root.addView(Button(this).apply {
+                isAllCaps = false
+                textSize = 17f
+                gravity = Gravity.START or Gravity.CENTER_VERTICAL
+                text = (Ui.PICK.firstOrNull { it.first == now }?.second ?: t("theme_auto")) + "  ▾"
+                setOnClickListener {
+                    val codes = listOf("") + Ui.PICK.map { it.first }
+                    val labels = (listOf(t("theme_auto")) + Ui.PICK.map { it.second }).toTypedArray()
+                    android.app.AlertDialog.Builder(this@SetupActivity)
+                        .setSingleChoiceItems(labels, codes.indexOf(now).coerceAtLeast(0)) { dlg, k ->
+                            dlg.dismiss()
+                            if (codes[k] != now) { Ui.choose(this@SetupActivity, codes[k]); recreate() }
+                        }.show()
+                }
+            })
         }
 
         val hasScripts = Lang.ISV in Lang.ALL
@@ -314,7 +339,13 @@ class SetupActivity : Activity() {
         // the top of the page sat under the status bar and the bottom under
         // the navigation bar. The background still fills the whole screen.
         if (android.os.Build.VERSION.SDK_INT >= 35) {
-            scroll.clipToPadding = false
+            // Without the system's action bar the status bar lies on our own
+            // background: the page stops under it (not scrolling behind the
+            // clock), and on a light screen its icons are dark.
+            scroll.clipToPadding = true
+            val light = android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS or
+                android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+            window.insetsController?.setSystemBarsAppearance(if (dark) 0 else light, light)
             scroll.setOnApplyWindowInsetsListener { v, insets ->
                 val bars = insets.getInsets(
                     android.view.WindowInsets.Type.systemBars() or
@@ -351,8 +382,24 @@ class SetupActivity : Activity() {
         setContentView(scroll)
     }
 
+    // The language switched on the keyboard (space bar, 🌐) while this screen
+    // is open: the screen, its language and the text in ✎ follow (owner 261121).
+    private val langListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key != "language" || trySwitching) return@OnSharedPreferenceChangeListener
+        val now = Lang.current(this)
+        if (tryBuiltSig?.substringAfter('|')?.substringBefore('|') == now) return@OnSharedPreferenceChangeListener
+        val f = tryFollow
+        if (f != null) f(now) else { tryKeptText = tryText(); recreate() }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        getSharedPreferences("isv_collector", MODE_PRIVATE).unregisterOnSharedPreferenceChangeListener(langListener)
+    }
+
     override fun onResume() {
         super.onResume()
+        getSharedPreferences("isv_collector", MODE_PRIVATE).registerOnSharedPreferenceChangeListener(langListener)
         if (Ui.current(this) != ui) { recreate(); return }
         if (batchHandedOver) {
             batchHandedOver = false
@@ -543,13 +590,56 @@ class SetupActivity : Activity() {
      *  widths as on iOS 0.6.36; the last one chosen stays chosen. */
     private fun tabBar(tryRoot: View, learnRoot: View, setRoot: View): View {
         val prefs = getSharedPreferences("isv_collector", MODE_PRIVATE)
+        val d = resources.displayMetrics.density
         val bar = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            setPadding(0, 0, 0, (8 * resources.displayMetrics.density).toInt())
+            setPadding(0, 0, 0, (8 * d).toInt())
         }
+        // Above the tabs: the app's icon with a small "Interslove" at the side,
+        // and the shown tab's name as the title in the ordinary size (iOS
+        // `brandTitle`, owner 261118: panel names instead of "Interslove", which
+        // goes small at the side).
+        val title = TextView(this).apply {
+            textSize = 18f
+            setTextColor(cText)
+            setTypeface(typeface, android.graphics.Typeface.BOLD)
+            gravity = Gravity.CENTER
+        }
+        val brand = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(android.widget.ImageView(this@SetupActivity).apply {
+                setImageDrawable(applicationInfo.loadIcon(packageManager))
+                contentDescription = "Interslove"
+            }, LinearLayout.LayoutParams((40 * d).toInt(), (40 * d).toInt()))
+            addView(TextView(this@SetupActivity).apply {
+                text = "Interslove"
+                textSize = 12f
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+                setTextColor(cGloss)
+                setPadding((8 * d).toInt(), 0, 0, 0)
+            })
+        }
+        val head = android.widget.FrameLayout(this).apply {
+            setPadding(0, 0, 0, (6 * d).toInt())
+            addView(brand, android.widget.FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, (44 * d).toInt(), Gravity.START or Gravity.CENTER_VERTICAL))
+            addView(title, android.widget.FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, (44 * d).toInt(), Gravity.CENTER))
+        }
+        val names = mapOf("set" to "settings_head", "try" to "tab_write", "learn" to "learn_head")
         val tabs = listOf("set" to "⚙", "try" to "✎", "learn" to "🎓")
         val buttons = ArrayList<Button>()
         fun show(which: String) {
+            // Languages ticked in settings (or switched on the keyboard) since
+            // the write tab was built: build it again, text kept (owner 261121:
+            // Interslavic ticked, missing in the row).
+            if (which == "try" && tryRoot is LinearLayout && tryRoot.childCount > 0 && trySig() != tryBuiltSig) {
+                tryKeptText = tryText()
+                tryRoot.removeAllViews()
+                buildTryTab(tryRoot)
+            }
+            title.text = t(names[which] ?: "settings_head")
             tryRoot.visibility = if (which == "try") View.VISIBLE else View.GONE
             learnRoot.visibility = if (which == "learn") View.VISIBLE else View.GONE
             setRoot.visibility = if (which == "set") View.VISIBLE else View.GONE
@@ -564,7 +654,11 @@ class SetupActivity : Activity() {
             bar.addView(this, LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f))
         })
         show(prefs.getString("app_tab", "set") ?: "set")
-        return bar
+        return LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            addView(head)
+            addView(bar)
+        }
     }
 
     internal fun toast(t: String) = Toast.makeText(this, t, Toast.LENGTH_SHORT).show()

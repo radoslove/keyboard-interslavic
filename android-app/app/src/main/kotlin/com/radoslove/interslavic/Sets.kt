@@ -87,6 +87,59 @@ object Alphabets {
     fun title(lang: String, m: Script.Mode) =
         Script.name(Script.offered(lang).first()) + " → " + Script.name(m)
 
+    fun has(lang: String) = lang in LETTERS
+
+    /**
+     * Every script [lang] can be written in, its own first, Morse last (iOS
+     * `Alphabets.scripts`, 261118). For learning, both rune rows are offered to
+     * every language written in Latin letters, not only Norwegian as on the
+     * keyboard: a letter with an accent takes its base letter's rune (č -> ᛍ).
+     */
+    fun scripts(lang: String): List<Script.Mode> {
+        val letters = LETTERS[lang] ?: return emptyList()
+        val out = Script.choices(lang).toMutableList()
+        val latin = letters.any { it in 'a'..'z' }
+        if (latin && Script.Mode.RUNES_A !in out) {
+            val at = out.indexOf(Script.Mode.MORSE).let { if (it < 0) out.size else it }
+            out.addAll(at, listOf(Script.Mode.RUNES_A, Script.Mode.RUNES_B))
+        }
+        return out
+    }
+
+    /** Letter [l] of [lang] in script [m]; null when the script has no sign for it. */
+    private fun render(l: String, m: Script.Mode, lang: String): String? {
+        val row = Script.runeRow(m)
+        val f = when {
+            m == Script.Mode.MORSE -> if (l.length == 1) Morse.code(l[0], lang) else null
+            row != null -> if (l.length == 1) Runes.rune(l[0], row).toString() else null
+            m == Script.offered(lang).first() -> l
+            else -> Script.convert(l, m, lang)
+        }
+        return f?.takeIf { it.isNotBlank() }
+    }
+
+    /** "ABC → ⰀⰁⰂ", from any script to any other. */
+    fun title(from: Script.Mode, to: Script.Mode) = Script.name(from) + " → " + Script.name(to)
+
+    /**
+     * Cards from script [from] to [to]: the letter in [to] on the front, in
+     * [from] as the answer. Letters sharing one sign (runic ᛁ = e i j, Morse
+     * c = č) make one card with every letter in the answer.
+     */
+    fun pair(lang: String, from: Script.Mode, to: Script.Mode): List<Pair<String, String>> {
+        val letters = LETTERS[lang]?.split(' ') ?: return emptyList()
+        if (from == to) return emptyList()
+        val by = LinkedHashMap<String, MutableList<String>>()
+        for (l in letters) {
+            val f = render(l, to, lang) ?: continue
+            val b = render(l, from, lang) ?: continue
+            if (f == b) continue
+            val list = by.getOrPut(f) { ArrayList() }
+            if (b !in list) list.add(b)
+        }
+        return by.map { (f, bs) -> f to bs.joinToString(" / ") }
+    }
+
     /** For [lang]: (title, [(letter in the other script, letter)]) per script. */
     fun sets(lang: String): List<Pair<String, List<Pair<String, String>>>> {
         val letters = LETTERS[lang]?.split(' ') ?: return emptyList()

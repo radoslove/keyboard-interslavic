@@ -30,7 +30,29 @@ object Ui {
      *  `tools/ui_texts.json` have their own text (iOS 0.6.11, 2026-11-13), any
      *  other language gets Interslavic with the English gloss. A choice saved
      *  by the old four-language picker (removed in 3.9.7) is ignored. */
+    /** The screen's language chosen in ⚙ ("" = automatic, as below). Android 13's
+     *  per-app language does not know Interslavic, so the choice is the app's
+     *  own (iOS `Ui.choose`, 261118). A new key: the old picker's choice stays ignored. */
+    private const val PICK_KEY = "ui_lang"
+
+    fun chosen(context: Context): String =
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(PICK_KEY, "") ?: ""
+
+    fun choose(context: Context, lang: String) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(PICK_KEY, lang).apply()
+    }
+
+    /** Each screen language by its own name, for the chooser (iOS `Ui.names`). */
+    val PICK = listOf(
+        MS to "Medžuslovjansky", "be" to "Беларуская", "bs" to "Bosanski", "bg" to "Български",
+        "cs" to "Čeština", "en" to "English", "hr" to "Hrvatski", "mk" to "Македонски",
+        "nb" to "Norsk bokmål", "pl" to "Polski", "ru" to "Русский", "sk" to "Slovenčina",
+        "sl" to "Slovenščina", "sr" to "Srpski (latinica)", "sr-Cyrl" to "Српски (ћирилица)",
+        "uk" to "Українська",
+    )
+
     fun current(context: Context): String {
+        chosen(context).takeIf { it in UiTexts.LANGUAGES }?.let { return it }
         // The screen speaks the language the keyboard is set to (switched in
         // the keyboard's panel, the screen follows);
         // a keyboard language the screen has no text for (German, Proto-Slavic
