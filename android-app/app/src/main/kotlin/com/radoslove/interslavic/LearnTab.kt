@@ -420,7 +420,11 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
                 maxLines = 1
                 isEnabled = cards.isNotEmpty()
                 setOnClickListener {
-                    learnStart(cards)
+                    // One sign with one answer is one card to the learner, whatever
+                    // language it was taken under (Morse `··` = i in isv, nb, es...).
+                    learnStart(cards.distinctBy {
+                        if (isAlphabet(it)) "a\t${it.word}\t${it.tr}" else "w\t${it.lang}\t${it.word}"
+                    })
                     learnStudy = study
                     learnRevealed = false
                     learnJustDone = false
@@ -529,18 +533,23 @@ internal fun SetupActivity.buildLearnTab(root: LinearLayout) {
                 // so there only "don't know" counts - but a card already due is
                 // not studied ahead, so its answer counts (iOS 261118: "h" known
                 // in study, again and again).
+                // The same sign with the same answer under other languages
+                // (owner 261121: "i" known several times today, shown again).
+                val twins = if (isAlphabet(card)) Learn.cards(this@buildLearnTab)
+                    .filter { it !== card && isAlphabet(it) && it.word == card.word && it.tr == card.tr }
+                    else emptyList()
                 if (first == null) {
                     learnFirstGrade[key] = g
                     if (!learnStudy || g == 0 || card.due <= System.currentTimeMillis())
-                        Learn.grade(this@buildLearnTab, card, g)
-                } else if (g == 0) Learn.grade(this@buildLearnTab, card, 0)
+                        for (c in listOf(card) + twins) Learn.grade(this@buildLearnTab, c, g)
+                } else if (g == 0) for (c in listOf(card) + twins) Learn.grade(this@buildLearnTab, c, 0)
                 learnRecent.add(g)
                 learnCurrent = null
                 // "Know" ends the card's pass: it comes back the next day at
                 // the earliest, then less and less often - and not today in
                 // "study" either.
                 if (g == 2) {
-                    Learn.markKnown(this@buildLearnTab, card)
+                    for (c in listOf(card) + twins) Learn.markKnown(this@buildLearnTab, c)
                     // Learned in this pass: a card once forgotten here starts
                     // again from one day, not from a minute.
                     if (!learnStudy && first != null && first < 2 && card.due - System.currentTimeMillis() < 3_600_000L)

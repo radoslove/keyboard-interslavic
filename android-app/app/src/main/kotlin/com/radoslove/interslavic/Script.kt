@@ -130,6 +130,12 @@ object Script {
             .putString(prefKey(Lang.current(context)), mode.name.lowercase()).apply()
     }
 
+    /** [lang]'s script, set before switching to it (the app's write tab). */
+    fun setMode(context: Context, lang: String, mode: Mode) {
+        context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit()
+            .putString(prefKey(lang), mode.name.lowercase()).apply()
+    }
+
     /** The next script this language has, wrapping round; the script key next to 🌐. */
     fun next(context: Context): Mode {
         val can = choices(Lang.current(context))

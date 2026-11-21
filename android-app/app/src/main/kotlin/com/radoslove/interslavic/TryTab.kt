@@ -32,7 +32,8 @@ internal fun SetupActivity.trySig(): String {
 
 /** The last translation in the box, to turn it back exactly instead of
  *  translating a translation: from [from] ([before]) into [to] ([after]). */
-internal data class TryTurn(val from: String, val before: CharSequence, val to: String, val after: String)
+internal data class TryTurn(val from: String, val before: CharSequence, val to: String, val after: String,
+    val script: Script.Mode)
 internal var tryTurn: TryTurn? = null
 
 /** Words of the last translation (lowercase) -> the word they came from, so a
@@ -44,8 +45,14 @@ internal var tryPairsLang: String? = null
 internal var tryFollow: ((String) -> Unit)? = null
 internal var trySwitching = false
 
+/** Switches the write tab to a language as its row does (translating the box). */
+internal var tryGo: ((String) -> Unit)? = null
+
 /** Builds the try tab into [root]. */
 internal fun SetupActivity.buildTryTab(root: LinearLayout) {
+    // Callbacks of the screen built before this one must not fire.
+    tryGo = null
+    tryFollow = null
     // A box to try the keyboard right here (iOS `try_head`): it tells "the
     // keyboard is broken" from "it is not switched on", and is a place to
     // write without opening another app.
@@ -207,10 +214,14 @@ internal fun SetupActivity.addLanguageRow(root: LinearLayout, box: android.widge
     val d = resources.displayMetrics.density
     // Alphabetical, as every list of languages (owner 261118): the keyboard's
     // languages, then the ones the text can only be translated into.
-    val on = Lang.enabled(this).sorted()
+    val on = Lang.enabled(this)
     val cur = Lang.current(this)
-    val more = glossReach(cur).filter { it !in on }.sorted()
-    if (on.size < 2 && more.isEmpty()) return
+    // One row: Interslavic first, as in the keyboard's language list (the
+    // project's own language), then the keyboard's languages and the ones
+    // the text can only be translated into, all alphabetical together
+    // (owner 261121); the second kind is paler.
+    val all = (on + glossReach(cur)).distinct().sortedWith(compareBy({ it != Lang.ISV }, { it }))
+    if (all.size < 2) return
     val chips = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
@@ -231,10 +242,17 @@ internal fun SetupActivity.addLanguageRow(root: LinearLayout, box: android.widge
             // the original comes back, not a translation of a translation.
             val turn = tryTurn
             val result: CharSequence =
-                if (turn != null && turn.to == from && turn.from == l && turn.after == typed) turn.before
+                if (turn != null && turn.to == from && turn.from == l && turn.after == typed) {
+                    // ...in the alphabet chosen for it now (Glagolitic picked in
+                    // the row below brings Polish back in Glagolitic).
+                    val now = Script.chosen(this@addLanguageRow, l)
+                    if (now == turn.script) turn.before
+                    else Script.convert(Script.back(turn.before.toString(), turn.script, l), now, l)
+                }
                 else if (typed.isBlank()) "" else translateBox(typed, from, l)
             tryTurn = if (typed.isBlank()) null
-                else TryTurn(from, android.text.SpannableString(box.text ?: typed), l, result.toString())
+                else TryTurn(from, android.text.SpannableString(box.text ?: typed), l, result.toString(),
+                    Script.chosen(this@addLanguageRow, from))
             // The box is always in the keyboard's language: a translation
             // language not on the keyboard yet joins it.
             if (switch && l !in Lang.enabled(this@addLanguageRow)) {
@@ -252,6 +270,7 @@ internal fun SetupActivity.addLanguageRow(root: LinearLayout, box: android.widge
             recreate()
     }
     tryFollow = { go(it, false) }
+    tryGo = { go(it, true) }
     fun chip(l: String, keyboard: Boolean) = Button(this).apply {
         text = l.uppercase()
         isAllCaps = false
@@ -261,16 +280,7 @@ internal fun SetupActivity.addLanguageRow(root: LinearLayout, box: android.widge
         if (l == cur) setTypeface(typeface, android.graphics.Typeface.BOLD)
         setOnClickListener { go(l, true) }
     }
-    for (l in on) chips.addView(chip(l, true))
-    if (more.isNotEmpty()) {
-        chips.addView(TextView(this).apply {
-            text = "│"
-            textSize = 16f
-            setTextColor(cGloss)
-            setPadding((4 * d).toInt(), 0, (4 * d).toInt(), 0)
-        })
-        for (l in more) chips.addView(chip(l, false))
-    }
+    for (l in all) chips.addView(chip(l, l in on))
     val row = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
@@ -305,39 +315,74 @@ internal fun SetupActivity.addLanguageRow(root: LinearLayout, box: android.widge
 
 
 /**
- * The language's alphabets as buttons right above the try box: a tap turns the text IN the box into that alphabet and the
- * keyboard switches with it, so writing goes on in the new script - Polish in
- * Glagolitic, Interslavic in Cyrillic. Only for languages with more than one.
+ * Every alphabet as buttons right above the try box (owner 261121: always
+ * all of them, as the languages above). One the language has turns the text
+ * IN the box into it and the keyboard switches with it; one it has not
+ * switches to a language that has it - the website's rule for its chips.
  */
 internal fun SetupActivity.addScriptRow(root: LinearLayout, box: android.widget.EditText, at: Int) {
     val lang = Lang.current(this)
-    val modes = Script.choices(lang)
-    if (modes.size < 2) return
-    fun label(m: Script.Mode) = Script.name(m)
+    val own = Script.choices(lang)
+    val modes = listOf(Script.Mode.LATIN, Script.Mode.CYRILLIC, Script.Mode.GLAGOLITIC,
+        Script.Mode.RUNES_A, Script.Mode.RUNES_B, Script.Mode.MORSE)
     val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
     val buttons = ArrayList<Button>()
+    fun shade(m: Script.Mode, on: Script.Mode) = if (m == on) 1f else if (m in own) 0.55f else 0.3f
     for (m in modes) buttons.add(Button(this).apply {
-        text = label(m)
+        text = Script.name(m)
         isAllCaps = false
         textSize = 16f
         narrow(this)
-        alpha = if (m == Script.chosen(this@addScriptRow, lang)) 1f else 0.45f
+        alpha = shade(m, Script.chosen(this@addScriptRow, lang))
         setOnClickListener {
+            if (m !in own) { otherScript(m, lang); return@setOnClickListener }
             val old = Script.chosen(this@addScriptRow, lang)
             // Tapping the alphabet already on turns it off: back to the
             // language's own script, as a switch is expected to behave.
-            val to = if (m == old) modes.first() else m
+            val to = if (m == old) own.first() else m
             if (to == old) return@setOnClickListener
             val latin = Script.back(box.text?.toString().orEmpty(), old, lang)
             Script.setMode(this@addScriptRow, to)
             box.setText(Script.convert(latin, to, lang))
             box.setSelection(box.text?.length ?: 0)
             ImeService.running?.rebuildView(false)
-            for ((i, b) in buttons.withIndex()) b.alpha = if (modes[i] == to) 1f else 0.45f
+            for ((i, b) in buttons.withIndex()) b.alpha = shade(modes[i], to)
         }
         row.addView(this)
     })
-    root.addView(row, at)
+    root.addView(android.widget.HorizontalScrollView(this).apply {
+        isHorizontalScrollBarEnabled = false
+        addView(row)
+    }, at)
+}
+
+/** Alphabet [m], which [lang] is not written in: to a language that has it -
+ *  one on the keyboard the text can be translated into first (Norwegian ->
+ *  Glagolitic goes to Polish), else one on the keyboard, else Interslavic
+ *  (Cyrillic, Glagolitic) or Norwegian (runes), which then joins the keyboard. */
+private fun SetupActivity.otherScript(m: Script.Mode, lang: String) {
+    val has = Lang.ALL.filter { it != lang && m in Script.choices(it) }
+    if (has.isEmpty()) return
+    // Interslavic first among the keyboard's languages (owner 261121: АБВ on
+    // Polish went to Belarusian).
+    val on = Lang.enabled(this).sortedWith(compareBy({ it != Lang.ISV }, { it }))
+    val reach = glossReach(lang)
+    // A language for which [m] is an added alphabet (Polish and Glagolitic,
+    // Interslavic and Cyrillic) before one written only in it (Belarusian):
+    // the text changes alphabet, not people.
+    fun added(l: String) = Script.offered(l).first() != m
+    val to = on.firstOrNull { it in has && added(it) && it in reach }
+        ?: on.firstOrNull { it in has && added(it) }
+        ?: on.firstOrNull { it in has }
+        ?: (if (Lang.ISV in has) Lang.ISV else has.sorted().first())
+    Script.setMode(this, to, m)
+    val go = tryGo
+    if (go != null) { go(to); return }
+    if (to !in on) Lang.setEnabled(this, Lang.enabled(this) + to)
+    val ime = ImeService.running
+    if (ime == null || !ime.switchToLanguage(to)) Lang.setCurrent(this, to)
+    tryKeptText = tryText()
+    recreate()
 }
 
 /** Under the translation, every word of the box as a button: a tap puts it
