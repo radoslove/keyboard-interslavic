@@ -19,7 +19,7 @@ IOS = ROOT / "ios" / "App" / "UiTexts.swift"
 ANDROID = ROOT / "android-app/app/src/interslove/kotlin/com/radoslove/interslavic/UiTexts.kt"
 
 # `č š ž ě` in a sentence ABOUT the Interslavic letters stays Latin.
-KEEP = re.compile(r"č š ž ě|Interslove|QWERTZ|QWERTY|JSON|ABC|MB|ID|iOS|Android|Gmail|Shift|\{n\}|[\w.+-]+@[\w.-]+|https?://\S+")
+KEEP = re.compile(r"č š ž ě|Interslove|QWERTZ|QWERTY|JSON|ABC|MB|ID|iOS|Android|Gmail|Shift|\{[a-z]\}|[\w.+-]+@[\w.-]+|https?://\S+")
 SR_PAIRS = [("dž", "џ"), ("Dž", "Џ"), ("DŽ", "Џ"), ("lj", "љ"), ("Lj", "Љ"), ("LJ", "Љ"),
             ("nj", "њ"), ("Nj", "Њ"), ("NJ", "Њ")]
 SR_ONE = dict(zip("abvgdđežzijklmnoprstćufhcčš", "абвгдђежзијклмнопрстћуфхцчш"))
@@ -58,7 +58,7 @@ def check(langs, texts):
             v = row.get(l)
             if v is None:
                 continue
-            for tok in ("{n}", "🌐", "⚙", "＋", "Interslove"):
+            for tok in ("{n}", "{k}", "🌐", "⚙", "＋", "Interslove"):
                 if tok in row["en"] and tok not in v and l != "isv":
                     errors.append(f"{k}/{l}: lost {tok!r}")
             if l == "sr-Cyrl" and re.search(r"[a-zčćđšž]", KEEP.sub("", v)):

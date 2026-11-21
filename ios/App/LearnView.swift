@@ -383,7 +383,10 @@ struct LearnView: View {
                 if alphaMode {
                     Section(alphabetHead) {
                         small(Ui.body("learn_alpha_body"))
-                        alphabetWheels
+                        // Only while 🎓 is shown: a wheel is a UIKit view that keeps
+                        // taking touches under `opacity(0)` / `allowsHitTesting(false)`,
+                        // so from the hidden tab it swallowed every tap in ✎ (owner 261118).
+                        if active { alphabetWheels } else { Color.clear.frame(height: 110) }
                     }
                     Section {
                         DisclosureGroup("\(Ui.t("learn_my_letters")) (\(letterList.count))", isExpanded: $showLetters) {
@@ -582,7 +585,8 @@ struct LearnView: View {
                     .disabled(Learn.due(shown).isEmpty)
                     .buttonStyle(.bordered).frame(maxWidth: .infinity)
                 Button(Ui.t("learn_study")) { start(shown.filter { !knownToday($0) }.shuffled(), study: true) }
-                    .disabled(shown.isEmpty)
+                    // Every card already known today: nothing to study until midnight.
+                    .disabled(shown.allSatisfy { knownToday($0) })
                     .buttonStyle(.bordered).frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderless)

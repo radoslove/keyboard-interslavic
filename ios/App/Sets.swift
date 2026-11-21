@@ -36,8 +36,10 @@ enum Sets {
     /// A set's name in the screen language, else English.
     static func title(_ set: String) -> String {
         guard let r = rows.first(where: { $0.set == set && $0.id.hasPrefix("#") }) else { return set }
-        let ui = Ui.current == "sr-Cyrl" ? "sr" : Ui.current
-        return r.cells[ui] ?? r.cells["en"] ?? set
+        // Serbian Cyrillic has no column: the Latin name, converted (the topics
+        // stood in Latin on an otherwise Cyrillic screen, simulator 261118).
+        if Ui.current == "sr-Cyrl", let sr = r.cells["sr"] { return Scripts.convert(sr, .cyrillic, "sr") }
+        return r.cells[Ui.current] ?? r.cells["en"] ?? set
     }
 
     /// The set's words in [lang], each with its translation in [target].

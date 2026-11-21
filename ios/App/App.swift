@@ -50,7 +50,12 @@ struct RootView: View {
             }
             .id(uiLang)
         }
-        .onChange(of: tab) { UserDefaults.standard.set($0, forKey: "app_tab") }
+        .onChange(of: tab) {
+            UserDefaults.standard.set($0, forKey: "app_tab")
+            // The keyboard must not stay up over another tab, typing into a
+            // field that is no longer shown (tester review 261118).
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
     }
 }
 
