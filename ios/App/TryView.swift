@@ -376,8 +376,18 @@ struct TryView: View {
                     learnRow
                     languageRow
                     scriptRow
-                    BoxView(text: $text, selection: $selection, focused: $focused,
-                            placeholder: Ui.t("try_hint"))
+                    // Only while ✎ is shown: a UIKit view keeps taking touches
+                    // under `opacity(0)` / `allowsHitTesting(false)` (the 🎓 wheels
+                    // blocked ✎ in 1.0 (2); tester review 261121). The text lives
+                    // in this view's state, so nothing is lost.
+                    Group {
+                        if active {
+                            BoxView(text: $text, selection: $selection, focused: $focused,
+                                    placeholder: Ui.t("try_hint"))
+                        } else {
+                            Color.clear
+                        }
+                    }
                         .frame(minHeight: 120, alignment: .topLeading)
                         .padding(.trailing, text.isEmpty ? 0 : 34)
                         .overlay(alignment: .topTrailing) {
