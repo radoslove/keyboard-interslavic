@@ -23,34 +23,43 @@
       <use href="#h" transform="rotate(90)  translate(0 -86)" fill="#FFFFFF"/>
     </g>
     <!-- text -->
-    <text x="412" y="132" font-family="Segoe UI Historic, sans-serif" font-size="50" fill="#FFFFFF" fill-opacity="0.95">Ⰻⱀⱅⰵⱃⱄⰾⱁⰲⰵ</text>
     <text x="408" y="200" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="700" font-size="64" fill="#FFFFFF">Interslove</text>
-    <text x="414" y="344" font-family="Segoe UI Historic, sans-serif" font-size="48" letter-spacing="5" fill="#FFFFFF" fill-opacity="0.95">ᛁᚾᛏᛖᚱᛊᛚᛟᚹᛖ</text>
     <text x="412" y="248" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="600" font-size="30" fill="#F5C400">Many languages and alphabets</text>
     <text x="412" y="286" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-weight="500" font-size="23" fill="#FFFFFF" fill-opacity="0.85">swipe  ·  offline  ·  open source</text>
-    <rect x="414" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="426" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="446" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="470" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="490" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="522" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="542" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="554" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="578" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="598" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="610" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="622" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="642" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="654" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="678" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="690" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="710" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="734" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="758" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="790" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="802" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="814" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="826" y="376.5" width="19" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
-    <rect x="858" y="376.5" width="7" height="7" rx="3.5" fill="#FFFFFF" fill-opacity="0.95"/>
+    <!-- decor layer: inlined from brand/src/decor.svg -->
+    <g fill="#FFFFFF" fill-opacity="0.95" opacity="0.45">
+    <g id="decor-glag" transform="translate(412 132)">
+      <text x="0" y="0" font-family="Segoe UI Historic, sans-serif" font-size="28">Ⰻⱀⱅⰵⱃⱄⰾⱁⰲⰵ</text>
+    </g>
+    <g id="decor-runy" transform="translate(414 336)">
+      <text x="0" y="0" font-family="Segoe UI Historic, sans-serif" font-size="26" letter-spacing="3">ᛁᚾᛏᛖᚱᛊᛚᛟᚹᛖ</text>
+    </g>
+    <g id="decor-morse" transform="translate(414 376.5)">
+      <rect x="0" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="12" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="32" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="56" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="76" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="108" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="128" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="140" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="164" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="184" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="196" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="208" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="228" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="240" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="264" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="276" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="296" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="320" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="344" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="376" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="388" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="400" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="412" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="444" y="0" width="7" height="7" rx="3.5"/>
+    </g>
+    </g>
   </g>
 </svg>

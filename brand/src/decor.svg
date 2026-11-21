@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="460" height="120" viewBox="0 0 460 120">
+  <!-- Interslove decor layer: Glagolitic, runes, Morse. ONE source for the website banner and the store graphic.
+       Look = the website banner (measured 261118): white, fill-opacity 0.95, group opacity 0.45
+       -> on the banner blue it lands at about rgb(120,137,186). No Cyrillic, no working font v09.
+       Each group starts at x=0; its baseline (text) or top (Morse) is at y=0 inside the group.
+       Consumers place the groups with translate(); they never restyle them.
+       Render text WITHOUT subpixel (LCD) antialiasing, or the letters get cyan/orange fringes. -->
+  <g id="decor" fill="#FFFFFF" fill-opacity="0.95" opacity="0.45">
+    <g id="decor-glag" transform="translate(0 30)">
+      <text x="0" y="0" font-family="Segoe UI Historic, sans-serif" font-size="28">Ⰻⱀⱅⰵⱃⱄⰾⱁⰲⰵ</text>
+    </g>
+    <g id="decor-runy" transform="translate(2 70)">
+      <text x="0" y="0" font-family="Segoe UI Historic, sans-serif" font-size="26" letter-spacing="3">ᛁᚾᛏᛖᚱᛊᛚᛟᚹᛖ</text>
+    </g>
+    <g id="decor-morse" transform="translate(2 100)">
+      <rect x="0" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="12" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="32" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="56" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="76" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="108" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="128" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="140" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="164" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="184" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="196" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="208" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="228" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="240" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="264" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="276" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="296" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="320" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="344" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="376" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="388" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="400" y="0" width="7" height="7" rx="3.5"/>
+      <rect x="412" y="0" width="19" height="7" rx="3.5"/>
+      <rect x="444" y="0" width="7" height="7" rx="3.5"/>
+    </g>
+  </g>
+</svg>
