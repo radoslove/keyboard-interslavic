@@ -1,0 +1,17 @@
+# Reviewer verdicts on keyboard wordlists - an OVERLAY on dictionary/main_<lang>.combined,
+# applied by tools/apply_verdicts.py after any wordlist build. The source lists are not edited
+# by hand; this file is the record of every change, with who decided it and on what source.
+#
+# lang     keyboard language (sk, hr, uk, ...)
+# form     the form as stored in the wordlist (Cyrillic lists: the internal Latin, e.g. uk `krasotu`)
+# verdict  keep | demote | remove | fix
+#          keep   - reviewed, stays as it is (so the cross filter stops showing it)
+#          demote - stays, frequency set to `target` (a number 0-255)
+#          remove - dropped from the list
+#          fix    - replaced by `target` (a form of the same list), frequency kept
+# target   for demote: the new frequency; for fix: the corrected form; else empty
+# reason   one line
+# source   URL of the normative dictionary the verdict rests on
+# who      reviewer (agent name or owner)
+# date     RRMMDD
+lang	form	verdict	target	reason	source	who	date
