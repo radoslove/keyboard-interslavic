@@ -25,6 +25,8 @@ enum AppLangs {
 struct LearnView: View {
     var active = true
     @State private var cards: [Learn.Card] = []
+    /// Every card of every language, read in `reload()`.
+    @State private var allCards: [Learn.Card] = []
     @State private var mine: [String] = []
     /// The language being learned; nil = the keyboard's current language.
     @State private var learnLang: String? = UserDefaults.standard.string(forKey: "learn_lang")
@@ -102,7 +104,9 @@ struct LearnView: View {
     private func reload() {
         // Alphabets do not depend on the language being learned: the alphabet
         // cards of every language are shown too, each kept under its own language.
-        cards = Learn.cards(order: AppLangs.codes).filter { $0.lang == lang || Self.isAlphabet($0) }
+        // Read once here, not on every redraw (owner 261121: the tab took long to come up).
+        allCards = Learn.cards(order: AppLangs.codes)
+        cards = allCards.filter { $0.lang == lang || Self.isAlphabet($0) }
         mine = Shared.userWords(lang).sorted()
         if let f = filter, !f.isEmpty, f != Self.allAlpha, !topics.contains(f) { filter = nil }
         lookUp()
@@ -135,6 +139,27 @@ struct LearnView: View {
             .filter { $0.value == Self.today }
         d[c.id] = Self.today
         UserDefaults.standard.set(d, forKey: Self.knownKey)
+    }
+
+    /// Due now and not known today, one per sign (see `twinKey`).
+    private var dueNow: [Learn.Card] { Self.oneEach(Learn.due(shown).filter { !knownToday($0) }) }
+
+    /// One sign with one answer is one card to the learner, whatever language
+    /// it was taken under (Morse `··` = i in isv, pl, nb... - owner 261121:
+    /// "i" and "h" known several times today, shown again). Android 3.11.13.
+    private static func twinKey(_ c: Learn.Card) -> String {
+        isAlphabet(c) ? "a\t\(c.word)\t\(c.tr)" : "w\t\(c.lang)\t\(c.word)"
+    }
+    private static func oneEach(_ l: [Learn.Card]) -> [Learn.Card] {
+        var seen = Set<String>()
+        return l.filter { seen.insert(twinKey($0)).inserted }
+    }
+    /// The same sign with the same answer under the other languages.
+    private func twins(_ c: Learn.Card) -> [Learn.Card] {
+        guard Self.isAlphabet(c) else { return [] }
+        return allCards.filter {
+            $0.id != c.id && Self.isAlphabet($0) && $0.word == c.word && $0.tr == c.tr
+        }
     }
 
     private func isAlphaFilter(_ f: String?) -> Bool {
@@ -185,15 +210,60 @@ struct LearnView: View {
     // MARK: language, topics, alphabets
 
     private func counted(_ l: String) -> String {
-        let n = Learn.cards(order: AppLangs.codes).filter { $0.lang == l }.count
+        let n = allCards.filter { $0.lang == l }.count
         return AppLangs.name(l) + (n > 0 ? " (\(n))" : "")
     }
 
     private func switchTo(_ l: String) {
+        guard l != lang else { return }
+        let running = queue != nil ? study : nil
         learnLang = l
         UserDefaults.standard.set(l, forKey: "learn_lang")
-        filter = nil; queue = nil; current = nil; justDone = false; readIn = nil
+        // An alphabet filter stays: alphabets are the same in every language.
+        if !isAlphaFilter(filter) { filter = nil }
+        queue = nil; current = nil; justDone = false; readIn = nil
         reload()
+        // Switched in the middle of a pass: it goes on in the new language.
+        if let st = running {
+            if st { start(Self.oneEach(shown.filter { !knownToday($0) }).shuffled(), study: true) }
+            else { start(dueNow, study: false) }
+        }
+    }
+
+    /// The languages as one row of buttons above the cards, as in ✎ (owner
+    /// 261121: switch language right where the cards are): the keyboard's
+    /// languages, then the others paler (＋ joins the keyboard), each alphabetical.
+    private var langRow: some View {
+        let on = Set(langs)
+        // The keyboard's languages alphabetical (Interslavic among them,
+        // owner 261121), then the others to add, also alphabetical.
+        let all = AppLangs.codes.sorted { a, b in
+            if on.contains(a) != on.contains(b) { return on.contains(a) }
+            return a < b
+        }
+        return ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(all, id: \.self) { l in
+                        let n = allCards.filter { $0.lang == l && !Self.isAlphabet($0) }.count
+                        Button {
+                            if !on.contains(l) { Shared.store.set(langs + [l], forKey: "languages") }
+                            switchTo(l)
+                        } label: {
+                            Text((on.contains(l) ? "" : "＋") + l.uppercased() + (n > 0 ? " \(n)" : ""))
+                                .font(.body.weight(l == lang ? .bold : .regular))
+                                .padding(.horizontal, 12).padding(.vertical, 7)
+                                .background(l == lang ? Color.accentColor.opacity(0.25) : Color(.systemGray4).opacity(0.6),
+                                            in: Capsule())
+                                .opacity(l == lang ? 1 : on.contains(l) ? 0.8 : 0.5)
+                        }
+                        .buttonStyle(.plain)
+                        .id(l)
+                    }
+                }
+            }
+            .onAppear { proxy.scrollTo(lang, anchor: .center) }
+        }
     }
 
     /// One button: the language being learned; the menu offers the keyboard's
@@ -287,7 +357,10 @@ struct LearnView: View {
         Picker("", selection: Binding(get: { sel }, set: set)) {
             ForEach(items, id: \.self) { Text(label($0)).tag($0) }
         }
-        .pickerStyle(.wheel).frame(maxWidth: .infinity).frame(height: 110).clipped()
+        .pickerStyle(.wheel).frame(maxWidth: .infinity)
+        // Tall enough to show the neighbours above and below: at 110 pt only
+        // two names were in sight and Morse at the end looked missing (owner 261121).
+        .frame(height: 180).clipped()
     }
 
     /// The letters of the language being learned (🌐 at the top), Interslavic
@@ -367,7 +440,8 @@ struct LearnView: View {
             List {
                 // The review first, high up: what the tab is for (owner 261118).
                 Section {
-                    Text(Ui.t("learn_due").replacingOccurrences(of: "{k}", with: "\(Learn.due(shown).count)"))
+                    langRow
+                    Text(Ui.t("learn_due").replacingOccurrences(of: "{k}", with: "\(dueNow.count)"))
                     cardBox
                 }
 
@@ -386,7 +460,7 @@ struct LearnView: View {
                         // Only while 🎓 is shown: a wheel is a UIKit view that keeps
                         // taking touches under `opacity(0)` / `allowsHitTesting(false)`,
                         // so from the hidden tab it swallowed every tap in ✎ (owner 261118).
-                        if active { alphabetWheels } else { Color.clear.frame(height: 110) }
+                        if active { alphabetWheels } else { Color.clear.frame(height: 180) }
                     }
                     Section {
                         DisclosureGroup("\(Ui.t("learn_my_letters")) (\(letterList.count))", isExpanded: $showLetters) {
@@ -403,7 +477,6 @@ struct LearnView: View {
                 } else {
                 Section {
                     small(Ui.body("learn_body"))
-                    langMenu
                 }
 
                 if !t.topics.isEmpty {
@@ -565,7 +638,7 @@ struct LearnView: View {
                     if mode != nil { Text(card.word).font(.title3).foregroundStyle(.secondary) }
                     if !card.note.isEmpty { Text(card.note).frame(maxWidth: .infinity, alignment: .leading) }
                     if !card.ex.isEmpty { Text(card.ex).italic().frame(maxWidth: .infinity, alignment: .leading) }
-                    HStack {
+                    FitRow {
                         ForEach([(0, "learn_g0"), (1, "learn_g1"), (2, "learn_g2")], id: \.0) { g, key in
                             Button(Ui.t(key)) { grade(card, g) }
                                 .buttonStyle(.bordered).frame(maxWidth: .infinity)
@@ -580,11 +653,11 @@ struct LearnView: View {
             // Review takes the cards due now; study goes through every card of
             // the chosen topic in random order, so there is always something
             // to do after the review is over.
-            HStack {
-                Button(Ui.t("learn_start")) { start(Learn.due(shown), study: false) }
-                    .disabled(Learn.due(shown).isEmpty)
+            FitRow {
+                Button(Ui.t("learn_start")) { start(dueNow, study: false) }
+                    .disabled(dueNow.isEmpty)
                     .buttonStyle(.bordered).frame(maxWidth: .infinity)
-                Button(Ui.t("learn_study")) { start(shown.filter { !knownToday($0) }.shuffled(), study: true) }
+                Button(Ui.t("learn_study")) { start(Self.oneEach(shown.filter { !knownToday($0) }).shuffled(), study: true) }
                     // Every card already known today: nothing to study until midnight.
                     .disabled(shown.allSatisfy { knownToday($0) })
                     .buttonStyle(.bordered).frame(maxWidth: .infinity)
@@ -643,17 +716,26 @@ struct LearnView: View {
         if first == nil {
             firstGrade[key] = g
             // A card already due is not studied ahead, so its answer counts.
-            if !study || g == 0 || card.due <= Learn.now() { after = Learn.grade(card, g) }
+            if !study || g == 0 || card.due <= Learn.now() {
+                after = Learn.grade(card, g)
+                for t in twins(card) { Learn.grade(t, g) }
+            }
         } else if g == 0 {
             after = Learn.grade(card, 0)
+            for t in twins(card) { Learn.grade(t, 0) }
         }
         recent.append(g)
         if g == 2 {
             markKnown(card)
-            // "Know" ends the card's pass. Learned in this pass: a card once
-            // forgotten here starts again from one day, not from a minute.
-            if !study, let f = first, f < 2, after.due - Learn.now() < 3_600_000 {
+            for t in twins(card) { markKnown(t) }
+            // "Know" ends the card's pass and the card does not come back
+            // before tomorrow, in either mode (a card missed earlier in a
+            // "study" pass stayed due in a minute and came back in review).
+            // A card once forgotten starts again from one day, not a minute.
+            let tomorrow = Int64((Calendar.current.startOfDay(for: Date()).timeIntervalSince1970 + 86_400) * 1000)
+            if after.due < tomorrow {
                 after = Learn.grade(after, 1)
+                for t in twins(card) where t.due < tomorrow { Learn.grade(t, 1) }
             }
         } else {
             // Not to drill one card to boredom: every miss in this pass puts it

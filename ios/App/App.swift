@@ -22,6 +22,7 @@ struct RootView: View {
     @State private var tab = UserDefaults.standard.string(forKey: "app_tab") ?? "set"
     /// The screen's language chosen in ⚙: every tab is rebuilt in it.
     @AppStorage("ui_lang") private var uiLang = ""
+    @AppStorage(AppTheme.key) private var appTheme = AppTheme.auto.rawValue
     private let tabs = [("set", "⚙"), ("try", "✎"), ("learn", "🎓")]
 
     private func page(_ key: String, _ v: some View) -> some View {
@@ -34,12 +35,18 @@ struct RootView: View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
                 ForEach(tabs, id: \.0) { key, icon in
+                    // The icons at full strength: dimmed to 45 % they were
+                    // barely visible on the dark background (owner 261121);
+                    // the tab on is marked by its tinted, outlined button.
                     Button { tab = key } label: {
                         Text(icon).font(.system(size: 30))
                             .frame(maxWidth: .infinity, minHeight: 50)
+                            .background(tab == key ? Color.accentColor.opacity(0.28) : Color(.systemGray3).opacity(0.55),
+                                        in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(tab == key ? Color.accentColor : .clear, lineWidth: 2))
                     }
-                    .buttonStyle(.bordered)
-                    .opacity(tab == key ? 1 : 0.45)
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 12).padding(.top, 4).padding(.bottom, 6)
@@ -50,6 +57,7 @@ struct RootView: View {
             }
             .id(uiLang)
         }
+        .preferredColorScheme((AppTheme(rawValue: appTheme) ?? .auto).scheme)
         .onChange(of: tab) {
             UserDefaults.standard.set($0, forKey: "app_tab")
             // The keyboard must not stay up over another tab, typing into a

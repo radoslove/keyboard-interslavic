@@ -61,12 +61,13 @@ enum Gloss {
         return out
     }
 
-    /// The languages [from] can be glossed into; for Polish the keyboard's own first.
+    /// The languages [from] can be glossed into: Polish into every keyboard
+    /// language its Wiktionary has, alphabetical (Android 3.11.10), the others into Polish.
     static func targets(_ from: String, enabled: [String]) -> [String] {
         guard has(from) else { return [] }
         guard from == "pl" else { return ["pl"] }
-        let all = ["de", "en", "nb", "cs", "sk", "sl", "hr", "sr", "bs", "mk", "ru", "uk", "bg", "be"]
-        return all.filter { enabled.contains($0) } + all.filter { !enabled.contains($0) }
+        return ["be", "bg", "bs", "cs", "de", "en", "es", "fr", "hr", "it", "mk", "nb", "nl", "ro",
+                "ru", "sk", "sl", "sr", "uk"].filter(has)
     }
 
     /// The keyboard's ticked languages (the keyboard writes them to the group).
