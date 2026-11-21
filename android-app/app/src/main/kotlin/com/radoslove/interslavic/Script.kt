@@ -31,7 +31,20 @@ object Script {
     /** MORSE is chosen like the others but is never what [mode] returns: in
      *  Morse the keyboard works in the language's own first script and
      *  [Morse.Conn] turns the text into dots and dashes at the editor. */
-    enum class Mode { LATIN, CYRILLIC, GLAGOLITIC, MORSE }
+    enum class Mode { LATIN, CYRILLIC, GLAGOLITIC, RUNES_A, RUNES_B, MORSE }
+
+    /** The rune row of a choice, or null. Runes (Norwegian only, 261118) work
+     *  like Morse: never what [mode] returns, [Runes.Conn] writes them. */
+    fun runeRow(m: Mode): Runes.Row? = when (m) {
+        Mode.RUNES_A -> Runes.Row.MEDIEVAL
+        Mode.RUNES_B -> Runes.Row.YOUNG
+        else -> null
+    }
+
+    /** The rune row the keyboard writes now, or null. */
+    fun runes(context: Context): Runes.Row? = runeRow(chosen(context))
+
+    private fun outsideOnly(m: Mode) = m == Mode.MORSE || runeRow(m) != null
 
     private const val PREFS = "isv_collector"
     private const val KEY = "script"
@@ -65,7 +78,9 @@ object Script {
     /** What the script key and the panels offer: the alphabets, then Morse
      *  for every language that has a Morse table. */
     fun choices(lang: String): List<Mode> =
-        offered(lang) + if (Morse.has(lang)) listOf(Mode.MORSE) else emptyList()
+        offered(lang) +
+            (if (Runes.has(lang)) listOf(Mode.RUNES_A, Mode.RUNES_B) else emptyList()) +
+            (if (Morse.has(lang)) listOf(Mode.MORSE) else emptyList())
 
     /** Each language remembers its own script. Interslavic keeps the old key, so
      *  nobody's chosen alphabet is lost to this change. */
@@ -77,7 +92,7 @@ object Script {
 
     fun mode(context: Context, lang: String): Mode {
         val c = chosen(context, lang)
-        return if (c == Mode.MORSE) offered(lang).first() else c
+        return if (outsideOnly(c)) offered(lang).first() else c
     }
 
     /** The choice itself, Morse included. */
@@ -92,6 +107,8 @@ object Script {
             "cyrillic" -> Mode.CYRILLIC
             "glagolitic" -> Mode.GLAGOLITIC
             "morse" -> Mode.MORSE
+            "runes_a" -> Mode.RUNES_A
+            "runes_b" -> Mode.RUNES_B
             else -> Mode.LATIN
         }
         return if (m in can) m else can.first()
@@ -104,6 +121,7 @@ object Script {
      *  popup: in the script, and in Morse the letter over its code. */
     fun label(context: Context, latin: String): String {
         val shown = out(context, latin)
+        runes(context)?.let { return Runes.encode(shown, it) }
         return if (morse(context)) Morse.keyLabel(shown, Lang.current(context)) else shown
     }
 
@@ -130,6 +148,8 @@ object Script {
         Mode.LATIN -> "ABC"
         Mode.CYRILLIC -> "АБВ"
         Mode.GLAGOLITIC -> "ⰀⰁⰂ"
+        Mode.RUNES_A -> Runes.label(Runes.Row.MEDIEVAL)
+        Mode.RUNES_B -> Runes.label(Runes.Row.YOUNG)
         Mode.MORSE -> "·−"
     }
 
@@ -272,6 +292,7 @@ object Script {
     fun convert(latin: String, m: Mode, lang: String = Lang.ISV): String = when {
         latin.isEmpty() || m == Mode.LATIN -> latin
         m == Mode.MORSE -> Morse.encode(convert(latin, offered(lang).first(), lang), lang)
+        runeRow(m) != null -> Runes.encode(convert(latin, offered(lang).first(), lang), runeRow(m)!!)
         m == Mode.CYRILLIC -> cyrillic(latin, cyrTable(lang))
         lang == Lang.PL -> glagoliticPL(latin)
         else -> glagolitic(latin)
@@ -355,6 +376,7 @@ object Script {
     fun back(s: String, m: Mode, lang: String = Lang.ISV): String {
         if (m == Mode.LATIN || s.isEmpty()) return s
         if (m == Mode.MORSE) return back(Morse.decode(s, lang), offered(lang).first(), lang)
+        runeRow(m)?.let { return back(Runes.decodeLossy(s, it), offered(lang).first(), lang) }
         if (m == Mode.GLAGOLITIC && lang == Lang.PL) return backPolish(s)
         val rev = when {
             m == Mode.CYRILLIC && lang == Lang.SR -> REVERSE_SR

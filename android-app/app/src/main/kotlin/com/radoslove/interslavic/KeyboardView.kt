@@ -240,6 +240,7 @@ class KeyboardView(
         get() {
             val ic = service.currentInputConnection ?: return null
             if (Script.morse(context)) return Morse.Conn(ic, Lang.current(context))
+            Script.runes(context)?.let { return Runes.Conn(ic, it) }
             return if (Script.rewritesWord(context)) WideSpace(ic) else ic
         }
 
