@@ -122,9 +122,53 @@ final class KeyboardViewController: UIInputViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         applyTheme()
+        followApp()
+        // A tap on a language in the ✎ tab with the box empty changes no
+        // text, so `textDidChange` never comes (owner 261121, test 1: CS
+        // arrived only after a trip to the learning tab). Ask the store a
+        // few times a second while the keys are on screen - two strings.
+        appWatch?.invalidate()
+        appWatch = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: true) { [weak self] _ in
+            self?.followApp()
+        }
         lastSwipedWord = nil
         pendingSpace = false
         rearmShiftIfSentenceStart()
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        appWatch?.invalidate()
+        appWatch = nil
+    }
+
+    private var appWatch: Timer?
+
+    /// The language and script the keys were last built for.
+    private var builtLanguage = ""
+    private var builtChoice = ""
+
+    /// The ✎ tab of the app (261121, Android 3.11.13 `switchToLanguage`)
+    /// sets the language and script in the shared store while this keyboard
+    /// may stay on screen; `Layout.language` is kept in memory, so the store
+    /// is asked again here. Cheap: two strings compared on every letter, the
+    /// keys rebuilt only when one of them really changed. No haptic - the
+    /// change did not come from a finger on the keyboard.
+    private func followApp() {
+        guard swipeInput != nil else { return }
+        let saved = Shared.store.string(forKey: "language") ?? ""
+        if saved != Layout.language || !Layout.enabled.contains(Layout.language) {
+            Layout.forgetLanguage()
+        }
+        let lang = Layout.language
+        if lang != builtLanguage {
+            swipeLog.notice("isv-swipe: language from the app \(lang, privacy: .public)")
+            switchLanguage(to: lang, haptic: false)
+        } else if Script.choice != builtChoice {
+            swipeLog.notice("isv-swipe: script from the app \(Script.choice, privacy: .public)")
+            buildKeyboard()
+            refreshCompletions()
+        }
     }
 
     /// The theme picked in the app (Android 3.5.27): auto follows the phone.
@@ -138,6 +182,7 @@ final class KeyboardViewController: UIInputViewController {
 
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
+        followApp()
         rearmShiftIfSentenceStart()
         caretMaybeMoved()
     }
@@ -210,6 +255,8 @@ final class KeyboardViewController: UIInputViewController {
     // MARK: - Building
 
     private func buildKeyboard() {
+        builtLanguage = Layout.language
+        builtChoice = Script.choice
         // ⚙ keeps its place while something in it is ticked: every tick
         // rebuilds the panel, which used to jump back to the top (owner 261118).
         if showingSettings, let s = settingsScroll { settingsOffset = s.contentOffset.y }
@@ -937,7 +984,7 @@ final class KeyboardViewController: UIInputViewController {
     /// Everything that hangs on the language: its list, its own words, its
     /// letters and script; the glide state of the word before belongs to the
     /// old language and is closed.
-    private func switchLanguage(to lang: String, rebuild: Bool = true) {
+    private func switchLanguage(to lang: String, rebuild: Bool = true, haptic: Bool = true) {
         Layout.language = lang
         lastSwipedWord = nil
         lastCandidates = []
@@ -951,7 +998,7 @@ final class KeyboardViewController: UIInputViewController {
         guard rebuild else { return }
         buildKeyboard()
         showSuggestions([])
-        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        if haptic { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
     }
 
     @objc private func tapScript() {

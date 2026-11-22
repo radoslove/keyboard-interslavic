@@ -29,6 +29,7 @@ from a deliberate choice. Anything not named here works the same way on both pla
 |---|---|---|
 | Slovak, Slovenian, Croatian and Serbian (Latin) keyboards | `Lang`, `Layout.skOwn` / `slOwn` / `hrSrOwn`, subtypes in `method.xml` | one extension each (`KeyboardSK`, `KeyboardSL`, `KeyboardHR`, `KeyboardSR`) |
 | QWERTY or QWERTZ per language, defaulting to the language's own keyboards (QWERTZ for Czech, Slovak, Slovenian, Croatian, Serbian; Norwegian keeps its own row) | `KeyRows`, settings section in the app | `Layout.qwertz`, row in the in-keyboard settings |
+| A language or script picked in the app's write tab reaches the keyboard on screen at once, without hiding it | `ImeService.running.switchToLanguage` | `followApp()` on appearing and on every text change |
 
 ## Deliberate differences
 

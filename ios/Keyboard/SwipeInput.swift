@@ -244,7 +244,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         let (centres, keyWidth) = host.swipeKeyCentres
         Shared.appendGesture([
             "t": Date().timeIntervalSince1970,
-            "lang": Layout.language, "script": "\(Script.mode)",
+            "lang": Layout.language, "script": Script.choice,
             "kw": Double(keyWidth),
             "keys": centres.map { [Double($0.x), Double($0.y)] },
             "path": path.map { [Double($0.x), Double($0.y)] },
@@ -315,7 +315,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         // Macedonian has single letters on those keys, so no digraph routes.
         let digraph = Script.mode != .latin && !Layout.singleLetterKeys
         let dzh = digraph && Layout.language == "sr"
-        let lang = Layout.language, script = "\(Script.mode)"
+        let lang = Layout.language, script = Script.choice
         let polishGlag = Script.rewritesWord
         queue.async { [weak self] in
             var decoder = SwipeDecoder(dictionary: dictionary,
