@@ -108,7 +108,8 @@ struct LearnView: View {
         allCards = Learn.cards(order: AppLangs.codes)
         cards = allCards.filter { $0.lang == lang || Self.isAlphabet($0) }
         mine = Shared.userWords(lang).sorted()
-        if let f = filter, !f.isEmpty, f != Self.allAlpha, !topics.contains(f) { filter = nil }
+        // A pair on the wheels stays chosen while it has no cards yet (＋ is right there).
+        if let f = filter, !f.isEmpty, f != Self.allAlpha, !f.contains(" → "), !topics.contains(f) { filter = nil }
         lookUp()
     }
 
@@ -176,7 +177,7 @@ struct LearnView: View {
     private func setMode(_ on: Bool) {
         alphaMode = on
         UserDefaults.standard.set(on, forKey: "learn_alpha_mode")
-        pick(on ? Self.allAlpha : nil)
+        if on { followWheels() } else { pick(nil) }
         readIn = nil
     }
 
@@ -223,6 +224,8 @@ struct LearnView: View {
         if !isAlphaFilter(filter) { filter = nil }
         queue = nil; current = nil; justDone = false; readIn = nil
         reload()
+        // The pair's name carries the language ("PL · ABC → ⰀⰁⰂ"): take the wheels' pair anew.
+        if let f = filter, f != Self.allAlpha, f.contains(" → ") { followWheels() }
         // Switched in the middle of a pass: it goes on in the new language.
         if let st = running {
             if st { start(Self.oneEach(shown.filter { !knownToday($0) }).shuffled(), study: true) }
@@ -407,14 +410,20 @@ struct LearnView: View {
         .buttonStyle(.borderless)
     }
 
-    /// A turned wheel landing on a taken alphabet pair shows its cards.
+    /// The pair on the wheels is the pair studied, taken or not: "all
+    /// alphabets" only when tapped. Before, a pair not taken (or the
+    /// alphabets section just opened) fell back to all of them, so with
+    /// ABC → ⰀⰁⰂ on the wheels a Morse card due today came up in the pass
+    /// (owner 261122: "nagle wpierdolił się morse").
     private func follow(_ src: String, _ from: String?, _ to: String?) {
         let all = Alphabets.scripts(src)
         guard let f = all.first(where: { $0.name == from }) ?? all.first,
               let t = all.first(where: { $0.name == to && $0 != f }) ?? all.first(where: { $0 != f }) else { return }
-        let name = Alphabets.title(f, t)
-        if taken(src, name) > 0 { pick(shownAs(src, name)) }
-        else if cards.contains(where: Self.isAlphabet) { pick(Self.allAlpha) }
+        pick(shownAs(src, Alphabets.title(f, t)))
+    }
+
+    private func followWheels() {
+        follow(Alphabets.scripts(lang).count > 1 ? lang : "isv", alphaFrom, alphaTo)
     }
 
     private func grid(_ tiles: [Tile]) -> some View {
@@ -550,7 +559,7 @@ struct LearnView: View {
             }
             .onAppear {
                 reload()
-                if alphaMode != isAlphaFilter(filter) { pick(alphaMode ? Self.allAlpha : nil) }
+                if alphaMode != isAlphaFilter(filter) { if alphaMode { followWheels() } else { pick(nil) } }
             }
             .onChange(of: active) { if $0 { reload() } }
             .onChange(of: phase) { if $0 == .active { reload() } }

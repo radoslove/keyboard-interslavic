@@ -20,6 +20,8 @@ from a deliberate choice. Anything not named here works the same way on both pla
 | Feature | Where |
 |---|---|
 | Keyboard settings drawn inside the keyboard (theme, script, layout, own words) | `holdLayer`, `settingsPanel` |
+| Write tab: the language row always shows every language (from Interslavic, which has no gloss, it showed only the keyboard's own); a long press takes a language off the keyboard (2026-11-22) | `TryView.languages`, `drop` — Android `addLanguageRow` still builds from `glossReach(cur)` |
+| Learn tab: the alphabet pair on the wheels is the pair studied, even before it is taken; "all alphabets" only when tapped (a Morse card came up in a Glagolitic pass, 2026-11-22) | `LearnView.follow`, `followWheels` |
 
 ## In code on both, released on iOS test builds first
 

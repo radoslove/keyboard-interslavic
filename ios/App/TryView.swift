@@ -21,6 +21,9 @@ struct TryView: View {
     @State private var known: Set<String> = []
     @State private var toast: String?
     @State private var busy = false
+    /// Bumped when the keyboard's languages change here, so the row redraws
+    /// (they live in the App Group, which SwiftUI does not watch).
+    @State private var tick = 0
     @Environment(\.scenePhase) private var phase
 
     /// The last translation, to turn it back exactly instead of translating
@@ -163,10 +166,22 @@ struct TryView: View {
         return a < b
     }
 
-    private var languages: [String] {
-        var seen = Set<String>()
-        // Alphabetical, Interslavic among the rest (owner 261121).
-        return (Gloss.enabled + Self.reach(lang)).filter { seen.insert($0).inserted }.sorted()
+    /// Every language, alphabetical with Interslavic among the rest (owner
+    /// 261121). Not only the ones [lang] translates into: from Interslavic
+    /// (no gloss) that left the keyboard's two, and the others came into
+    /// sight only after the space bar switched to a language with a gloss
+    /// (owner 261122). A language with no way there keeps the text as it is.
+    private var languages: [String] { AppLangs.codes.sorted() }
+
+    /// Long press: off the keyboard (owner 261122: "dodawać inne albo
+    /// usuwać"). Not the language being written in, not the last one.
+    private func drop(_ l: String) {
+        let on = Gloss.enabled
+        guard on.contains(l), l != lang, on.count > 1 else { return }
+        Shared.store.set(on.filter { $0 != l }, forKey: "languages")
+        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+        show("⌨ − \(l.uppercased())")
+        tick += 1
     }
 
     /// The gloss files write Serbian in Cyrillic, every other language in its own alphabet.
@@ -334,13 +349,15 @@ struct TryView: View {
     }
 
     private var languageRow: some View {
-        HStack {
+        let _ = tick   // redraw after `drop`
+        return HStack {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
                         ForEach(languages, id: \.self) { l in
                             chip(l.uppercased(), on: l == lang,
-                                 shade: l == lang ? 1 : Gloss.enabled.contains(l) ? 0.75 : 0.5) { go(l) }
+                                 shade: l == lang ? 1 : Gloss.enabled.contains(l) ? 0.75 : 0.4) { go(l) }
+                                .simultaneousGesture(LongPressGesture(minimumDuration: 0.5).onEnded { _ in drop(l) })
                                 .id(l)
                         }
                     }
@@ -423,6 +440,13 @@ struct TryView: View {
             .onAppear { follow() }
             .onChange(of: active) { if $0 { follow() } }
             .onChange(of: phase) { if $0 == .active { follow() } }
+            // The language switched with the space bar: the row follows within
+            // a moment, not only after the next letter (owner 261121).
+            .onReceive(Timer.publish(every: 0.4, on: .main, in: .common).autoconnect()) { _ in
+                guard active, !busy else { return }
+                let now = AppLangs.current
+                if now != lang { lang = now; turn = nil }
+            }
             .onChange(of: text) { _ in
                 // A language switched on the keyboard while typing here: the
                 // rows follow (the text is not translated behind the user's back).
