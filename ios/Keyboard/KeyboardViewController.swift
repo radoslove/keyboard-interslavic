@@ -445,7 +445,17 @@ final class KeyboardViewController: UIInputViewController {
             // 😀 left of space where `,` was; the comma is
             // now the FIRST item held on `.`, so it is still one gesture away.
             // `?` and `!` live on `123` next to backspace.
-            let emoji = functionKey("😀", action: #selector(tapEmojiKey))
+            let emoji = functionKey("", action: #selector(tapEmojiKey))
+            emoji.accessibilityLabel = "Emoji"
+            let face = SmileyIcon()
+            face.translatesAutoresizingMaskIntoConstraints = false
+            emoji.addSubview(face)
+            NSLayoutConstraint.activate([
+                face.centerXAnchor.constraint(equalTo: emoji.centerXAnchor),
+                face.centerYAnchor.constraint(equalTo: emoji.centerYAnchor),
+                face.widthAnchor.constraint(equalToConstant: SmileyIcon.grid),
+                face.heightAnchor.constraint(equalToConstant: SmileyIcon.grid),
+            ])
             stack.addArrangedSubview(emoji)
             weights.append((emoji, 0.9))
         }
@@ -2172,3 +2182,63 @@ extension KeyboardViewController: SwipeHost {
     }
 }
 
+/// The emoji key's face, drawn instead of the colour 😀 (owner 261123,
+/// `Projects/INTERSLOVE/uklad/klawiatura_wyglad_261123_v02.md`): dark theme =
+/// the outline alone, light theme = a grey disc with the outline and dark
+/// features. Every measure is a fraction of `dc`, the diameter of the
+/// circle's centre line, measured on the owner's drawing; Android draws the
+/// same numbers. Colours are dynamic, so the theme comes down the view tree
+/// from `overrideUserInterfaceStyle` and "always light/dark" is kept.
+final class SmileyIcon: UIView {
+    /// The icon's square, and the circle in it (open question: 20 or 22 pt).
+    static let grid: CGFloat = 24
+    static let dc: CGFloat = 20
+    /// The smile's sweep, symmetric about the bottom: 160° (+10° … +170°),
+    /// the medium one the owner picked 261123 over the 210° of his drawing.
+    static let sweep: CGFloat = 160
+
+    private static let disc = UIColor { t in
+        t.userInterfaceStyle == .dark ? .clear
+            : UIColor(red: 0xCF / 255, green: 0xD4 / 255, blue: 0xD8 / 255, alpha: 1)
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isOpaque = false
+        backgroundColor = .clear
+        contentMode = .redraw
+        isUserInteractionEnabled = false
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
+
+    override func traitCollectionDidChange(_ previous: UITraitCollection?) {
+        super.traitCollectionDidChange(previous)
+        setNeedsDisplay()
+    }
+
+    override func draw(_ rect: CGRect) {
+        let d = Self.dc
+        let c = CGPoint(x: bounds.midX, y: bounds.midY)
+        let ink = UIColor.label.resolvedColor(with: traitCollection)
+        let circle = UIBezierPath(ovalIn: CGRect(x: c.x - d / 2, y: c.y - d / 2, width: d, height: d))
+        Self.disc.resolvedColor(with: traitCollection).setFill()
+        circle.fill()
+        ink.setStroke()
+        circle.lineWidth = 0.0967 * d
+        circle.stroke()
+        ink.setFill()
+        let r = 0.0643 * d
+        for side: CGFloat in [-1, 1] {
+            let e = CGPoint(x: c.x + side * 0.181 * d, y: c.y - 0.155 * d)
+            UIBezierPath(ovalIn: CGRect(x: e.x - r, y: e.y - r, width: 2 * r, height: 2 * r)).fill()
+        }
+        // Stroked, never filled: a fill would close the chord into a crescent.
+        let start = (90 - Self.sweep / 2) * .pi / 180
+        let mouth = UIBezierPath(arcCenter: CGPoint(x: c.x, y: c.y + 0.076 * d),
+                                 radius: 0.2488 * d, startAngle: start,
+                                 endAngle: start + Self.sweep * .pi / 180, clockwise: true)
+        mouth.lineWidth = 0.1043 * d
+        mouth.lineCapStyle = .round
+        mouth.stroke()
+    }
+}
