@@ -233,7 +233,11 @@ enum Script {
 
     /// Latin text -> the current script. Case follows the source:
     /// `Lj` -> `Љ`, `LJUBOV` -> `ЉУБОВ`.
-    static func out(_ latin: String) -> String { convert(latin, mode) }
+    static func out(_ latin: String) -> String {
+        // A titlo popup item: the letter in the script, the mark after it.
+        if let t = Titlo.split(latin) { return convert(t.base, mode) + t.mark }
+        return convert(latin, mode)
+    }
 
     static func convert(_ latin: String, _ m: Mode) -> String {
         if latin.isEmpty || m == .latin { return latin }
@@ -254,7 +258,7 @@ enum Script {
     /// True when the glyph at `i` ends something typed as such: ⰷ, ⱉ, or the
     /// soft yer right after d (ⰴⱐ, held d) - the converter never makes ⰴⱐ itself.
     static func endsAtomic(_ w: [Character], _ i: Int) -> Bool {
-        if atomicGlyphs.contains(w[i]) { return true }
+        if atomicGlyphs.contains(w[i]) || Titlo.has(w[i]) { return true }
         return (w[i] == "ⱐ" || w[i] == "Ⱐ") && i > 0 && (w[i - 1] == "ⰴ" || w[i - 1] == "Ⰴ")
     }
 
@@ -498,5 +502,75 @@ enum Script {
             out.append(chars[i]); i += 1
         }
         return out
+    }
+}
+
+/// The titlo (tytło), the Glagolitic abbreviation mark, held on every letter
+/// while writing Glagolitic (owner 261121; Android to follow). Popup order
+/// after the letter's own variants: plain, opening half, closing half.
+///
+/// A long titlo is STORED as the left half over every letter but the last and
+/// the right half over the last: left half - bare middle - right half draws a
+/// broken line (measured 261121 on Noto Sans Glagolitic). What the user
+/// presses is not what is stored: the keyboard fills the halves itself.
+///  - text selected + any titlo item: every run of letters in it gets one
+///    titlo (plain over a single letter), titlos already there are replaced;
+///  - opening half: shows at once over its letter, so an unclosed run stays
+///    VISIBLE instead of being a hidden mode;
+///  - closing half: finds that opening half before the caret and fills the
+///    letters in between. No state is kept - the half line on screen is it.
+enum Titlo {
+    static let plain = "\u{0483}", open = "\u{FE2E}", close = "\u{FE2F}"
+    static let marks = [plain, open, close]
+    private static let scalars: Set<Unicode.Scalar> = ["\u{0483}", "\u{FE2E}", "\u{FE2F}"]
+
+    /// Glagolitic only - the alphabet the titlo belongs to here.
+    static var offered: Bool { Script.mode == .glagolitic && !Script.morse && Script.runes == nil }
+
+    /// A popup item `a` + mark -> (`a`, mark); nil for anything else.
+    static func split(_ s: String) -> (base: String, mark: String)? {
+        let u = s.unicodeScalars
+        guard u.count > 1, let last = u.last, scalars.contains(last) else { return nil }
+        return (String(String.UnicodeScalarView(u.dropLast())), String(last))
+    }
+
+    static func has(_ c: Character) -> Bool { c.unicodeScalars.contains { scalars.contains($0) } }
+
+    static func strip(_ s: String) -> String {
+        String(String.UnicodeScalarView(s.unicodeScalars.filter { !scalars.contains($0) }))
+    }
+
+    /// One titlo over every run of letters: plain over a single letter, the
+    /// halves over a longer one. Spaces and marks stay bare, so each word of a
+    /// selection gets its own line.
+    static func over(_ text: String) -> String {
+        let chars = Array(strip(text))
+        var out = ""
+        var i = 0
+        while i < chars.count {
+            guard chars[i].isLetter else { out.append(chars[i]); i += 1; continue }
+            var j = i
+            while j < chars.count, chars[j].isLetter { j += 1 }
+            if j - i == 1 {
+                out += String(chars[i]) + plain
+            } else {
+                for k in i..<j { out += String(chars[k]) + (k == j - 1 ? close : open) }
+            }
+            i = j
+        }
+        return out
+    }
+
+    /// The open run before the caret: from the last letter carrying the
+    /// opening half to the caret, or nil when none is open on this line.
+    static func openRun(before text: String) -> String? {
+        var run: [Character] = []
+        for c in text.reversed().prefix(80) {
+            if c == "\n" { return nil }
+            if c.unicodeScalars.contains("\u{FE2F}") || c.unicodeScalars.contains("\u{0483}") { return nil }
+            run.append(c)
+            if c.unicodeScalars.contains("\u{FE2E}") { return String(run.reversed()) }
+        }
+        return nil
     }
 }

@@ -727,7 +727,10 @@ final class KeyboardViewController: UIInputViewController {
             selected = indexOfVariant(atX: x, count: variants.count)
             highlightSelection()
         case .ended:
-            if variants.indices.contains(selected) { insert(variants[selected]) }
+            if variants.indices.contains(selected) {
+                if let t = Titlo.split(variants[selected]) { putTitlo(t.base, t.mark) }
+                else { insert(variants[selected]) }
+            }
             dismissPopup()
             if shift == .on { shift = .off; refreshTitles() }
         case .cancelled, .failed:
@@ -1366,6 +1369,47 @@ final class KeyboardViewController: UIInputViewController {
             put(Script.out(latin))
         }
         rearmShiftIfSentenceStart()
+        refreshCompletions()
+    }
+
+    /// A titlo item from a letter's hold (`Titlo`). With text selected the
+    /// whole selection is marked and the letter is not written; otherwise the
+    /// letter goes in as any letter, then its mark.
+    private func putTitlo(_ base: String, _ mark: String) {
+        if decoding > 0 { queuedKeys.append { [weak self] in self?.putTitlo(base, mark) }; return }
+        if let sel = doc.selectedText, sel.contains(where: \.isLetter) {
+            doc.insertText(Titlo.over(sel))
+            afterTitlo()
+            return
+        }
+        // Closing half: the run from the opening half to the caret is written
+        // again with the new letter, halves filled in (read BEFORE the letter
+        // goes in - some apps report the text before the cursor late).
+        if mark == Titlo.close, let run = Titlo.openRun(before: contextBefore ?? "") {
+            if pendingSpace { put(" "); pendingSpace = false }
+            if let kept = lastSwipedWord { swipeInput.learn(from: Script.toLatin(kept)) }
+            let bare = Titlo.strip(run)
+            let letters = Script.rewritesWord
+                ? Script.out(Script.softenPL(Script.toLatin(bare) + base))
+                : bare + Script.out(base)
+            for _ in run { doc.deleteBackward() }
+            put(Titlo.over(letters))
+            afterTitlo()
+            return
+        }
+        insert(base)
+        doc.insertText(mark)
+        afterTitlo()
+    }
+
+    /// A word with a titlo is an abbreviation, never a word to learn or to
+    /// complete; the Polish word re-write starts after it (`Script.endsAtomic`).
+    private func afterTitlo() {
+        glagWord = nil
+        tappedWord = nil
+        lastSwipedWord = nil
+        pendingSpace = false
+        ownEditAt = Date()
         refreshCompletions()
     }
 

@@ -485,8 +485,12 @@ enum Layout {
                 "e": ["ę", "ię"], "h": ["ch"], "l": ["ł"], "n": ["ń"],
                 "o": ["ó", "ō"], "r": ["rz"], "s": ["ś", "sz", "szcz"], "z": ["ż", "ź"],
             ]
-            guard let g = glagHolds[lower] else { return nil }
-            return g.map { cased($0, uppercase) }
+            let g = (glagHolds[lower] ?? []).map { cased($0, uppercase) } + titloItems(key, uppercase)
+            return g.isEmpty ? nil : g
+        }
+        if !latin && Titlo.offered && key.isLetter {
+            let g = own.map { cased($0, uppercase) } + titloItems(key, uppercase)
+            return g.isEmpty ? nil : g
         }
         if latin {
             let isvOnPl: [Character: String] = ["c": "č", "s": "š", "z": "ž", "e": "ě"]
@@ -498,6 +502,17 @@ enum Layout {
         if key == "." { return periodLetterHold }
         if key == "," { return commaAccents }
         return nil
+    }
+
+    /// The three titlo items of a letter key in Glagolitic (`Titlo`): the
+    /// key's own letter with each mark. None on a key that writes no
+    /// Glagolitic letter (isv q w x) or writes a yer marker (Polish v).
+    private static func titloItems(_ key: Character, _ uppercase: Bool) -> [String] {
+        guard Titlo.offered else { return [] }
+        let base = keyText(uppercase ? Character(key.uppercased()) : Character(key.lowercased()), latin: false)
+        guard base != Script.softYerMark, base != Script.hardYerMark,
+              Script.out(base) != base else { return [] }
+        return Titlo.marks.map { base + $0 }
     }
 
     /// `ß` has no one-letter capital; a digraph capitalises its first letter
