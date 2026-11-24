@@ -320,6 +320,8 @@ enum Layout {
         if latin && qwertz {
             return [Array("qwertzuiop"), Array("asdfghjkl"), Array("yxcvbnm")]
         }
+        // Interslavic Glagolitic, layout 261124 (owner): the Polish grid with x.
+        if isvGlagShift { return [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")] }
         return latin
             ? [Array("qwertyuiop"), Array("asdfghjkl"), Array("zxcvbnm")]
             : [Array("qwertyuiop"), Array("asdfghjkl"), Array("zcvbnm")]
@@ -343,8 +345,9 @@ enum Layout {
             case "v", "V": return Script.softYerMark
             // x = ch Ⱈ like Keyman's Glagolitic (Phonetic) and Cyrillic х;
             // dzelo stays on hold d.
-            case "x": return "ch"
-            case "X": return "Ch"
+            // 261124: x = dzelo ⰷ like Interslavic Glagolitic (was ch).
+            case "x": return "ẑ"
+            case "X": return "Ẑ"
             default: return String(ch)
             }
         }
@@ -364,6 +367,23 @@ enum Layout {
             default: return String(ch)
             }
         }
+        // Interslavic Glagolitic, layout 261124 (owner): as close to Polish
+        // Glagolitic as it goes - q = ja, w = v, v = the soft yer like Polish,
+        // x = dzelo, lj nj under holds l n, ž under z. Cyrillic keeps q = lj, w = nj.
+        if isvGlagShift {
+            switch ch {
+            case "q": return "ja"
+            case "Q": return "Ja"
+            case "w": return "v"
+            case "W": return "V"
+            // v = the soft yer like Polish (l + v = lj, n + v = nj, else a
+            // bare Ⱐ; the keyboard turns it into j after l and n).
+            case "v", "V": return Script.softYerMark
+            case "x": return "ẑ"
+            case "X": return "Ẑ"
+            default: return String(ch)
+            }
+        }
         switch ch {
         case "q": return "lj"
         case "Q": return "Lj"
@@ -374,6 +394,24 @@ enum Layout {
         case "x" where language == "sr": return "dž"
         case "X" where language == "sr": return "Dž"
         default: return String(ch)
+        }
+    }
+
+    /// Interslavic in Glagolitic: layout 261124 (q ja, w v, v soft yer, x dzelo; lj nj under l n, ž under z).
+    static var isvGlagShift: Bool { language == "isv" && Script.mode == .glagolitic }
+
+    /// The wordlist key index a BUTTON stands for. Normally its own letter;
+    /// in `isvGlagShift` the letter v lies on button w, the ja route (index
+    /// of x) on button q, and buttons x (dzelo) and v (yer) are crossed as
+    /// nothing. The lj and nj routes get the
+    /// centres of l and n (see `swipeKeyCentres`).
+    static func swipeIndex(button ch: Character) -> Int? {
+        guard isvGlagShift else { return swipeIndex(ch) }
+        switch ch {
+        case "q": return dzhKey
+        case "w": return swipeIndex("v")
+        case "x", "v": return nil
+        default: return swipeIndex(ch)
         }
     }
 
@@ -481,7 +519,7 @@ enum Layout {
                 // ę ię ą ią also under the keys they contain (0.6.30)
                 "a": ["ą", "ią", "ia"],
                 "c": ["ć", "cz"],
-                "d": ["dź", "ď", "dż", "ḍ"],
+                "d": ["ẑ", "dź", "ď", "dż", "ḍ"],
                 "e": ["ę", "ię"], "h": ["ch"], "l": ["ł"], "n": ["ń"],
                 "o": ["ó", "ō"], "r": ["rz"], "s": ["ś", "sz", "szcz"], "z": ["ż", "ź"],
             ]
@@ -489,7 +527,14 @@ enum Layout {
             return g.isEmpty ? nil : g
         }
         if !latin && Titlo.offered && key.isLetter {
-            let g = own.map { cased($0, uppercase) } + titloItems(key, uppercase)
+            // Interslavic Glagolitic 261124: nj moved under n, dzelo first
+            // under d like in Polish.
+            let isvGlagHolds: [Character: [String]] = ["n": ["nj"], "l": ["lj"], "d": ["ẑ"], "q": ["ju", "jo", "ȧ"],
+                                                     "v": [Script.hardYerMark]]
+            let extra = isvGlagShift ? (isvGlagHolds[lower] ?? []) : []
+            // ḍ: a d that stays apart from a following z (pod-zemny as ⰴⰸ)
+            let tail = isvGlagShift && lower == "d" ? ["ḍ"] : []
+            let g = (extra + own + tail).map { cased($0, uppercase) } + titloItems(key, uppercase)
             return g.isEmpty ? nil : g
         }
         if latin {

@@ -325,6 +325,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
                                        userWords: mine)
             decoder.digraphKeys = digraph
             decoder.dzhKey = dzh
+            decoder.jaKey = digraph && Layout.isvGlagShift
             decoder.polishGlag = polishGlag
             // German `ü ö ä` and Spanish `ñ`: keys of their own, also reached
             // over the plain letter (Android `BASE_ROUTE`).
@@ -374,7 +375,7 @@ final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
         let dzh = Layout.language == "sr" && word.lowercased().contains("dž")
         if Script.mode != .latin, !Layout.singleLetterKeys,
            let route = keys.map(UInt8.init).withUnsafeBufferPointer({
-               SwipeDecoder.digraphRoute($0, dzh: dzh)
+               SwipeDecoder.digraphRoute($0, dzh: dzh, ja: Layout.isvGlagShift)
            }) {
             func gap(_ k: [Int]) -> CGFloat {
                 guard let a = k.first, let b = k.last,

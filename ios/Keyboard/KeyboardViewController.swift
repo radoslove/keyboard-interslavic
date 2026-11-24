@@ -71,6 +71,8 @@ final class KeyboardViewController: UIInputViewController {
     private var ownCaretMoveAt = Date.distantPast
     /// Our own last edit: a text change reported this soon after is ours.
     private var ownEditAt = Date.distantPast
+    /// The last letter typed in Interslavic Glagolitic was ḍ (no dzelo after it).
+    private var isvSplitD = false
     /// The candidates of the last swipe, kept so a rejected word can be
     /// replaced by tapping the next one.
     private var lastCandidates: [String] = []
@@ -1288,6 +1290,12 @@ final class KeyboardViewController: UIInputViewController {
     /// Puts LATIN text in, written in the chosen script. One key's worth: a
     /// letter, a held letter or digraph (`dž`), a mark, space or return.
     private func insert(_ latin: String) {
+        // Interslavic Glagolitic: the soft yer after l or n is the j of lj/nj,
+        // so the wordlist and the glide see plain Interslavic.
+        if Layout.isvGlagShift, latin == Script.softYerMark,
+           let prev = Script.toLatin(contextBefore ?? "").last, "lnLN".contains(prev) {
+            insert("j"); return
+        }
         guard let ch = latin.first else { return }
         recased = nil
         caretByHand = false
@@ -1376,7 +1384,16 @@ final class KeyboardViewController: UIInputViewController {
                 }
             }
             glagWord = nil
-            put(Script.out(latin))
+            // Interslavic Glagolitic: z after a typed d makes dzelo ⰷ, unless
+            // that d was ḍ (hold d), which stays apart (variant 1, 261124).
+            if Layout.isvGlagShift, latin.lowercased() == "z", !isvSplitD,
+               let d = before.last, d == "ⰴ" || d == "Ⰴ" {
+                doc.deleteBackward()
+                put(d == "Ⰴ" ? "Ⰷ" : "ⰷ")
+            } else {
+                put(Script.out(latin))
+            }
+            isvSplitD = latin == "ḍ" || latin == "Ḍ"
         }
         rearmShiftIfSentenceStart()
         refreshCompletions()
@@ -1408,7 +1425,15 @@ final class KeyboardViewController: UIInputViewController {
             return
         }
         insert(base)
-        doc.insertText(mark)
+        // Two glyphs from one key: written again with the mark over both.
+        let glyphs = Script.out(base)
+        let wrote = Script.rewritesWord ? (glagWord?.shown ?? "") : glyphs
+        if glyphs.count > 1, wrote.hasSuffix(glyphs) {
+            for _ in glyphs { doc.deleteBackward() }
+            put(Titlo.apply(glyphs, mark))
+        } else {
+            doc.insertText(mark)
+        }
         afterTitlo()
     }
 
@@ -1879,6 +1904,27 @@ extension KeyboardViewController: SwipeHost {
 
         view.addSubview(stack)
         suggestionBar = stack
+        // Undo the keyboard's last edit, at the left end of the bar (owner
+        // 261124, variant B). Only what this keyboard wrote or deleted.
+        let undo = UIButton(type: .system)
+        undo.setImage(UIImage(systemName: "arrow.uturn.backward"), for: .normal)
+        undo.tintColor = .secondaryLabel
+        undo.accessibilityLabel = "Undo"
+        undo.translatesAutoresizingMaskIntoConstraints = false
+        undo.isEnabled = !Doc.journal.isEmpty
+        undo.addAction(UIAction { [weak self] _ in
+            guard let self else { return }
+            self.ownEditAt = Date()
+            let done = self.doc.undo()
+            swipeLog.notice("isv-undo: \(done, privacy: .public) left \(Doc.journal.count, privacy: .public)")
+            self.glagWord = nil
+            self.tappedWord = nil
+            self.lastSwipedWord = nil
+            self.completingPrefix = nil
+            self.refreshCompletions()
+        }, for: .touchUpInside)
+        Doc.onJournal = { [weak undo] in undo?.isEnabled = !Doc.journal.isEmpty }
+        view.addSubview(undo)
         // Hide the keyboard, at the right end of the bar as
         // on most keyboards.
         let hide = UIButton(type: .system)
@@ -1893,7 +1939,11 @@ extension KeyboardViewController: SwipeHost {
             hide.centerYAnchor.constraint(equalTo: stack.centerYAnchor),
             hide.widthAnchor.constraint(equalToConstant: 40),
             hide.heightAnchor.constraint(equalToConstant: Self.suggestionBarHeight),
-            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 3),
+            undo.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 3),
+            undo.centerYAnchor.constraint(equalTo: stack.centerYAnchor),
+            undo.widthAnchor.constraint(equalToConstant: 40),
+            undo.heightAnchor.constraint(equalToConstant: Self.suggestionBarHeight),
+            stack.leadingAnchor.constraint(equalTo: undo.trailingAnchor, constant: 2),
             stack.trailingAnchor.constraint(equalTo: hide.leadingAnchor, constant: -2),
             stack.topAnchor.constraint(equalTo: view.topAnchor, constant: 2),
             stack.heightAnchor.constraint(equalToConstant: Self.suggestionBarHeight),
@@ -2102,11 +2152,17 @@ extension KeyboardViewController: SwipeHost {
         for b in letterButtons {
             guard let id = b.accessibilityIdentifier,
                   let ch = id.lowercased().first,
-                  let index = Layout.swipeIndex(ch)
+                  let index = Layout.swipeIndex(button: ch)
             else { continue }
             let centre = b.superview?.convert(b.center, to: view) ?? b.center
             centres[index] = centre
             width = max(width, b.bounds.width)
+        }
+        // Interslavic Glagolitic 261124: nj sits under hold n, so its glide
+        // route crosses the n key.
+        if Layout.isvGlagShift, let n = Layout.swipeIndex("n"), let l = Layout.swipeIndex("l") {
+            centres[Layout.njKey] = centres[n]
+            centres[Layout.ljKey] = centres[l]
         }
         return (centres, width)
     }

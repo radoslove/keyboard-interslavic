@@ -224,18 +224,31 @@ enum Script {
 
     private static let glagLetters: [Character: String] = [
         "a": "ⰰ", "b": "ⰱ", "c": "ⱌ", "č": "ⱍ", "d": "ⰴ", "e": "ⰵ", "ě": "ⱑ",
-        "f": "ⱇ", "g": "ⰳ", "h": "ⱈ", "i": "ⰻ", "k": "ⰽ", "l": "ⰾ", "m": "ⱞ",
+        // f = ⱚ and y = ⱏⰹ (hard yer + i) like Polish Glagolitic (owner 261124;
+        // were ⱇ and ⱐⰹ - old text still reads back).
+        "f": "ⱚ", "g": "ⰳ", "h": "ⱈ", "i": "ⰻ", "k": "ⰽ", "l": "ⰾ", "m": "ⱞ",
         "n": "ⱀ", "o": "ⱁ", "p": "ⱂ", "r": "ⱃ", "s": "ⱄ", "š": "ⱎ", "t": "ⱅ",
-        "u": "ⱆ", "v": "ⰲ", "y": "ⱐⰹ", "z": "ⰸ", "ž": "ⰶ",
+        "u": "ⱆ", "v": "ⰲ", "y": "ⱏⰹ", "z": "ⰸ", "ž": "ⰶ",
+        // dzelo, from hold d (261124, like Polish Glagolitic): marker ẑ.
+        "ẑ": "ⰷ",
+        // the old ja ligature ⱝ, from hold q (261124): marker ȧ.
+        "ȧ": "ⱝ",
+        // a d that does NOT join a following z, from hold d: marker ḍ
+        "ḍ": "ⰴ",
+        // bare yers from the v key (layout 261124), markers like Polish
+        "\u{02B9}": "ⱐ", "\u{02BA}": "ⱏ",
     ]
-    private static let jLigature: [Character: String] = ["a": "ⱝ", "u": "ⱓ", "o": "ⱖ"]
+    /// ja is Ⱑ like in Polish Glagolitic (owner 261124: "żeby to ja zostało
+    /// takie jak w pl"; it was ⱝ). Ⱑ is also ě, so reading back decides by
+    /// the letter before it (`jaFromJat`).
+    private static let jLigature: [Character: String] = ["a": "ⱑ", "u": "ⱓ", "o": "ⱖ"]
     private static let vowels: Set<Character> = ["a", "e", "ě", "i", "o", "u", "y"]
 
     /// Latin text -> the current script. Case follows the source:
     /// `Lj` -> `Љ`, `LJUBOV` -> `ЉУБОВ`.
     static func out(_ latin: String) -> String {
         // A titlo popup item: the letter in the script, the mark after it.
-        if let t = Titlo.split(latin) { return convert(t.base, mode) + t.mark }
+        if let t = Titlo.split(latin) { return Titlo.apply(convert(t.base, mode), t.mark) }
         return convert(latin, mode)
     }
 
@@ -304,6 +317,7 @@ enum Script {
     /// Longest first. Jotted vowels after a consonant mark its softness
     /// (siano -> ⱄⱑⱀⱁ), the soft yer ⱐ softens (ś ź ć ń dź rz), the hard yer ⱏ
     /// hardens (ł, y). Same table as the converter `pl2glag.py`.
+    /// m = ⱞ like isv (owner 261124; was ⰿ, which still reads back).
     private static let polishGlag: [(String, String)] = [
         // Two forms kept beside the canon: x writes the
         // historical dzelo ⰷ, holding o offers otu ⱉ. Inside they are the
@@ -320,9 +334,10 @@ enum Script {
         ("ḍ", "ⰴ"), ("rz", "ⱃⱐ"),
         ("ś", "ⱄⱐ"), ("ź", "ⰸⱐ"), ("ć", "ⱌⱐ"), ("ń", "ⱀⱐ"),
         ("ł", "ⰾⱏ"), ("ó", "ⱁ\u{0301}"),
-        ("ch", "ⱈ"), ("h", "ⱒ"), ("y", "ⱏⰹ"),
+        // h = ⱈ like isv; ch is c + h (owner 261124; were ch = ⱈ, h = ⱒ)
+        ("h", "ⱈ"), ("y", "ⱏⰹ"),
         ("a", "ⰰ"), ("b", "ⰱ"), ("c", "ⱌ"), ("d", "ⰴ"), ("e", "ⰵ"), ("f", "ⱚ"),
-        ("g", "ⰳ"), ("i", "ⰻ"), ("j", "ⰹ"), ("k", "ⰽ"), ("l", "ⰾ"), ("m", "ⰿ"),
+        ("g", "ⰳ"), ("i", "ⰻ"), ("j", "ⰹ"), ("k", "ⰽ"), ("l", "ⰾ"), ("m", "ⱞ"),
         ("n", "ⱀ"), ("o", "ⱁ"), ("p", "ⱂ"), ("r", "ⱃ"), ("s", "ⱄ"), ("t", "ⱅ"),
         ("u", "ⱆ"), ("w", "ⰲ"), ("v", "ⰲ"), ("z", "ⰸ"),   // v writes ⰲ like w
     ]
@@ -373,7 +388,7 @@ enum Script {
     /// `ja` elsewhere; `ⰾⱏⰹ` is `ly` (Polish has no `łj`), so typing `l` `y`
     /// keeps going instead of turning into `łj`.
     private static let reversePolishGlag: [(String, String)] =
-        ([("ⰾⱏⰹ", "ly"), ("ⰴⰸⱐ", "dź"), ("ⰴⰶ", "dż"), ("ⰴⰸ", "dz"), ("ⰷⱐ", "dź"), ("ⰷ", "dz"), ("ⱉ", "ó"), ("ⰴⱐ", "dź")]
+        ([("ⰾⱏⰹ", "ly"), ("ⰴⰸⱐ", "dź"), ("ⰴⰶ", "dż"), ("ⰴⰸ", "dz"), ("ⰷⱐ", "dź"), ("ⰷ", "dz"), ("ⱉ", "ó"), ("ⰴⱐ", "dź"), ("ⰿ", "m"), ("ⱒ", "h")]
          + polishGlag.filter { !["ia", "iu", "ię", "ią", "ja", "ju", "ję", "ją", "dż", "dź", "dz", "v", "ẑ", "ō", "ď", "ḍ"].contains($0.0) }
             .map { ($0.1, $0.0) })
         .sorted { $0.0.count > $1.0.count }
@@ -458,6 +473,11 @@ enum Script {
                 i += 1
                 continue
             }
+            // Every d + z is dzelo ⰷ (owner 261124, variant 1 - in Interslavic
+            // all of them are prefix seams: podzemny, nadzor, odzyv). ḍ keeps them apart.
+            if c == "d", i + 1 < low.count, low[i + 1] == "z" {
+                out += cased("ⰷ", src[i], caps); i += 2; continue
+            }
             out += glagLetters[c].map { cased($0, src[i], caps) } ?? String(src[i])
             i += 1
         }
@@ -465,6 +485,26 @@ enum Script {
     }
 
     // MARK: Back to Latin (for wordlist lookups)
+
+    /// Ⱑ reads as ja at the start of a word or after a vowel (moja, jablo),
+    /// as ě after a consonant (město). Consonant + ja (polja, morja: 256 word
+    /// pairs in the wordlist, 261124) therefore reads as ě - the price of the
+    /// shared letter. Turned into ⱝ here, which the reverse table reads as ja.
+    private static let glagVowels: Set<Character> = ["ⰰ", "ⰵ", "ⱑ", "ⰻ", "ⰹ", "ⱁ", "ⱆ", "ⱝ", "ⱓ", "ⱖ"]
+    static func jaFromJat(_ s: String) -> String {
+        var out = ""
+        var prev: Character?
+        for ch in s {
+            let low = Character(ch.lowercased())
+            if low == "ⱑ", prev.map({ !$0.isLetter || glagVowels.contains(Character($0.lowercased())) }) ?? true {
+                out.append(ch.isUppercase ? "Ⱝ" : "ⱝ")
+            } else {
+                out.append(ch)
+            }
+            prev = ch
+        }
+        return out
+    }
 
     private static let reverses: [String: [(String, String)]] = Dictionary(uniqueKeysWithValues:
         ["isv", "sr", "mk", "ru", "uk", "bg", "be", "sla"].map { lang in
@@ -475,8 +515,8 @@ enum Script {
     }
 
     private static let reverseGlagolitic: [(String, String)] =
-        ([("ⱐⰹ", "y"), ("ⱝ", "ja"), ("ⱓ", "ju"), ("ⱖ", "jo"), ("ⱐ", "j"), ("ⰹ", "j"), ("ⰿ", "m")]
-         + glagLetters.filter { $0.key != "y" }.map { ($0.value, String($0.key)) })
+        ([("ⰷ", "dz"), ("ⱏⰹ", "y"), ("ⱐⰹ", "y"), ("ⱇ", "f"), ("ⱝ", "ja"), ("ⱓ", "ju"), ("ⱖ", "jo"), ("ⱐ", "j"), ("ⰹ", "j"), ("ⰿ", "m")]
+         + glagLetters.filter { !["y", "ȧ", "ẑ", "ḍ", "\u{02B9}", "\u{02BA}"].contains($0.key) }.map { ($0.value, String($0.key)) })
         .sorted { $0.0.count > $1.0.count }
 
     /// Text in the current script -> Latin. Latin passes through.
@@ -486,7 +526,7 @@ enum Script {
         if m == .latin || s.isEmpty { return s }
         if m == .glagolitic && Layout.language == "pl" { return backPolish(s) }
         let table = m == .cyrillic ? reverseCyrillic : reverseGlagolitic
-        let chars = Array(s)
+        let chars = Array(m == .glagolitic ? jaFromJat(s) : s)
         var out = ""
         var i = 0
         outer: while i < chars.count {
@@ -538,6 +578,16 @@ enum Titlo {
 
     static func strip(_ s: String) -> String {
         String(String.UnicodeScalarView(s.unicodeScalars.filter { !scalars.contains($0) }))
+    }
+
+    /// A mark put on what ONE key wrote. A letter written with two glyphs
+    /// (ś = ⱄⱐ, ł = ⰾⱏ, y = ⱏⰹ, isv lj = ⰾⱐ) takes it over both: plain and
+    /// closing become a long titlo over the pair, the opening half goes over
+    /// each glyph (owner 261123: "na obydwa od razu").
+    static func apply(_ glyphs: String, _ mark: String) -> String {
+        guard glyphs.count > 1, glyphs.allSatisfy(\.isLetter) else { return glyphs + mark }
+        if mark == open { return glyphs.map { String($0) + open }.joined() }
+        return over(glyphs)
     }
 
     /// One titlo over every run of letters: plain over a single letter, the

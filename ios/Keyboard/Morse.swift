@@ -235,45 +235,123 @@ struct Doc {
 
     var hasText: Bool { proxy.hasText }
 
+    // MARK: Undo (owner 261124, variant B: ↶ on the left of the bar)
+
+    /// What the keyboard did to the field, at the level of the field's own
+    /// characters (Morse, runes and Glagolitic included). Only the keyboard's
+    /// own edits: an extension sees nothing of what the app or the user did.
+    enum Step { case insert(String), delete(String), move(Int) }
+    static var journal: [[Step]] = []
+    static var lastStepAt = Date.distantPast
+    /// The text before the caret right after the last recorded step; undo
+    /// refuses when the field no longer ends like this (caret moved, app edited).
+    static var tailAfter = ""
+    static var recording = true
+    static var onJournal: (() -> Void)?
+
+    private func record(_ step: Step) {
+        guard Doc.recording else { return }
+        // One undo step = everything within 0.5 s (a glide's replacement,
+        // a word typed in one go).
+        if Date().timeIntervalSince(Doc.lastStepAt) > 0.5 || Doc.journal.isEmpty {
+            Doc.journal.append([])
+            if Doc.journal.count > 50 { Doc.journal.removeFirst() }
+        }
+        // Inserts in a row become one: a titlo mark typed after its letter
+        // is one character with it, and ⌫ takes the two together.
+        if case .insert(let s) = step, case .insert(let prev)? = Doc.journal[Doc.journal.count - 1].last {
+            Doc.journal[Doc.journal.count - 1][Doc.journal[Doc.journal.count - 1].count - 1] = .insert(prev + s)
+        } else {
+            Doc.journal[Doc.journal.count - 1].append(step)
+        }
+        Doc.lastStepAt = Date()
+    }
+
+    private func noteTail() {
+        guard Doc.recording else { return }
+        Doc.tailAfter = String((proxy.documentContextBeforeInput ?? "").suffix(40))
+        Doc.onJournal?()
+    }
+
+    /// Undoes the last group. False when there is nothing, or the field has
+    /// changed under the keyboard since (then the journal is dropped).
+    func undo() -> Bool {
+        guard let group = Doc.journal.last else { return false }
+        let now = String((proxy.documentContextBeforeInput ?? "").suffix(40))
+        guard now == Doc.tailAfter else { Doc.journal = []; Doc.onJournal?(); return false }
+        Doc.journal.removeLast()
+        Doc.recording = false
+        for step in group.reversed() {
+            switch step {
+            case .insert(let s): for _ in s { proxy.deleteBackward() }
+            case .delete(let s): proxy.insertText(s)
+            case .move(let n): proxy.adjustTextPosition(byCharacterOffset: -n)
+            }
+        }
+        Doc.recording = true
+        Runes.tail = ""
+        Doc.tailAfter = String((proxy.documentContextBeforeInput ?? "").suffix(40))
+        Doc.lastStepAt = .distantPast
+        Doc.onJournal?()
+        return true
+    }
+
+    private func rawInsert(_ s: String) {
+        record(.insert(s)); proxy.insertText(s); noteTail()
+    }
+
+    private func rawDelete() {
+        if let sel = proxy.selectedText, !sel.isEmpty {
+            record(.delete(sel))
+        } else if let c = proxy.documentContextBeforeInput?.last {
+            record(.delete(String(c)))
+        }
+        proxy.deleteBackward(); noteTail()
+    }
+
+    private func rawMove(_ n: Int) {
+        record(.move(n)); proxy.adjustTextPosition(byCharacterOffset: n); noteTail()
+    }
+
     func insertText(_ s: String) {
         if let r = runes {
             Runes.wrote(s, after: proxy.documentContextBeforeInput ?? "", r)
-            proxy.insertText(Runes.encode(s, r))
+            rawInsert(Runes.encode(s, r))
             return
         }
-        guard let lang = morse, !s.isEmpty else { proxy.insertText(s); return }
+        guard let lang = morse, !s.isEmpty else { rawInsert(s); return }
         let prev = proxy.documentContextBeforeInput?.last
-        proxy.insertText(Morse.encode(s, lang, glyphBefore: prev.map { !($0 == " " || $0 == "\n" || $0 == "\t") } ?? false))
+        rawInsert(Morse.encode(s, lang, glyphBefore: prev.map { !($0 == " " || $0 == "\n" || $0 == "\t") } ?? false))
     }
 
     /// One LETTER back: its code and the gap before it.
     func deleteBackward() {
         if runes != nil {
-            proxy.deleteBackward()      // one rune = one letter
+            rawDelete()      // one rune = one letter
             if !Runes.tail.isEmpty { Runes.tail.removeLast() }
             return
         }
-        guard let lang = morse else { proxy.deleteBackward(); return }
+        guard let lang = morse else { rawDelete(); return }
         let raw = rawBefore
-        guard let last = Morse.pieces(raw, lang).last else { proxy.deleteBackward(); return }
-        for _ in 0..<max(1, raw.count - last.start) { proxy.deleteBackward() }
+        guard let last = Morse.pieces(raw, lang).last else { rawDelete(); return }
+        for _ in 0..<max(1, raw.count - last.start) { rawDelete() }
     }
 
     /// The caret by `n` letters.
     func adjustTextPosition(byCharacterOffset n: Int) {
-        if runes != nil { Runes.tail = ""; proxy.adjustTextPosition(byCharacterOffset: n); return }
-        guard let lang = morse, n != 0 else { proxy.adjustTextPosition(byCharacterOffset: n); return }
+        if runes != nil { Runes.tail = ""; rawMove(n); return }
+        guard let lang = morse, n != 0 else { rawMove(n); return }
         if n < 0 {
             let raw = rawBefore
             let ps = Morse.pieces(raw, lang)
             let k = min(-n, ps.count)
             let to = k == 0 ? raw.count : ps[ps.count - k].start
-            proxy.adjustTextPosition(byCharacterOffset: -(raw.count - to))
+            rawMove(-(raw.count - to))
         } else {
             let raw = proxy.documentContextAfterInput ?? ""
             let ps = Morse.pieces(raw, lang)
             let to = n >= ps.count ? raw.count : ps[n].start
-            proxy.adjustTextPosition(byCharacterOffset: to)
+            rawMove(to)
         }
     }
 }

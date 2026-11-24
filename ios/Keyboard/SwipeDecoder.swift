@@ -71,6 +71,9 @@ struct SwipeDecoder {
     /// itself has `dž`, read from its bytes; `nadzor`, `podzemlje` (24 forms)
     /// are two letters and no `џ`.
     var dzhKey = false
+    /// Interslavic Glagolitic 261124: button q writes ja (Ⱑ), so `j a` may
+    /// also be one touch on it (key index of x, unused in Interslavic).
+    var jaKey = false
     /// Soft end gate (Android 3.9.13, `END_SOFT`): a word whose LAST letter lies
     /// past the end keys - one key beyond where the finger lifted (`here`
     /// drawn to `r`) - is not thrown out but pays `softEndPenalty` (key widths,
@@ -117,7 +120,7 @@ struct SwipeDecoder {
     static let softEndReach: Double = 1.8
 
     private static let keyD: UInt8 = 3, keyJ: UInt8 = 9, keyL: UInt8 = 11, keyN: UInt8 = 13
-    private static let keyZ: UInt8 = 25
+    private static let keyZ: UInt8 = 25, keyA: UInt8 = 0
     private static let keyQ = UInt8(Layout.ljKey), keyW = UInt8(Layout.njKey)
     private static let keyX = UInt8(Layout.dzhKey)
 
@@ -132,7 +135,7 @@ struct SwipeDecoder {
     /// The route over the digraph keys: `l j` -> `q`, `n j` -> `w`, and with
     /// `dzh` also `d z` -> `x`. Nil when the word has no digraph, so the caller
     /// scores the plain route alone.
-    static func digraphRoute(_ keys: UnsafeBufferPointer<UInt8>, dzh: Bool = false) -> [UInt8]? {
+    static func digraphRoute(_ keys: UnsafeBufferPointer<UInt8>, dzh: Bool = false, ja: Bool = false) -> [UInt8]? {
         var out: [UInt8]?
         var i = 0
         while i < keys.count {
@@ -140,6 +143,12 @@ struct SwipeDecoder {
             if i + 1 < keys.count, keys[i + 1] == keyJ, k == keyL || k == keyN {
                 if out == nil { out = Array(keys[0..<i]) }
                 out!.append(k == keyL ? keyQ : keyW)
+                i += 2
+                continue
+            }
+            if ja, i + 1 < keys.count, k == keyJ, keys[i + 1] == keyA {
+                if out == nil { out = Array(keys[0..<i]) }
+                out!.append(keyX)
                 i += 2
                 continue
             }
@@ -231,7 +240,7 @@ struct SwipeDecoder {
                 }
                 return best
             }
-            guard digraphKeys, let route = Self.digraphRoute(keys, dzh: dzh),
+            guard digraphKeys, let route = Self.digraphRoute(keys, dzh: dzh, ja: jaKey),
                   let alt = route.withUnsafeBufferPointer({ one($0) })
             else { return plain }
             return min(plain ?? alt, alt)
@@ -299,6 +308,8 @@ struct SwipeDecoder {
             // `џ` is filed under `d` at the start and under `ž` (= `z`) at the end.
             if dzhKey, firstKeys.contains(Layout.dzhKey) { firstKeys.append(Int(Self.keyD)) }
             if dzhKey, lastKeys.contains(Layout.dzhKey) { lastKeys.append(Int(Self.keyZ)) }
+            if jaKey, firstKeys.contains(Layout.dzhKey) { firstKeys.append(Int(Self.keyJ)) }
+            if jaKey, lastKeys.contains(Layout.dzhKey) { lastKeys.append(Int(Self.keyA)) }
             var seenF = Set<Int>(), seenL = Set<Int>()
             firstKeys = firstKeys.filter { seenF.insert($0).inserted }
             lastKeys = lastKeys.filter { seenL.insert($0).inserted }
