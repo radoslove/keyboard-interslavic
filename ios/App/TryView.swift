@@ -310,7 +310,17 @@ struct TryView: View {
 
     // MARK: view
 
-    private func chip(_ label: String, on: Bool, shade: Double, action: @escaping () -> Void) -> some View {
+    /// A stable name for UI tests (Maestro, XCUITest): the chips' labels change
+    /// with the script and the screen language, the identifier does not.
+    private static func testId(_ c: Scripts.Choice) -> String {
+        switch c {
+        case .script(let m): return "script_\(m)"
+        case .runes(let r): return "runes_\(r)"
+        case .morse: return "morse"
+        }
+    }
+
+    private func chip(_ label: String, id: String, on: Bool, shade: Double, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(label).font(.body.weight(on ? .bold : .regular))
                 .padding(.horizontal, 12).padding(.vertical, 7)
@@ -319,6 +329,8 @@ struct TryView: View {
                 .opacity(shade)
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier(id)
+        .accessibilityAddTraits(on ? .isSelected : [])
     }
 
     @ViewBuilder private var learnRow: some View {
@@ -355,7 +367,7 @@ struct TryView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 6) {
                         ForEach(languages, id: \.self) { l in
-                            chip(l.uppercased(), on: l == lang,
+                            chip(l.uppercased(), id: "lang_\(l)", on: l == lang,
                                  shade: l == lang ? 1 : Gloss.enabled.contains(l) ? 0.75 : 0.4) { go(l) }
                                 .simultaneousGesture(LongPressGesture(minimumDuration: 0.5).onEnded { _ in drop(l) })
                                 .id(l)
@@ -380,7 +392,7 @@ struct TryView: View {
         return ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 6) {
                 ForEach(Self.six, id: \.self) { c in
-                    chip(c.name, on: c == on, shade: c == on ? 1 : own.contains(c) ? 0.75 : 0.45) { tapScript(c) }
+                    chip(c.name, id: Self.testId(c), on: c == on, shade: c == on ? 1 : own.contains(c) ? 0.75 : 0.45) { tapScript(c) }
                 }
             }
         }
@@ -475,6 +487,9 @@ private struct BoxView: UIViewRepresentable {
         v.textContainerInset = .zero
         v.textContainer.lineFragmentPadding = 0
         v.delegate = context.coordinator
+        // Found by UI tests whatever it holds: the placeholder is gone once
+        // there is text, so tests cannot look for it (Maestro, 261123).
+        v.accessibilityIdentifier = "write_box"
         v.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         let p = UILabel()
         p.text = placeholder

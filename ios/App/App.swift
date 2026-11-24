@@ -47,6 +47,12 @@ struct RootView: View {
                                 .stroke(tab == key ? Color.accentColor : .clear, lineWidth: 2))
                     }
                     .buttonStyle(.plain)
+                    // An icon alone reads as nothing to VoiceOver and to UI tests
+                    // (Maestro found no tab by name, 261123): the tab's name as the
+                    // label, a fixed identifier for tests, "selected" on the open one.
+                    .accessibilityLabel(Ui.t(["set": "settings_head", "try": "tab_write", "learn": "learn_head"][key]!))
+                    .accessibilityIdentifier("tab_\(key)")
+                    .accessibilityAddTraits(tab == key ? .isSelected : [])
                 }
             }
             .padding(.horizontal, 12).padding(.top, 4).padding(.bottom, 6)
