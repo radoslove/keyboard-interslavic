@@ -346,6 +346,19 @@ MAC_PUNCT_OPTION = {41: ("„", "“"), 39: ("’", "”"), 27: ("–", "—")}
 MAC_PUNCT_OPTION.update({kc: (TITLO, TITLO) for kc in TITLO_KEYS_MAC})
 
 
+# Navigation and control keys, the SAME output in every keyMap (261124: the layout had no
+# 123-126 at all, so the arrows were dead). Values: Apple's documented keylayout convention
+# (TN2056 / Ukelele's U.S. template) - NOT read from an Apple-generated file, none was found
+# on hp or mc. 76 (keypad enter) is U+0003 as Apple has it (was U+000D from the base).
+MAC_NAV = {
+    123: "\u001c", 124: "\u001d", 125: "\u001f", 126: "\u001e",       # left right down up
+    115: "\u0001", 119: "\u0004", 116: "\u000b", 121: "\u000c",       # home end pgup pgdn
+    117: "\u007f", 51: "\u0008", 36: "\u000d", 76: "\u0003",          # fwd del, delete, return, enter
+    48: "\u0009", 53: "\u001b", 71: "\u001b", 114: "\u0005",          # tab, escape, clear, help
+}
+MAC_CONTROL = {33: "\u001b", 42: "\u001c", 30: "\u001d"}           # Ctrl+[ \ ]
+
+
 def write_keylayout(A, dst):
     import build_keylayout as bk                      # same base (digits, punctuation, keypad)
     t = isv_table(A)
@@ -359,8 +372,8 @@ def write_keylayout(A, dst):
 
     def keymap(idx, pick):
         rows = [f'    <keyMap index="{idx}">']
-        for kc in sorted(BASE):
-            v = pick(kc)
+        for kc in sorted(set(BASE) | set(MAC_NAV)):
+            v = MAC_NAV[kc] if kc in MAC_NAV else pick(kc)   # navigation/control: same in EVERY map
             if v:
                 rows.append(f'      <key code="{kc}" output="{ent(v)}"/>')
         rows.append("    </keyMap>")
@@ -379,6 +392,10 @@ def write_keylayout(A, dst):
         keymap(4, lambda kc: letter(kc, 1) if kc in MAC_LETTERS else BASE[kc][0]),
         # Command: plain US letters, so Cmd+C / Cmd+V keep working with a Glagolitic base
         keymap(5, lambda kc: BASE[kc][0]),
+        # Control: Latin control characters as Apple's U.S. layout (Ctrl+A = U+0001 ... so
+        # Ctrl+A / Ctrl+E move to line start / end in Cocoa text); [ \ ] = U+001B 1C 1D
+        keymap(6, lambda kc: MAC_CONTROL.get(kc) or (chr(ord(MAC_LETTERS[kc]) - 96) if kc in MAC_LETTERS
+                                                     else BASE[kc][0])),
     ]
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE keyboard SYSTEM "file://localhost/System/Library/DTDs/KeyboardLayout.dtd">
@@ -394,6 +411,7 @@ def write_keylayout(A, dst):
     <keyMapSelect mapIndex="3"><modifier keys="anyShift anyOption caps?"/></keyMapSelect>
     <keyMapSelect mapIndex="4"><modifier keys="caps"/></keyMapSelect>
     <keyMapSelect mapIndex="5"><modifier keys="command anyShift? anyOption? caps? anyControl?"/></keyMapSelect>
+    <keyMapSelect mapIndex="6"><modifier keys="anyControl anyShift? anyOption? caps?"/></keyMapSelect>
   </modifierMap>
   <keyMapSet id="ANSI">
 {chr(10).join(maps)}
@@ -827,10 +845,14 @@ def check(A, I, klc_path, mac_path, rules, km_root=None):
     say(len(ligs) == want_ligs, f".klc: {len(ligs)} ligature rows (expected {want_ligs})")
     import xml.etree.ElementTree as ET
     x = mac_path.read_text(encoding="utf-8")
-    x = re.sub(r"<!DOCTYPE[^>]*>", "", x)
-    x = re.sub(r"&#x00(0[0-9A-F]|1[0-9A-F]);", "", x)        # control keys: legal for macOS, not for ET
-    root = ET.fromstring(x.encode("utf-8"))
-    km = {int(m.get("index")): {int(e.get("code")): e.get("output") for e in m} for m in root.iter("keyMap")}
+    # well-formedness (control-char entities are legal for macOS, not for ET: blanked here only)
+    ET.fromstring(re.sub(r"&#x00(0[0-9A-F]|1[0-9A-F]);", "",
+                         re.sub(r"<!DOCTYPE[^>]*>", "", x)).encode("utf-8"))
+    # the real read: every key with its output decoded, control characters INCLUDED
+    km = {}
+    for idx, body in re.findall(r'<keyMap index="(\d+)">(.*?)</keyMap>', x, re.S):
+        km[int(idx)] = {int(c): re.sub(r"&#x([0-9A-Fa-f]+);", lambda m: chr(int(m.group(1), 16)), o)
+                        for c, o in re.findall(r'<key code="(\d+)" output="([^"]*)"/>', body)}
     okm = sum(1 for kc, lat in MAC_LETTERS.items()
               if km[0].get(kc) == t[lat][0] and km[2].get(kc) == t[lat][1]
               and km[1].get(kc) == up(t[lat][0]))
@@ -847,6 +869,13 @@ def check(A, I, klc_path, mac_path, rules, km_root=None):
         f".klc: AltGr / Shift+AltGr on {TITLO_KEYS_WIN} = titlo ({oem}); AltGr+T via the letter table")
     tk = [kc for kc in (17,) + TITLO_KEYS_MAC if km[2].get(kc) == TITLO and km[3].get(kc) == TITLO]
     say(len(tk) == 3 and km[0].get(10) == "§", f".keylayout: Option / Shift+Option = titlo on keycodes {tk} (t, `, §); § base = {km[0].get(10)}")
+    navbad = [(i, kc) for i in sorted(km) for kc, v in MAC_NAV.items() if km[i].get(kc) != v]
+    say(not navbad and len(km) == 7,
+        f".keylayout: navigation/control ({len(MAC_NAV)} keys, arrows 123-126) in every one of {len(km)} keyMaps"
+        + (f"; missing/wrong {navbad[:6]}" if navbad else ""))
+    ctl = {lat: km.get(6, {}).get(kc) for kc, lat in MAC_LETTERS.items() if lat in "ae"}
+    say(ctl == {"a": "\u0001", "e": "\u0005"} and km.get(6, {}).get(33) == "\u001b",
+        f".keylayout: Control map Ctrl+A = U+0001, Ctrl+E = U+0005, Ctrl+[ = U+001B (line start/end in Cocoa)")
 
     print("5. Polish: typing key by key (Keyman rules) == the phone converter on the whole word")
     words = read_words("main_pl.combined")
@@ -923,6 +952,8 @@ def negative_control(A):
     # 2. one .keylayout cell: Option+v (hard yer ⱏ) -> nothing
     m = mac.read_text(encoding="utf-8")
     m = m.replace('<key code="9" output="&#x2C4F;"/>', "", 1)
+    # 2b. right arrow dropped from the first keyMap
+    m = m.replace('<key code="124" output="&#x001D;"/>', "", 1)
     mac.write_text(m, encoding="utf-8")
     # 3. one phone entry (Android side): GLAG_LETTERS f -> ⱇ
     B = copy.deepcopy(A)
@@ -930,9 +961,9 @@ def negative_control(A):
     # 4. one Keyman rule: c + h no longer joins
     rules2 = [r for r in rules if not (r[0] == ("ⱌ",) and r[1] == ("c", "h"))
               and r[1] != ("alt", "q", False)]          # 5. AltGr+Q (jo) gone
-    print("== broken: .klc F, .keylayout Option+V, Android letter f, Keyman ch, Keyman AltGr+Q (must FAIL) ==")
+    print("== broken: .klc F, .keylayout Option+V and arrow 124, Android letter f, Keyman ch, Keyman AltGr+Q (must FAIL) ==")
     bad, failed = check(B, I, klc, mac, rules2, tmp / PL_ID)
-    expect = ["GLAG_LETTERS", ".klc:", ".keylayout:", "forms (lower", "AltGr+Q"]
+    expect = ["GLAG_LETTERS", ".klc:", ".keylayout: 2", "navigation/control", "forms (lower", "AltGr+Q"]
     caught = [e for e in expect if any(e in f for f in failed)]
     print(f"== negative control: baseline {base_bad} fail(s); broken run {bad} fail(s); "
           f"caught {len(caught)}/{len(expect)}: {caught}")

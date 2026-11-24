@@ -2035,9 +2035,9 @@ class KeyboardView(
     }
 
     /** One tap does what fits (owner 261124): titlo over the selection (or off,
-     *  if it has one); after ·digits the number in Glagolitic capitals closed
-     *  with ·; after plain digits the number with one titlo; otherwise · to
-     *  start a number. Without a selection the titlo never jumps over a word. */
+     *  if it has one); after digits the number in Glagolitic capitals between
+     *  dots (·ⰓⰋⰂ·, or closing ·digits with ·); otherwise · to start a number.
+     *  Without a selection the titlo never jumps over a word. */
     private fun titloOnWord() {
         feedback()
         val ic = conn ?: return
@@ -2055,7 +2055,11 @@ class KeyboardView(
         if (num != null && g != null) {
             val before = ic.getTextBeforeCursor(16, 0)?.toString().orEmpty()
             val opened = !num.second && before.dropLast(num.first.length).lastOrNull() == '·'
-            val text = if (opened) g + "·" else Titlo.over(g)
+            // A number is marked with dots, never with a titlo (owner 261124:
+            // "the titlo over a letter from the hold, the dot for numbers"):
+            // digits -> ·ⰓⰋⰂ·, ·digits -> ⰓⰋⰂ· (iOS 151c9e6 still puts a titlo
+            // over plain digits - port the change to iOS).
+            val text = if (opened) g + "·" else "·" + g + "·"
             if (num.second) {
                 ic.commitText(text, 1)
                 afterSelfEditTo(minOf(selStart, selEnd) + text.length)
