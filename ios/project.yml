@@ -16,7 +16,7 @@ options:
 settings:
   base:
     MARKETING_VERSION: "1.0"
-    CURRENT_PROJECT_VERSION: "2"
+    CURRENT_PROJECT_VERSION: "4"
     SWIFT_VERSION: "5.0"
     CODE_SIGN_STYLE: Automatic
     # Read from the environment so it never lands in the repo, and - more
