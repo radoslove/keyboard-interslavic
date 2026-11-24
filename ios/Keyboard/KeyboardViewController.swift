@@ -46,6 +46,7 @@ final class KeyboardViewController: UIInputViewController {
     private var swipeInput: SwipeInput!
     private var suggestionBar: UIStackView!
     private var suggestionButtons: [UIButton] = []
+    private weak var titloButton: UIButton?
     /// What the last swipe put in, so tapping another suggestion knows how much
     /// to take back out.
     private var lastSwipedWord: String?
@@ -184,6 +185,7 @@ final class KeyboardViewController: UIInputViewController {
 
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
+        doc.fieldChanged()
         followApp()
         rearmShiftIfSentenceStart()
         caretMaybeMoved()
@@ -237,6 +239,7 @@ final class KeyboardViewController: UIInputViewController {
     /// words for where the caret is now.
     override func selectionDidChange(_ textInput: UITextInput?) {
         super.selectionDidChange(textInput)
+        doc.fieldChanged()
         caretMaybeMoved()
     }
 
@@ -661,6 +664,83 @@ final class KeyboardViewController: UIInputViewController {
     /// the word in two at it.
     private func wordChar(_ c: Character) -> Bool {
         c.isLetter || (c == "'" && Layout.apostropheInWord)
+    }
+
+    /// The bar's titlo icon: a letter box with the titlo stroke over it and
+    /// the number dots at its sides (owner 261124),
+    /// drawn as a template so it takes the text colour (owner 261124: the
+    /// ◌҃ character was too faint).
+    static let titloIcon: UIImage = {
+        let size = CGSize(width: 30, height: 26)
+        return UIGraphicsImageRenderer(size: size).image { _ in
+            UIColor.black.setStroke()
+            UIColor.black.setFill()
+            for x in [1.5, 26.0] { UIBezierPath(ovalIn: CGRect(x: x, y: 16, width: 2.6, height: 2.6)).fill() }
+            let box = UIBezierPath(roundedRect: CGRect(x: 8, y: 11, width: 14, height: 13), cornerRadius: 2.5)
+            box.lineWidth = 2.2
+            box.stroke()
+            let t = UIBezierPath()
+            t.move(to: CGPoint(x: 6, y: 8))
+            t.addLine(to: CGPoint(x: 8, y: 4))
+            t.addLine(to: CGPoint(x: 22, y: 4))
+            t.addLine(to: CGPoint(x: 24, y: 8))
+            t.lineWidth = 2.4
+            t.lineCapStyle = .round
+            t.lineJoinStyle = .round
+            t.stroke()
+        }.withRenderingMode(.alwaysTemplate)
+    }()
+
+    // MARK: Titlo button (owner 261124): one tap does what fits - the
+    // selection, else digits before the caret as a number, else the word.
+
+    /// The digits right before the caret, or the selection when it is digits.
+    private var numberAtCaret: (digits: String, selected: Bool)? {
+        if let sel = doc.selectedText, !sel.isEmpty, sel.allSatisfy(\.isASCII), sel.allSatisfy(\.isNumber) {
+            return (sel, true)
+        }
+        let d = String((contextBefore ?? "").reversed().prefix { $0.isASCII && $0.isNumber }.reversed())
+        return d.isEmpty ? nil : (d, false)
+    }
+
+    private func writeNumber(dots: Bool) {
+        guard let num = numberAtCaret, let n = Int(num.digits), let g = Titlo.numeral(n) else { return }
+        ownEditAt = Date()
+        let text = dots ? "·" + g + "·" : Titlo.over(g)
+        if num.selected { doc.insertText(text) } else {
+            for _ in num.digits { doc.deleteBackward() }
+            put(text)
+        }
+        afterTitlo()
+    }
+
+    /// The bar's titlo button: the selection, else the word at the caret.
+    private func titloOnWord() {
+        if decoding > 0 { return }
+        ownEditAt = Date()
+        // Titlo over words only on a selection (owner 261124); a selection
+        // that has titlos already loses them.
+        if let sel = doc.selectedText, sel.contains(where: \.isLetter) {
+            doc.insertText(sel.contains(where: Titlo.has) ? Titlo.strip(sel) : Titlo.over(sel))
+            afterTitlo()
+            return
+        }
+        if let num = numberAtCaret, let n = Int(num.digits), Titlo.numeral(n) != nil {
+            // Opened with · (first tap): close it with · ; else titlo over it.
+            let before = contextBefore ?? ""
+            let opened = !num.selected && before.dropLast(num.digits.count).last == "·"
+            if opened {
+                for _ in num.digits { doc.deleteBackward() }
+                put(Titlo.numeral(n)! + "·")
+                afterTitlo()
+            } else {
+                writeNumber(dots: false)
+            }
+            return
+        }
+        // No selection, no digits: start a number with · (261124).
+        put("·")
+        afterTitlo()
     }
 
     /// The word right before the cursor, as shown; a leading apostrophe is a
@@ -1539,6 +1619,7 @@ final class KeyboardViewController: UIInputViewController {
     ///
     /// The text is read in the chosen script and looked up in Latin.
     private func refreshCompletions() {
+        titloButton?.isHidden = !Titlo.offered
         let before = contextBefore ?? ""
         let typedShown = trailingWord(before)
         let typed = Script.toLatin(typedShown)
@@ -1908,7 +1989,8 @@ extension KeyboardViewController: SwipeHost {
         // 261124, variant B). Only what this keyboard wrote or deleted.
         let undo = UIButton(type: .system)
         undo.setImage(UIImage(systemName: "arrow.uturn.backward"), for: .normal)
-        undo.tintColor = .secondaryLabel
+        undo.tintColor = .label
+        undo.setPreferredSymbolConfiguration(.init(pointSize: 19, weight: .semibold), forImageIn: .normal)
         undo.accessibilityLabel = "Undo"
         undo.translatesAutoresizingMaskIntoConstraints = false
         undo.isEnabled = !Doc.journal.isEmpty
@@ -1923,8 +2005,42 @@ extension KeyboardViewController: SwipeHost {
             self.completingPrefix = nil
             self.refreshCompletions()
         }, for: .touchUpInside)
-        Doc.onJournal = { [weak undo] in undo?.isEnabled = !Doc.journal.isEmpty }
+        // ↷ right of ↶: does again what ↶ took back (owner 261124).
+        let redo = UIButton(type: .system)
+        redo.setImage(UIImage(systemName: "arrow.uturn.forward"), for: .normal)
+        redo.tintColor = .label
+        redo.setPreferredSymbolConfiguration(.init(pointSize: 19, weight: .semibold), forImageIn: .normal)
+        redo.accessibilityLabel = "Redo"
+        redo.translatesAutoresizingMaskIntoConstraints = false
+        redo.isEnabled = !Doc.redoStack.isEmpty
+        redo.addAction(UIAction { [weak self] _ in
+            guard let self else { return }
+            self.ownEditAt = Date()
+            let done = self.doc.redo()
+            swipeLog.notice("isv-redo: \(done, privacy: .public) left \(Doc.redoStack.count, privacy: .public)")
+            self.glagWord = nil
+            self.tappedWord = nil
+            self.lastSwipedWord = nil
+            self.completingPrefix = nil
+            self.refreshCompletions()
+        }, for: .touchUpInside)
+        Doc.onJournal = { [weak undo, weak redo] in
+            undo?.isEnabled = !Doc.journal.isEmpty
+            redo?.isEnabled = !Doc.redoStack.isEmpty
+        }
         view.addSubview(undo)
+        view.addSubview(redo)
+        // Titlo over the selection, or without one over the word at the
+        // caret (owner 261124: selecting on a phone is awkward). A word that
+        // has a titlo already loses it. Glagolitic only.
+        let titlo = UIButton(type: .system)
+        titlo.setImage(Self.titloIcon, for: .normal)
+        titlo.tintColor = .label
+        titlo.accessibilityLabel = "Titlo"
+        titlo.translatesAutoresizingMaskIntoConstraints = false
+        titlo.addAction(UIAction { [weak self] _ in self?.titloOnWord() }, for: .touchUpInside)
+        titloButton = titlo
+        view.addSubview(titlo)
         // Hide the keyboard, at the right end of the bar as
         // on most keyboards.
         let hide = UIButton(type: .system)
@@ -1943,8 +2059,16 @@ extension KeyboardViewController: SwipeHost {
             undo.centerYAnchor.constraint(equalTo: stack.centerYAnchor),
             undo.widthAnchor.constraint(equalToConstant: 40),
             undo.heightAnchor.constraint(equalToConstant: Self.suggestionBarHeight),
-            stack.leadingAnchor.constraint(equalTo: undo.trailingAnchor, constant: 2),
-            stack.trailingAnchor.constraint(equalTo: hide.leadingAnchor, constant: -2),
+            redo.leadingAnchor.constraint(equalTo: undo.trailingAnchor),
+            redo.centerYAnchor.constraint(equalTo: stack.centerYAnchor),
+            redo.widthAnchor.constraint(equalToConstant: 40),
+            redo.heightAnchor.constraint(equalToConstant: Self.suggestionBarHeight),
+            titlo.trailingAnchor.constraint(equalTo: hide.leadingAnchor),
+            titlo.centerYAnchor.constraint(equalTo: stack.centerYAnchor),
+            titlo.widthAnchor.constraint(equalToConstant: 40),
+            titlo.heightAnchor.constraint(equalToConstant: Self.suggestionBarHeight),
+            stack.leadingAnchor.constraint(equalTo: redo.trailingAnchor, constant: 2),
+            stack.trailingAnchor.constraint(equalTo: titlo.leadingAnchor, constant: -2),
             stack.topAnchor.constraint(equalTo: view.topAnchor, constant: 2),
             stack.heightAnchor.constraint(equalToConstant: Self.suggestionBarHeight),
         ])

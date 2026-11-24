@@ -266,7 +266,7 @@ enum Script {
 
     /// Glyphs typed as such (x key, hold on o): the word re-write starts after
     /// the last of them, so they are never turned back into ⰴⰸ or ⱁ́.
-    static let atomicGlyphs: Set<Character> = ["ⰷ", "Ⰷ", "ⱉ", "Ⱉ"]
+    static let atomicGlyphs: Set<Character> = ["ⰷ", "Ⰷ", "ⱉ", "Ⱉ", "ⱖ", "Ⱖ"]
 
     /// True when the glyph at `i` ends something typed as such: ⰷ, ⱉ, or the
     /// soft yer right after d (ⰴⱐ, held d) - the converter never makes ⰴⱐ itself.
@@ -323,6 +323,8 @@ enum Script {
         // historical dzelo ⰷ, holding o offers otu ⱉ. Inside they are the
         // markers ẑ and ō, so the word re-write leaves them as typed.
         ("ẑ", "ⰷ"), ("ō", "ⱉ"),
+        // jo ⱖ (as in Interslavic), from hold q: marker ǒ (261124)
+        ("ǒ", "ⱖ"),
         // d softened by the soft yer, offered beside dź: marker ď.
         ("ď", "ⰴⱐ"),
         // v key: bare yers where Polish has no letter for the pair (layout v04)
@@ -334,8 +336,9 @@ enum Script {
         ("ḍ", "ⰴ"), ("rz", "ⱃⱐ"),
         ("ś", "ⱄⱐ"), ("ź", "ⰸⱐ"), ("ć", "ⱌⱐ"), ("ń", "ⱀⱐ"),
         ("ł", "ⰾⱏ"), ("ó", "ⱁ\u{0301}"),
-        // h = ⱈ like isv; ch is c + h (owner 261124; were ch = ⱈ, h = ⱒ)
-        ("h", "ⱈ"), ("y", "ⱏⰹ"),
+        // ch = ⱈ (the isv h), joined by itself from c + h; h stays ⱒ
+        // (owner 261124, second thought)
+        ("ch", "ⱈ"), ("h", "ⱒ"), ("y", "ⱏⰹ"),
         ("a", "ⰰ"), ("b", "ⰱ"), ("c", "ⱌ"), ("d", "ⰴ"), ("e", "ⰵ"), ("f", "ⱚ"),
         ("g", "ⰳ"), ("i", "ⰻ"), ("j", "ⰹ"), ("k", "ⰽ"), ("l", "ⰾ"), ("m", "ⱞ"),
         ("n", "ⱀ"), ("o", "ⱁ"), ("p", "ⱂ"), ("r", "ⱃ"), ("s", "ⱄ"), ("t", "ⱅ"),
@@ -388,8 +391,8 @@ enum Script {
     /// `ja` elsewhere; `ⰾⱏⰹ` is `ly` (Polish has no `łj`), so typing `l` `y`
     /// keeps going instead of turning into `łj`.
     private static let reversePolishGlag: [(String, String)] =
-        ([("ⰾⱏⰹ", "ly"), ("ⰴⰸⱐ", "dź"), ("ⰴⰶ", "dż"), ("ⰴⰸ", "dz"), ("ⰷⱐ", "dź"), ("ⰷ", "dz"), ("ⱉ", "ó"), ("ⰴⱐ", "dź"), ("ⰿ", "m"), ("ⱒ", "h")]
-         + polishGlag.filter { !["ia", "iu", "ię", "ią", "ja", "ju", "ję", "ją", "dż", "dź", "dz", "v", "ẑ", "ō", "ď", "ḍ"].contains($0.0) }
+        ([("ⰾⱏⰹ", "ly"), ("ⰴⰸⱐ", "dź"), ("ⰴⰶ", "dż"), ("ⰴⰸ", "dz"), ("ⰷⱐ", "dź"), ("ⰷ", "dz"), ("ⱉ", "ó"), ("ⰴⱐ", "dź"), ("ⰿ", "m"), ("ⱖ", "jo")]
+         + polishGlag.filter { !["ia", "iu", "ię", "ią", "ja", "ju", "ję", "ją", "dż", "dź", "dz", "v", "ẑ", "ō", "ǒ", "ď", "ḍ"].contains($0.0) }
             .map { ($0.1, $0.0) })
         .sorted { $0.0.count > $1.0.count }
     private static let polishJotted: [Character: String] = ["ⱑ": "a", "ⱓ": "u", "ⱗ": "ę", "ⱙ": "ą"]
@@ -561,8 +564,16 @@ enum Script {
 ///    letters in between. No state is kept - the half line on screen is it.
 enum Titlo {
     static let plain = "\u{0483}", open = "\u{FE2E}", close = "\u{FE2F}"
+    /// Over the letters between the halves: the conjoining macron, which
+    /// joins into one line (the opening half there left a knob at every
+    /// letter - owner 261124: "ciągła linia"; measured on Noto, `mc`).
+    static let middle = "\u{FE26}"
+    /// Added to the opening half on the first letter: with it the line starts
+    /// over the first letter at the height of the rest (alone, the first
+    /// letter's mark sat low and apart - owner 261124, Noto measured on `mc`).
+    static let lift = "\u{0305}"
     static let marks = [plain, open, close]
-    private static let scalars: Set<Unicode.Scalar> = ["\u{0483}", "\u{FE2E}", "\u{FE2F}"]
+    private static let scalars: Set<Unicode.Scalar> = ["\u{0483}", "\u{FE2E}", "\u{FE2F}", "\u{FE26}", "\u{0305}"]
 
     /// Glagolitic only - the alphabet the titlo belongs to here.
     static var offered: Bool { Script.mode == .glagolitic && !Script.morse && Script.runes == nil }
@@ -604,10 +615,26 @@ enum Titlo {
             if j - i == 1 {
                 out += String(chars[i]) + plain
             } else {
-                for k in i..<j { out += String(chars[k]) + (k == j - 1 ? close : open) }
+                for k in i..<j { out += String(chars[k]) + (k == i ? open : k == j - 1 ? close : middle) }
             }
             i = j
         }
+        return out
+    }
+
+    /// A number 1-999 in Glagolitic letters, capitals (owner 261124), table
+    /// `vault_002/Projects/INTERSLOVE/glagolica_liczby_261122_v01.md`: units
+    /// Ⰰ-Ⰸ, tens Ⰹ Ⰻ-Ⱂ (Ⰺ has no value), hundreds Ⱃ-Ⱋ; 11-19 put the unit
+    /// before the ten, as the number is said. Nil outside 1-999 (the values
+    /// above 900 are not settled).
+    static func numeral(_ n: Int) -> String? {
+        guard (1...999).contains(n) else { return nil }
+        let units = Array("ⰀⰁⰂⰃⰄⰅⰆⰇⰈ"), tens = Array("ⰉⰋⰌⰍⰎⰏⰐⰑⰒ"), hundreds = Array("ⰓⰔⰕⰖⰗⰘⰙⰚⰛ")
+        let h = n / 100, t = n / 10 % 10, u = n % 10
+        var out = h > 0 ? String(hundreds[h - 1]) : ""
+        if t == 1 && u > 0 { return out + String(units[u - 1]) + String(tens[0]) }
+        if t > 0 { out += String(tens[t - 1]) }
+        if u > 0 { out += String(units[u - 1]) }
         return out
     }
 

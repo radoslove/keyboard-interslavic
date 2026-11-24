@@ -242,6 +242,10 @@ struct Doc {
     /// own edits: an extension sees nothing of what the app or the user did.
     enum Step { case insert(String), delete(String), move(Int) }
     static var journal: [[Step]] = []
+    /// Groups taken back by ↶, for ↷; any new edit drops them.
+    static var redoStack: [[Step]] = []
+    /// When the keyboard last changed the field (edit, undo, redo).
+    static var lastOwnChangeAt = Date.distantPast
     static var lastStepAt = Date.distantPast
     /// The text before the caret right after the last recorded step; undo
     /// refuses when the field no longer ends like this (caret moved, app edited).
@@ -251,6 +255,8 @@ struct Doc {
 
     private func record(_ step: Step) {
         guard Doc.recording else { return }
+        Doc.redoStack = []
+        Doc.lastOwnChangeAt = Date()
         // One undo step = everything within 0.5 s (a glide's replacement,
         // a word typed in one go).
         if Date().timeIntervalSince(Doc.lastStepAt) > 0.5 || Doc.journal.isEmpty {
@@ -273,26 +279,51 @@ struct Doc {
         Doc.onJournal?()
     }
 
-    /// Undoes the last group. False when there is nothing, or the field has
-    /// changed under the keyboard since (then the journal is dropped).
-    func undo() -> Bool {
-        guard let group = Doc.journal.last else { return false }
+    /// Called from `textDidChange`, when the field's text is up to date
+    /// (right after `insertText` many apps still report the old text, so the
+    /// tail taken there was stale and ↶ refused every time - 261124). A change
+    /// of ours refreshes the tail; one that is not ours and leaves the field
+    /// different drops the journal.
+    func fieldChanged() {
         let now = String((proxy.documentContextBeforeInput ?? "").suffix(40))
-        guard now == Doc.tailAfter else { Doc.journal = []; Doc.onJournal?(); return false }
-        Doc.journal.removeLast()
+        if Date().timeIntervalSince(Doc.lastOwnChangeAt) < 0.6 {
+            Doc.tailAfter = now
+        } else if now != Doc.tailAfter, !(Doc.journal.isEmpty && Doc.redoStack.isEmpty) {
+            Doc.journal = []; Doc.redoStack = []
+        }
+        Doc.onJournal?()
+    }
+
+    private func apply(_ group: [Step], back: Bool) {
         Doc.recording = false
-        for step in group.reversed() {
-            switch step {
-            case .insert(let s): for _ in s { proxy.deleteBackward() }
-            case .delete(let s): proxy.insertText(s)
-            case .move(let n): proxy.adjustTextPosition(byCharacterOffset: -n)
+        for step in back ? group.reversed() : group {
+            switch (step, back) {
+            case (.insert(let s), true), (.delete(let s), false): for _ in s { proxy.deleteBackward() }
+            case (.delete(let s), true), (.insert(let s), false): proxy.insertText(s)
+            case (.move(let n), _): proxy.adjustTextPosition(byCharacterOffset: back ? -n : n)
             }
         }
         Doc.recording = true
         Runes.tail = ""
-        Doc.tailAfter = String((proxy.documentContextBeforeInput ?? "").suffix(40))
         Doc.lastStepAt = .distantPast
+        Doc.lastOwnChangeAt = Date()
         Doc.onJournal?()
+    }
+
+    /// Undoes the last group. False when there is nothing, or the field has
+    /// changed under the keyboard since (then the journal is dropped).
+    func undo() -> Bool {
+        guard let group = Doc.journal.popLast() else { return false }
+        Doc.redoStack.append(group)     // before apply: it refreshes the buttons
+        apply(group, back: true)
+        return true
+    }
+
+    /// Does again what ↶ took back.
+    func redo() -> Bool {
+        guard let group = Doc.redoStack.popLast() else { return false }
+        Doc.journal.append(group)
+        apply(group, back: false)
         return true
     }
 

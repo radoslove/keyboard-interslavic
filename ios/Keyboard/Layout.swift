@@ -512,7 +512,8 @@ enum Layout {
         // it starts with; the jotted family under q, j (ja…) and i (ia…).
         if !latin && language == "pl" && key.isLetter {
             let glagHolds: [Character: [String]] = [
-                "q": ["ja", "ju", "ję", "ją"], "j": ["ja", "ju", "ję", "ją"],
+                // q: jo ⱖ first instead of ja, which is the key itself (owner 261124)
+                "q": ["ǒ", "ju", "ję", "ją"], "j": ["ja", "ju", "ję", "ją"],
                 "i": ["ia", "iu", "ię", "ią"], "w": ["ę", "ię", "ą", "ią"],
                 // v: the hard yer Ⱏ (l + Ⱏ = ł, otherwise a bare Ⱏ)
                 "v": [Script.hardYerMark],
@@ -529,7 +530,7 @@ enum Layout {
         if !latin && Titlo.offered && key.isLetter {
             // Interslavic Glagolitic 261124: nj moved under n, dzelo first
             // under d like in Polish.
-            let isvGlagHolds: [Character: [String]] = ["n": ["nj"], "l": ["lj"], "d": ["ẑ"], "q": ["ju", "jo", "ȧ"],
+            let isvGlagHolds: [Character: [String]] = ["n": ["nj"], "l": ["lj"], "d": ["ẑ"], "q": ["jo", "ju", "ȧ"],
                                                      "v": [Script.hardYerMark]]
             let extra = isvGlagShift ? (isvGlagHolds[lower] ?? []) : []
             // ḍ: a d that stays apart from a following z (pod-zemny as ⰴⰸ)
