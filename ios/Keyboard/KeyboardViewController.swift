@@ -444,6 +444,11 @@ final class KeyboardViewController: UIInputViewController {
                 let script = functionKey(Script.keyLabel, action: #selector(tapScript))
                 script.titleLabel?.adjustsFontSizeToFitWidth = true
                 script.titleLabel?.minimumScaleFactor = 0.5
+                // Hold: every alphabet of the language in a list, like the
+                // languages held on space (owner 261124).
+                let holdS = UILongPressGestureRecognizer(target: self, action: #selector(holdScript(_:)))
+                holdS.minimumPressDuration = 0.4
+                script.addGestureRecognizer(holdS)
                 stack.addArrangedSubview(script)
                 weights.append((script, 1.2))
             }
@@ -1094,6 +1099,33 @@ final class KeyboardViewController: UIInputViewController {
         buildKeyboard()
         showSuggestions([])
         if haptic { UIImpactFeedbackGenerator(style: .light).impactOccurred() }
+    }
+
+    /// Hold the script key: the alphabets in a list, slide onto one and lift.
+    @objc private func holdScript(_ g: UILongPressGestureRecognizer) {
+        guard let key = g.view as? UIButton else { return }
+        let all = Script.choices
+        switch g.state {
+        case .began:
+            showLanguageList(over: key, langs: all.map { Script.choiceLabel($0) }, named: false)
+            selected = all.firstIndex(of: Script.choice) ?? 0
+            highlightSelection()
+        case .changed:
+            selected = languageIndex(at: g.location(in: view))
+            highlightSelection()
+        case .ended:
+            let pick = all.indices.contains(selected) ? all[selected] : Script.choice
+            dismissPopup()
+            if pick != Script.choice {
+                Script.setChoice(pick)
+                buildKeyboard()
+                refreshCompletions()
+            }
+        case .cancelled, .failed:
+            dismissPopup()
+        default:
+            break
+        }
     }
 
     @objc private func tapScript() {
@@ -1853,7 +1885,7 @@ final class KeyboardViewController: UIInputViewController {
     /// Hold on space: the ticked languages as a VERTICAL list of full names
     /// over the space bar (a horizontal strip of codes was hard to notice). The keyboard is clipped to its own frame, so when the
     /// rows would not fit above the space bar the list breaks into columns.
-    private func showLanguageList(over key: UIButton, langs: [String]) {
+    private func showLanguageList(over key: UIButton, langs: [String], named: Bool = true) {
         dismissPopup()
         let rowH: CGFloat = 40, colW: CGFloat = 170
         let keyFrame = key.convert(key.bounds, to: view)
@@ -1873,7 +1905,7 @@ final class KeyboardViewController: UIInputViewController {
 
         variantLabels = langs.map { code in
             let l = UILabel()
-            l.text = "  " + Layout.name(code)
+            l.text = "  " + (named ? Layout.name(code) : code)
             l.font = .systemFont(ofSize: 19)
             l.adjustsFontSizeToFitWidth = true
             l.minimumScaleFactor = 0.6
@@ -2077,6 +2109,7 @@ extension KeyboardViewController: SwipeHost {
     /// `current` is the index of the word now in the text, marked bold; nil
     /// after a rejected swipe, when none of them is.
     fileprivate func showSuggestions(_ words: [String], current: Int? = 0) {
+        titloButton?.isHidden = !Titlo.offered      // also after a language or script switch
         swipeLog.notice("isv-bar: show \(words.joined(separator: "|"), privacy: .public)")
         slotWords = suggestionButtons.indices.map { i in
             i < words.count && !words[i].isEmpty ? words[i] : nil
