@@ -35,7 +35,12 @@ the v1 examples in `GLAGOLITIC-DIFF.md` (`azijatsky` → `ⰰⰸⰻⱝⱅⱄⰽ�
 |---|---|---|---|
 | Latin | `q w e r t y u i o p` | `a s d f g h j k l` | `z x c v b n m` |
 | Cyrillic | `љ њ е р т ы у и о п` | `а с д ф г х ј к л` | `з ц в б н м` |
-| Glagolitic | `ⰾⱐ ⱀⱐ ⰵ ⱃ ⱅ ⱐⰹ ⱆ ⰻ ⱁ ⱂ` | `ⰰ ⱄ ⰴ ⱇ ⰳ ⱈ ⰹ ⰽ ⰾ` | `ⰸ ⱌ ⰲ ⰱ ⱀ ⱞ` |
+| Glagolitic | `ⱑ ⰲ ⰵ ⱃ ⱅ ⱏⰹ ⱆ ⰻ ⱁ ⱂ` | `ⰰ ⱄ ⰴ ⱚ ⰳ ⱈ ⰹ ⰽ ⰾ` | `ⰸ ⰷ ⱌ ⱐ ⰱ ⱀ ⱞ` |
+
+Glagolitic follows the layout of 2026-11-24 (the Polish Glagolitic grid, with `x`): `q` = ja `Ⱑ`,
+`w` = v `Ⰲ`, `v` = the soft yer `Ⱐ` (after `l` / `n` the phone writes `j`, so lj and nj), `x` =
+dzelo `Ⰷ`; lj, nj, ž, dž and the hard yer sit under holds (`l n z d v`). The paragraphs below
+about the `q` / `w` digraph keys and the missing `x` describe Cyrillic.
 
 `q w x` have no letter in these alphabets. Two of the three positions carry the `lj` and `nj`
 keys — `љ` and `њ`, where the Serbian and Macedonian standards put them, `ⰾⱐ` and `ⱀⱐ` in

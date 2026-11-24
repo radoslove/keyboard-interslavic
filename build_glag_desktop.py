@@ -8,24 +8,33 @@ Two keyboards, two routes:
        windows/src/KBDISVGL.klc      -> MSKLC kbdutool -> windows/installers/kbdisvgl/
        mac/ISVGLAG.keylayout
      One key = one output, like a tap on the phone. The letters are the ones the phone
-     writes on the same keys (docs/script-tables.md, "Rows per script"): q = lj, w = nj,
-     y = the two signs of v1, no x. The phone's HOLDS go to AltGr / Option.
+     writes on the same keys (docs/script-tables.md, "Rows per script"), layout 261124:
+     q = ja Ⱑ, w = v Ⰲ, v = soft yer Ⱐ, x = dzelo Ⰷ, y = ⱏⰹ. AltGr / Option keep the
+     261119 placements (c s z e d l n a u o j) and add v = hard yer Ⱏ (the phone's hold on v).
 
   2. Polish in Glagolitic (pl-Glag), KEYMAN, because Polish Glagolitic needs context
      (c + z = cz, r + z = rz, j + a = ja ...), which neither .klc nor .keylayout can do:
        keyman/pl_glag/   -> kmc build -> keyman/pl_glag.kmp  (Windows, macOS, Linux)
-     Typed Polish the usual way (AltGr letters as on the Polish programmer's layout);
+     Typed Polish the usual way (AltGr letters as on the Polish programmer's layout),
+     q = ja Ⱑ and x = dzelo Ⰷ as on the phone (261124);
      each key looks at the glyph before the cursor and rewrites it, so the result is
      the same as converting the whole word.
 
 ONE TABLE. Nothing here is typed from memory: the letter tables are READ from the
-Android sources (Script.kt GLAG_LETTERS / J_LIGATURE / POLISH_GLAG, Layout.kt isvOwn
-and keyText). `--check` then proves the outputs against the phone (Android AND iOS
-tables), against docs/script-tables.md, and against the Polish canon pl2glag.py.
+Android sources (Script.kt GLAG_LETTERS / J_LIGATURE / POLISH_GLAG, Layout.kt isvOwn,
+isvGlagHolds, polishGlagHolds and keyText). `--check` then proves the outputs against the
+phone (Android AND iOS tables), against docs/script-tables.md, and against the Polish
+canon pl2glag.py - where m = ⰿ (canon) vs ⱞ (phone, 261124), the x key and the ǒ marker
+are a NAMED known difference that prints but does not fail.
 
 USAGE
     python -X utf8 build_glag_desktop.py            # write the three sources
     python -X utf8 build_glag_desktop.py --check    # + all checks (exit 1 on a mismatch)
+    python -X utf8 build_glag_desktop.py --negative-control
+        # builds into a temp folder, breaks one cell in each output and one phone entry,
+        # and exits 0 only if the checks FAIL on them (repo files untouched)
+
+⚠ Without --negative-control the script (re)writes the three sources in the repo.
 
 .klc = UTF-16LE + CRLF (.gitattributes keeps git away from it).
 """
@@ -58,52 +67,99 @@ def kt_block(text, start):
     raise ValueError(start)
 
 
+def kt_unesc(x):
+    r"""Kotlin / Swift string escapes: \u01c9 and \u{02B9}."""
+    x = re.sub(r"\\u\{([0-9A-Fa-f]+)\}", lambda m: chr(int(m.group(1), 16)), x)
+    return re.sub(r"\\u([0-9A-Fa-f]{4})", lambda m: chr(int(m.group(1), 16)), x)
+
+
+def items(body, consts):
+    """`"a", Script.HARD_YER_MARK, "b"` -> ['a', 'ʺ', 'b'] (Kotlin or Swift constant names)."""
+    out = []
+    for m in re.finditer(r'"((?:[^"\\]|\\.)*)"|(?:Script\.)?(\w+)', body):
+        if m.group(1) is not None:
+            out.append(kt_unesc(m.group(1)))
+        elif m.group(2) in consts:
+            out.append(consts[m.group(2)])
+        else:
+            raise ValueError("unknown constant " + m.group(2))
+    return out
+
+
+def holds(body, consts, quote):
+    """`'q' to listOf(...)` (Kotlin) or `"q": [...]` (Swift) -> {key: [items]}."""
+    pat = r"'(.)' to listOf\(([^)]*)\)" if quote == "'" else r'"(.)": \[([^\]]*)\]'
+    return {k: items(v, consts) for k, v in re.findall(pat, body)}
+
+
+def when_block(text, head):
+    """The `'x' -> ...` arms of the `when (ch) {` that follows `head`."""
+    i = text.index(head)
+    j = text.index("{", i)
+    return text[j + 1:text.index("}", j)]
+
+
 def read_android():
     script = (KT / "Script.kt").read_text(encoding="utf-8")
     layout = (KT / "Layout.kt").read_text(encoding="utf-8")
-    consts = dict(re.findall(r'const val (\w+) = "([^"]*)"', script))
+    consts = {k: kt_unesc(v) for k, v in re.findall(r'const val (\w+) = "([^"]*)"', script)}
 
-    letters = dict(re.findall(r"'(.)' to \"([^\"]+)\"",
-                              kt_block(script, "private val GLAG_LETTERS = mapOf")))
-    jlig = dict(re.findall(r"'(.)' to \"([^\"]+)\"",
-                           kt_block(script, "private val J_LIGATURE = mapOf")))
+    def pairs_char(body):
+        return {kt_unesc(k): kt_unesc(v) for k, v in re.findall(r"'((?:\\u[0-9A-Fa-f]{4})|.)' to \"([^\"]+)\"", body)}
+
+    letters = pairs_char(kt_block(script, "private val GLAG_LETTERS = mapOf"))
+    jlig = pairs_char(kt_block(script, "private val J_LIGATURE = mapOf"))
     pl = []
     body = kt_block(script, "private val POLISH_GLAG: List<Pair<String, String>> = listOf")
+    body = re.sub(r"//[^\n]*", "", body)
     for m in re.finditer(r'(?:"([^"]+)"|(SOFT_YER_MARK|HARD_YER_MARK)) to "([^"]+)"', body):
-        pl.append((m.group(1) if m.group(1) is not None else consts[m.group(2)], m.group(3)))
-    isv_own = {k: re.findall(r'"([^"]+)"', v) for k, v in re.findall(
-        r"'(.)' to listOf\(([^)]*)\)", kt_block(layout, "private val isvOwn: Map<Char, List<String>> = mapOf"))}
-    pl_holds = {}
-    for k, v in re.findall(r"'(.)' to listOf\(([^)]*)\)",
-                           kt_block(layout, "private val polishGlagHolds: Map<Char, List<String>> = mapOf")):
-        pl_holds[k] = [consts.get(x.strip(), None) or x.strip().strip('"')
-                       for x in v.split(",") if x.strip()]
-    pl_holds = {k: [consts["HARD_YER_MARK"] if x == "Script.HARD_YER_MARK" else x for x in v]
-                for k, v in pl_holds.items()}
-    # keyText: the two digraph keys of the non-Latin rows, and the Polish shortcuts
-    kt = kt_block(layout, "fun keyText") if False else layout[layout.index("fun keyText"):]
+        pl.append((kt_unesc(m.group(1)) if m.group(1) is not None else consts[m.group(2)],
+                   kt_unesc(m.group(3))))
+    isv_own = holds(kt_block(layout, "private val isvOwn: Map<Char, List<String>> = mapOf"), consts, "'")
+    isv_glag_holds = holds(kt_block(layout, "private val isvGlagHolds: Map<Char, List<String>> = mapOf"),
+                           consts, "'")
+    pl_holds = holds(re.sub(r"//[^\n]*", "", kt_block(
+        layout, "private val polishGlagHolds: Map<Char, List<String>> = mapOf")), consts, "'")
+    # keyText: what a key WRITES in Glagolitic (Interslavic block and Polish block)
+    kt = layout[layout.index("fun keyText"):]
     kt = kt[:kt.index("\n    }\n")]
-    isv_keys = {}
-    for k, v in re.findall(r"^\s*ch == '(.)' -> \"([^\"]+)\"", kt, re.M):
-        isv_keys.setdefault(k, v)                      # the plain `ch == 'q' -> "lj"` lines
-    pl_part = kt[kt.index("lang == Lang.PL -> when (ch)"):]
-    pl_part = pl_part[:pl_part.index("}")]
-    pl_keys = dict(re.findall(r"'(.)' -> \"([^\"]+)\"", pl_part))
-    return dict(letters=letters, jlig=jlig, pl=pl, isv_own=isv_own, pl_holds=pl_holds,
-                isv_keys={k: v for k, v in isv_keys.items() if k in "qw"}, pl_keys=pl_keys,
-                consts=consts)
+
+    def arms(head):
+        body = re.sub(r"//[^\n]*", "", when_block(kt, head))
+        return {k: items(v, consts)[0] for k, v in re.findall(r"'(.)' -> ([^\n]+)", body)
+                if k != "e" or "else" not in v}
+
+    isv_keys = arms("isvGlag(script, lang) -> when (ch)")
+    pl_keys = arms("lang == Lang.PL -> when (ch)")
+    titlo = re.search(r'const val PLAIN = "([^"]*)"', (KT / "Titlo.kt").read_text(encoding="utf-8")).group(1)
+    return dict(letters=letters, jlig=jlig, pl=pl, isv_own=isv_own, isv_glag_holds=isv_glag_holds,
+                pl_holds=pl_holds, isv_keys=isv_keys, pl_keys=pl_keys, consts=consts, titlo=kt_unesc(titlo))
 
 
 def read_ios():
-    s = (SWIFT / "Script.swift").read_text(encoding="utf-8")
-    def unesc(x):
-        return re.sub(r"\\u\{([0-9A-Fa-f]+)\}", lambda m: chr(int(m.group(1), 16)), x)
+    """iOS at HEAD (git), so a half-edited working tree on another machine cannot leak in."""
+    import subprocess
+    s = subprocess.run(["git", "-C", str(HERE), "show", "HEAD:ios/Keyboard/Script.swift"],
+                       capture_output=True, check=True).stdout.decode("utf-8")
+    lay = subprocess.run(["git", "-C", str(HERE), "show", "HEAD:ios/Keyboard/Layout.swift"],
+                         capture_output=True, check=True).stdout.decode("utf-8")
+    consts = {k: kt_unesc(v) for k, v in re.findall(r'static let (\w+) = "([^"]*)"', s)}
     i = s.index("glagLetters: [Character: String] = [")
-    letters = dict(re.findall(r'"(.)": "([^"]+)"', s[i:s.index("\n    ]", i)]))
+    blk = re.sub(r"//[^\n]*", "", s[i:s.index("\n    ]", i)])
+    letters = {kt_unesc(a): kt_unesc(b) for a, b in re.findall(r'"((?:\\u\{[0-9A-Fa-f]+\})|.)": "([^"]+)"', blk)}
+    i = s.index("jLigature: [Character: String] = [") + len("jLigature: [Character: String] = [")
+    jlig = {a: b for a, b in re.findall(r'"(.)": "([^"]+)"', s[i:s.index("]", i)])}
     i = s.index("polishGlag: [(String, String)] = [")
     j = s.index("\n    ]", i)
-    pl = [(unesc(a), unesc(b)) for a, b in re.findall(r'\("([^"]+)", "([^"]+)"\)', s[i:j])]
-    return dict(letters=letters, pl=pl)
+    blk = re.sub(r"//[^\n]*", "", s[i:j])
+    pl = [(kt_unesc(a), kt_unesc(b)) for a, b in re.findall(r'\("([^"]+)", "([^"]+)"\)', blk)]
+    i = lay.index("let glagHolds: [Character: [String]] = [")
+    pl_holds = holds(re.sub(r"//[^\n]*", "", lay[i:lay.index("\n            ]", i)]), consts, '"')
+    i = lay.index("let isvGlagHolds: [Character: [String]] = [")
+    isv_glag_holds = holds(lay[i:lay.index("]\n", lay.index("hardYerMark", i))], consts, '"')
+    titlo = kt_unesc(re.search(r'static let plain = "([^"]*)"', s).group(1))
+    return dict(letters=letters, jlig=jlig, pl=pl, pl_holds=pl_holds, isv_glag_holds=isv_glag_holds,
+                titlo=titlo)
 
 
 # ---------------------------------------------------------------- v1 converter (port of Script.glagolitic)
@@ -135,6 +191,8 @@ def isv_convert(latin, A):
                 out.append(cased("ⰹ", latin[i]))
             i += 1
             continue
+        if c == "d" and i + 1 < len(low) and low[i + 1] == "z":     # every d + z = dzelo (261124)
+            out.append(cased(A["letters"]["ẑ"], latin[i])); i += 2; continue
         m = A["letters"].get(c)
         out.append(cased(m, latin[i]) if m else latin[i])
         i += 1
@@ -155,31 +213,56 @@ PUNCT_ALTGR = {                     # same as KBDMSSTD (isv Latin on the compute
     "OEM_1": ("„", "“"), "OEM_7": ("’", "”"), "OEM_MINUS": ("–", "—"),
 }
 
-# AltGr cells that are NOT phone holds but the phone converter's j rules (ja ju jo)
-# and the bare soft yer: PROPOSAL, owner decides before this is frozen.
-ISV_ALTGR_EXTRA_KEYS = {"a": "ja", "u": "ju", "o": "jo", "j": "lj"}   # j: soft yer (tail of lj)
+# The titlo, U+0483, a COMBINING mark typed after the letter (the phone's Titlo.PLAIN,
+# read from Titlo.kt / Script.swift and checked to be U+0483). Owner 261124: on BOTH
+# AltGr+T and AltGr+` (grave key: OEM_3 on Windows, keycodes 50 and 10 = ` and § on the
+# Mac). Shift+AltGr writes the same mark (more routes to one sign, never a dead cell).
+TITLO = "҃"
+TITLO_KEYS_WIN = ("OEM_3",)
+TITLO_KEYS_MAC = (50, 10)
+PUNCT_ALTGR.update({vk: (TITLO, TITLO) for vk in TITLO_KEYS_WIN})
+
+# AltGr layer, layout 261124. The desktop has no hold, so the phone's held signs sit on
+# AltGr. Placement is the OWNER's (decisions 261124): the 261119 cells kept where the sign
+# still exists (c s z e d l n from the holds of the same key; a u o were the 261119
+# j-ligature cells, now the phone's hold on q: ⱝ ⱓ ⱖ; j = the bare soft yer, KEPT although
+# the v key writes it too - the owner wants more routes to one sign), v = hard yer Ⱏ (the
+# phone's hold on v) and t = titlo. Values are Latin INSIDE (as on the phone), converted by
+# the phone's own table; the titlo passes the converter unchanged.
+ISV_ALTGR = {
+    "c": "č", "s": "š", "z": "ž", "e": "ě", "d": "dž", "l": "lj", "n": "nj",
+    "a": "ȧ", "u": "ju", "o": "jo", "j": "ʹ",
+    "v": "ʺ", "t": TITLO,
+}
+ISV_ALTGR_NEW_261124 = {"v", "t"}
+
+
+def phone_isv_signs(A):
+    """Every Latin-inside value the phone can write in isv Glagolitic by a key or a hold."""
+    s = set(A["isv_keys"].values())
+    for v in list(A["isv_own"].values()) + list(A["isv_glag_holds"].values()):
+        s.update(v)
+    return s
 
 
 def isv_table(A):
     """Latin key -> (base, AltGr, source of AltGr), outputs in Glagolitic, lower case."""
     t = {}
     for k in "abcdefghijklmnopqrstuvwxyz":
-        if k in A["isv_keys"]:
-            base = isv_convert(A["isv_keys"][k], A)
-        elif k == "x":
-            base = None                                  # no x key in Glagolitic
+        base = isv_convert(A["isv_keys"].get(k, k), A)
+        lat = ISV_ALTGR.get(k)
+        alt = isv_convert(lat, A) if lat else None
+        if lat is None:
+            src = None
+        elif lat == TITLO:
+            src = "phone titlo (Titlo.PLAIN, under every letter's hold)  (NEW 261124)"
         else:
-            base = isv_convert(k, A)
-        hold = A["isv_own"].get(k)
-        alt, src = (isv_convert(hold[0], A), "hold " + hold[0]) if hold else (None, None)
-        if alt is None and k in ISV_ALTGR_EXTRA_KEYS:
-            lat = ISV_ALTGR_EXTRA_KEYS[k]
-            alt = isv_convert(lat, A)
-            if k == "j":
-                alt = alt[-1]                            # ⱐ alone
-                src = "proposal: soft yer ⱐ (tail of lj/nj)"
-            else:
-                src = "proposal: " + lat + " (v1 ligature)"
+            where = [key for key, v in list(A["isv_own"].items()) + list(A["isv_glag_holds"].items())
+                     if lat in v] or [key for key, v in A["isv_keys"].items() if v == lat]
+            how = "hold" if any(lat in v for v in list(A["isv_own"].values())
+                                + list(A["isv_glag_holds"].values())) else "key"
+            src = f"phone {how} {'/'.join(sorted(set(where)))}: {lat}" + \
+                ("  (NEW 261124)" if k in ISV_ALTGR_NEW_261124 else "  (261119 cell)")
         t[k] = (base, alt, src)
     return t
 
@@ -260,18 +343,23 @@ MAC_LETTERS = {
     31: "o", 32: "u", 34: "i", 35: "p", 37: "l", 38: "j", 40: "k", 45: "n", 46: "m",
 }
 MAC_PUNCT_OPTION = {41: ("„", "“"), 39: ("’", "”"), 27: ("–", "—")}
+MAC_PUNCT_OPTION.update({kc: (TITLO, TITLO) for kc in TITLO_KEYS_MAC})
 
 
 def write_keylayout(A, dst):
     import build_keylayout as bk                      # same base (digits, punctuation, keypad)
     t = isv_table(A)
+    # keycode 10 = the ISO key left of 1 (§ ±, as Apple's U.S. layout on ISO hardware): not in
+    # build_keylayout's ANSI base, added so the titlo also sits on § (owner 261124)
+    BASE = dict(bk.BASE)
+    BASE.setdefault(10, ("§", "±"))
 
     def ent(s):
         return "".join("&#x%04X;" % ord(c) for c in s)
 
     def keymap(idx, pick):
         rows = [f'    <keyMap index="{idx}">']
-        for kc in sorted(bk.BASE):
+        for kc in sorted(BASE):
             v = pick(kc)
             if v:
                 rows.append(f'      <key code="{kc}" output="{ent(v)}"/>')
@@ -284,13 +372,13 @@ def write_keylayout(A, dst):
         return {0: base, 1: up(base) if base else None, 2: alt, 3: up(alt) if alt else None}[col]
 
     maps = [
-        keymap(0, lambda kc: letter(kc, 0) if kc in MAC_LETTERS else bk.BASE[kc][0]),
-        keymap(1, lambda kc: letter(kc, 1) if kc in MAC_LETTERS else bk.BASE[kc][1]),
+        keymap(0, lambda kc: letter(kc, 0) if kc in MAC_LETTERS else BASE[kc][0]),
+        keymap(1, lambda kc: letter(kc, 1) if kc in MAC_LETTERS else BASE[kc][1]),
         keymap(2, lambda kc: letter(kc, 2) if kc in MAC_LETTERS else MAC_PUNCT_OPTION.get(kc, (None,))[0]),
         keymap(3, lambda kc: letter(kc, 3) if kc in MAC_LETTERS else (MAC_PUNCT_OPTION.get(kc, (None, None))[1])),
-        keymap(4, lambda kc: letter(kc, 1) if kc in MAC_LETTERS else bk.BASE[kc][0]),
+        keymap(4, lambda kc: letter(kc, 1) if kc in MAC_LETTERS else BASE[kc][0]),
         # Command: plain US letters, so Cmd+C / Cmd+V keep working with a Glagolitic base
-        keymap(5, lambda kc: bk.BASE[kc][0]),
+        keymap(5, lambda kc: BASE[kc][0]),
     ]
     xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE keyboard SYSTEM "file://localhost/System/Library/DTDs/KeyboardLayout.dtd">
@@ -319,18 +407,41 @@ def write_keylayout(A, dst):
 
 # Polish letters typed with AltGr, as on the Polish (programmer's) layout.
 PL_ALTGR = {"ą": "a", "ć": "c", "ę": "e", "ł": "l", "ń": "n", "ó": "o", "ś": "s", "ż": "z", "ź": "x"}
-# Desktop-only AltGr cells (no AltGr on the phone): PROPOSAL, owner decides.
+# Desktop-only AltGr cells (no AltGr on the phone), owner's decisions 261124:
+#   q -> jo Ⱖ (the phone's first hold on q, marker ǒ; Shift = Ⱖ)
+#   t -> titlo (also AltGr+` below, PUNCT_KEYMAN)
 #   v -> soft yer Ⱐ (the phone's v key = the kreska: s+Ⱐ = ś, r+Ⱐ = rz, d+Ⱐ = ď)
 #   y -> hard yer Ⱏ (the phone's hold on v: l+Ⱏ = ł)
 #   d -> a d that never joins a following z (the phone's held ḍ: od|zyskać)
-PL_EXTRA = {"v": "ⱐ", "y": "ⱏ"}
+PL_EXTRA = {"v": "ⱐ", "y": "ⱏ", "t": TITLO}
+PL_ALTGR_MARKERS = {"q": "ǒ"}         # AltGr key -> phone marker, output read from POLISH_GLAG
+PL_PHONE_KEYS = ("q", "x")
 NOJOIN = "nojoin"
 
 
 def pl_tokens(A):
     """POLISH_GLAG, Latin token -> output, without the phone's internal markers."""
-    markers = {"ẑ", "ō", "ď", "ḍ", A["consts"]["SOFT_YER_MARK"], A["consts"]["HARD_YER_MARK"]}
+    markers = {"ẑ", "ō", "ǒ", "ď", "ḍ", A["consts"]["SOFT_YER_MARK"], A["consts"]["HARD_YER_MARK"]}
     return [(l, g) for l, g in A["pl"] if l not in markers]
+
+
+def pl_convert(word, A):
+    """Port of Android Script.glagoliticPL: POLISH_GLAG in list order, first match wins."""
+    caps = any(c.isalpha() for c in word) and not any(c.islower() for c in word)
+    low = word.lower()
+    if len(low) != len(word):
+        return word
+    out, i = [], 0
+    while i < len(low):
+        for lat, gl in A["pl"]:
+            if low.startswith(lat, i):
+                src = word[i]
+                out.append(gl if not src.isupper() else gl.upper() if caps else gl[0].upper() + gl[1:])
+                i += len(lat)
+                break
+        else:
+            out.append(word[i]); i += 1
+    return "".join(out)
 
 
 def key_of(ch):
@@ -359,12 +470,14 @@ def pl_rules(A):
             ch = lat.upper() if shifted else lat
             res = up(gl) if shifted else gl
             add((), key_of(ch), [res])
-    # phone shortcuts on keys Polish does not use (keyText): q = ja, x = ch
-    for k, lat in A["pl_keys"].items():
-        if lat in out:
-            for shifted in (False, True):
-                add((), ("c", k.upper() if shifted else k), [up(out[lat]) if shifted else out[lat]])
-    for k, gl in PL_EXTRA.items():
+    # phone keys Polish does not use (keyText): q = ja Ⱑ, x = dzelo Ⰷ (261124, was ch).
+    # The phone's v (soft yer kreska) stays AltGr+V here: a Polish typist types v as v.
+    full = dict(A["pl"])
+    for k in PL_PHONE_KEYS:
+        gl = full[A["pl_keys"][k]]
+        for shifted in (False, True):
+            add((), ("c", k.upper() if shifted else k), [up(gl) if shifted else gl])
+    for k, gl in list(PL_EXTRA.items()) + [(k, full[m]) for k, m in PL_ALTGR_MARKERS.items()]:
         add((), ("alt", k, False), [gl]); add((), ("alt", k, True), [up(gl)])
     for p in PUNCT_KEYMAN:
         pass
@@ -404,17 +517,26 @@ def pl_rules(A):
     return rules
 
 
-PUNCT_KEYMAN = {"K_COLON": ("„", "“"), "K_QUOTE": ("’", "”"), "K_HYPHEN": ("–", "—")}
+PUNCT_KEYMAN = {"K_COLON": ("„", "“"), "K_QUOTE": ("’", "”"), "K_HYPHEN": ("–", "—"),
+                "K_BKQUOTE": (TITLO, TITLO)}       # titlo on AltGr+` too (owner 261124)
+
+
+_SIM_INDEX = {}
 
 
 def simulate(rules, events):
     """Keyman semantics: of the rules for this key, the longest context that matches the
     end of the output wins; deadkeys match only where a rule names them."""
-    by_key = {}
-    for ctx, key, res in rules:
-        by_key.setdefault(key, []).append((ctx, res))
-    for v in by_key.values():
-        v.sort(key=lambda r: -len(r[0]))
+    cached = _SIM_INDEX.get(id(rules))
+    if cached is None or cached[0] is not rules:
+        by_key = {}
+        for ctx, key, res in rules:
+            by_key.setdefault(key, []).append((ctx, res))
+        for v in by_key.values():
+            v.sort(key=lambda r: -len(r[0]))
+        _SIM_INDEX[id(rules)] = (rules, by_key)
+    else:
+        by_key = cached[1]
     out = []
     for ev in events:
         hit = None
@@ -456,6 +578,7 @@ def km_key(ev):
 
 PL_ID = "pl_glag"
 PL_NAME = "Glagolitic (Polish)"   # PLACEHOLDER, English
+PL_VERSION = "1.2"                # 1.0 = 261119, 1.1 = phone layout 261124, 1.2 = owner's AltGr 261124
 
 
 def write_keyman(A, root):
@@ -465,12 +588,14 @@ def write_keyman(A, root):
     lines = [
         f"c {PL_ID} - Polish written in Glagolitic (pl-Glag)",
         "c GENERATED by build_glag_desktop.py from Script.kt POLISH_GLAG - do not edit by hand",
-        "c Canon: vault pl2glag.py = Android Script.glagoliticPL = iOS Script.polishGlag",
+        "c Phone table (layout 261124): Android Script.glagoliticPL = iOS Script.polishGlag",
+        "c Keys: q = ja, x = dzelo, AltGr+V soft yer, AltGr+Y hard yer, AltGr+D d that does not join z,",
+        "c       AltGr+Q jo, AltGr+T and AltGr+` titlo (combining, after the letter)",
         "",
         f"store(&NAME) '{PL_NAME}'",
         "store(&COPYRIGHT) '© Interslove'",
         "store(&VERSION) '10.0'",
-        "store(&KEYBOARDVERSION) '1.0'",
+        f"store(&KEYBOARDVERSION) '{PL_VERSION}'",
         "store(&TARGETS) 'windows macosx linux'",
         "",
         "begin Unicode > use(main)",
@@ -524,14 +649,18 @@ def write_keyman(A, root):
   </Keyboards>
 </Package>
 """, encoding="utf-8", newline="\r\n")
+    sample = " · ".join(" ".join(pl_convert(w, A) for w in grp.split())
+                        for grp in ("góra mój ósmy", "szczęście", "rzeka", "chleb", "dzień"))
     html = f"""<!DOCTYPE html>
 <html lang="pl"><head><meta charset="utf-8"><title>{PL_NAME}</title>
 <style>body{{font:11pt "Segoe UI",sans-serif;margin:1em;line-height:1.45}} .g{{font-family:"Noto Sans Glagolitic","Segoe UI Historic";font-size:15pt}}</style>
 </head><body>
 <h1>{PL_NAME}</h1>
 <p>Type Polish as usual; the keyboard writes Glagolitic. ą ć ę ł ń ó ś ż ź = AltGr + a c e l n o s z x.</p>
-<p class="g">ⰳⱁ́ⱃⰰ ⰿⱁ́ⰹ ⱁ́ⱄⰿⱏⰹ · ⱎⱍⱔⱄⱐⱌⰻⰵ · ⱃⱐⰵⰽⰰ</p>
-<p>AltGr+D: a d that does not join the next z (od|zyskać). AltGr+V: soft yer, AltGr+Y: hard yer.</p>
+<p class="g">{sample}</p>
+<p>Q: ja (Ⱑ). X: dzelo (Ⰷ). ch joins by itself (Ⱈ), h stays Ⱒ.</p>
+<p>AltGr+D: a d that does not join the next z (od|zyskać). AltGr+V: soft yer, AltGr+Y: hard yer, AltGr+Q: jo (Ⱖ).</p>
+<p>AltGr+T or AltGr+`: titlo, typed after the letter.</p>
 <p>Font: Noto Sans Glagolitic or Segoe UI Historic.</p>
 </body></html>
 """
@@ -566,6 +695,14 @@ Supported Platforms
     (root / "HISTORY.md").write_text(f"""{PL_NAME} Change History
 ====================
 
+1.2 (2026-11-24)
+----------------
+* AltGr+Q = jo ⱖ, titlo U+0483 on AltGr+T and AltGr+` (owner's decisions)
+
+1.1 (2026-11-24)
+----------------
+* Follows the phone layout of 2026-11-24: m = ⱞ, x = dzelo ⰷ (was ch), ch joins from c + h
+
 1.0 (2026-11-19)
 ----------------
 * Created by Interslove
@@ -575,29 +712,74 @@ Supported Platforms
 
 # ---------------------------------------------------------------- checks
 
+# The Polish canon pl2glag.py converts TEXT; the phone keyboard also has KEY MARKERS that
+# no text contains (x key = ẑ, hold q = ǒ, the other internal markers). Those are compared
+# out (pl_tokens) and named below; the check proves the canon really has no such input.
+# Since 261124 (canon m = ⱞ) there is NO known difference in the letter pairs: any
+# difference fails.
+KEYBOARD_ONLY_MARKERS = {
+    "ẑ": "the x key (dzelo ⰷ)",
+    "ǒ": "the first hold on q (jo ⱖ); on the desktop AltGr+Q",
+}
 
-def check(A, I, klc_path, mac_path, rules):
+
+def prefix_order(pairs):
+    """Order that matters for longest-first matching: (a, b) where a is a proper prefix of b."""
+    lat = [l for l, _ in pairs]
+    pos = {l: i for i, l in enumerate(lat)}
+    return {(a, b, pos[a] < pos[b]) for a in lat for b in lat if a != b and b.startswith(a)}
+
+
+def read_words(name):
+    words = []
+    with open(HERE / "dictionary" / name, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if line.startswith("word="):
+                words.append(line[5:line.index(",f=")])
+    return words
+
+
+def check(A, I, klc_path, mac_path, rules, km_root=None):
     bad = 0
+    failed = []
 
     def say(ok, msg):
         nonlocal bad
         bad += 0 if ok else 1
+        if not ok:
+            failed.append(msg)
         print(("  OK   " if ok else "  FAIL ") + msg)
 
-    print("1. Android == iOS (the two phone tables)")
-    say(A["letters"] == I["letters"], f"GLAG_LETTERS == glagLetters ({len(A['letters'])} letters)")
-    say(A["pl"] == I["pl"], f"POLISH_GLAG == polishGlag ({len(A['pl'])} entries)")
+    print("1. Android (working tree) == iOS (HEAD), the phone tables")
+    say(A["letters"] == I["letters"], f"GLAG_LETTERS == glagLetters ({len(A['letters'])} = {len(I['letters'])} letters)")
+    say(A["jlig"] == I["jlig"], f"J_LIGATURE == jLigature ({len(A['jlig'])} = {len(I['jlig'])})")
+    say(dict(A["pl"]) == dict(I["pl"]) and len(A["pl"]) == len(I["pl"]),
+        f"POLISH_GLAG == polishGlag as pairs ({len(A['pl'])} = {len(I['pl'])} entries)")
+    say(prefix_order(A["pl"]) == prefix_order(I["pl"]),
+        "POLISH_GLAG order where it matters (a token before the longer token it starts)")
+    if A["pl"] != I["pl"]:
+        moved = [a for a, b in zip(A["pl"], I["pl"]) if a != b]
+        print(f"     (list order differs only for {sorted({l for l, _ in moved})}: single-token markers, no effect)")
+    say(A["isv_glag_holds"] == I["isv_glag_holds"], f"isvGlagHolds equal ({A['isv_glag_holds']})")
+    say(A["pl_holds"] == I["pl_holds"], f"polishGlagHolds == glagHolds ({len(A['pl_holds'])} keys)")
 
-    print("2. Polish table == canon pl2glag.py (vault)")
+    print("2. Polish phone table == canon pl2glag.py (vault)")
     sys.path.insert(0, str(Path(r"C:\Projects\vault_002\Projects\INTERSLOVE\glagolica_pl")))
     try:
         import pl2glag
-        canon = [(l, unicodedata.normalize("NFC", g)) for l, g in pl2glag.MAP]
-        mine = [(l, unicodedata.normalize("NFC", g)) for l, g in pl_tokens(A)]
-        say(dict(canon) == dict(mine),
-            f"same Latin->Glagolitic pairs ({len(canon)} canon, {len(mine)} phone minus markers)")
-        if dict(canon) != dict(mine):
-            print("     only canon:", set(canon) - set(mine), " only phone:", set(mine) - set(canon))
+        canon = {l: unicodedata.normalize("NFC", g) for l, g in pl2glag.MAP}
+        mine = {l: unicodedata.normalize("NFC", g) for l, g in pl_tokens(A)}
+        diff = sorted(k for k in set(canon) | set(mine) if canon.get(k) != mine.get(k))
+        say(not diff, f"same Latin->Glagolitic pairs ({len(canon)} canon, {len(mine)} phone minus markers)"
+            + (f": differ {[(k, canon.get(k), mine.get(k)) for k in diff]}" if diff else ""))
+        full = dict(A["pl"])
+        for mk, why in KEYBOARD_ONLY_MARKERS.items():
+            ok = mk not in canon and pl2glag.convert_word(mk) == mk and mk in full
+            say(ok, f"marker {mk} -> {full.get(mk)} = {why}: keyboard marker, not text; "
+                    f"the canon text converter has no input for it")
+        say(A["pl_keys"].get("x") == "ẑ" and "x" not in canon,
+            "x: the phone's x key writes marker ẑ; the canon has no x (text never needs it)")
     except ImportError as e:
         pl2glag = None
         say(False, f"pl2glag.py not found: {e}")
@@ -606,14 +788,20 @@ def check(A, I, klc_path, mac_path, rules):
     t = isv_table(A)
     doc = (HERE / "docs/script-tables.md").read_text(encoding="utf-8")
     row = re.search(r"^\| Glagolitic \| `([^`]*)` \| `([^`]*)` \| `([^`]*)` \|", doc, re.M)
-    for latin_row, doc_row in zip(("qwertyuiop", "asdfghjkl", "zcvbnm"), row.groups()):
+    for latin_row, doc_row in zip(("qwertyuiop", "asdfghjkl", "zxcvbnm"), row.groups()):
         mine = " ".join(t[k][0] for k in latin_row)
         say(mine == doc_row, f"{latin_row}: {mine}")
-    say(t["x"][0] is None, "x: no output (no x key in Glagolitic)")
-    print("   AltGr layer vs phone holds (Layout.isvOwn through the v1 converter):")
+    signs = phone_isv_signs(A)
+    say(all(v in signs or v == TITLO for v in ISV_ALTGR.values()),
+        "every AltGr cell writes a sign the phone writes by a key or a hold (titlo: Titlo.PLAIN)")
+    print("   AltGr layer (phone source):")
     for k in sorted(t):
         if t[k][1]:
-            print(f"     AltGr+{k} = {t[k][1]:<3} {up(t[k][1]):<3}  ({t[k][2]})")
+            print(f"     AltGr+{k.upper()} = {t[k][1]:<3} {up(t[k][1]):<3}  ({t[k][2]})")
+    not_on_desktop = sorted(s for s in signs
+                            if s not in A["isv_keys"].values() and s not in ISV_ALTGR.values()
+                            and len(s) == 1 and s not in "abcdefghijklmnopqrstuvwxyz")
+    print(f"     phone signs with no desktop cell (proposals only): {not_on_desktop}")
 
     print("4. what was WRITTEN (.klc read back, .keylayout parsed)")
     k = klc_path.read_text(encoding="utf-16")
@@ -634,7 +822,9 @@ def check(A, I, klc_path, mac_path, rules):
                 okc += 1
             else:
                 print("     ", key, want, got)
-    say(okc == 26, f".klc: {okc}/26 letter keys read back equal to the table ({len(ligs)} ligatures)")
+    want_ligs = sum(1 for key in t for v in (t[key][0], t[key][1]) if v and len(v) > 1) * 2
+    say(okc == 26, f".klc: {okc}/26 letter keys read back equal to the table")
+    say(len(ligs) == want_ligs, f".klc: {len(ligs)} ligature rows (expected {want_ligs})")
     import xml.etree.ElementTree as ET
     x = mac_path.read_text(encoding="utf-8")
     x = re.sub(r"<!DOCTYPE[^>]*>", "", x)
@@ -642,37 +832,60 @@ def check(A, I, klc_path, mac_path, rules):
     root = ET.fromstring(x.encode("utf-8"))
     km = {int(m.get("index")): {int(e.get("code")): e.get("output") for e in m} for m in root.iter("keyMap")}
     okm = sum(1 for kc, lat in MAC_LETTERS.items()
-              if km[0].get(kc) == t[lat][0] and km[2].get(kc) == t[lat][1])
-    say(okm == 26, f".keylayout: {okm}/26 letter keys (base + Option) equal to the table")
-    say(km[5].get(8) == "c", ".keylayout: Command+C stays Latin c (shortcuts work)")
+              if km[0].get(kc) == t[lat][0] and km[2].get(kc) == t[lat][1]
+              and km[1].get(kc) == up(t[lat][0]))
+    say(okm == 26, f".keylayout: {okm}/26 letter keys (base + Shift + Option) equal to the table")
+    cmd = sum(1 for kc, lat in MAC_LETTERS.items() if km[5].get(kc) == lat)
+    say(cmd == 26, f".keylayout: Command map has {cmd}/26 Latin letters (Cmd+C / Cmd+V work)")
+    say(A["titlo"] == I["titlo"] == TITLO, f"titlo: Android Titlo.PLAIN == iOS Titlo.plain == U+{ord(TITLO):04X}")
+    oem = []
+    for line in k.splitlines():
+        f = [c for c in line.split("//")[0].split("\t") if c.strip()]
+        if len(f) == 8 and f[1] in TITLO_KEYS_WIN:
+            oem.append((f[6], f[7]))
+    say(oem == [("%04x" % ord(TITLO),) * 2] * len(TITLO_KEYS_WIN),
+        f".klc: AltGr / Shift+AltGr on {TITLO_KEYS_WIN} = titlo ({oem}); AltGr+T via the letter table")
+    tk = [kc for kc in (17,) + TITLO_KEYS_MAC if km[2].get(kc) == TITLO and km[3].get(kc) == TITLO]
+    say(len(tk) == 3 and km[0].get(10) == "§", f".keylayout: Option / Shift+Option = titlo on keycodes {tk} (t, `, §); § base = {km[0].get(10)}")
 
-    print("5. Polish: typing key by key (Keyman rules) == converting the whole word")
-    words = []
-    with open(HERE / "dictionary/main_pl.combined", encoding="utf-8") as fh:
-        for line in fh:
-            line = line.strip()
-            if line.startswith("word="):
-                words.append(line[5:line.index(",f=")])
-    skip = set("qxv")
+    print("5. Polish: typing key by key (Keyman rules) == the phone converter on the whole word")
+    words = read_words("main_pl.combined")
+    skip = set("qx")                          # q and x write ja / dzelo, not their Latin letter
     tested = mism = 0
     examples = []
+    # A one-letter capital (`Ć`) is also an ALL-CAPS word, which the phone writes ⰜⰠ while
+    # a key can only write the first sign capital (Ⱌⱐ); one-letter words: lower case only.
     for w in words:
         if set(w.lower()) & skip or not w.isalpha():
             continue
-        for form in (w, up(w)):
+        for form in ((w, up(w)) if len(w) > 1 else (w,)):
             tested += 1
-            want = unicodedata.normalize("NFC", pl2glag.convert_word(form) if pl2glag else "")
+            want = unicodedata.normalize("NFC", pl_convert(form, A))
             got = unicodedata.normalize("NFC", simulate(rules, events_for(form)))
             if got != want:
                 mism += 1
                 if len(examples) < 8:
                     examples.append((form, want, got))
-    say(mism == 0, f"{tested} forms (lower + Capitalised, without q x v): {mism} differ")
+    say(mism == 0 and tested > 1000, f"{tested} forms (lower + Capitalised, without q x): {mism} differ")
     for e in examples:
         print("     ", e)
-    for w in ("góra", "mój", "ósmy", "szczęście", "rzeka", "dzień", "jaźń", "Łódź", "chrząszcz", "siano", "byja"):
-        print(f"     {w:<10} -> {simulate(rules, events_for(w))}   canon {pl2glag.convert_word(w)}")
-    # the prefix rule needs a dictionary: Keyman cannot, AltGr+D does it by hand
+    if pl2glag:
+        cm = sum(1 for w in words if w.isalpha() and not set(w.lower()) & skip and
+                 unicodedata.normalize("NFC", pl2glag.convert_word(w))
+                 != unicodedata.normalize("NFC", pl_convert(w, A)))
+        say(cm == 0, f"phone converter == canon convert_word (no exception): {cm} differ")
+    for w in ("góra", "mój", "ósmy", "szczęście", "rzeka", "dzień", "jaźń", "Łódź", "chrząszcz", "chleb",
+              "hak", "mama", "siano", "byja"):
+        print(f"     {w:<10} -> {simulate(rules, events_for(w))}")
+    xq = simulate(rules, [("c", "q"), ("c", "x"), ("c", "Q"), ("c", "X")])
+    say(xq == "ⱑⰷⰡⰇ", f"q x Q X = {xq} (ja, dzelo, as the phone keys)")
+    aq = simulate(rules, [("alt", "q", False), ("alt", "q", True), key_of("m"), ("alt", "t", False),
+                          ("alt", "t", True)])
+    say(aq == "ⱖ" + "ⱖ".upper() + "ⱞ" + TITLO * 2, f"AltGr+Q Shift+AltGr+Q m AltGr+T Shift+AltGr+T = {aq} (jo, Jo, m + titlo x2)")
+    kmn = ((km_root or HERE / "keyman" / PL_ID) / "source" / f"{PL_ID}.kmn").read_text(encoding="utf-8-sig")
+    bq = [l for l in kmn.splitlines() if "K_BKQUOTE]" in l]
+    say(len(bq) == 2 and all(l.endswith(f"U+{ord(TITLO):04X}") for l in bq),
+        f".kmn: AltGr+` and Shift+AltGr+` = titlo ({len(bq)} rules)")
     od = simulate(rules, [key_of("o"), ("alt", "d", False), key_of("z"), key_of("y"), key_of("s"),
                           key_of("k"), key_of("a"), ("alt", "c", False)])
     say(od == "ⱁⰴⰸⱏⰹⱄⰽⰰⱌⱐ", f"o AltGr+D z y s k a AltGr+C = {od} (odzyskać, as the phone)")
@@ -682,25 +895,61 @@ def check(A, I, klc_path, mac_path, rules):
                and len(w) - len(p) >= 3 and w[len(p):] in sw)
     print(f"     forms where the phone's prefix rule splits d|z (need AltGr+D here): {pref} of {len(words)}")
 
-    print("6. isv: one key = one sign, against the phone converter (v1, whole word)")
-    isvw = []
-    with open(HERE / "dictionary/main_isv.combined", encoding="utf-8") as fh:
-        for line in fh:
-            line = line.strip()
-            if line.startswith("word="):
-                isvw.append(line[5:line.index(",f=")])
+    print("6. isv: one key = one sign, against the phone converter (whole word)")
+    isvw = read_words("main_isv.combined")
     plain = sum(1 for w in isvw if "".join(isv_convert(c, A) for c in w.lower()) == isv_convert(w.lower(), A))
     print(f"     {plain} of {len(isvw)} forms ({100 * plain / len(isvw):.1f} %) come out right letter by letter;")
-    print("     the rest need AltGr ja/ju/jo or q/w (lj nj), as a TAP on the phone does (docs/script-tables.md ⚠)")
-    return bad
+    print("     the rest need AltGr ju/jo, q (ja), x (dz) or v (lj nj), as a TAP on the phone does")
+    return bad, failed
+
+
+def negative_control(A):
+    """Build into a temp folder, break one cell of each output and one phone entry, and
+    require the checks to FAIL on exactly those. The repo files are not touched."""
+    import copy
+    import tempfile
+    tmp = Path(tempfile.mkdtemp(prefix="glag_neg_"))
+    klc, mac = tmp / "KBDISVGL.klc", tmp / "ISVGLAG.keylayout"
+    write_klc(A, klc)
+    write_keylayout(A, mac)
+    rules = write_keyman(A, tmp / PL_ID)
+    I = read_ios()
+    print("== baseline in the temp folder (must PASS) ==")
+    base_bad, _ = check(A, I, klc, mac, rules, tmp / PL_ID)
+    # 1. one .klc cell: the F key base ⱚ -> the old ⱇ
+    k = klc.read_text(encoding="utf-16").replace("\tF\t1\t%04x\t" % ord("ⱚ"), "\tF\t1\t%04x\t" % ord("ⱇ"), 1)
+    with io.open(klc, "w", encoding="utf-16", newline="") as fh:
+        fh.write(k)
+    # 2. one .keylayout cell: Option+v (hard yer ⱏ) -> nothing
+    m = mac.read_text(encoding="utf-8")
+    m = m.replace('<key code="9" output="&#x2C4F;"/>', "", 1)
+    mac.write_text(m, encoding="utf-8")
+    # 3. one phone entry (Android side): GLAG_LETTERS f -> ⱇ
+    B = copy.deepcopy(A)
+    B["letters"]["f"] = "ⱇ"
+    # 4. one Keyman rule: c + h no longer joins
+    rules2 = [r for r in rules if not (r[0] == ("ⱌ",) and r[1] == ("c", "h"))
+              and r[1] != ("alt", "q", False)]          # 5. AltGr+Q (jo) gone
+    print("== broken: .klc F, .keylayout Option+V, Android letter f, Keyman ch, Keyman AltGr+Q (must FAIL) ==")
+    bad, failed = check(B, I, klc, mac, rules2, tmp / PL_ID)
+    expect = ["GLAG_LETTERS", ".klc:", ".keylayout:", "forms (lower", "AltGr+Q"]
+    caught = [e for e in expect if any(e in f for f in failed)]
+    print(f"== negative control: baseline {base_bad} fail(s); broken run {bad} fail(s); "
+          f"caught {len(caught)}/{len(expect)}: {caught}")
+    return base_bad == 0 and len(caught) == len(expect)
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--negative-control", action="store_true")
     a = ap.parse_args()
     sys.path.insert(0, str(HERE))
     A = read_android()
+    if a.negative_control:
+        ok = negative_control(A)
+        print("NEGATIVE CONTROL OK - the gate fails on a broken cell" if ok else "NEGATIVE CONTROL BROKEN")
+        sys.exit(0 if ok else 1)
     klc = HERE / "windows/src/KBDISVGL.klc"
     mac = HERE / "mac/ISVGLAG.keylayout"
     write_klc(A, klc)
@@ -710,7 +959,7 @@ def main():
     print("wrote", mac)
     print("wrote", HERE / "keyman" / PL_ID, f"({len(rules)} rules)")
     if a.check:
-        bad = check(A, read_ios(), klc, mac, rules)
+        bad, _ = check(A, read_ios(), klc, mac, rules)
         print("ALL CHECKS PASS" if not bad else f"{bad} CHECK(S) FAILED")
         sys.exit(1 if bad else 0)
 

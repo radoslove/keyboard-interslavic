@@ -388,6 +388,12 @@ object Dictionary {
     @Volatile
     var digraphKeys: Boolean = false
 
+    /** Interslavic Glagolitic 261124 (iOS `SwipeDecoder.jaKey`): button q writes
+     *  ja (Ⱑ), so `j a` may also be one touch on it - filed under the key `x`,
+     *  which Interslavic does not use (KeyboardView puts button q's centre there). */
+    @Volatile
+    var jaKey: Boolean = false
+
     /** The key a digraph at [i] folds to, or null if there is no digraph there. */
     private fun pairKey(w: String, i: Int): Char? {
         if (!digraphKeys || i + 1 >= w.length) return null
@@ -396,6 +402,7 @@ object Dictionary {
         return when {
             second == 'j' && foldBase(first) == 'l' -> 'q'
             second == 'j' && foldBase(first) == 'n' -> 'w'
+            jaKey && first == 'j' && second == 'a' -> 'x'
             // Serbian Cyrillic only: `dž` is the single letter `џ` on the `x`
             // key. The second letter is matched UNFOLDED on purpose - folding
             // would also catch a plain `z`, and `d` + `z` meet across a prefix
@@ -514,14 +521,14 @@ object Dictionary {
      * gate anyway, so walking them in index order gives the same candidates in
      * the same order.
      */
-    private class StartIndex(val list: Array<Entry>, val digraphs: Boolean, val byKey: Map<Char, IntArray>)
+    private class StartIndex(val list: Array<Entry>, val digraphs: Boolean, val ja: Boolean, val byKey: Map<Char, IntArray>)
     /** One per loaded list (arrays hash by identity), so switching languages
      *  with the space bar never rebuilds; built on the load thread. */
     private val startIndexes = java.util.Collections.synchronizedMap(HashMap<Array<Entry>, StartIndex>())
 
     private fun startIndexFor(arr: Array<Entry>): StartIndex {
         val have = startIndexes[arr]
-        if (have != null && have.digraphs == digraphKeys) return have
+        if (have != null && have.digraphs == digraphKeys && have.ja == jaKey) return have
         val tmp = HashMap<Char, ArrayList<Int>>()
         for (i in arr.indices) {
             val w = arr[i].word
@@ -535,7 +542,7 @@ object Dictionary {
                 if (u != a && u != b) tmp.getOrPut(u) { ArrayList() }.add(i)
             }
         }
-        val built = StartIndex(arr, digraphKeys, tmp.mapValues { it.value.toIntArray() })
+        val built = StartIndex(arr, digraphKeys, jaKey, tmp.mapValues { it.value.toIntArray() })
         startIndexes[arr] = built
         return built
     }

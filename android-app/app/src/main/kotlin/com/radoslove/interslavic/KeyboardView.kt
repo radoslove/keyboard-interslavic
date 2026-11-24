@@ -104,6 +104,28 @@ class KeyboardView(
     // Prediction bar (M2). The strip is a single persistent view whose three
     // slots are updated on every keystroke; render() only re-parents it.
     private val suggestionViews = ArrayList<TextView>(3)
+    // Declared ABOVE `init`: render() runs there and builds the strip, and a
+    // property declared below it would still be null then (3.11.14 crashed on
+    // open) or be reset to its initial value right after.
+    private val journal = ArrayList<MutableList<Step>>()
+    private val redoStack = ArrayList<List<Step>>()
+    private var lastStepAt = 0L
+    /** When the keyboard last changed the field (edit, undo, redo), iOS `lastOwnChangeAt`. */
+    private var lastOwnChangeAt = 0L
+    private var recording = true
+    private var undoBtn: android.view.View? = null
+    private var redoBtn: android.view.View? = null
+    private var titloBtn: android.view.View? = null
+    /** Interslavic Glagolitic, layout 261124 (iOS `Layout.isvGlagShift`). */
+    @Volatile private var isvGlag = false
+    /** The last letter typed in Interslavic Glagolitic was ḍ (no dzelo after it). */
+    private var isvSplitD = false
+    /** A finger is on the keyboard (DOWN seen, UP/CANCEL not yet). */
+    private var touchActive = false
+    /** A render() asked for while [touchActive], done when the finger lifts. */
+    private var renderPending = false
+    /** The typeface keys, popups and chips draw with ([GlagFont]); set in render(). */
+    @Volatile private var face: android.graphics.Typeface = android.graphics.Typeface.DEFAULT
     private val suggestionStrip: android.view.View by lazy { buildSuggestionStrip() }
     private var currentWord = ""
     // Per-slot state: the word to act on, and whether the slot is a "save this
@@ -238,7 +260,9 @@ class KeyboardView(
      *  characters to delete stays right (iOS 0.6.14 `put` / `contextBefore`). */
     private val conn: InputConnection?
         get() {
-            val ic = service.currentInputConnection ?: return null
+            // The journal sits right on the field, under Morse, runes and the
+            // wide space, so ↶ takes back the field's own characters (iOS `Doc`).
+            val ic = Journal(service.currentInputConnection ?: return null)
             if (Script.morse(context)) return Morse.Conn(ic, Lang.current(context))
             Script.runes(context)?.let { return Runes.Conn(ic, it) }
             return if (Script.rewritesWord(context)) WideSpace(ic) else ic
@@ -427,6 +451,7 @@ class KeyboardView(
 
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
+        previewTxt.typeface = face
         if (swiping && trailPts.size >= 6) {
             trailPath.reset()
             trailPath.moveTo(trailPts[0], trailPts[1])
@@ -514,7 +539,7 @@ class KeyboardView(
                     previewTxt.color = Color.WHITE
                 } else previewTxt.color = cText
                 // Full names, shrunk to the cell if one is too long for it.
-                val label = if (items[i] == LANG_GEAR) "⚙" else Lang.label(items[i])
+                val label = if (items[i] == LANG_GEAR) "⚙" else langLabel(items[i])
                 previewTxt.textSize = base
                 val room = langColW - dp(12)
                 val wide = previewTxt.measureText(label)
@@ -531,9 +556,14 @@ class KeyboardView(
     // codes was hard to notice. The keyboard cannot draw above its own top, so
     // when the rows do not fit above the space bar the list breaks into columns.
     private var langItems: List<String>? = null
+    /** How a row of that list is named: a language, or an alphabet (script key). */
+    private var langLabel: (String) -> String = { Lang.label(it) }
     /** Last row of the space-bar list (iOS 0.6.10: easier to find than
      *  under 123): lifting on it opens the panel. */
-    private val LANG_GEAR = " gear"
+    // A getter, not a stored value: keys built in `init` read it before a
+    // stored property declared below `init` is set (3.11.15 crashed on the
+    // globe key with a null gear).
+    private val LANG_GEAR: String get() = "\u0000gear"
     private var langLeft = 0f
     private var langTop = 0f
     private var langRowH = 0f
@@ -541,7 +571,8 @@ class KeyboardView(
     private var langRows = 1
     private var langSel = 0
 
-    private fun showLangList(tv: TextView, langs: List<String>) {
+    private fun showLangList(tv: TextView, langs: List<String>, selected: String? = null) {
+        langLabel = { Lang.label(it) }
         val row = tv.parent as? android.view.View ?: return
         hideKeyPreview()
         val keyTop = (row.top + tv.top).toFloat()
@@ -556,7 +587,7 @@ class KeyboardView(
         langLeft = (centre - w / 2f).coerceAtMost(width - w - dp(2)).coerceAtLeast(dp(2).toFloat())
         langTop = (keyTop - dp(4) - langRowH * langRows).coerceAtLeast(0f)
         langItems = langs
-        langSel = langs.indexOf(Lang.current(context)).coerceAtLeast(0)
+        langSel = langs.indexOf(selected ?: Lang.current(context)).coerceAtLeast(0)
         invalidate()
     }
 
@@ -591,7 +622,7 @@ class KeyboardView(
      *  app's own launcher icon instead of a glyph (owner 2026-11-18: a gear
      *  said "settings" only). One private-use character, so the width rules
      *  that measure items as text treat it as a single letter. */
-    private val APP_ITEM = "\uE000"
+    private val APP_ITEM: String get() = "\uE000"   // a getter: see LANG_GEAR
     private val appIcon: android.graphics.drawable.Drawable? by lazy {
         try { context.packageManager.getApplicationIcon(context.packageName) } catch (_: Throwable) { null }
     }
@@ -639,8 +670,8 @@ class KeyboardView(
         // Polish Glagolitic: one variant can be two or three letters (ⰴⰸⱐ, ⱎⱍ),
         // which ran into the next cell - a cell is as wide as
         // the longest variant (iOS 0.6.19: 14 + 18 per letter).
-        if (Script.rewritesWord(context)) {
-            val longest = items.maxOf { Script.out(context, it).length }
+        if (Script.rewritesWord(context) || Titlo.offered(context)) {
+            val longest = items.maxOf { Titlo.clusters(Titlo.strip(Script.out(context, it))).size }
             if (longest > 1) popupCell = maxOf(popupCell, dp(14 + 18 * longest).toFloat())
         }
         popupCell = minOf(popupCell, room / (items.size - 0.5f))
@@ -747,7 +778,38 @@ class KeyboardView(
             ?.playSoundEffect(AudioManager.FX_KEYPRESS_STANDARD)
     }
 
+    /**
+     * A finger on the glass keeps its keys (261124). render() throws every key
+     * away and builds new ones; done in the middle of a touch it cancels the key
+     * that holds it, the rest of the touch reaches nobody and the glide is lost
+     * WITHOUT a trace in the gesture log ("the first glide does not get
+     * through", mostly right after the keyboard appears - that is when the
+     * editor's first selection report re-arms shift and rebuilds the view).
+     * So a rebuild asked for mid-touch waits until the finger lifts.
+     */
+    override fun dispatchTouchEvent(e: MotionEvent): Boolean {
+        val end = e.actionMasked == MotionEvent.ACTION_UP || e.actionMasked == MotionEvent.ACTION_CANCEL
+        if (e.actionMasked == MotionEvent.ACTION_DOWN) touchActive = true
+        // On the lift the touch is over: what a key does on UP (shift, a capital
+        // spent, the script key) re-builds at once, as before.
+        if (end) touchActive = false
+        val r = super.dispatchTouchEvent(e)
+        if (end) {
+            if (renderPending) {
+                renderPending = false
+                post { render() }
+            }
+        }
+        return r
+    }
+
     private fun render() {
+        if (touchActive) {
+            renderPending = true
+            android.util.Log.i("isv-touch", "render deferred: finger down")
+            return
+        }
+        face = GlagFont.forScript(context)
         removeAllViews()
         addView(suggestionStrip)
         when {
@@ -884,6 +946,10 @@ class KeyboardView(
         Dictionary.digraphKeys = script != Script.Mode.LATIN && lang !in Lang.SINGLE_LETTER_KEYS &&
             lang != Lang.PL
         polishGlag = lang == Lang.PL && script == Script.Mode.GLAGOLITIC
+        // Interslavic Glagolitic 261124: ja over button q (key x inside), lj/nj
+        // over l/n, v over button w ([computeCenters]).
+        isvGlag = Layout.isvGlag(script, lang)
+        Dictionary.jaKey = isvGlag
         Layout.letterRows(lang, script, qwertz).forEachIndexed { index, row ->
             val rv = makeRow()
             val pad = (full[index].length - row.length) / 2f
@@ -920,11 +986,7 @@ class KeyboardView(
         // Latin -> Cyrillic -> Glagolitic. It names the current alphabet; the
         // key labels and everything written from now on follow it. Label: ABC / АБВ / ⰀⰁⰂ.
         // Interslavic only - Polish is written in Latin.
-        if (scripts) b.addView(functionKey(Script.keyLabel(context), 1.2f) {
-            Script.next(context)
-            render()
-            refreshSuggestions()
-        })
+        if (scripts) b.addView(scriptKey(1.2f))
         // Only `.` beside space, on its right; 😀 is the one key on the left
         // (as in the iOS row: the comma comes back as the FIRST item held on
         // `.`, the other marks beside it as before).
@@ -933,7 +995,11 @@ class KeyboardView(
         // decimal, so the same thumb travel works on both phones. Nothing moved
         // out of reach - `: ; ( ) -` sit on the `123` page and `–` is held on
         // its `-`.
-        b.addView(functionKey("😀", 0.9f) { emoji = true; symbols = false; render() })
+        b.addView(functionKey("", 0.9f) { emoji = true; symbols = false; render() }.also {
+            // A drawn face instead of the colour 😀 (iOS d8538ba).
+            it.foreground = SmileyIcon(context, dark, cText)
+            it.contentDescription = "Emoji"
+        })
         b.addView(spaceKey(if (scripts) 3.45f else 4.65f))
         b.addView(symbolKey('.', 0.9f, Layout.periodHold(Lang.current(context))))
         b.addView(functionKey("⏎", 1.4f) { enter() })
@@ -1198,6 +1264,62 @@ class KeyboardView(
         clearSlots()
     }
 
+    /** The script key: tap = the next alphabet (Latin -> Cyrillic -> Glagolitic ->
+     *  ...), HOLD = every alphabet of the language in a list, like the
+     *  languages held on space: slide onto one and lift (iOS 3c25a28). */
+    private fun scriptKey(weight: Float): TextView {
+        val tv = baseKey(Script.keyLabel(context), weight)
+        tv.isLongClickable = false
+        val all = Script.choices(Lang.current(context))
+        val hold = Runnable {
+            showLangList(tv, all.map { it.name }, Script.chosen(context).name)
+            langLabel = { Script.name(Script.Mode.valueOf(it)) }
+            tv.isPressed = false
+        }
+        tv.setOnTouchListener { _, e ->
+            when (e.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    tv.isPressed = true
+                    (tv.parent as? android.view.ViewGroup)?.requestDisallowInterceptTouchEvent(true)
+                    flickHandler.postDelayed(hold, 400L)
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (langItems != null) moveLangList(tv, e.x, e.y)
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    flickHandler.removeCallbacks(hold)
+                    tv.isPressed = false
+                    (tv.parent as? android.view.ViewGroup)?.requestDisallowInterceptTouchEvent(false)
+                    val listed = langItems != null
+                    val pick = closeLangList()
+                    feedback()
+                    if (listed) {
+                        if (pick != null && pick != Script.chosen(context).name) {
+                            Script.setMode(context, Script.Mode.valueOf(pick))
+                            render()
+                            refreshSuggestions()
+                        }
+                    } else {
+                        Script.next(context)
+                        render()
+                        refreshSuggestions()
+                    }
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    flickHandler.removeCallbacks(hold)
+                    tv.isPressed = false
+                    closeLangList()
+                    true
+                }
+                else -> false
+            }
+        }
+        return tv
+    }
+
     /** Names the language when there is more than one to tell apart. */
     private fun spaceKey(weight: Float): TextView {
         val many = Lang.enabled(context).size > 1
@@ -1420,14 +1542,15 @@ class KeyboardView(
         val latin = Script.mode(context) == Script.Mode.LATIN
         // Whether this key has a letter of the keyboard's OWN on it (flick target).
         val hasAccent = Layout.longPress(ch, false, lang) != null
-        val holds = Layout.variants(ch, false, lang, latin).isNotEmpty()
+        val titlo = Titlo.offered(context)
+        val holds = Layout.variants(ch, false, lang, latin, titlo).isNotEmpty()
         val flickThreshold = dp(22)
 
         var downX = 0f
         var downY = 0f
         var handled = false
         val longPress = Runnable {
-            val items = Layout.variants(ch, shift, lang, latin)
+            val items = Layout.variants(ch, shift, lang, latin, titlo)
             if (items.isNotEmpty()) {
                 showPopup(tv, items, downX)
                 handled = true
@@ -1456,7 +1579,10 @@ class KeyboardView(
                     flickHandler.removeCallbacks(longPress)
                     tv.isPressed = false
                     hideKeyPreview()
-                    closePopup()?.let { commit(Script.out(context, it), it) }
+                    closePopup()?.let { item ->
+                        val t = Titlo.split(item)
+                        if (t != null) putTitlo(t.first, t.second) else commit(Script.out(context, item), item)
+                    }
                     if (!handled) {
                         val dx = e.x - downX
                         val dy = e.y - downY
@@ -1649,6 +1775,7 @@ class KeyboardView(
     private fun baseKey(text: String, weight: Float): TextView {
         val tv = TextView(context)
         tv.text = text
+        tv.typeface = face          // bundled Noto Glagolitic in Glagolitic (GlagFont)
         tv.gravity = Gravity.CENTER
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20f)
         // One line, shrinking to fit: a wide label never wraps onto a second line.
@@ -1671,6 +1798,11 @@ class KeyboardView(
     /** [s] as shown; [latin] = the same in the keyboard's Latin, given by the
      *  letter keys so Polish Glagolitic can re-write the word (iOS 0.6.12). */
     private fun commit(s: String, latin: String? = null) {
+        // Interslavic Glagolitic: the v key writes the soft yer ⱐ. After l or n
+        // that IS lj/nj (ⰾⱐ ⱀⱐ), and ⱐ already reads back as j, so the wordlist
+        // and the glide see plain Interslavic. Deliberately NOT re-typed as "j"
+        // as iOS 0593919 does: a lone j converts to ⰹ, and konj came out ⰽⱁⱀⰹ
+        // (measured on a55, 3.11.17).
         // A letter typed inside the post-glide window EXTENDS the word that was
         // just glided - the very case the backspace path below already handles.
         // Smart space must not fire there, or `pisem` + `s` lands as `pisem s`
@@ -1773,12 +1905,229 @@ class KeyboardView(
                     pendingSpace = false
                 }
             }
+        } else if (isvGlag && latin != null && latin.lowercase() == "z" && !isvSplitD &&
+            ic.getTextBeforeCursor(1, 0)?.toString().let { it == "ⰴ" || it == "Ⰴ" }) {
+            // Interslavic Glagolitic: z after a typed d makes dzelo ⰷ, unless
+            // that d was ḍ (hold d), which stays apart (variant 1, iOS 0593919).
+            val big = ic.getTextBeforeCursor(1, 0)?.toString() == "Ⰴ"
+            ic.deleteSurroundingText(1, 0)
+            ic.commitText(if (big) "Ⰷ" else "ⰷ", 1)
+            inserted = finished
         } else {
             ic.commitText(s, 1)
         }
+        if (latin != null) isvSplitD = latin == "ḍ" || latin == "Ḍ"
         afterSelfEdit(inserted)
         refreshSuggestions()
         consumeOneShotShift()          // a tapped capital lasts exactly one letter
+    }
+
+    // ---- ↶ / ↷: undo and redo the keyboard's OWN edits (iOS 0593919, 151c9e6) ----
+    // A journal at the level of the field's characters (Morse, runes and
+    // Glagolitic included): what this keyboard inserted or deleted, grouped by
+    // 0.5 s (a glide's replacement, a word typed in one go), at most 50 groups,
+    // inserts in a row merged. A caret move or an edit that is not ours drops
+    // it. Android could ask the editor for more, but the model stays the iOS
+    // one: we take back only what we did.
+
+    private sealed class Step {
+        data class Ins(val s: String) : Step()
+        data class Del(val s: String) : Step()
+    }
+
+    private fun record(step: Step) {
+        if (!recording) return
+        redoStack.clear()
+        val now = SystemClock.uptimeMillis()
+        if (journal.isEmpty() || now - lastStepAt > 500) {
+            journal.add(ArrayList())
+            if (journal.size > 50) journal.removeAt(0)
+        }
+        val g = journal.last()
+        val last = g.lastOrNull()
+        // A titlo mark typed after its letter is one character with it.
+        if (step is Step.Ins && last is Step.Ins) g[g.size - 1] = Step.Ins(last.s + step.s) else g.add(step)
+        lastStepAt = now
+        lastOwnChangeAt = now
+        showUndoButtons()
+    }
+
+    private fun dropJournal() {
+        if (journal.isEmpty() && redoStack.isEmpty()) return
+        journal.clear(); redoStack.clear()
+        showUndoButtons()
+    }
+
+    private fun showUndoButtons() {
+        undoBtn?.let { it.isEnabled = journal.isNotEmpty(); it.alpha = if (it.isEnabled) 1f else 0.3f }
+        redoBtn?.let { it.isEnabled = redoStack.isNotEmpty(); it.alpha = if (it.isEnabled) 1f else 0.3f }
+    }
+
+    /** Records what goes through it; everything else passes untouched. */
+    private inner class Journal(target: InputConnection) : InputConnectionWrapper(target, false) {
+        override fun commitText(text: CharSequence?, newCursorPosition: Int): Boolean {
+            if (recording && text != null) {
+                val sel = super.getSelectedText(0)?.toString()
+                if (!sel.isNullOrEmpty()) record(Step.Del(sel))
+                if (text.isNotEmpty()) record(Step.Ins(text.toString()))
+            }
+            return super.commitText(text, newCursorPosition)
+        }
+
+        override fun deleteSurroundingText(beforeLength: Int, afterLength: Int): Boolean {
+            if (recording && beforeLength > 0) {
+                val t = super.getTextBeforeCursor(beforeLength, 0)?.toString().orEmpty()
+                if (t.isNotEmpty()) record(Step.Del(t))
+            }
+            return super.deleteSurroundingText(beforeLength, afterLength)
+        }
+    }
+
+    private fun applyGroup(group: List<Step>, back: Boolean) {
+        val ic = service.currentInputConnection ?: return
+        recording = false
+        var delta = 0
+        ic.beginBatchEdit()
+        for (step in if (back) group.asReversed() else group) {
+            val removes = (step is Step.Ins) == back
+            val s = when (step) { is Step.Ins -> step.s; is Step.Del -> step.s }
+            if (removes) { ic.deleteSurroundingText(s.length, 0); delta -= s.length }
+            else { ic.commitText(s, 1); delta += s.length }
+        }
+        ic.endBatchEdit()
+        recording = true
+        lastStepAt = 0L
+        lastOwnChangeAt = SystemClock.uptimeMillis()
+        afterSelfEdit(delta)
+        glagWord = null
+        pendingSpace = false
+        swipeJustCommitted = false
+        lastSwipeWord = ""
+        lastSwipeCandidates = emptyList()
+        clearUndo()
+        showUndoButtons()
+        refreshSuggestions()
+    }
+
+    private fun undoStep() {
+        feedback()
+        val g = journal.removeLastOrNull() ?: return
+        redoStack.add(g)
+        applyGroup(g, back = true)
+    }
+
+    private fun redoStep() {
+        feedback()
+        val g = redoStack.removeLastOrNull() ?: return
+        journal.add(g.toMutableList())
+        applyGroup(g, back = false)
+    }
+
+    // ---- the titlo button on the bar (iOS 151c9e6) ----
+
+    /** The digits right before the caret, or the selection when it is digits. */
+    private fun numberAtCaret(ic: InputConnection): Pair<String, Boolean>? {
+        val sel = ic.getSelectedText(0)?.toString()
+        if (!sel.isNullOrEmpty() && sel.all { it in '0'..'9' }) return sel to true
+        val before = ic.getTextBeforeCursor(12, 0)?.toString().orEmpty()
+        val d = before.takeLastWhile { it in '0'..'9' }
+        return if (d.isEmpty()) null else d to false
+    }
+
+    /** One tap does what fits (owner 261124): titlo over the selection (or off,
+     *  if it has one); after ·digits the number in Glagolitic capitals closed
+     *  with ·; after plain digits the number with one titlo; otherwise · to
+     *  start a number. Without a selection the titlo never jumps over a word. */
+    private fun titloOnWord() {
+        feedback()
+        val ic = conn ?: return
+        val sel = ic.getSelectedText(0)?.toString()
+        if (sel != null && sel.any { it.isLetter() }) {
+            val now = if (Titlo.has(sel)) Titlo.strip(sel) else Titlo.over(sel)
+            ic.commitText(now, 1)
+            afterSelfEditTo(minOf(selStart, selEnd) + now.length)
+            afterTitlo()
+            return
+        }
+        val num = numberAtCaret(ic)
+        val n = num?.first?.toIntOrNull()
+        val g = n?.let { Titlo.numeral(it) }
+        if (num != null && g != null) {
+            val before = ic.getTextBeforeCursor(16, 0)?.toString().orEmpty()
+            val opened = !num.second && before.dropLast(num.first.length).lastOrNull() == '·'
+            val text = if (opened) g + "·" else Titlo.over(g)
+            if (num.second) {
+                ic.commitText(text, 1)
+                afterSelfEditTo(minOf(selStart, selEnd) + text.length)
+            } else {
+                ic.deleteSurroundingText(num.first.length, 0)
+                ic.commitText(text, 1)
+                afterSelfEdit(text.length - num.first.length)
+            }
+            afterTitlo()
+            return
+        }
+        commit("·")
+        afterTitlo()
+    }
+
+    /** A titlo item from a letter's hold ([Titlo], iOS `putTitlo`). With text
+     *  selected the whole selection is marked and the letter is not written;
+     *  otherwise the letter goes in as any letter, then its mark. */
+    private fun putTitlo(base: String, mark: String) {
+        val ic = conn ?: return
+        val sel = ic.getSelectedText(0)?.toString()
+        if (sel != null && sel.any { it.isLetter() }) {
+            val now = Titlo.over(sel)
+            ic.commitText(now, 1)
+            afterSelfEditTo(minOf(selStart, selEnd) + now.length)
+            afterTitlo()
+            return
+        }
+        // Closing half: the run from the opening half to the caret is written
+        // again with the new letter, halves filled in (read BEFORE the letter
+        // goes in).
+        val before = ic.getTextBeforeCursor(160, 0)?.toString().orEmpty()
+        val run = if (mark == Titlo.CLOSE) Titlo.openRun(before) else null
+        if (run != null) {
+            var lead = 0
+            if (pendingSpace) { ic.commitText(" ", 1); lead = 1; pendingSpace = false }
+            val bare = Titlo.strip(run)
+            val letters = if (Script.rewritesWord(context))
+                Script.out(context, Script.softenPL(Script.toLatin(context, bare) + base))
+            else bare + Script.out(context, base)
+            ic.deleteSurroundingText(run.length, 0)
+            val now = Titlo.over(letters)
+            ic.commitText(now, 1)
+            afterSelfEdit(lead - run.length + now.length)
+            afterTitlo()
+            return
+        }
+        commit(Script.out(context, base), base)
+        // Two glyphs from one key: written again with the mark over both.
+        val glyphs = Script.out(context, base)
+        val wrote = if (Script.rewritesWord(context)) glagWord?.second.orEmpty() else glyphs
+        val tail = ic.getTextBeforeCursor(glyphs.length, 0)?.toString()
+        if (Titlo.clusters(glyphs).size > 1 && wrote.endsWith(glyphs) && tail == glyphs) {
+            ic.deleteSurroundingText(glyphs.length, 0)
+            val now = Titlo.apply(glyphs, mark)
+            ic.commitText(now, 1)
+            afterSelfEdit(now.length - glyphs.length)
+        } else {
+            ic.commitText(mark, 1)
+            afterSelfEdit(mark.length)
+        }
+        afterTitlo()
+    }
+
+    /** A word with a titlo is an abbreviation, never a word to learn or to
+     *  complete; the Polish word re-write starts after it (`Script.endsAtomic`). */
+    private fun afterTitlo() {
+        glagWord = null
+        swipeJustCommitted = false
+        lastSwipeWord = ""
+        pendingSpace = false
+        refreshSuggestions()
     }
 
     /**
@@ -1826,6 +2175,7 @@ class KeyboardView(
      * puts a capital in the middle of a word (iOS `viewWillAppear`, `byh Dobra`).
      */
     fun onInputStarted() {
+        dropJournal()
         shiftByHand = false
         recased = null
         liftSample = null
@@ -1856,6 +2206,12 @@ class KeyboardView(
         }
         caretByHand = !ours
         if (!ours) {
+            // The field changed under us: ↶ would undo the wrong thing. Not
+            // within 0.6 s of our own edit - a word re-written in Polish
+            // Glagolitic (take back, write again) reports the caret in between,
+            // and that dropped the journal after every letter (3.11.15, iOS
+            // `fieldChanged` has the same window).
+            if (SystemClock.uptimeMillis() - lastOwnChangeAt > 600) dropJournal()
             pendingSpace = false
             swipeJustCommitted = false
             lastSwipeWord = ""
@@ -2218,13 +2574,82 @@ class KeyboardView(
             false
         }
         scroller.layoutParams = LayoutParams(0, dp(42), 1f)
+        // ↶ ↷ on the left, the titlo button left of the chevron (iOS 151c9e6):
+        // `[↶][↷]  slowo | slowo | slowo  [titlo][⌄]`.
+        fun barButton(desc: String, draw: (Canvas, Float, Float, Float, Paint) -> Unit, tap: () -> Unit) =
+            object : android.view.View(context) {
+                private val p = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                    color = cText; style = Paint.Style.STROKE
+                    strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND
+                }
+                override fun onDraw(c: Canvas) = draw(c, width / 2f, height / 2f, dp(1).toFloat(), p)
+            }.apply {
+                layoutParams = LayoutParams(dp(40), LayoutParams.MATCH_PARENT)
+                contentDescription = desc
+                isClickable = true
+                setOnClickListener { tap() }
+                setOnTouchListener { v, e ->
+                    if (e.actionMasked == MotionEvent.ACTION_DOWN) {
+                        (v.parent?.parent as? android.view.ViewGroup)?.requestDisallowInterceptTouchEvent(true)
+                    }
+                    false
+                }
+            }
+        val undo = barButton("Undo", { c, cx, cy, u, p -> drawUturn(c, cx, cy, u, p, false) }) { undoStep() }
+        val redo = barButton("Redo", { c, cx, cy, u, p -> drawUturn(c, cx, cy, u, p, true) }) { redoStep() }
+        val titlo = barButton("Titlo", { c, cx, cy, u, p -> drawTitloIcon(c, cx, cy, u, p) }) { titloOnWord() }
+        undoBtn = undo; redoBtn = redo; titloBtn = titlo
+        titlo.visibility = if (Titlo.offered(context)) VISIBLE else GONE
+        showUndoButtons()
         val row = LinearLayout(context)
         row.orientation = HORIZONTAL
         row.setBackgroundColor(cStrip)
         row.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, dp(42))
+        row.addView(undo)
+        row.addView(redo)
         row.addView(scroller)
+        row.addView(titlo)
         row.addView(hide)
         return row
+    }
+
+    /** ↶ (or ↷ mirrored): a shaft from the arrow head round a half circle,
+     *  like the iOS `arrow.uturn.backward`. [u] = 1 dp. */
+    private fun drawUturn(c: Canvas, cx: Float, cy: Float, u: Float, p: Paint, mirror: Boolean) {
+        p.strokeWidth = 2.2f * u
+        c.save()
+        if (mirror) c.scale(-1f, 1f, cx, cy)
+        val r = 5f * u
+        val left = cx - 8f * u
+        val top = cy - r
+        val path = Path()
+        path.moveTo(left, top)
+        path.lineTo(cx + 3f * u, top)
+        path.arcTo(android.graphics.RectF(cx + 3f * u - r, top, cx + 3f * u + r, top + 2 * r), -90f, 180f)
+        path.lineTo(cx - 4f * u, top + 2 * r)
+        c.drawPath(path, p)
+        val h = 4f * u
+        c.drawLine(left, top, left + h, top - h, p)
+        c.drawLine(left, top, left + h, top + h, p)
+        c.restore()
+    }
+
+    /** The titlo button's icon (iOS `titloIcon`, 30 x 26 pt): a letter box,
+     *  the titlo stroke over it, the number dots at its sides. */
+    private fun drawTitloIcon(c: Canvas, cx: Float, cy: Float, u: Float, p: Paint) {
+        val x0 = cx - 15f * u
+        val y0 = cy - 13f * u
+        fun x(v: Float) = x0 + v * u
+        fun y(v: Float) = y0 + v * u
+        p.style = Paint.Style.FILL
+        for (dx in listOf(1.5f, 26f)) c.drawCircle(x(dx + 1.3f), y(17.3f), 1.3f * u, p)
+        p.style = Paint.Style.STROKE
+        p.strokeWidth = 2.2f * u
+        c.drawRoundRect(x(8f), y(11f), x(22f), y(24f), 2.5f * u, 2.5f * u, p)
+        p.strokeWidth = 2.4f * u
+        val t = Path()
+        t.moveTo(x(6f), y(8f)); t.lineTo(x(8f), y(4f)); t.lineTo(x(22f), y(4f)); t.lineTo(x(24f), y(8f))
+        c.drawPath(t, p)
     }
 
     /**
@@ -2234,6 +2659,8 @@ class KeyboardView(
      * Saving is a deliberate tap, never silent.
      */
     private fun refreshSuggestions() {
+        // Glagolitic only; also after a language or script switch (iOS 3c25a28).
+        titloBtn?.visibility = if (Titlo.offered(context)) VISIBLE else GONE
         val before = conn
             ?.getTextBeforeCursor(48, 0)?.toString().orEmpty()
         val word = trailingWord(before)
@@ -2342,6 +2769,7 @@ class KeyboardView(
     }
 
     private fun setSlot(i: Int, display: String, word: String, save: Boolean) {
+        suggestionViews.getOrNull(i)?.typeface = face
         slotWord[i] = word
         slotIsSave[i] = save
         slotIsSwipeAlt[i] = false
@@ -2696,10 +3124,24 @@ class KeyboardView(
         val centers = HashMap<Char, FloatArray>(letterKeyViews.size)
         for ((ch, v) in letterKeyViews) {
             val row = v.parent as? android.view.View ?: continue
-            centers[ch] = floatArrayOf(
+            // Interslavic Glagolitic 261124 (iOS `Layout.swipeIndex(button:)`):
+            // the letter v lies on button w, the ja route (key x inside) on
+            // button q, and buttons x (dzelo) and v (yer) are crossed as nothing.
+            val key = if (!isvGlag) ch else when (ch) {
+                'q' -> 'x'
+                'w' -> 'v'
+                'x', 'v' -> null
+                else -> ch
+            } ?: continue
+            centers[key] = floatArrayOf(
                 row.left + v.left + v.width / 2f,
                 row.top + v.top + v.height / 2f,
             )
+        }
+        // lj and nj sit under holds l and n, so their glide routes cross those keys.
+        if (isvGlag) {
+            centers['l']?.let { centers['q'] = it }
+            centers['n']?.let { centers['w'] = it }
         }
         return centers
     }

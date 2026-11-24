@@ -2,8 +2,8 @@
 <#
     install.ps1 - install the "Glagolitic (Interslavic)" keyboard layout (KBDISVGL).
 
-    Interslavic in Glagolitic, the phone's keys (docs/script-tables.md). AltGr carries the
-    phone's held letters (c s z e d l n) and ja ju jo. No dead keys.
+    Interslavic in Glagolitic, the phone's keys (docs/script-tables.md, layout 261124).
+    AltGr carries the phone's held signs (c s z e d l n v, and q's ⱝ ⱓ ⱖ on a u o). No dead keys.
     Appears under Polish in the Windows language list (no phantom Slovenian).
 
     USAGE

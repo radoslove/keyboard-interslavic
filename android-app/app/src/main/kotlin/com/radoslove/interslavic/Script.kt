@@ -284,16 +284,33 @@ object Script {
 
     private val GLAG_LETTERS = mapOf(
         'a' to "ⰰ", 'b' to "ⰱ", 'c' to "ⱌ", 'č' to "ⱍ", 'd' to "ⰴ", 'e' to "ⰵ", 'ě' to "ⱑ",
-        'f' to "ⱇ", 'g' to "ⰳ", 'h' to "ⱈ", 'i' to "ⰻ", 'k' to "ⰽ", 'l' to "ⰾ", 'm' to "ⱞ",
+        // f = ⱚ and y = ⱏⰹ (hard yer + i) like Polish Glagolitic (owner 261124,
+        // iOS 0593919; were ⱇ and ⱐⰹ - old text still reads back).
+        'f' to "ⱚ", 'g' to "ⰳ", 'h' to "ⱈ", 'i' to "ⰻ", 'k' to "ⰽ", 'l' to "ⰾ", 'm' to "ⱞ",
         'n' to "ⱀ", 'o' to "ⱁ", 'p' to "ⱂ", 'r' to "ⱃ", 's' to "ⱄ", 'š' to "ⱎ", 't' to "ⱅ",
-        'u' to "ⱆ", 'v' to "ⰲ", 'y' to "ⱐⰹ", 'z' to "ⰸ", 'ž' to "ⰶ",
+        'u' to "ⱆ", 'v' to "ⰲ", 'y' to "ⱏⰹ", 'z' to "ⰸ", 'ž' to "ⰶ",
+        // dzelo, from the x key and hold d (261124, like Polish): marker ẑ.
+        'ẑ' to "ⰷ",
+        // the old ja ligature ⱝ, from hold q (261124): marker ȧ.
+        'ȧ' to "ⱝ",
+        // a d that does NOT join a following z, from hold d: marker ḍ.
+        'ḍ' to "ⰴ",
+        // bare yers from the v key (layout 261124), markers like Polish.
+        'ʹ' to "ⱐ", 'ʺ' to "ⱏ",
     )
-    private val J_LIGATURE = mapOf('a' to "ⱝ", 'u' to "ⱓ", 'o' to "ⱖ")
+    /** ja is Ⱑ like in Polish Glagolitic (owner 261124; it was ⱝ). Ⱑ is also ě,
+     *  so reading back decides by the letter before it ([jaFromJat]). */
+    private val J_LIGATURE = mapOf('a' to "ⱑ", 'u' to "ⱓ", 'o' to "ⱖ")
     private val VOWELS = setOf('a', 'e', 'ě', 'i', 'o', 'u', 'y')
 
     /** Latin text -> the current script. Case follows the source: `Lj` -> `Љ`, `LJUBOV` -> `ЉУБОВ`. */
-    fun out(context: Context, latin: String): String =
-        convert(latin, mode(context), Lang.current(context))
+    fun out(context: Context, latin: String): String {
+        // A titlo popup item: the letter in the script, the mark over it.
+        Titlo.split(latin)?.let { (base, mark) ->
+            return Titlo.apply(convert(base, mode(context), Lang.current(context)), mark)
+        }
+        return convert(latin, mode(context), Lang.current(context))
+    }
 
     fun convert(latin: String, m: Mode, lang: String = Lang.ISV): String = when {
         latin.isEmpty() || m == Mode.LATIN -> latin
@@ -347,6 +364,11 @@ object Script {
                 i++
                 continue
             }
+            // Every d + z is dzelo ⰷ (owner 261124, variant 1 - in Interslavic
+            // all of them are prefix seams: podzemny, nadzor, odzyv). ḍ keeps them apart.
+            if (c == 'd' && low.getOrNull(i + 1) == 'z') {
+                sb.append(cased("ⰷ", latin[i], caps)); i += 2; continue
+            }
             val mapped = GLAG_LETTERS[c]
             sb.append(if (mapped == null) latin[i].toString() else cased(mapped, latin[i], caps))
             i++
@@ -370,10 +392,32 @@ object Script {
     private val REVERSE: Map<Mode, List<Pair<String, String>>> = mapOf(
         Mode.CYRILLIC to reversed(CYRILLIC),
         Mode.GLAGOLITIC to (
-            listOf("ⱐⰹ" to "y", "ⱝ" to "ja", "ⱓ" to "ju", "ⱖ" to "jo", "ⱐ" to "j", "ⰹ" to "j", "ⰿ" to "m") +
-                GLAG_LETTERS.filterKeys { it != 'y' }.entries.map { it.value to it.key.toString() }
+            listOf("ⰷ" to "dz", "ⱏⰹ" to "y", "ⱐⰹ" to "y", "ⱇ" to "f", "ⱝ" to "ja", "ⱓ" to "ju", "ⱖ" to "jo",
+                "ⱐ" to "j", "ⰹ" to "j", "ⰿ" to "m") +
+                GLAG_LETTERS.filterKeys { it !in setOf('y', 'ȧ', 'ẑ', 'ḍ', 'ʹ', 'ʺ') }
+                    .entries.map { it.value to it.key.toString() }
             ).sortedByDescending { it.first.length },
     )
+
+    /** Ⱑ reads as ja at the start of a word or after a vowel (moja, jablo), as
+     *  ě after a consonant (město). Consonant + ja (polja, morja: 256 word pairs
+     *  in the wordlist, iOS 261124) therefore reads as ě - the price of the
+     *  shared letter. Turned into ⱝ here, which the reverse table reads as ja. */
+    private val GLAG_VOWELS = setOf('ⰰ', 'ⰵ', 'ⱑ', 'ⰻ', 'ⰹ', 'ⱁ', 'ⱆ', 'ⱝ', 'ⱓ', 'ⱖ')
+
+    fun jaFromJat(s: String): String {
+        val out = StringBuilder(s.length)
+        var prev: Char? = null
+        for (ch in s) {
+            if (ch.lowercaseChar() == 'ⱑ' &&
+                (prev == null || !prev.isLetter() || prev.lowercaseChar() in GLAG_VOWELS)) {
+                out.append(if (ch.isUpperCase()) 'Ⱝ' else 'ⱝ')
+            } else out.append(ch)
+            // A mark over a letter (titlo, acute) does not count as the letter before.
+            if (Character.getType(ch) != Character.NON_SPACING_MARK.toInt()) prev = ch
+        }
+        return out.toString()
+    }
 
     /** Text in the current script -> Latin. Latin passes through. */
     fun toLatin(context: Context, s: String): String =
@@ -384,6 +428,7 @@ object Script {
         if (m == Mode.MORSE) return back(Morse.decode(s, lang), offered(lang).first(), lang)
         runeRow(m)?.let { return back(Runes.decodeLossy(s, it), offered(lang).first(), lang) }
         if (m == Mode.GLAGOLITIC && lang == Lang.PL) return backPolish(s)
+        if (m == Mode.GLAGOLITIC) return backWith(jaFromJat(s), REVERSE.getValue(m))
         val rev = when {
             m == Mode.CYRILLIC && lang == Lang.SR -> REVERSE_SR
             m == Mode.CYRILLIC && lang == Lang.MK -> REVERSE_MK
@@ -394,6 +439,10 @@ object Script {
             m == Mode.CYRILLIC && lang == Lang.BE -> REVERSE_BE
             else -> REVERSE.getValue(m)
         }
+        return backWith(s, rev)
+    }
+
+    private fun backWith(s: String, rev: List<Pair<String, String>>): String {
         val sb = StringBuilder()
         var i = 0
         outer@ while (i < s.length) {
@@ -422,12 +471,12 @@ object Script {
 
     /** Glyphs typed as such (held o, held d): the word re-write starts after
      *  the last of them, so they are never turned back into ⰴⰸ or ⱁ́. */
-    private val ATOMIC = setOf('ⰷ', 'Ⰷ', 'ⱉ', 'Ⱉ')
+    private val ATOMIC = setOf('ⰷ', 'Ⰷ', 'ⱉ', 'Ⱉ', 'ⱖ', 'Ⱖ')
 
     /** True when the glyph at [i] ends something typed as such: ⰷ, ⱉ, or the
      *  soft yer right after d (ⰴⱐ) - the converter never makes ⰴⱐ itself. */
     fun endsAtomic(w: String, i: Int): Boolean {
-        if (w[i] in ATOMIC) return true
+        if (w[i] in ATOMIC || Titlo.isMark(w[i])) return true
         return (w[i] == 'ⱐ' || w[i] == 'Ⱐ') && i > 0 && (w[i - 1] == 'ⰴ' || w[i - 1] == 'Ⰴ')
     }
 
@@ -470,6 +519,8 @@ object Script {
      *  ḍ = a d that never joins a following z (pod-ziemie). */
     private val POLISH_GLAG: List<Pair<String, String>> = listOf(
         "ẑ" to "ⰷ", "ō" to "ⱉ", "ď" to "ⰴⱐ",
+        // jo ⱖ (as in Interslavic), from hold q: marker ǒ (iOS 151c9e6)
+        "ǒ" to "ⱖ",
         SOFT_YER_MARK to "ⱐ", HARD_YER_MARK to "ⱏ",
         "ja" to "ⱑ", "ia" to "ⱑ", "ju" to "ⱓ", "iu" to "ⱓ", "ję" to "ⱗ", "ię" to "ⱗ", "ją" to "ⱙ", "ią" to "ⱙ",
         "sz" to "ⱎ", "cz" to "ⱍ", "ż" to "ⰶ", "ą" to "ⱘ", "ę" to "ⱔ",
@@ -479,7 +530,7 @@ object Script {
         "ł" to "ⰾⱏ", "ó" to "ⱁ́",
         "ch" to "ⱈ", "h" to "ⱒ", "y" to "ⱏⰹ",
         "a" to "ⰰ", "b" to "ⰱ", "c" to "ⱌ", "d" to "ⰴ", "e" to "ⰵ", "f" to "ⱚ",
-        "g" to "ⰳ", "i" to "ⰻ", "j" to "ⰹ", "k" to "ⰽ", "l" to "ⰾ", "m" to "ⰿ",
+        "g" to "ⰳ", "i" to "ⰻ", "j" to "ⰹ", "k" to "ⰽ", "l" to "ⰾ", "m" to "ⱞ",   // m = ⱞ like isv (owner 261124; ⰿ still reads back)
         "n" to "ⱀ", "o" to "ⱁ", "p" to "ⱂ", "r" to "ⱃ", "s" to "ⱄ", "t" to "ⱅ",
         "u" to "ⱆ", "w" to "ⰲ", "v" to "ⰲ", "z" to "ⰸ",
     )
@@ -526,9 +577,9 @@ object Script {
     private val POLISH_JOTTED = mapOf('ⱑ' to "a", 'ⱓ' to "u", 'ⱗ' to "ę", 'ⱙ' to "ą")
     private val REVERSE_PL: List<Pair<String, String>> = (
         listOf("ⰾⱏⰹ" to "ly", "ⰴⰸⱐ" to "dź", "ⰴⰶ" to "dż", "ⰴⰸ" to "dz", "ⰷⱐ" to "dź",
-            "ⰷ" to "dz", "ⱉ" to "ó", "ⰴⱐ" to "dź") +
+            "ⰷ" to "dz", "ⱉ" to "ó", "ⰴⱐ" to "dź", "ⰿ" to "m", "ⱖ" to "jo") +
             POLISH_GLAG.filter {
-                it.first !in setOf("ia", "iu", "ię", "ią", "ja", "ju", "ję", "ją", "dż", "dź", "dz", "v", "ẑ", "ō", "ď", "ḍ")
+                it.first !in setOf("ia", "iu", "ię", "ią", "ja", "ju", "ję", "ją", "dż", "dź", "dz", "v", "ẑ", "ō", "ǒ", "ď", "ḍ")
             }.map { it.second to it.first }
         ).sortedByDescending { it.first.length }
 

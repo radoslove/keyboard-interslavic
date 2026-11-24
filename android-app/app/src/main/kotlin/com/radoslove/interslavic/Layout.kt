@@ -126,11 +126,13 @@ object Layout {
      *  Markers, read by `Script`: ď = ⰴⱐ, ḍ = a d that never joins a z,
      *  ō = otu Ⱉ. */
     private val polishGlagHolds: Map<Char, List<String>> = mapOf(
-        'q' to listOf("ja", "ju", "ję", "ją"), 'j' to listOf("ja", "ju", "ję", "ją"),
+        // q: jo ⱖ first instead of ja, which is the key itself (owner 261124, iOS 151c9e6)
+        'q' to listOf("ǒ", "ju", "ję", "ją"), 'j' to listOf("ja", "ju", "ję", "ją"),
         'i' to listOf("ia", "iu", "ię", "ią"), 'w' to listOf("ę", "ię", "ą", "ią"),
         'v' to listOf(Script.HARD_YER_MARK),
         'a' to listOf("ą", "ią", "ia"), 'e' to listOf("ę", "ię"),
-        'c' to listOf("ć", "cz"), 'd' to listOf("dź", "ď", "dż", "ḍ"),
+        // d: dzelo first (261124, as in Interslavic Glagolitic)
+        'c' to listOf("ć", "cz"), 'd' to listOf("ẑ", "dź", "ď", "dż", "ḍ"),
         'h' to listOf("ch"), 'l' to listOf("ł"), 'n' to listOf("ń"),
         'o' to listOf("ó", "ō"), 'r' to listOf("rz"), 's' to listOf("ś", "sz", "szcz"),
         'z' to listOf("ż", "ź"),
@@ -400,6 +402,8 @@ object Layout {
         // Glagolitic. ⚠ Only for the NON-Latin script - iOS 0.6.12 crashed at
         // start when this branch did not say so and called itself.
         lang == Lang.PL && script != Script.Mode.LATIN -> if (qwertz) qwertzRows else latinRows
+        // Interslavic Glagolitic, layout 261124 (owner, iOS 0593919): the Polish grid with x.
+        lang == Lang.ISV && script == Script.Mode.GLAGOLITIC -> latinRows
         script != Script.Mode.LATIN -> nonLatinRows
         qwertz -> qwertzRows
         else -> latinRows
@@ -422,10 +426,23 @@ object Layout {
         // x = ch Ⱈ (as Keyman's Glagolitic (Phonetic)), v = the soft yer Ⱐ as the
         // Polish kreska (s + v = ś, z ź, c ć, n ń, dz dź, r rz, d ⰴⱐ; after any
         // other letter a bare Ⱐ) - inside the marker ʹ, `Script.softenPL`.
+        // 261124: x = dzelo ⰷ like Interslavic Glagolitic (was ch Ⱈ; ch now joins from c + h).
         lang == Lang.PL -> when (ch) {
             'q' -> "ja"
-            'x' -> "ch"
+            'x' -> "ẑ"
             'v' -> Script.SOFT_YER_MARK
+            else -> ch.toString()
+        }
+        // Interslavic Glagolitic, layout 261124 (owner, iOS 0593919): as close to
+        // Polish Glagolitic as it goes - q = ja, w = v, v = the soft yer like
+        // Polish (l + v = lj, n + v = nj, else a bare Ⱐ; the keyboard turns it
+        // into j after l and n), x = dzelo; lj nj under holds l n, ž under z.
+        // Cyrillic keeps q = lj, w = nj.
+        isvGlag(script, lang) -> when (ch) {
+            'q' -> "ja"
+            'w' -> "v"
+            'v' -> Script.SOFT_YER_MARK
+            'x' -> "ẑ"
             else -> ch.toString()
         }
         ch == 'q' -> "lj"
@@ -490,14 +507,49 @@ object Layout {
      * Foreign letters only in Latin: in Cyrillic or Glagolitic they would be
      * Latin letters in the middle of the other script.
      */
-    fun variants(key: Char, uppercase: Boolean, lang: String, latin: Boolean): List<String> {
+    fun variants(key: Char, uppercase: Boolean, lang: String, latin: Boolean,
+                 titlo: Boolean = false): List<String> {
         // Polish Glagolitic: every letter Polish writes with more than one key
         // sits under the key it starts with (layout v04, iOS `glagHolds`).
-        if (!latin && lang == Lang.PL) return polishGlagHolds[key].orEmpty().map { cased(it, uppercase) }
+        if (!latin && lang == Lang.PL) {
+            return polishGlagHolds[key].orEmpty().map { cased(it, uppercase) } +
+                titloItems(key, uppercase, lang, titlo)
+        }
         val mine = own(lang)[key].orEmpty()
+        if (!latin && titlo && key.isLetter()) {
+            // Interslavic Glagolitic 261124 (iOS 0593919): lj nj first under l n,
+            // dzelo first under d, ḍ (a d that stays apart from a z) last.
+            val glag = lang == Lang.ISV
+            val extra = if (glag) isvGlagHolds[key].orEmpty() else emptyList()
+            val tail = if (glag && key == 'd') listOf("ḍ") else emptyList()
+            // distinct: on iOS lj/nj came twice (extra + own), one is enough.
+            return (extra + mine + tail).distinct().map { cased(it, uppercase) } +
+                titloItems(key, uppercase, lang, titlo)
+        }
         if (!latin) return mine.map { cased(it, uppercase) }
         val extra = foreign[key].orEmpty() + if (lang == Lang.PL) isvOnPl[key].orEmpty() else emptyList()
         return (mine + extra.filter { it !in mine }).distinct().map { cased(it, uppercase) }
+    }
+
+    /** Interslavic in Glagolitic: layout 261124 (q ja, w v, v soft yer, x dzelo). */
+    fun isvGlag(script: Script.Mode, lang: String) = lang == Lang.ISV && script == Script.Mode.GLAGOLITIC
+
+    /** Interslavic Glagolitic holds that come BEFORE the letter's own (iOS `isvGlagHolds`). */
+    private val isvGlagHolds: Map<Char, List<String>> = mapOf(
+        'n' to listOf("nj"), 'l' to listOf("lj"), 'd' to listOf("ẑ"),
+        'q' to listOf("jo", "ju", "ȧ"),
+        'v' to listOf(Script.HARD_YER_MARK),
+    )
+
+    /** The three titlo items of a letter key in Glagolitic ([Titlo]): the key's
+     *  own letter with each mark. None on a key that writes no Glagolitic
+     *  letter or writes a yer marker (v). */
+    private fun titloItems(key: Char, uppercase: Boolean, lang: String, titlo: Boolean): List<String> {
+        if (!titlo) return emptyList()
+        val base = cased(keyText(key.lowercaseChar(), Script.Mode.GLAGOLITIC, lang), uppercase)
+        if (base == Script.SOFT_YER_MARK || base == Script.HARD_YER_MARK) return emptyList()
+        if (Script.convert(base, Script.Mode.GLAGOLITIC, lang) == base) return emptyList()
+        return Titlo.MARKS.map { base + it }
     }
 
     /** `ß` has no one-letter capital; a digraph capitalises its first letter only (`Dž`). */

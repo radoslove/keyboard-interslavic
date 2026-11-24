@@ -1,19 +1,21 @@
 # KBDISVGL — Glagolitic (Interslavic) — Windows layout
 
-Interslavic written in Glagolitic, on the same keys as the phone keyboard
-(`docs/script-tables.md`, "Rows per script"): one key writes one sign, `q` = `ⰾⱐ` (lj),
-`w` = `ⱀⱐ` (nj), `y` = `ⱐⰹ`, no `x`. AltGr carries the letters the phone has under a
-hold, plus the `j` ligatures:
+Interslavic written in Glagolitic, on the same keys as the phone keyboard (layout of
+2026-11-24, `docs/script-tables.md`, "Rows per script"): one key writes one sign,
+`q` = `Ⱑ` (ja), `w` = `Ⰲ` (v), `v` = `Ⱐ` (soft yer), `x` = `Ⰷ` (dzelo), `y` = `ⱏⰹ`,
+`f` = `Ⱚ`, `h` = `Ⱈ`, `m` = `Ⱞ`. AltGr carries what the phone has under a hold:
 
-| AltGr + | c | s | z | e | d | l | n | a | u | o | j |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| writes | ⱍ | ⱎ | ⰶ | ⱑ | ⰴⰶ | ⰾⱐ | ⱀⱐ | ⱝ | ⱓ | ⱖ | ⱐ |
+| AltGr + | c | s | z | e | d | l | n | a | u | o | j | v | t | ` |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| writes | ⱍ | ⱎ | ⰶ | ⱑ | ⰴⰶ | ⰾⱐ | ⱀⱐ | ⱝ | ⱓ | ⱖ | ⱐ | ⱏ | ◌҃ | ◌҃ |
 
-Shift gives the capital (first sign of a pair). AltGr + `;` `'` `-` = `„` `’` `–` as on the
+Shift gives the capital (first sign of a pair). The titlo (U+0483) is a combining mark: type
+it AFTER the letter; Shift+AltGr on `t` and `` ` `` writes the same mark. The soft yer has two
+routes on purpose (`v` and AltGr+J). AltGr + `;` `'` `-` = `„` `’` `–` as on the
 Latin layout. No dead keys. Appears under **Polish** (locale `pl-PL`).
 
-A key has no context: `l` + `j` + `u` writes `ⰾⰹⱆ`, not `ⰾⱓ` — use AltGr+U after `l`.
-Same limitation as a tap on the phone.
+A key has no context: `l` + `j` + `u` writes `ⰾⰹⱆ`, not `ⰾⱓ` — use AltGr+U after `l`;
+`d` + `z` writes `ⰴⰸ`, use `x` for `ⰷ`. Same limitation as a tap on the phone.
 
 Font: Segoe UI Historic (in Windows) or Noto Sans Glagolitic.
 

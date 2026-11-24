@@ -69,6 +69,9 @@ internal fun SetupActivity.buildTryTab(root: LinearLayout) {
     frame.addView(tryBox.apply {
         hint = t("try_hint")
         textSize = 20f
+        // Glagolitic and the titlo from the bundled Noto 2.004 (GlagFont), the rest
+        // from the system fonts it falls back to.
+        GlagFont.get(context)?.let { typeface = it }
         minLines = 4
         maxLines = 10
         gravity = Gravity.TOP or Gravity.START
