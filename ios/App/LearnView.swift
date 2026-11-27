@@ -54,6 +54,16 @@ struct LearnView: View {
     @State private var study = false
     /// Cards in the running pass when it began, for the "3 / 12" over the card.
     @State private var passTotal = 0
+    /// The last answer, to take it back (owner 261127: "jakby jednak ktoś miał
+    /// myśl po chwili"): the card and its twins as they were stored, who was
+    /// known today, and the pass as it stood. One step back, not a history.
+    private struct Undo {
+        let cards: [Learn.Card], known: [String: Int]
+        let queue: [Learn.Card], line: [Learn.Card], current: Learn.Card
+        let firstGrade: [String: Int], misses: [String: Int], recent: [Int], sinceNew: Int
+        let study: Bool, passTotal: Int, filter: String?
+    }
+    @State private var undo: Undo?
     /// The script word cards are shown in (nil = the language's own), to practise reading.
     @State private var readIn: Script.Mode?
     /// nil = all, "" = cards without a category.
@@ -235,7 +245,28 @@ struct LearnView: View {
     }
 
     private func stopPass() {
-        queue = nil; current = nil; line = []; revealed = false
+        queue = nil; current = nil; line = []; revealed = false; undo = nil
+    }
+
+    /// Take the last answer back: the card returns with its answer shown, its
+    /// schedule and the pass exactly as they were before the tap.
+    private func takeBack() {
+        guard let u = undo else { return }
+        for c in u.cards { Learn.update(c) }
+        UserDefaults.standard.set(u.known, forKey: Self.knownKey)
+        filter = u.filter
+        queue = u.queue; line = u.line; current = u.current
+        firstGrade = u.firstGrade; misses = u.misses; recent = u.recent; sinceNew = u.sinceNew
+        study = u.study; passTotal = u.passTotal
+        revealed = true; justDone = false
+        undo = nil
+        reload()
+    }
+
+    private var undoButton: some View {
+        Button { takeBack() } label: { Image(systemName: "arrow.uturn.backward") }
+            .buttonStyle(LookStyle(kind: .plain, wide: false))
+            .accessibilityIdentifier("learn_undo")
     }
 
     /// Every topic in use, the language's own first, alphabetically.
@@ -305,7 +336,7 @@ struct LearnView: View {
     }
 
     private func pick(_ f: String?) {
-        filter = f; queue = nil; current = nil; justDone = false
+        filter = f; queue = nil; current = nil; justDone = false; undo = nil
     }
 
     /// A ready set or an alphabet into the cards, under [from]'s language
@@ -638,6 +669,7 @@ struct LearnView: View {
 
     private func unlearn(_ c: Learn.Card) {
         Learn.drop(c)
+        undo = nil
         queue?.removeAll { $0.id == c.id }
         line.removeAll { $0.id == c.id }
         if current?.id == c.id {
@@ -680,6 +712,7 @@ struct LearnView: View {
                     Text("\(max(1, passTotal - left + 1)) / \(passTotal) · \(deckName)")
                         .font(.subheadline).foregroundStyle(Look.muted).lineLimit(1)
                     Spacer()
+                    if undo != nil { undoButton }
                     Button("✕") { stopPass() }
                         .buttonStyle(LookStyle(kind: .plain, wide: false))
                         .accessibilityIdentifier("learn_stop")
@@ -738,7 +771,14 @@ struct LearnView: View {
             .frame(maxWidth: .infinity)
             .buttonStyle(.borderless)
         } else {
-            if justDone { Text(Ui.t("learn_done")) }
+            if justDone {
+                HStack {
+                    Text(Ui.t("learn_done"))
+                    Spacer()
+                    // The last card of a pass can be taken back too.
+                    if undo != nil { undoButton }
+                }
+            }
             // Review takes the cards due now; study goes through every card of
             // the chosen topic in random order, so there is always something
             // to do after the review is over.
@@ -813,6 +853,7 @@ struct LearnView: View {
         passTotal = cards.count
         line = []; firstGrade = [:]; misses = [:]; recent = []; sinceNew = 0
         self.study = study
+        undo = nil
         revealed = false
         justDone = false
         current = next()
@@ -837,6 +878,11 @@ struct LearnView: View {
 
     private func grade(_ card: Learn.Card, _ g: Int) {
         let key = card.id
+        undo = Undo(cards: ([card] + twins(card)).map { Learn.card($0.lang, $0.word) },
+                    known: UserDefaults.standard.dictionary(forKey: Self.knownKey) as? [String: Int] ?? [:],
+                    queue: queue ?? [], line: line, current: card,
+                    firstGrade: firstGrade, misses: misses, recent: recent, sinceNew: sinceNew,
+                    study: study, passTotal: passTotal, filter: filter)
         let first = firstGrade[key]
         var after = card
         // Only the first answer of a pass sets the schedule; the repeats inside
