@@ -3,7 +3,8 @@ import UIKit
 
 /// The ✎ tab - Android `TryTab.kt` (3.11.13). A box to try the keyboard (it
 /// tells "the keyboard is broken" from "it is not switched on"), and above it:
-/// - every word of the box as a button: a tap puts it among the cards;
+/// - (no word buttons above the box since Android 3.11.41: they repeated the
+///   text in it; words to learn are added in 🎓);
 /// - one row of languages, the keyboard's and the ones the text can be
 ///   translated into, all alphabetical (Interslavic too, owner 261121): a tap
 ///   translates the text IN the box word by word (Wiktionary, offline; through
@@ -34,11 +35,17 @@ struct TryView: View {
     /// so a card made from the box gets its translation.
     @State private var pairs: [String: String] = [:]
     @State private var pairsLang: String?
+    /// The script the box is written in now (its store name); the text is
+    /// rewritten from it when the keyboard's script key changes the script
+    /// (owner 261127, Android `tryScriptFollow`).
+    @State private var shown = ""
 
     // MARK: alphabets
 
-    private static let six: [Scripts.Choice] = [.script(.latin), .script(.cyrillic), .script(.glagolitic),
-                                                .runes(.medieval), .runes(.young), .morse]
+    /// Every script of the row, the rune rows as the keyboard lists them
+    /// (oldest first, three since the elder futhark - Android 3.11.25).
+    private static let six: [Scripts.Choice] = [.script(.latin), .script(.cyrillic), .script(.glagolitic)]
+        + Runes.Row.allCases.map { .runes($0) } + [.morse]
 
     private static func raw(_ c: Scripts.Choice) -> String {
         switch c {
@@ -68,8 +75,12 @@ struct TryView: View {
     private static func toNative(_ s: String, _ c: Scripts.Choice, _ l: String) -> String {
         Layout.language = l
         switch c {
-        case .morse: return Morse.decode(s, l)
-        case .runes(let r): return Runes.decodeLossy(s, r)
+        // Decoded only when the text IS in that script: a language switched
+        // with the text kept leaves Latin in the box of a Morse or rune
+        // language ("jak sie pisze" decoded as Morse came out as one word).
+        case .morse: return s.contains(where: \.isLetter) ? s : Morse.decode(s, l)
+        case .runes(let r):
+            return s.unicodeScalars.contains { (0x16A0...0x16FF).contains($0.value) } ? Runes.decodeLossy(s, r) : s
         case .script(let m):
             if native(l) == .latin {
                 return Script.back(Script.back(s, .glagolitic), .cyrillic)
@@ -119,6 +130,7 @@ struct TryView: View {
             text = ns.replacingCharacters(in: selection, with: out)
             selection = NSRange(location: selection.location, length: (out as NSString).length)
             Self.setChosen(lang, c)
+            shown = Self.raw(c)
             turn = nil
             return
         }
@@ -129,6 +141,20 @@ struct TryView: View {
         text = Self.fromNative(Self.toNative(text, old, lang), to, lang)
         selection = NSRange(location: (text as NSString).length, length: 0)
         Self.setChosen(lang, to)
+        shown = Self.raw(to)
+        turn = nil
+    }
+
+    /// The keyboard's script key (next to 🌐) changed the script: the text in
+    /// the box is rewritten into it and the row lights it.
+    private func followScript() {
+        let now = Self.chosen(lang)
+        guard Self.raw(now) != shown else { return }
+        let old = Scripts.choices(lang).first { Self.raw($0) == shown }
+        shown = Self.raw(now)
+        guard let old, !text.isEmpty else { return }
+        text = Self.fromNative(Self.toNative(text, old, lang), now, lang)
+        selection = NSRange(location: (text as NSString).length, length: 0)
         turn = nil
     }
 
@@ -141,7 +167,15 @@ struct TryView: View {
         let on = Gloss.enabled.sorted(by: Self.isvFirst)
         let reach = Self.reach(lang)
         func added(_ l: String) -> Bool { Scripts.choices(l)[0] != m }
+        // With text in the box, a language it can be translated into: the
+        // keyboard's, else Bulgarian for Cyrillic (owner 261127: English + АБВ
+        // should change the text, not land untranslated on Interslavic).
+        let blank = text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let withText: String? = blank ? nil
+            : on.first { has.contains($0) && reach.contains($0) }
+                ?? (m == .script(.cyrillic) && has.contains("bg") && reach.contains("bg") ? "bg" : nil)
         let to = on.first { has.contains($0) && added($0) && reach.contains($0) }
+            ?? withText
             ?? on.first { has.contains($0) && added($0) }
             ?? on.first { has.contains($0) }
             ?? (has.contains("isv") ? "isv" : has.sorted()[0])
@@ -211,6 +245,7 @@ struct TryView: View {
             turn = typed.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil
                 : Turn(from: from, before: typed, to: l, after: out, script: fromScript)
             lang = l
+            shown = Self.raw(Self.chosen(l))
             text = out
             selection = NSRange(location: (out as NSString).length, length: 0)
             reloadKnown()
@@ -224,14 +259,21 @@ struct TryView: View {
         }
         if typed.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { done(""); return }
         guard Self.reach(from).contains(l) else {
-            // No gloss (Interslavic): the text stays, in the new language's alphabet.
+            // No gloss (Interslavic, until its dictionary's licence is
+            // settled): the words stay as typed. Only a code of letters (Latin,
+            // Morse, runes) follows the new language; Cyrillic or Glagolitic
+            // would spell another language's words in it (owner 261127:
+            // English came out in Cyrillic under ISV). Android 3.11.41.
             pairs = [:]; pairsLang = nil
             Layout.language = from
             let n = Self.toNative(typed, Self.chosen(from), from)
             let latin = Self.native(from) == .latin ? n : Script.back(n, Self.native(from))
             Layout.language = l
-            let nl = Self.native(l) == .latin ? latin : Script.convert(latin, Self.native(l))
-            done(Self.fromNative(nl, Self.chosen(l), l))
+            switch Self.chosen(l) {
+            case .morse: done(Morse.encode(latin, l))
+            case .runes(let r): done(Runes.encode(latin, r))
+            default: done(latin)
+            }
             return
         }
         let src = Self.toGloss(typed, from)
@@ -301,7 +343,9 @@ struct TryView: View {
     /// The keyboard may have switched language while the app was away.
     private func follow() {
         let now = AppLangs.current
-        if now != lang { lang = now; turn = nil }
+        if now != lang { lang = now; turn = nil; shown = Self.raw(Self.chosen(now)) }
+        if shown.isEmpty { shown = Self.raw(Self.chosen(lang)) }
+        followScript()
         reloadKnown()
         // The gloss tables load once, in the background, before the first tap.
         let l = lang
@@ -402,7 +446,7 @@ struct TryView: View {
         NavigationStack {
             List {
                 Section {
-                    learnRow
+                    // No word buttons above the box (Android 3.11.41): `learnRow` stays for later.
                     languageRow
                     scriptRow
                     // Only while ✎ is shown: a UIKit view keeps taking touches
@@ -457,12 +501,15 @@ struct TryView: View {
             .onReceive(Timer.publish(every: 0.4, on: .main, in: .common).autoconnect()) { _ in
                 guard active, !busy else { return }
                 let now = AppLangs.current
-                if now != lang { lang = now; turn = nil }
+                if now != lang { lang = now; turn = nil; shown = Self.raw(Self.chosen(now)) }
+                else { followScript() }
             }
             .onChange(of: text) { _ in
                 // A language switched on the keyboard while typing here: the
                 // rows follow (the text is not translated behind the user's back).
-                if AppLangs.current != lang, !busy { lang = AppLangs.current; turn = nil }
+                if AppLangs.current != lang, !busy {
+                    lang = AppLangs.current; turn = nil; shown = Self.raw(Self.chosen(lang))
+                }
             }
         }
     }

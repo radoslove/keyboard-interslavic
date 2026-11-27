@@ -103,8 +103,19 @@ enum Alphabets {
     static func pair(_ lang: String, _ from: Scripts.Choice, _ to: Scripts.Choice) -> [(String, String)] {
         guard from != to, let ls = letters[lang]?.split(separator: " ").map(String.init) else { return [] }
         var order: [String] = [], by: [String: [String]] = [:]
+        // A letter with an accent that only borrows its base letter's sign
+        // (runes: ą = ᛆ as a) is left out: "ᛆ a", not "ᛆ a / ą". One with a
+        // sign of its own (Morse ą, the Glagolitic ć) stays. Android 3.11.33.
+        func base(_ l: String) -> String {
+            if l == "ł" { return "l" }
+            if l == "đ" { return "d" }
+            return String(String.UnicodeScalarView(l.decomposedStringWithCanonicalMapping.unicodeScalars.prefix(1)))
+        }
         for l in ls {
-            guard let f = render(l, to, lang), let b = render(l, from, lang), f != b else { continue }
+            guard let f = render(l, to, lang) else { continue }
+            let bl = base(l)
+            if bl != l, ls.contains(bl), render(bl, to, lang) == f { continue }
+            guard let b = render(l, from, lang), f != b else { continue }
             if by[f] == nil { order.append(f) }
             if !(by[f]?.contains(b) ?? false) { by[f, default: []].append(b) }
         }

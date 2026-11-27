@@ -52,6 +52,8 @@ struct LearnView: View {
     @State private var sinceNew = 0
     /// The running pass is "study" (every card, outside the schedule), not a review.
     @State private var study = false
+    /// Cards in the running pass when it began, for the "3 / 12" over the card.
+    @State private var passTotal = 0
     /// The script word cards are shown in (nil = the language's own), to practise reading.
     @State private var readIn: Script.Mode?
     /// nil = all, "" = cards without a category.
@@ -186,10 +188,54 @@ struct LearnView: View {
 
     private static func isAlphabet(_ c: Learn.Card) -> Bool { c.cat.contains(" → ") }
 
-    /// The topic a card is shown under: its category, and for an alphabet of
-    /// another language that language's code in front ("NB · ABC → ᚠᚢᚦ").
-    private func topic(_ c: Learn.Card) -> String {
-        Self.isAlphabet(c) && c.lang != lang ? "\(c.lang.uppercased()) · \(c.cat)" : c.cat
+    /// The topic a card is shown under: its category. Alphabets do not belong
+    /// to a language (owner 261127, Android 3.11.33): one deck per pair of
+    /// scripts, whatever language a card was once taken under.
+    private func topic(_ c: Learn.Card) -> String { c.cat }
+
+    /// The letters of the alphabets come from Interslavic, the one language
+    /// written in Latin, Cyrillic and Glagolitic alike.
+    private static let alphaSrc = "isv"
+
+    /// The name of the deck being studied, as its tile says it.
+    private var deckName: String {
+        switch filter {
+        case nil, Self.allAlpha: return Ui.t("learn_all")
+        case "": return Ui.t("learn_nocat")
+        default: return filter!
+        }
+    }
+
+    /// "3 / 11": the cards due now in the count colour, then how many there are.
+    private func counts(_ all: [Learn.Card]) -> Text {
+        let c = Self.oneEach(all)
+        return Text("\(Learn.due(c).count)").bold().foregroundColor(Look.count) + Text(" / \(c.count)")
+    }
+
+    /// The count says which deck it is about (it jumped 243 -> 23 between the
+    /// modes with nothing saying why).
+    private var dueLine: Text {
+        let parts = Ui.t("learn_due").components(separatedBy: "{k}")
+        var t = Text(deckName).bold() + Text(" · " + parts[0])
+            + Text("\(dueNow.count)").bold().foregroundColor(Look.count)
+        if parts.count > 1 { t = t + Text(parts[1]) }
+        return t
+    }
+
+    /// A language's name for a wheel, in the screen's language where the
+    /// system knows it (Interslavic and Proto-Slavic keep the app's own names).
+    private func short(_ l: String) -> String {
+        let ui = Ui.current
+        var n: String?
+        if ui != "isv", l != "isv", l != "sla" {
+            n = Locale(identifier: ui == "sr" ? "sr-Latn" : ui).localizedString(forLanguageCode: l)
+        }
+        let s = n ?? AppLangs.name(l)
+        return s.prefix(1).uppercased() + s.dropFirst()
+    }
+
+    private func stopPass() {
+        queue = nil; current = nil; line = []; revealed = false
     }
 
     /// Every topic in use, the language's own first, alphabetically.
@@ -210,11 +256,6 @@ struct LearnView: View {
 
     // MARK: language, topics, alphabets
 
-    private func counted(_ l: String) -> String {
-        let n = allCards.filter { $0.lang == l }.count
-        return AppLangs.name(l) + (n > 0 ? " (\(n))" : "")
-    }
-
     private func switchTo(_ l: String) {
         guard l != lang else { return }
         let running = queue != nil ? study : nil
@@ -224,8 +265,6 @@ struct LearnView: View {
         if !isAlphaFilter(filter) { filter = nil }
         queue = nil; current = nil; justDone = false; readIn = nil
         reload()
-        // The pair's name carries the language ("PL · ABC → ⰀⰁⰂ"): take the wheels' pair anew.
-        if let f = filter, f != Self.allAlpha, f.contains(" → ") { followWheels() }
         // Switched in the middle of a pass: it goes on in the new language.
         if let st = running {
             if st { start(Self.oneEach(shown.filter { !knownToday($0) }).shuffled(), study: true) }
@@ -233,69 +272,36 @@ struct LearnView: View {
         }
     }
 
-    /// The languages as one row of buttons above the cards, as in ✎ (owner
-    /// 261121: switch language right where the cards are): the keyboard's
-    /// languages, then the others paler (＋ joins the keyboard), each alphabetical.
-    private var langRow: some View {
-        let on = Set(langs)
-        // The keyboard's languages alphabetical (Interslavic among them,
-        // owner 261121), then the others to add, also alphabetical.
-        let all = AppLangs.codes.sorted { a, b in
-            if on.contains(a) != on.contains(b) { return on.contains(a) }
-            return a < b
-        }
-        return ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    ForEach(all, id: \.self) { l in
-                        let n = allCards.filter { $0.lang == l && !Self.isAlphabet($0) }.count
-                        Button {
-                            if !on.contains(l) { Shared.store.set(langs + [l], forKey: "languages") }
-                            switchTo(l)
-                        } label: {
-                            Text((on.contains(l) ? "" : "＋") + l.uppercased() + (n > 0 ? " \(n)" : ""))
-                                .font(.body.weight(l == lang ? .bold : .regular))
-                                .padding(.horizontal, 12).padding(.vertical, 7)
-                                .background(l == lang ? Color.accentColor.opacity(0.25) : Color(.systemGray4).opacity(0.6),
-                                            in: Capsule())
-                                .opacity(l == lang ? 1 : on.contains(l) ? 0.8 : 0.5)
-                        }
-                        .buttonStyle(.plain)
-                        .id(l)
-                    }
-                }
-            }
-            .onAppear { proxy.scrollTo(lang, anchor: .center) }
-        }
-    }
-
-    /// One button: the language being learned; the menu offers the keyboard's
-    /// languages first, then ＋ the others (turned on in the keyboard when picked).
-    private var langMenu: some View {
-        Menu {
-            ForEach(langs, id: \.self) { l in
-                Button(counted(l)) { switchTo(l) }
-            }
-            Section {
-                ForEach(AppLangs.codes.filter { !langs.contains($0) }, id: \.self) { l in
-                    Button("＋ " + counted(l)) {
-                        Shared.store.set(langs + [l], forKey: "languages")
-                        switchTo(l)
-                    }
-                }
-            }
-        } label: {
-            HStack {
-                Text("🌐  " + counted(lang)).font(.title3)
-                Spacer()
-                Text("▾").foregroundStyle(.secondary)
+    /// Two wheels, as for the alphabets: the language learned -> the language
+    /// its words are translated into (owner 261127, Android 3.11.33: nothing
+    /// said which language the translations came in). The keyboard's
+    /// languages, Interslavic first; only Polish has more than one language to
+    /// translate into, and the choice is the writing box's one.
+    @ViewBuilder private var wordWheels: some View {
+        let on = langs.sorted { ($0 != "isv" ? 1 : 0, $0) < ($1 != "isv" ? 1 : 0, $1) }
+        let ls = on.contains(lang) ? on : on + [lang]
+        let ts = lang == "pl" ? Gloss.targets("pl", enabled: langs) : ["pl"]
+        let trs = ts.isEmpty ? [Sets.target(lang)] : ts
+        let trNow = trs.first { $0 == Gloss.target(lang) } ?? trs[0]
+        HStack(spacing: 0) {
+            wheel(lang, ls, { l in
+                let n = allCards.filter { $0.lang == l && !Self.isAlphabet($0) }.count
+                return short(l) + (n > 0 ? " (\(n))" : "")
+            }) { switchTo($0) }
+            Text("→").foregroundStyle(.secondary)
+            wheel(trNow, trs, short) { to in
+                guard lang == "pl", to != trNow else { return }
+                UserDefaults.standard.set(to, forKey: "gloss_target_pl")
+                glosses = glosses.filter { !$0.key.hasPrefix("pl\t") }
+                reload()
             }
         }
     }
 
+    /// A topic as a tile: its name, under it the cards due and in all; a ready
+    /// set not taken yet has ＋ and no count.
     private struct Tile: Identifiable {
-        let label: String, on: Bool, tap: () -> Void
-        var id: String { label }
+        let id: String, name: String, cards: [Learn.Card]?, on: Bool, tap: () -> Void
     }
 
     private func pick(_ f: String?) {
@@ -313,52 +319,46 @@ struct LearnView: View {
             if c.cat.isEmpty { c.cat = name }
             Learn.update(c)
         }
-        let shownAs = l == lang ? name : "\(l.uppercased()) · \(name)"
-        say("\(Ui.t("learn_added")): \(shownAs)")
+        say("\(Ui.t("learn_added")): \(name)")
         reload()
-        pick(shownAs)
+        pick(name)
     }
 
-    /// Tiles: all, every topic in use, no topic, then the ready sets not taken;
-    /// alphabet topics (with ` → ` in the name) go to their own grid.
-    private var tiles: (topics: [Tile], alphabets: [Tile], addable: [Tile]) {
-        let cats = self.topics
-        var words: [Tile] = [], alpha: [Tile] = []
-        if !cards.isEmpty {
-            words.append(Tile(label: "\(Ui.t("learn_all")) (\(cards.filter { !Self.isAlphabet($0) }.count))", on: filter == nil) { pick(nil) })
+    /// Tiles: all words, every word topic in use, no topic, then the ready
+    /// sets not taken.
+    private var tiles: [Tile] {
+        let cats = self.topics.filter { !$0.contains(" → ") }
+        let words = cards.filter { !Self.isAlphabet($0) }
+        var out: [Tile] = []
+        if !words.isEmpty {
+            out.append(Tile(id: "\u{1}all", name: Ui.t("learn_all"), cards: words, on: filter == nil) { pick(nil) })
         }
         for c in cats {
-            let t = Tile(label: "\(c) (\(cards.filter { topic($0) == c }.count))", on: filter == c) { pick(c) }
-            if c.contains(" → ") { alpha.append(t) } else { words.append(t) }
+            out.append(Tile(id: c, name: c, cards: cards.filter { topic($0) == c }, on: filter == c) { pick(c) })
         }
-        if !cats.isEmpty, cards.contains(where: { $0.cat.isEmpty }) {
-            words.append(Tile(label: "\(Ui.t("learn_nocat")) (\(cards.filter { $0.cat.isEmpty }.count))",
-                               on: filter == "") { pick("") })
+        if !cats.isEmpty, words.contains(where: { $0.cat.isEmpty }) {
+            out.append(Tile(id: "\u{1}nocat", name: Ui.t("learn_nocat"), cards: words.filter { $0.cat.isEmpty },
+                            on: filter == "") { pick("") })
         }
         let l = lang, target = Sets.target(l)
         for set in Sets.names(l) {
             let name = Sets.title(set)
             if cats.contains(name) { continue }
-            words.append(Tile(label: "＋ \(name)", on: false) { take(name, Sets.words(set, l, target)) })
+            out.append(Tile(id: "\u{1}set " + set, name: "＋ \(name)", cards: nil, on: false) {
+                take(name, Sets.words(set, l, target))
+            })
         }
-        return (words, alpha, [])
+        return out
     }
 
     // MARK: the alphabet wheels
 
-    private func shownAs(_ src: String, _ name: String) -> String {
-        src == lang ? name : "\(src.uppercased()) · \(name)"
-    }
-
-    private func taken(_ src: String, _ name: String) -> Int {
-        let t = shownAs(src, name)
-        return cards.filter { topic($0) == t }.count
-    }
+    private func taken(_ name: String) -> Int { cards.filter { topic($0) == name }.count }
 
     private func wheel<T: Hashable>(_ sel: T, _ items: [T], _ label: @escaping (T) -> String,
                                     _ set: @escaping (T) -> Void) -> some View {
         Picker("", selection: Binding(get: { sel }, set: set)) {
-            ForEach(items, id: \.self) { Text(label($0)).tag($0) }
+            ForEach(items, id: \.self) { Text(label($0)).lineLimit(1).minimumScaleFactor(0.6).tag($0) }
         }
         .pickerStyle(.wheel).frame(maxWidth: .infinity)
         // Tall enough to show the neighbours above and below: at 110 pt only
@@ -366,48 +366,95 @@ struct LearnView: View {
         .frame(height: 180).clipped()
     }
 
-    /// The letters of the language being learned (🌐 at the top), Interslavic
-    /// when that one has a single script. No language wheel: every script is
-    /// there for every Latin-letter language anyway (owner 261118: "języki
-    /// się wpierdalają"). Turning onto a pair already taken shows its cards;
-    /// one not taken gets ＋.
-    @ViewBuilder private var alphabetWheels: some View {
-        let src = Alphabets.scripts(lang).count > 1 ? lang : "isv"
-        let all = Alphabets.scripts(src)
+    /// The pair the wheels show now. Both wheels hold every script (owner
+    /// 261121, Android): a right wheel without the left one's script shifted
+    /// under the finger when the left one turned, and runes -> Latin landed on Morse.
+    private var wheelPair: (all: [Scripts.Choice], from: Scripts.Choice, to: Scripts.Choice) {
+        let all = Alphabets.scripts(Self.alphaSrc)
         let from = all.first { $0.name == alphaFrom } ?? all[0]
-        let tos = all.filter { $0 != from }
-        let to = tos.first { $0.name == alphaTo } ?? tos[0]
+        let to = all.first { $0.name == alphaTo } ?? all.first { $0 != from } ?? all[0]
+        return (all, from, to)
+    }
+
+    /// The wheels stay on the screen; the pair on them is the pair studied.
+    /// Under them ＋ for a pair not taken yet and "all" for every alphabet
+    /// (no tiles, owner 261127), then the cheat sheet.
+    @ViewBuilder private var alphabetWheels: some View {
+        let w = wheelPair
+        let name = Alphabets.title(w.from, w.to)
+        let pairs = Alphabets.pair(Self.alphaSrc, w.from, w.to)
+        let alpha = cards.filter(Self.isAlphabet)
+        // With every alphabet chosen, the wheels are not what is studied.
+        let everyOn = filter == Self.allAlpha && !alpha.isEmpty
         HStack(spacing: 0) {
-            wheel(from, all, { $0.name }) { f in
+            wheel(w.from, w.all, { $0.name }) { f in
+                if alphaTo == nil { alphaTo = w.to.name }
                 alphaFrom = f.name
-                if alphaTo == f.name || alphaTo == nil { alphaTo = (all.first { $0 != f } ?? f).name }
-                follow(src, alphaFrom, alphaTo)
+                followWheels()
             }
             Text("→").foregroundStyle(.secondary)
-            wheel(to, tos, { t in t.name + (taken(src, Alphabets.title(from, t)) > 0 ? "  ✓" : "") }) { t in
-                alphaFrom = from.name; alphaTo = t.name
-                follow(src, alphaFrom, alphaTo)
+            wheel(w.to, w.all, { t in t.name + (taken(Alphabets.title(w.from, t)) > 0 ? "  ✓" : "") }) { t in
+                alphaFrom = w.from.name; alphaTo = t.name
+                followWheels()
             }
         }
-        let name = Alphabets.title(from, to)
-        let pairs = Alphabets.pair(src, from, to)
-        let n = taken(src, name)
-        let alpha = cards.filter(Self.isAlphabet).count
+        .opacity(everyOn ? 0.45 : 1)
         HStack {
-            if n > 0 {
-                Button("\(shownAs(src, name)) (\(n))") { pick(shownAs(src, name)) }
-                    .fontWeight(filter == shownAs(src, name) ? .bold : .regular)
-            } else if !pairs.isEmpty {
-                Button("＋ \(shownAs(src, name)) (\(pairs.count))") { take(name, pairs, from: src) }
+            if w.from == w.to {
+                small("\(w.from.name) = \(w.to.name)").frame(maxWidth: .infinity, alignment: .leading)
+            } else if taken(name) == 0, !pairs.isEmpty {
+                Button("＋ \(name) (\(pairs.count))") { take(name, pairs, from: Self.alphaSrc) }
+                    .buttonStyle(LookStyle(kind: .accent))
             }
-            Spacer()
-            // Every alphabet taken, of whatever language: reviewed apart from words.
-            if alpha > 0 {
-                Button("\(Ui.t("learn_all")) (\(alpha))") { pick(Self.allAlpha) }
-                    .fontWeight(filter == Self.allAlpha ? .bold : .regular)
+            if !alpha.isEmpty {
+                Button { pick(everyOn ? name : Self.allAlpha) } label: {
+                    Text(Ui.t("learn_all") + " ") + counts(alpha)
+                }
+                .buttonStyle(LookStyle(kind: everyOn ? .chosen : .plain))
             }
         }
-        .buttonStyle(.borderless)
+        sheet(w.from, w.to)
+    }
+
+    /// The cheat sheet's signs: the script translated INTO (the right wheel)
+    /// with the Latin letter under each sign, whatever the left wheel says;
+    /// with ABC on the right, the left wheel's script. Glagolitic: then the
+    /// Polish letters Interslavic has not (ą ę ł ń ó ś ź ż), in the Polish
+    /// spelling the keyboard writes (owner 261127).
+    private func sheetPairs(_ from: Scripts.Choice, _ to: Scripts.Choice) -> (Scripts.Choice, [(String, String)])? {
+        let latin = Scripts.Choice.script(.latin)
+        let target = to == latin ? from : to
+        guard target != latin else { return nil }
+        var pairs = Alphabets.pair(Self.alphaSrc, latin, target)
+        if target == .script(.glagolitic) {
+            let known = Set(pairs.flatMap { $0.1.components(separatedBy: " / ") })
+            pairs += Alphabets.pair("pl", latin, target).filter { p in
+                !p.1.components(separatedBy: " / ").contains(where: known.contains)
+            }
+        }
+        return (target, pairs)
+    }
+
+    /// Five columns for every script but Morse, so the sheets look alike;
+    /// Morse codes are wider, four fit. Runes big: two of them can differ
+    /// only by the slant of one twig (ᛅ a / ᚾ n).
+    @ViewBuilder private func sheet(_ from: Scripts.Choice, _ to: Scripts.Choice) -> some View {
+        if let (target, pairs) = sheetPairs(from, to) {
+            let morse = target == .morse
+            let runes: Bool = { if case .runes = target { return true }; return false }()
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 0), count: morse ? 4 : 5), spacing: 8) {
+                ForEach(Array(pairs.enumerated()), id: \.offset) { _, p in
+                    VStack(spacing: 2) {
+                        Text(p.0).font(.system(size: morse ? 20 : runes ? 36 : 30, weight: morse ? .bold : .regular,
+                                               design: morse ? .monospaced : .default))
+                            .lineLimit(1).minimumScaleFactor(0.6)
+                        Text(p.1).font(.system(size: 15)).foregroundStyle(Look.muted)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            .accessibilityIdentifier("learn_sheet")
+        }
     }
 
     /// The pair on the wheels is the pair studied, taken or not: "all
@@ -415,62 +462,69 @@ struct LearnView: View {
     /// alphabets section just opened) fell back to all of them, so with
     /// ABC → ⰀⰁⰂ on the wheels a Morse card due today came up in the pass
     /// (owner 261122: "nagle wpierdolił się morse").
-    private func follow(_ src: String, _ from: String?, _ to: String?) {
-        let all = Alphabets.scripts(src)
-        guard let f = all.first(where: { $0.name == from }) ?? all.first,
-              let t = all.first(where: { $0.name == to && $0 != f }) ?? all.first(where: { $0 != f }) else { return }
-        pick(shownAs(src, Alphabets.title(f, t)))
-    }
-
     private func followWheels() {
-        follow(Alphabets.scripts(lang).count > 1 ? lang : "isv", alphaFrom, alphaTo)
+        let w = wheelPair
+        pick(Alphabets.title(w.from, w.to))
     }
 
     private func grid(_ tiles: [Tile]) -> some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
             ForEach(tiles) { t in
                 Button(action: t.tap) {
-                    Text(t.label).font(.subheadline.weight(t.on ? .bold : .regular))
-                        .lineLimit(2).frame(maxWidth: .infinity, minHeight: 36)
+                    VStack(spacing: 2) {
+                        Text(t.name).font(.subheadline.weight(t.on ? .bold : .regular))
+                            .lineLimit(2).multilineTextAlignment(.center)
+                        if let c = t.cards { counts(c).font(.subheadline) }
+                    }
+                    .frame(maxWidth: .infinity, minHeight: 36)
                 }
-                .buttonStyle(.bordered)
-                .opacity(t.on ? 1 : 0.7)
+                .buttonStyle(LookStyle(kind: t.on ? .chosen : t.cards == nil ? .add : .plain))
             }
         }
-        .buttonStyle(.borderless)
     }
 
-    /// Every alphabet is offered in every language, so the heading names them all.
-    private let alphabetHead = "ABC · АБВ · ⰀⰁⰂ · ᛆᛒᛍ · ᚠᚢᚦ · ·−"
+    /// What to learn: words of a language, or alphabets. First on the screen:
+    /// it says what the count under it is about.
+    private var modeRow: some View {
+        HStack(spacing: 8) {
+            ForEach([false, true], id: \.self) { on in
+                Button { if alphaMode != on { setMode(on) } } label: {
+                    Text(on ? "ABC  А  Ⰰ  ᚠ  ·−" : Ui.t("learn_words"))
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                }
+                .buttonStyle(LookStyle(kind: alphaMode == on ? .chosen : .plain))
+                .accessibilityIdentifier(on ? "learn_mode_alpha" : "learn_mode_words")
+            }
+        }
+    }
 
     var body: some View {
         let t = tiles
+        let words = cards.filter { !Self.isAlphabet($0) }
         return NavigationStack {
             List {
-                // The review first, high up: what the tab is for (owner 261118).
+                // A pass has the screen to itself: what to learn waits under
+                // it only while no pass runs (Android 3.11.33: it took 53 %
+                // of the screen under the card).
+                if queue != nil {
+                    Section { cardBox }
+                } else {
                 Section {
-                    langRow
-                    Text(Ui.t("learn_due").replacingOccurrences(of: "{k}", with: "\(dueNow.count)"))
+                    modeRow
+                    dueLine
                     cardBox
                 }
-
-                // Then what to learn: words of a language, or new alphabets.
-                Section {
-                    Picker("", selection: Binding(get: { alphaMode }, set: setMode)) {
-                        Text(Ui.t("learn_words")).tag(false)
-                        Text("ABC · ⰀⰁⰂ · ᚠᚢᚦ · ·−").tag(true)
-                    }
-                    .pickerStyle(.segmented)
-                }
+                .listRowSeparator(.hidden)
 
                 if alphaMode {
-                    Section(alphabetHead) {
-                        small(Ui.body("learn_alpha_body"))
+                    Section {
+                        if !cards.contains(where: Self.isAlphabet) { small(Ui.body("learn_alpha_body")) }
                         // Only while 🎓 is shown: a wheel is a UIKit view that keeps
                         // taking touches under `opacity(0)` / `allowsHitTesting(false)`,
                         // so from the hidden tab it swallowed every tap in ✎ (owner 261118).
                         if active { alphabetWheels } else { Color.clear.frame(height: 180) }
                     }
+                    .listRowSeparator(.hidden)
                     Section {
                         DisclosureGroup("\(Ui.t("learn_my_letters")) (\(letterList.count))", isExpanded: $showLetters) {
                             if letterList.isEmpty { small(Ui.t("learn_empty")) }
@@ -485,11 +539,14 @@ struct LearnView: View {
                     }
                 } else {
                 Section {
-                    small(Ui.body("learn_body"))
+                    // The how-to only while there is nothing yet.
+                    if words.isEmpty { small(Ui.body("learn_body")) }
+                    if active { wordWheels } else { Color.clear.frame(height: 180) }
                 }
+                .listRowSeparator(.hidden)
 
-                if !t.topics.isEmpty {
-                    Section(Ui.head("learn_topics")) { grid(t.topics) }
+                if !t.isEmpty {
+                    Section(Ui.head("learn_topics")) { grid(t) }
                 }
 
                 Section {
@@ -547,6 +604,7 @@ struct LearnView: View {
                             }
                         }
                     }
+                }
                 }
                 }
             }
@@ -614,8 +672,25 @@ struct LearnView: View {
             let alphabet = card.cat.contains(" → ")
             let scripts = alphabet ? [] : Script.offered(card.lang)
             let mode = readIn.flatMap { scripts.contains($0) && $0 != scripts.first ? $0 : nil }
+            let morse = card.cat.hasSuffix(Script.morseLabel)
+            let left = (queue?.count ?? 0) + line.count + 1
             VStack(spacing: 10) {
-                small(AppLangs.name(card.lang) + (card.cat.isEmpty ? "" : " · \(card.cat)"))
+                // Where the pass is, and the way out of it.
+                HStack {
+                    Text("\(max(1, passTotal - left + 1)) / \(passTotal) · \(deckName)")
+                        .font(.subheadline).foregroundStyle(Look.muted).lineLimit(1)
+                    Spacer()
+                    Button("✕") { stopPass() }
+                        .buttonStyle(LookStyle(kind: .plain, wide: false))
+                        .accessibilityIdentifier("learn_stop")
+                }
+                // An alphabet has no language; its pair is named once (the line
+                // above says it already, unless every alphabet is studied).
+                if !alphabet {
+                    small(AppLangs.name(card.lang) + (card.cat.isEmpty ? "" : " · \(card.cat)"))
+                } else if card.cat != deckName {
+                    small(card.cat)
+                }
                 // Reading practice: a word card can be shown in another script
                 // of its language (Interslavic in Cyrillic or Glagolitic, Polish
                 // in Glagolitic). Alphabet cards are already in their script.
@@ -628,11 +703,15 @@ struct LearnView: View {
                         }
                     }
                 }
+                // A sign to learn is drawn big: a Morse "−−" at 32 pt was a few
+                // pixels high. 56 is a step on a ladder (48/56/64).
                 Text(mode.map { Scripts.convert(card.word, $0, card.lang) } ?? card.word)
-                    .font(.system(size: 34, weight: .bold, design: card.cat.hasSuffix("·−") ? .monospaced : .default))
-                    .multilineTextAlignment(.center)
+                    .font(.system(size: alphabet ? 56 : 34, weight: .bold, design: morse ? .monospaced : .default))
+                    .tracking(alphabet && morse ? 8 : 0)
+                    .multilineTextAlignment(.center).minimumScaleFactor(0.5)
+                    .padding(.vertical, alphabet ? 12 : 0)
                 if !revealed {
-                    Button(Ui.t("learn_show")) { revealed = true }.buttonStyle(.borderedProminent)
+                    Button(Ui.t("learn_show")) { revealed = true }.buttonStyle(LookStyle(kind: .accent))
                 } else {
                     // The back: the translation first (what is checked), the word
                     // as normally written under it when it was read in another script.
@@ -647,11 +726,12 @@ struct LearnView: View {
                     if mode != nil { Text(card.word).font(.title3).foregroundStyle(.secondary) }
                     if !card.note.isEmpty { Text(card.note).frame(maxWidth: .infinity, alignment: .leading) }
                     if !card.ex.isEmpty { Text(card.ex).italic().frame(maxWidth: .infinity, alignment: .leading) }
-                    FitRow {
-                        ForEach([(0, "learn_g0"), (1, "learn_g1"), (2, "learn_g2")], id: \.0) { g, key in
-                            Button(Ui.t(key)) { grade(card, g) }
-                                .buttonStyle(.bordered).frame(maxWidth: .infinity)
-                        }
+                    // Side by side: don't know, so-so, know (as Android). One under
+                    // the other, when the labels do not fit at a large text size:
+                    // know first (owner 261127).
+                    ViewThatFits(in: .horizontal) {
+                        HStack { ForEach([0, 1, 2], id: \.self) { gradeButton(card, $0) } }
+                        VStack { ForEach([2, 1, 0], id: \.self) { gradeButton(card, $0) } }
                     }
                 }
             }
@@ -662,17 +742,56 @@ struct LearnView: View {
             // Review takes the cards due now; study goes through every card of
             // the chosen topic in random order, so there is always something
             // to do after the review is over.
+            // Both always answer a tap (owner 261127: "aktywne mają być"):
+            // see `begin`.
             FitRow {
-                Button(Ui.t("learn_start")) { start(dueNow, study: false) }
-                    .disabled(dueNow.isEmpty)
-                    .buttonStyle(.bordered).frame(maxWidth: .infinity)
-                Button(Ui.t("learn_study")) { start(Self.oneEach(shown.filter { !knownToday($0) }).shuffled(), study: true) }
-                    // Every card already known today: nothing to study until midnight.
-                    .disabled(shown.allSatisfy { knownToday($0) })
-                    .buttonStyle(.bordered).frame(maxWidth: .infinity)
+                Button { begin(study: false) } label: { Text(Ui.t("learn_start")).lineLimit(1) }
+                    .buttonStyle(LookStyle(kind: .accent))
+                    .accessibilityIdentifier("learn_start")
+                Button { begin(study: true) } label: { Text(Ui.t("learn_study")).lineLimit(1) }
+                    .buttonStyle(LookStyle(kind: .plain))
+                    .accessibilityIdentifier("learn_study")
             }
             .buttonStyle(.borderless)
         }
+    }
+
+    /// Review takes the cards due now; study goes through every card of the
+    /// chosen deck in random order. Neither button is ever greyed out:
+    /// - an alphabet pair on the wheels not taken yet is taken by the tap
+    ///   (the runes looked locked: nothing said ＋ had to come first);
+    /// - study with every card known today goes through them all again;
+    /// - review with nothing due says so.
+    private func begin(study: Bool) {
+        var pool = shown
+        if pool.isEmpty, alphaMode, filter != Self.allAlpha {
+            let w = wheelPair
+            let name = Alphabets.title(w.from, w.to)
+            let pairs = Alphabets.pair(Self.alphaSrc, w.from, w.to)
+            if !pairs.isEmpty {
+                take(name, pairs, from: Self.alphaSrc)
+                pool = Learn.cards(order: AppLangs.codes).filter { $0.cat == name }
+            }
+        }
+        if study {
+            var l = Self.oneEach(pool.filter { !knownToday($0) })
+            if l.isEmpty { l = Self.oneEach(pool) }
+            guard !l.isEmpty else { say(Ui.t("learn_empty")); return }
+            start(l.shuffled(), study: true)
+        } else {
+            let l = Self.oneEach(Learn.due(pool).filter { !knownToday($0) })
+            guard !l.isEmpty else {
+                say(pool.isEmpty ? Ui.t("learn_empty") : Ui.t("learn_done"))
+                return
+            }
+            start(l, study: false)
+        }
+    }
+
+    private func gradeButton(_ card: Learn.Card, _ g: Int) -> some View {
+        Button { grade(card, g) } label: { Text(Ui.t("learn_g\(g)")).lineLimit(1) }
+            .buttonStyle(LookStyle(kind: g == 0 ? .miss : g == 1 ? .plain : .accent))
+            .accessibilityIdentifier("learn_g\(g)")
     }
 
     private func start(_ cards: [Learn.Card], study: Bool) {
@@ -691,6 +810,7 @@ struct LearnView: View {
         let old = cards.filter { $0.reps > 0 }
         let rest = cards.filter { $0.reps == 0 }
         queue = old + ordered(rest.filter { !$0.isNew }) + ordered(rest.filter(\.isNew))
+        passTotal = cards.count
         line = []; firstGrade = [:]; misses = [:]; recent = []; sinceNew = 0
         self.study = study
         revealed = false
@@ -769,6 +889,63 @@ struct LearnView: View {
             }
             Spacer()
             if !cat.isEmpty { Text(cat).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
+        }
+    }
+}
+
+/// Colour only where there is something to press or a state to read (owner
+/// 261127, Android 3.11.33): the icon's blue on the main action (white text
+/// on it 5.1:1), its yellow on the cards due, a surface with an outline 3:1
+/// to the page for the other buttons.
+enum Look {
+    private static func ui(_ rgb: UInt32) -> UIColor {
+        UIColor(red: CGFloat((rgb >> 16) & 0xFF) / 255, green: CGFloat((rgb >> 8) & 0xFF) / 255,
+                blue: CGFloat(rgb & 0xFF) / 255, alpha: 1)
+    }
+    private static func dyn(_ light: UInt32, _ dark: UInt32) -> Color {
+        Color(UIColor { $0.userInterfaceStyle == .dark ? ui(dark) : ui(light) })
+    }
+    static let accent = Color(ui(0x3A66D9))
+    static let count = dyn(0x8A6D00, 0xF5C400)
+    static let muted = dyn(0x5F6B73, 0x8A99A1)
+    static let miss = dyn(0xB3261E, 0xFF8A80)
+    static let edge = dyn(0x7D8C96, 0x5F6B73)
+    static let surface = dyn(0xECEFF1, 0x262A2E)
+    static let chosenFill = dyn(0xDCE5FB, 0x2A3550)
+    static let chosenInk = dyn(0x2F57C4, 0xAFC4FF)
+}
+
+/// The tab's buttons: the main action, the chosen one, "don't know", a set
+/// to add (＋, paler), the rest.
+struct LookStyle: ButtonStyle {
+    enum Kind { case plain, accent, chosen, miss, add }
+    var kind: Kind = .plain
+    /// Takes the row's whole width (the ✕ of a pass does not).
+    var wide = true
+
+    func makeBody(configuration: Configuration) -> some View {
+        Face(kind: kind, wide: wide, pressed: configuration.isPressed, label: configuration.label)
+    }
+
+    private struct Face<L: View>: View {
+        let kind: Kind, wide: Bool, pressed: Bool, label: L
+        @Environment(\.isEnabled) private var enabled
+        var body: some View {
+            // A main action that cannot be pressed looks like the others.
+            let k: Kind = kind == .accent && !enabled ? .plain : kind
+            let fill: Color = k == .accent ? Look.accent : k == .chosen ? Look.chosenFill : Look.surface
+            let edge: Color = k == .chosen ? Look.accent : k == .miss ? Look.miss : Look.edge
+            let ink: Color = k == .accent ? .white : k == .chosen ? Look.chosenInk
+                : k == .miss ? Look.miss : k == .add ? Look.muted : .primary
+            let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+            label
+                .foregroundStyle(ink)
+                .padding(.horizontal, 14).padding(.vertical, 12)
+                .frame(maxWidth: wide ? .infinity : nil)
+                .background(fill, in: shape)
+                .overlay(shape.strokeBorder(edge, lineWidth: k == .accent ? 0 : k == .chosen ? 2 : 1))
+                .contentShape(shape)
+                .opacity(enabled ? (pressed ? 0.7 : 1) : 0.4)
         }
     }
 }
