@@ -385,6 +385,14 @@ class SetupActivity : Activity() {
     // The language switched on the keyboard (space bar, 🌐) while this screen
     // is open: the screen, its language and the text in ✎ follow (owner 261121).
     private val langListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        // The script key on the keyboard (next to 🌐): the text in the box
+        // and the alphabet row follow it at once (owner 261127).
+        if (key != null && key.startsWith("script") && !trySwitching) {
+            val cur = Lang.current(this)
+            if (key == (if (cur == Lang.ISV) "script" else "script_$cur"))
+                tryScriptFollow?.invoke(Script.chosen(this, cur))
+            return@OnSharedPreferenceChangeListener
+        }
         if (key != "language" || trySwitching) return@OnSharedPreferenceChangeListener
         val now = Lang.current(this)
         if (tryBuiltSig?.substringAfter('|')?.substringBefore('|') == now) return@OnSharedPreferenceChangeListener
@@ -634,9 +642,20 @@ class SetupActivity : Activity() {
         val brand = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            addView(android.widget.ImageView(this@SetupActivity).apply {
-                setImageDrawable(applicationInfo.loadIcon(packageManager))
+            // The icon's hearts on a grey tile, the screen's own surface: the
+            // launcher's white tile (Samsung) hid the white heart (owner 261127).
+            addView(android.widget.FrameLayout(this@SetupActivity).apply {
+                background = android.graphics.drawable.GradientDrawable().apply {
+                    cornerRadius = 10 * d
+                    setColor(col("#DDE1E4", "#3A4045"))
+                }
+                clipToOutline = true
                 contentDescription = "Interslove"
+                // The hearts as a vector without the icon's field (the
+                // launcher foreground PNG has an opaque white field baked in).
+                addView(android.widget.ImageView(this@SetupActivity).apply {
+                    setImageResource(R.drawable.hearts_mark)
+                }, android.widget.FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
             }, LinearLayout.LayoutParams((40 * d).toInt(), (40 * d).toInt()))
             addView(TextView(this@SetupActivity).apply {
                 text = "Interslove"

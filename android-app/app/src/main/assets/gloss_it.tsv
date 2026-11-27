@@ -48,7 +48,6 @@ da	określający kierunek
 do	do
 e	piąta litera włoskiego alfabetu
 e	i
-est	Ester → Księga Estery
 flirt	flirt
 gas	gaz
 golf	golf
@@ -64,7 +63,6 @@ lek	lek
 lev	lew
 li	używany do określenia dat
 li	ich
-ne	Libro di Neemia → Księga Nehemiasza
 nenia	pieśń żałobna
 net	net
 nome	imię
@@ -90,25 +88,20 @@ sia	1
 star	gwiazda
 sud	południe
 sud	południowy
-austria	Austria
 panna	śmietana
 moneta	moneta
 stella	gwiazda
 umbra	Umbryjka
 tautologia	tautologia
 x	x
-albania	Albania
 lato	bok
 lato	obszerny
 radio	rad
 radio	radiokomunikacja
 radio	radiowy
-norvegia	Norwegia
 verde	zielony
 verde	zieleń
 s	siedemnasta litera włoskiego alfabetu
-ok	OK
-ok	OK
 dolina	lej krasowy
 kimono	kimono
 omega	omega
@@ -126,14 +119,11 @@ zebra	zebra
 zero	zero
 zero	zero
 zip	zamek błyskawiczny
-estonia	Estonia
 mafia	mafia
 gondola	gondola
 cluster	klaster
 colon	okrężnica
 tank	cysterna
-ue	Unione Europea → UE
-mt	Vangelo di Matteo → Ewangelia Mateusza
 gloria	chwała
 gloria	Gloria
 formica	mrówka
@@ -176,26 +166,19 @@ martedì	wtorek
 mercoledì	środa
 sabato	sobota
 venerdì	piątek
-dominica	Dominika
 sabbato	sobota
-lusitania	Luzytania
 tenere	trzymać
 memoria	pamięć
 lupus	toczeń
 lupa	wilczyca
 go	go
-canada	Kanada
 gonna	spódnica
 bi	be
-cr	Libro delle Cronache → Krn
 no	nie
 no	przeczenie
-tb	Tobia → Księga Tobiasza
 ti	…jako dopełnienie bliższe ci
 patria	ojczyzna
 dafnia	dafnia
-europa	Europa
-europa	Europa
 brio	werwa
 esse	es
 esse	one
@@ -460,7 +443,6 @@ ardesia	łupek
 ardesia	kolor szaroniebieski
 ardesia	szaroniebieski
 area	teren
-argentina	Argentyna
 argentino	argentyński
 argentino	Argentyńczyk
 argento	srebro
@@ -570,128 +552,9 @@ anemo-	anemo
 automobile	samochodowy
 automobile	samochód
 alcuno	jakiś
-afghanistan	Afganistan
-africa	Afryka
-alaska	Alaska
-algeria	Algieria
-america	Ameryka
-amsterdam	Amsterdam
-andorra	Andora
-angola	Angola
-arabia	Arabia
-aristotele	Arystoteles
-arizona	Arizona
-armenia	Armenia
-asia	Azja
-australia	Australia
-azerbaijan	Azerbejdżan
-baltico	Bałtyk
-bavaria	Bawaria
 belga	belgijski
 belga	Belg
 belga	Belgijka
-bolivia	Boliwia
-bruxelles	Bruksela
-bucarest	Bukareszt
-budapest	Budapeszt
-bulgaria	Bułgaria
-california	Kalifornia
-camerun	Kamerun
-caucaso	Kaukaz
-cesare	imię męskie Cezary
-ceylon	Cejlon
-confucio	Konfucjusz
-congo	Kongo
-corea	Korea
-corsica	Korsyka
-cracovia	Kraków
-creta	Kreta
-crimea	Krym
-cuba	Kuba
-danubio	Dunaj
-dnepr	Dniepr
-elba	Łaba
-elba	Elba
-eos	Eos
-eros	Eros
-esopo	Ezop
-eurasia	Eurazja
-finlandia	Finlandia
-friburgo	Fryburg
-galilea	Galilea
-galles	Walia
-gange	Ganges
-germania	Niemcy
-groenlandia	Grenlandia
-helsinki	Helsinki
-india	Indie
-indonesia	Indonezja
-iran	Iran
-iraq	Irak
-irlanda	Irlandia
-islanda	Islandia
-istanbul	Stambuł
-italia	Włochy
-jugoslavia	Jugosławia
-kosovo	Kosowo
-labrador	Labrador
-lettonia	Łotwa
-lituania	Litwa
-lorena	Lotaryngia
-macedonia	Macedonia
-manica	Kanał La Manche
-marocco	Maroko
-marte	Mars
-mediterraneo	Morze Śródziemne
-mercurio	Merkury
-mesopotamia	Mezopotamia
-messia	Mesjasz
-micronesia	Mikronezja
-montenegro	Czarnogóra
-moravia	Morawy
-nigeria	Nigeria
-nilo	Nil
-normandia	Normandia
-nubia	Nubia
-oceania	Oceania
-pacifico	Pacyfik
-palestina	Palestyna
-paraguay	Paragwaj
-parma	Parma
-persia	Persja
-polonia	Polska
-ravenna	Rawenna
-roma	Rzym
-romania	Rumunia
-russia	Rosja
-sahara	Sahara
-samaria	Samaria
-saturno	Saturn
-scandinavia	Skandynawia
-senegal	Senegal
-serbia	Serbia
-seychelles	Seszele
-siberia	Syberia
-sicilia	Sycylia
-singapore	Singapur
-sion	Syjon
-sion	Syjon
-slovenia	Słowenia
-sodoma	Sodoma
-sudan	Sudan
-sumatra	Sumatra
-transilvania	Siedmiogród
-troia	Troja
-turchia	Turcja
-urano	Uranos
-vaticano	Watykan
-venere	Wenera
-venezuela	Wenezuela
-vesuvio	Wezuwiusz
-vienna	Wiedeń
-vietnam	Wietnam
-vladivostok	Władywostok
-volga	Wołga
 bacillo	pałeczka
 bacon	bekon
 badminton	badminton
@@ -1815,17 +1678,8 @@ hardware	hardware
 herpes	opryszczka
 humus	humus
 potassa	potaż
-gallia	Galia
-praga	Praga
-rt	Rut → Księga Rut
-rut	imię żeńskie Rut
-ml	Libro di Malachia → Księga Malachiasza
 opera	dzieło
 temperatura	temperatura
-afganistan	Afganistan
-etiopia	Etiopia
-haiti	Haiti
-georgia	Gruzja
 droga	przyprawa korzenna
 vinco	Salix viminalis
 idea	idea
@@ -2513,7 +2367,6 @@ possibile	możliwy
 cesta	kosz
 giraffa	żyrafa
 falco	sokół
-lipsia	Lipsk
 posto	miejsce
 potabile	pitny
 potente	potężny
@@ -2655,7 +2508,6 @@ resto	reszta
 rete	sieć
 reticente	powściągliwy
 reversibile	odwracalny
-aquitania	Akwitania
 ricco	bogaty
 rima	rym
 riso	śmiech
@@ -3111,8 +2963,6 @@ chi	ktoś
 chi	kto?
 mane	poranek
 creazione	stworzenie
-pasquetta	Poniedziałek Wielkanocny
-pasqua	Pascha
 artista	artysta
 artista	artystka
 baro	szuler
@@ -3272,7 +3122,6 @@ maltese	Maltańczyk
 maltese	Maltanka
 turco	turecki
 turco	Turek
-maria	imię żeńskie Maria
 dove	gdzie
 politologia	politologia
 turchese	turkus
@@ -3381,18 +3230,11 @@ broda	woda z gotowania
 bob	bobslej
 bagno	kąpiel
 bara	trumna
-barbados	Barbados
-benin	Benin
-bermuda	Bermudy
-bhutan	Bhutan
 del	przyimek di + rodzajnik określony il
 energia	energia
 hui	oj!
 internet	internet
-kiev	Kijów
-wikipedia	Wikipedia
 lavina	lawina
-moldovia	Mołdawia
 prosit	na zdrowie!
 pero	grusza
 pedofilia	pedofilia
@@ -3402,7 +3244,6 @@ rado	rzadko
 rado	radon
 mentire	kłamać
 yoghurt	zob. yogurt
-malta	Malta
 slava	Słowianka
 croissant	rogalik
 sfera	kula
@@ -3410,9 +3251,7 @@ casciubico	kaszubski
 casciubico	Kaszub
 seme	nasienie
 sapere	wiedzieć
-monaco	Monako
 sincero	szczery
-sofia	imię żeńskie Zofia
 testo	tekst
 negozio	sklep
 volpe	lis
@@ -3424,36 +3263,6 @@ zia	ciocia
 nonno	dziadek
 nonna	babcia
 icona	ikona
-abaco	imię męskie Habakuk
-adriatico	Adriatyk
-agata	imię żeńskie Agata
-angelus	Anioł Pański
-anglo	Angl
-anguilla	Anguilla
-bahrain	Bahrajn
-bosnia	Bośnia
-campania	Kampania
-chicago	Chicago
-christian	imię męskie Krystian
-colonia	Kolonia
-es	Esodo → Księga Wyjścia
-francia	Francja
-grecia	Grecja
-libano	Liban
-lima	Lima
-mensa	Góra Stołowa
-mosca	Moskwa
-oder	Odra
-orange	Oranje
-po	Pad
-pomerania	Pomorze
-rabat	Rabat
-re	Libro dei Re → Krl
-remo	Remigiusz
-ruhr	Ruhra
-seul	Seul
-siam	Syjam
-tantalo	Tantal
 malta	zaprawa
 band	band
 ne	zastępuje di + rzeczownik osobowy
@@ -3468,9 +3277,6 @@ pulce	pchła
 lucertola	jaszczurka
 coleottero	Coleoptera
 farfalla	motyl
-varsavia	Warszawa
-belgio	Belgia
-olanda	Holandia
 gatto	kot
 tè	herbata
 danza	taniec
@@ -3484,7 +3290,6 @@ cellulare	telefon komórkowy
 flavo	złocistożółty
 geografia	geografia
 ingegneria	inżynieria
-reykjavík	Reykjavík
 bruno	kolor brunatny
 bruno	brunatny
 ragazza	dziewczyna
@@ -3501,10 +3306,6 @@ aspro	o smaku
 umami	umami
 bitter	gorzki aperitif
 carpa	karp
-bielorussia	Białoruś
-croazia	Chorwacja
-cipro	Cypr
-danimarca	Dania
 entalpia	entalpia
 zucchero	cukier
 sale	sól
@@ -3526,22 +3327,9 @@ la	wyraz nietłumaczony
 la	ją
 la	tę
 la	la
-liechtenstein	Liechtenstein
-lussemburgo	Luksemburg
-lussemburgo	Luksemburg
-moldavia	Mołdawia
-ungheria	Węgry
-ucraina	Ukraina
-portogallo	Portugalia
-svizzera	Szwajcaria
-svezia	Szwecja
-spagna	Hiszpania
-slovacchia	Słowacja
-abs	ABS
 nuovo	nowy
 nuovo	nowość
 equazione	równanie
-nasa	NASA
 sala	sala
 sui	przyimek su + rodzajnik określony i
 quinto	piąty
@@ -3602,24 +3390,20 @@ amministratore	administrator
 acquario	akwarium
 alcool	zob. alcol
 finire	kończyć
-teresa	imię żeńskie Teresa
 oso	odważny
 -filia	filia
 fobia	fobia
 antropologia	antropologia
 ragazzo	chłopiec
-tanzania	Tanzania
 multa	mandat
 sierra	pasmo gór
 ateo	ateistyczny
 ateo	ateista
-aids	AIDS
 piano	płaszczyzna
 piano	płaski
 piano	powoli
 aiuto	pomoc
 aiuto	pomocy!
-pakistan	Pakistan
 contenuto	zawarty
 contenuto	zawartość
 banda	bok
@@ -3637,28 +3421,16 @@ teso	napięty
 tuta	kombinezon
 uso	korzyść
 enciclopedia	encyklopedia
-nepal	Nepal
-turkmenistan	Turkmenistan
 petrografia	petrografia
 litologia	litologia
-kenia	Kenia
 animale	zwierzęcy
 animale	zwierzę
 lume	lampa
-tailandia	zob. Thailandia
-thailandia	Tajlandia
-kirghizistan	Kirgistan
-kenya	Kenia
 pari	równy
 ca.	circa → około
-giove	Jowisz
-nettuno	Neptun
-plutone	Pluton
-venera	imię żeńskie
 tela	tkanina
 ateista	ateista
 ateista	ateistka
-paolo	imię męskie Paweł
 ortografia	ortografia
 amoroso	miłosny
 conciso	zwięzły
@@ -3666,19 +3438,11 @@ analfabeta	analfabeta
 analfabeta	analfabetka
 intervenire	wtrącać się
 venire	przyjść
-nairobi	Nairobi
 idrostatica	hydrostatyka
 manometro	manometr
 imparare	uczyć się
-stefano	imię męskie Stefan
-pietro	imię męskie Piotr
-piero	imię męskie Piotr
-remigio	Remigiusz
 inondazione	powódź
 chiesa	kościół
-chiesa	Kościół katolicki
-adelaide	imię żeńskie Adelajda
-adelaida	imię żeńskie Adelajda
 pressione	ciśnienie
 qualcuno	ktoś
 qcn.	qualcuno → ktoś
@@ -3689,11 +3453,9 @@ qcs	qualcosa → coś
 evocare	wywoływać
 provocare	prowokować
 strada	ulica
-firenze	Florencja
 peggiorativo	pejoratywny
 stampante	drukarka
 bicchiere	szklanka
-copenaghen	Kopenhaga
 differenza	różnica
 acuto	ostry
 acuto	najwyższa nuta
@@ -3706,72 +3468,12 @@ saga	saga
 box	boks
 malattia	choroba
 meta	meta
-ada	imię żeńskie Ada
 ahi	aj!
 dai	przyimek da + rodzajnik określony i
 fase	faza
 gel	żel
 rame	miedź
 gorilla	goryl
-abkhazia	Abchazja
-aruba	Aruba
-bangladesh	Bangladesz
-belize	Belize
-botswana	Botswana
-brunei	Brunei
-burundi	Burundi
-colombia	Kolumbia
-ecuador	Ekwador
-eritrea	Erytrea
-gabon	Gabon
-ghana	Ghana
-grenada	Grenada
-guatemala	Gwatemala
-guernsey	Guernsey
-guinea	Gwinea
-guinea-bissau	Gwinea Bissau
-guyana	Gujana
-honduras	Honduras
-jersey	Jersey
-kazakhstan	Kazachstan
-kiribati	Kiribati
-kuwait	Kuwejt
-laos	Laos
-lesotho	Lesotho
-liberia	Liberia
-madagascar	Madagaskar
-malawi	Malawi
-mauritania	Mauretania
-mauritius	Mauritius
-mongolia	Mongolia
-nagorno-karabakh	Górski Karabach
-namibia	Namibia
-nauru	Nauru
-nicaragua	Nikaragua
-niger	Niger
-oman	Oman
-palau	Palau
-panama	Panama
-panama	Panama
-transnistria	Naddniestrze
-qatar	Katar
-samoa	Samoa
-somalia	Somalia
-suriname	Surinam
-swaziland	Suazi
-togo	Togo
-tonga	Tonga
-tunisia	Tunezja
-tuvalu	Tuvalu
-uganda	Uganda
-uruguay	Urugwaj
-uzbekistan	Uzbekistan
-vanuatu	Vanuatu
-yemen	Jemen
-zambia	Zambia
-zimbabwe	Zimbabwe
-ebro	Ebro
-orinoco	Orinoko
 agenda	notes
 pandeismo	pandeizm
 omo	człowiek
@@ -3790,8 +3492,6 @@ lui	on
 trimestre	kwartał
 famiglia	rodzina
 ecco	oto
-natale	Boże Narodzenie
-natale	imię męskie Natalis
 padrino	ojciec chrzestny
 patrigno	ojczym
 lue	lues
@@ -3800,7 +3500,6 @@ nipote	wnuk
 nipote	wnuczka
 tallo	pęd
 ferie	urlop
-anna	imię żeńskie Anna
 gi	gie
 alle	przyimek a + rodzajnik określony le
 gran	zob. grande
@@ -3818,8 +3517,6 @@ dal	przyimek da + rodzajnik określony il
 dato	dany
 dato	podstawa
 cinema	kino
-eris	Eris
-eris	Eris
 violinista	skrzypek
 violinista	skrzypaczka
 renna	Rangifer tarandus
@@ -3861,7 +3558,6 @@ suo	jego
 legge	prawo
 grande	duży
 grande	dorosły
-deimos	Deimos
 pianista	pianista
 pianista	pianistka
 vario	różny
@@ -3869,13 +3565,10 @@ completo	cały
 completo	komplet
 sistema	układ
 aroma	aromat
-libia	Libia
 prof.	professore → profesor
-pc	PC
 bis	bis!
 bis	bis
 bis	dodatkowy
-cv	cavallo vapore → koń mechaniczny
 vegetarianismo	wegetarianizm
 serie	seria
 pagina	strona
@@ -3927,7 +3620,6 @@ espresso	espresso
 cappuccino	kapucyn
 halva	chałwa
 celadon	seledyn
-madrid	Madryt
 crepuscolo	zmierzch
 polpo	ośmiornica
 iceberg	góra lodowa
@@ -3963,7 +3655,6 @@ coyote	Canis latrans
 iguana	iguana
 caldera	kaldera
 writer	grafficiarz
-andalusia	Andaluzja
 alone	halo
 perpetuo	wieczny
 happening	happening
@@ -3999,8 +3690,6 @@ opossum	Didelphis Linnaeus
 durante	podczas
 europeo	europejski
 europeo	Europejczyk
-washington	Waszyngton
-washington	Waszyngton
 cristiano	chrześcijański
 cristiano	chrześcijanin
 triste	smutny
@@ -4026,7 +3715,6 @@ cazzo	kutas
 cazzo	kurwa!
 coglione	jądro
 coglione	durny
-andre	imię męskie Andrzejek
 vendere	sprzedać
 ornare	ozdabiać
 armata	armia
@@ -4040,13 +3728,11 @@ molo	molo
 desire	pragnienie
 gol	gol
 pube	kość łonowa
-ceuta	Ceuta
 croupier	krupier
 yeti	yeti
 yoga	joga
 piccolo	mały
 piranha	pirania
-pisa	Piza
 pixel	piksel
 interlingua	interlingua
 playboy	playboy
@@ -4056,7 +3742,6 @@ popcorn	zob. pop-corn
 portico	portyk
 karate	karate
 karaoke	karaoke
-melilla	Melilla
 quivi	tam
 igloo	igloo
 lite	sprzeczka
@@ -4088,7 +3773,6 @@ radio-	radio
 urea	mocznik
 airbag	poduszka powietrzna
 cactus	kaktus
-s.	Santo → św
 s.	secolo → wiek
 volume	objętość
 né	ani
@@ -4101,7 +3785,6 @@ sidro	cydr
 oh	ach!
 online	online
 enorme	potężny
-assisi	Asyż
 nuvola	chmura
 uomo	Homo sapiens
 largo	szerokość
@@ -4149,8 +3832,6 @@ biglietto	bilecik
 gradevole	miły
 ottimo	optimum
 coperta	nakrycie
-bratislava	Bratysława
-vilnius	Wilno
 valore	wartość
 importanza	ważność
 onesto	uczciwy
@@ -4261,7 +3942,6 @@ basta	aby tylko
 basta	dość!
 basta	fastryga
 vero	prawdziwy
-alessandro	imię męskie Aleksander
 angelo	anioł
 richiamare	przywoływać
 carezza	pieszczota
@@ -4315,8 +3995,6 @@ corretto	poprawny
 dovere	musieć
 dovere	być winnym
 dovere	obowiązek
-gambia	Gambia
-mali	Mali
 aggressivo	agresywny
 buono	dobry
 buono	dobro
@@ -4380,14 +4058,7 @@ baciare	całus
 credere	wierzyć
 conoscere	znać
 pensare	myśleć
-edvige	imię żeńskie Jadwiga
-ignazio	imię męskie Ignacy
-susanna	imię żeńskie Zuzanna
-cristina	imię żeńskie Krystyna
-cristoforo	imię męskie Krzysztof
-laura	imię żeńskie Laura
 limonata	lemoniada
-lidia	Lidia
 fornito	wyposażony
 domandare	pytać
 domandare	pytać się
@@ -4402,7 +4073,6 @@ liliale	czysty
 neve	śnieg
 napoletano	neapolitański
 napoletano	neapolitańczyk
-lombardia	Lombardia
 fiore	kwiat
 anca	biodro
 gioventù	młodość
@@ -4421,13 +4091,11 @@ torinese	turyński
 torinese	turyńczyk
 torinese	turynka
 lattice	zob. latice
-luanda	Luanda
 abjad	abdżad
 essenziale	główny
 essenziale	rzecz podstawowa
 territoriale	terytorialny
 regione	region
-abruzzo	Abruzja
 matita	ołówek
 anziano	w podeszłym wieku
 anziano	osoba starsza
@@ -4445,7 +4113,6 @@ telefonino	telefon komórkowy
 prezzemolo	Petroselinum crispum
 mio	mój
 mio	mój
-torino	Turyn
 vasto	rozległy
 produzione	produkowanie
 febbre	gorączka
@@ -4457,7 +4124,6 @@ centrale	centrala
 serafico	seraficzny
 nudo	nagi
 severo	surowy
-lazio	Lacjum
 guazzo	kałuża
 boccale	dzbanek
 boccale	ustny
@@ -4722,7 +4388,6 @@ stirare	rozciągać
 inizio	początek
 iniziare	rozpocząć
 tundra	tundra
-piemonte	Piemont
 aspetto	wygląd
 fiato	wydech
 fidanzata	narzeczona
@@ -4822,7 +4487,6 @@ decimo	dziesiąta część
 delusione	rozczarowanie
 nascere	urodzić się
 nascere	narodziny
-milano	Mediolan
 nascondere	chować
 passività	pasywność
 lucherino	Carduelis spinus
@@ -4897,7 +4561,6 @@ fiasco	butelka opleciona słomą lub siatką
 ghetto	getto
 passacaglia	stary włoski taniec w powolnym tempie
 pizzico	uszczypnięcie
-umbria	Umbria
 ritocco	korekta
 molare	szlifować
 molare	trzonowy
@@ -4975,7 +4638,6 @@ neo	znamię
 freddo	zimny
 freddo	zimno
 necessario	niezbędny
-sardegna	Sardynia
 passeggiata	spacer
 dopo	potem
 dopo	po
@@ -5062,7 +4724,6 @@ fioritura	kwitnienie
 polso	puls
 fé	wiara
 sicurezza	bezpieczeństwo
-onu	Organizzazione delle Nazioni Unite → ONZ
 quadro	obraz
 quadro	kwadratowy
 comprendere	składać się
@@ -5122,11 +4783,6 @@ modo	sposób
 arrogante	arogancki
 arrogante	arogant
 arrogante	arogantka
-kabul	Kabul
-kabul	Kabul
-tirana	Tirana
-baku	Baku
-manila	Manila
 cadere	upadać
 parere	wydawać się
 parere	zdanie
@@ -5139,18 +4795,9 @@ straordinariamente	nadzwyczajnie
 giardino	ogród
 giardino	zob. città giardino
 oppure	albo
-tbilisi	Tbilisi
-bagdad	Bagdad
-teheran	Teheran
-ottawa	Ottawa
-ottawa	Ottawa
-astana	Astana
 principio	początek
 interno	wewnętrzny
 interno	wnętrze )
-managua	Managua
-oslo	Oslo
-islamabad	Islamabad
 peregrino	rzadki
 subito	zaraz
 subito	nagły
@@ -5239,8 +4886,6 @@ capofamiglia	głowa rodziny
 latinismo	latynizm
 latinista	latynista
 latinista	latynistka
-bangkok	Bangkok
-ankara	Ankara
 metropolitana	metro
 nervosità	nerwowość
 stoffa	materiał
@@ -5290,8 +4935,6 @@ sequenza	sekwencja
 costringere	kazać
 orologiaio	zegarmistrz
 rifugio	schronienie
-apollo	Apollo
-barnaba	imię męskie Barnaba
 intendere	rozumieć
 intenso	intensywny
 intellettuale	intelektualny
@@ -5305,7 +4948,6 @@ pervenire	dotrzeć
 graffio	zadrapanie
 graffiare	zadrapać
 intensificazione	intensyfikacja
-messico	Meksyk
 simpatico	sympatyczny
 simpatico	układ nerwowy współczulny
 simpatizzare	sympatyzować
@@ -5315,10 +4957,7 @@ centrocampista	środkowy
 centrocampista	środkowa
 onomastico	imieninowy
 onomastico	imieniny
-massimo	imię męskie Maksym
 traduzione	tłumaczenie
-olaf	imię męskie Olaf
-walter	imię męskie Walter
 labirinto	labirynt
 stanza	pokój
 standardizzazione	standaryzacja
@@ -5432,26 +5071,6 @@ nientemeno	mimo to
 nientedimeno	ni mniej
 turnista	osoba pracująca na zmiany
 lampadina	żarówka
-alina	imię żeńskie Alina
-amanda	imię żeńskie Amanda
-andromeda	Andromeda
-anita	imię żeńskie Anita
-antonina	imię żeńskie Antonina
-aurelia	imię żeńskie Aurelia
-balbina	imię żeńskie Balbina
-barbara	imię żeńskie Barbara
-beata	imię żeńskie Beata
-berta	imię żeńskie Berta
-bona	imię żeńskie Bona
-daria	imię żeńskie Daria
-diana	Diana
-eleonora	imię żeńskie Eleonora
-emilia	imię żeńskie Emilia
-emma	imię żeńskie
-eufemia	imię żeńskie Eufemia
-eugenia	imię żeńskie Eugenia
-filomena	imię żeńskie Filomena
-ida	imię żeńskie Ida
 inchiesta	wywiad
 cantiere	plac budowy
 carogna	padlina
@@ -5465,18 +5084,6 @@ oltre	dalej
 oltre	za
 altro	inny
 altro	ktoś inny
-marianna	imię żeńskie Marianna
-marta	imię żeńskie Marta
-melania	imię żeńskie Melania
-natalia	imię żeńskie Natalia
-ofelia	imię żeńskie Ofelia
-regina	imię żeńskie Regina
-renata	imię żeńskie Renata
-sabrina	imię żeńskie Sabrina
-samanta	imię żeńskie Samanta
-sandra	imię żeńskie Sandra
-sara	imię żeńskie Sara
-stefania	imię żeńskie Stefania
 tavolo	stół
 maturo	o owocach
 saggio	esej
@@ -5494,10 +5101,8 @@ inchiostro	atrament
 inchiostrare	poplamić atramentem
 birmano	Birmańczyk
 birmano	birmański
-bologna	Bolonia
 binario	tor kolejowy
 binario	podwójny
-emilia-romagna	Emilia-Romania
 emozionare	emocjonować
 emozione	emocja
 pianterreno	parter
@@ -5561,8 +5166,6 @@ costernazione	smutek
 oscurare	zaciemniać
 oscurare	ściemniać się
 costellazione	konstelacja
-federico	imię męskie Fryderyk
-federica	imię żeńskie Fryderyka
 valanga	lawina
 regista	reżyser
 regista	reżyserka
@@ -5634,8 +5237,6 @@ rapitore	porywacz
 rapitore	porywający
 nicchia	nisza
 cripta	krypta
-marino	imię męskie Maryn
-vistola	Wisła
 profeta	prorok
 incrociatore	krążownik
 kamikaze	kamikaze
@@ -5653,13 +5254,7 @@ rubare	ukraść
 fregare	pocierać
 rubinetto	kran
 sopracciglio	brew
-kinshasa	Kinszasa
-banjul	Bandżul
 munizione	amunicja
-antananarivo	Antananarywa
-vientiane	Wientian
-myanmar	Myanmar
-sarajevo	Sarajewo
 occhiali	okulary
 bisognare	potrzebować
 ferramenta	żelazne narzędzia
@@ -5694,7 +5289,6 @@ usare	używać
 tenda	daszek
 generoso	szczodry
 sonatina	sonatina
-giappone	Japonia
 prudentemente	ostrożnie
 missilistico	rakietowy
 missile	rakieta
@@ -5714,20 +5308,17 @@ corpulento	korpulentny
 cosmonauta	kosmonauta
 cosmonauta	kosmonautka
 cosmico	kosmiczny
-gdynia	Gdynia
 vecchio	stary
 collinoso	pagórkowaty
 identico	identyczny
 tsunami	tsunami
 laconico	krótki
-zagabria	Zagrzeb
 ohm	om
 raccomandare	rekomendować
 raccomandazione	rekomendacja
 pagamento	płatność
 pagare	płacić
 redditizio	rentowny
-adamo	imię męskie Adam
 tessitura	tkanie
 tessile	włókienniczy
 tessile	tkacz
@@ -5749,7 +5340,6 @@ fregata	fregata
 resistenza	opór
 comandante	dowodzący
 comandante	komendant
-palermo	Palermo
 isterico	histeryczny
 isterico	histeryk
 lampa	lampa
@@ -5782,7 +5372,6 @@ civiltà	cywilizacja
 psicologo	psycholog
 psicologia	psychologia
 sudore	pot
-dio	Bóg
 portare	nieść
 inflazione	inflacja
 vivo	istota żywa
@@ -5809,13 +5398,11 @@ muscolo	mięsień
 ormone	hormon
 veneto	wenecki
 veneto	mieszkaniec Wenecji Euganejskiej
-venezia	Wenecja
 gabbiano	Laridae
 linguistico	językowy
 sinfonia	symfonia
 versare	rozlewać
 surrealistico	surrealistyczny
-gondwana	Gondwana
 abiologia	abiologia
 sportivo	sportowy
 sportivo	sportowiec
@@ -5830,7 +5417,6 @@ atleta	lekkoatletka
 mole	gmach
 gneiss	gnejs
 geisha	gejsza
-raffaele	imię męskie Rafał
 arcangelo	archanioł
 insegnante	nauczyciel
 insegnante	nauczycielka
@@ -6051,8 +5637,6 @@ burrone	wąwóz
 passaggio	przejazd
 parsimonioso	gospodarny
 visita	wizyta
-panamá	Panama
-panamá	Panama
 fuori	na zewnątrz
 fuori	poza
 fuori	precz!
@@ -6074,7 +5658,6 @@ andorrano	Andorczyk
 andorrana	Andorka
 nato	urodzony
 nato	syn
-tibet	Tybet
 ficcare	wbić
 infatti	rzeczywiście
 bonbon	cukierek
@@ -6095,7 +5678,6 @@ cetriolo	ogórek
 broccolo	brokuł
 campagna	wieś
 chimica	chemia
-genova	Genua
 progettare	projektować
 avvocato	adwokat
 tratto	kreska
@@ -6156,7 +5738,6 @@ falso	fałszywy
 menzogna	kłamstwo
 fatale	fatalny
 canzone	piosenka
-luna	Księżyc
 subire	ponieść
 consigliare	radzić
 ammoniaca	amoniak
@@ -6164,9 +5745,6 @@ termochimico	termochemiczny
 mitragliatrice	karabin maszynowy
 pungere	kłuć
 pezzo	kawałek
-alice	imię żeńskie Alicja
-eva	imię żeńskie Ewa
-ivo	imię męskie Iwo
 adatto	odpowiedni
 obiettivo	obiektyw
 obiettivo	obiektywny
@@ -6235,7 +5813,6 @@ caro	drogi
 completamente	kompletnie
 esattamente	dokładnie
 occidentale	zachodni
-egitto	Egipt
 piemontese	piemoncki
 piemontese	Piemontczyk
 piemontese	Piemontka
@@ -6301,11 +5878,6 @@ abbonamento	abonament
 protestantesimo	protestantyzm
 riforma	reforma
 scorpione	skorpion
-scorpione	Skorpion
-leone	Lew
-sagittario	Strzelec
-toro	Byk
-ariete	Baran
 diciottesimo	osiemnasty
 diciottesimo	osiemnasta część
 compitare	przeliterować
@@ -6349,20 +5921,9 @@ etico	dotyczący etyki
 etico	etyk
 elettronico	elektronowy
 brama	żądza
-cecoslovacchia	Czechosłowacja
-zurigo	Zurych
-cina	Chiny
-filippo	imię męskie Filip
-napoli	Neapol
-giorgio	imię męskie Jerzy
-alsazia	Alzacja
-ambrogio	imię męskie Ambroży
 bongiorno	zob. buongiorno
 buongiorno	dzień dobry
 buongiorno	zob. dare il buongiorno
-daniele	imię męskie Daniel
-dorotea	imię żeńskie Dorota
-elisabetta	imię żeńskie Elżbieta
 buondì	dzień dobry
 sessista	seksista
 sessista	seksistka
@@ -6376,7 +5937,6 @@ compatezza	spoistość
 sesso	płeć
 generosità	szlachetność
 generalità	powszechność
-giuditta	imię żeńskie Judyta
 berretto	czapka
 vista	widok
 valle	dolina
@@ -6386,12 +5946,6 @@ islandese	Islandka
 repubblica	republika
 zaino	plecak
 esistere	istnieć
-azzorre	Azory
-brasile	Brazylia
-scozia	Szkocja
-romano	imię męskie Roman
-patrizia	imię żeńskie Patrycja
-toscana	Toskania
 tossicologia	toksykologia
 tossina	toksyna
 genetica	genetyka
@@ -6400,7 +5954,6 @@ papà	tata
 cecchino	snajper
 ambulanza	ambulans
 autoambulanza	ambulans
-luca	imię męskie Łukasz
 telegrafista	telegrafista
 telegrafista	telegrafistka
 disperato	zdesperowany
@@ -6414,15 +5967,9 @@ bloccasterzo	blokada kierownicy
 sterzo	kierownica
 aggressione	agresja
 bottone	guzik
-francesca	imię żeńskie Franciszka
-figi	Fidżi
 teatrale	teatralny
-lisbona	Lizbona
-silvestro	imię męskie Sylwester
-alvernia	Owernia
 indifferente	obojętny
 indifferente	człowiek obojętny
-aragona	Aragonia
 straordinario	niezwykły
 ricchezza	bogactwo
 commissione	komisja
@@ -6465,12 +6012,6 @@ cassaforte	kasa pancerna
 carrozziere	blacharz
 balia	mamka
 zeolite	zeolit
-mosa	Moza
-paleoproterozoico	paleoproterozoik
-israele	Izrael
-urali	Ural
-paleogene	paleogen
-siviglia	Sewilla
 licealista	licealista
 licealista	licealistka
 limnologia	limnologia
@@ -6493,7 +6034,6 @@ bidonare	oszukiwać
 madama	jaśnie pani
 sfiga	brak szczęścia
 sfida	wyzwanie
-inghilterra	Anglia
 lindo	czysty
 giapponese	Japończyk
 giapponese	Japonka
@@ -6504,7 +6044,6 @@ dipendere	zależeć
 indebitato	zadłużony
 assenza	nieobecność
 pantera	pantera
-catalogna	Katalonia
 osservatore	obserwator
 lì	tam
 cubico	sześcienny
@@ -6560,7 +6099,6 @@ tranquillità	spokój
 bugiardo	kłamca
 bugiardo	kłamliwy
 tacere	milczeć
-francesco	imię męskie Franciszek
 barite	wodorotlenek baru
 essa	ona
 spiegare	wyjaśnić
@@ -6576,7 +6114,6 @@ melatonina	melatonina
 hockey	hokej
 della	przyimek di + rodzajnik określony la
 delle	przyimek di + rodzajnik określony le
-liguria	Liguria
 bauxite	boksyt
 giornalista	dziennikarz
 giornalista	dziennikarka
@@ -6592,7 +6129,6 @@ ligure	liguryjski
 calabrese	kalabryjski
 calabrese	Kalabryjczyk
 calabrese	Kalabryjka
-calabria	Kalabria
 signore	pan
 sguardo	spojrzenie
 selenio	selen
@@ -6624,7 +6160,6 @@ veneziano	wenecjanin
 veneziano	wenecki
 amareno	wiśnia
 rada	reda
-mp3	MP3
 babbo	tata
 barbetta	barbeta
 berillio	beryl
@@ -6660,39 +6195,15 @@ corrispondenza	korespondencja
 futurista	futurysta
 futurista	futurystka
 futurista	futurystyczny
-camilla	imię żeńskie Kamila
 anfiteatro	amfiteatr
-grigioni	Gryzonia
-irene	imię żeńskie Irena
-antonia	imię żeńskie Antonia
 combattere	walczyć
 anagogico	anagogiczny
-elvira	imię żeńskie Elwira
-rebecca	Rebeka
-silvia	imię żeńskie Sylwia
 mosso	poruszony
 artistico	artystyczny
 pugliese	apulijski
 pugliese	Apulijczyk
 pugliese	Apulijka
-bartolomeo	imię męskie Bartosz
-giacomo	imię męskie Jakub
-giovanni	imię męskie Jan
-giuseppe	imię męskie Józef
-martino	imię męskie Marcin
-taddeo	imię męskie Tadeusz
-domenico	imię męskie Dominik
-agnese	imię żeńskie Agnieszka
-evelina	imię żeńskie Ewelina
-giovanna	imię żeńskie Joanna
-giustina	imię żeńskie Justyna
-maddalena	imię żeńskie Magdalena
-margherita	imię żeńskie Małgorzata
-andrea	imię męskie Andrzej
-andrea	imię żeńskie Andrzeja
-michele	imię męskie Michał
 specchietto	lusterko
-matteo	imię męskie Mateusz
 avambraccio	przedramię
 gomito	łokieć
 ombelico	pępek
@@ -6719,9 +6230,6 @@ infinità	nieskończoność
 liberare	uwolnić
 buonasera	dobry wieczór
 buonasera	zob. dare la buonasera
-camillo	imię męskie Kamil
-giacobbe	imię męskie Jakub
-giuliano	imię męskie Julian
 carbonio	węgiel
 capodanno	Nowy Rok
 capolavoro	arcydzieło
@@ -6755,7 +6263,6 @@ adesso	teraz
 ascella	pacha
 arcobaleno	tęcza
 arcipelago	archipelag
-giuda	Judasz
 argomento	temat
 audizione	audycja
 caraffa	karafka
@@ -6781,15 +6288,8 @@ decidere	rozstrzygnąć
 decidere	zadecydować
 decorativo	dekoracyjny
 volentieri	chętnie
-tommaso	imię męskie Tomasz
-triassico	trias
-tagikistan	Tadżykistan
-tolosa	Tuluza
 pettinatura	czesanie
 prevedere	przewidzieć
-marco	imię męskie Marek
-giulia	imię żeńskie Julia
-giulio	imię męskie Juliusz
 inaspettatamente	nieoczekiwanie
 pubblicazione	publikacja
 volontieri	zob. volentieri
@@ -6802,13 +6302,6 @@ aspirapolvere	odkurzacz
 taccuino	notes
 fisso	przymocowany
 fisso	uporczywie
-dario	imię męskie Dariusz
-manfredo	imię męskie Manfred
-mario	imię męskie Mariusz
-matilde	Matylda
-girolamo	imię męskie Hieronim
-biagio	imię męskie Błażej
-beniamino	imię męskie Beniamin
 cima	wierzchołek
 mazza	laska
 scoraggiare	zniechęcać
@@ -6868,8 +6361,6 @@ misantropia	mizantropia
 musulmano	muzułmanin
 minaccioso	groźny
 miele	miód
-monica	imię żeńskie Monika
-sole	Słońce
 pillola	pigułka
 abnegazione	wyrzeczenie się
 integrazione	integracja
@@ -7064,7 +6555,6 @@ sveglio	obudzony
 coprire	przykryć
 cobalto	kobalt
 cobalto	o kolorze
-tirolo	Tyrol
 rientro	powrót
 tirolese	tyrolski
 tirolese	Tyrolczyk
@@ -7076,7 +6566,6 @@ ottimizzazione	optymalizacja
 ozio	lenistwo
 ovunque	gdziekolwiek
 dovunque	gdziekolwiek
-dna	DNA
 digitale	palcowy
 digitale	naparstnica
 dimissioni	dymisja
@@ -7152,10 +6641,8 @@ buddista	buddyjski
 calcolo	rachunek
 calcolatrice	kalkulator
 mite	łagodny
-taiwan	Tajwan
 maestro	nauczyciel
 maestro	główny
-modena	Modena
 fraternità	braterstwo
 umano	ludzki
 umano	rzecz ludzka
@@ -7230,7 +6717,6 @@ raggio	promień
 rafforzare	wzmocnić
 rafforzare	potężnieć
 raffermo	o chlebie czerstwy
-pirenei	Pireneje
 domare	poskramiać
 lampisteria	lampownia
 acero	klon
@@ -7372,7 +6858,6 @@ discriminazione	dyskryminacja
 pregiudizio	uprzedzenie
 anteprima	prapremiera
 letteralmente	dosłownie
-nizza	Nicea
 blasonatura	blazonowanie
 araldica	heraldyka
 adempiere	dokonać
@@ -7415,7 +6900,6 @@ ricambio	wymiana
 ricevitore	odbiornik
 reticenza	małomówność
 ricompensa	wynagrodzenie
-osaka	Osaka
 monofisismo	monofizytyzm
 teologia	teologia
 induismo	hinduizm
@@ -7429,9 +6913,7 @@ politeismo	wielobóstwo
 cattolico	katolicki
 cattolico	katolik
 battesimo	chrzest
-madera	Madera
 lastrina	płytka
-ognissanti	Wszystkich Świętych
 solennità	uroczystość
 eccessivamente	nadmiernie
 successivamente	sukcesywnie
@@ -7524,7 +7006,6 @@ curvo	krzywy
 cupo	pochmurny
 sfrenato	nieokiełznany
 decotto	napar
-gaza	Gaza
 medicamentoso	leczniczy
 debolezza	słabość
 dattiloscritto	napisany na maszynie
@@ -7564,7 +7045,6 @@ ansiosamente	tęsknie
 ansioso	niespokojny
 leccapiedi	wazeliniarz
 cariatide	kariatyda
-lucia	imię żeńskie Łucja
 incertezza	niepewność
 lacerare	drzeć
 stimare	szacować
@@ -7574,7 +7054,6 @@ riva	brzeg
 okapi	okapi
 fatta	rodzaj
 medusa	meduza
-medusa	Meduza
 portacenere	popielniczka
 riconsegnare	oddawać
 segnalazione	sygnalizacja
@@ -7582,7 +7061,6 @@ urtare	uderzyć
 collana	naszyjnik
 monile	naszyjnik
 gioiello	biżuteria
-acquario	zob. Aquario
 ideale	idealny
 ideale	ideał
 circostanza	okoliczność
@@ -7608,7 +7086,6 @@ sonnellino	drzemka
 gelare	zamrozić
 gelare	zmarznąć
 gelsomino	Jasminum L
-gerardo	imię męskie Gerard
 gestore	zarządca
 morfina	morfina
 sincerità	szczerość
@@ -7720,7 +7197,6 @@ battesimale	chrzcielny
 consentire	zgodzić się
 continuazione	kontynuacja
 destinazione	przeznaczenie
-lc	Vangelo di Luca → Łk
 squallido	nędzny
 squalifica	dyskwalifikacja
 squalificare	zdyskwalifikować
@@ -7871,7 +7347,6 @@ abracadabra	abrakadabra
 windsurfing	windsurfing
 windsurfer	windsurfer
 windsurfer	windsurferka
-olivia	imię żeńskie Oliwia
 surfista	surfer
 surfista	surferka
 cornuto	rogacz
@@ -7879,12 +7354,9 @@ cornuto	rogaty
 impacchettare	pakować
 coproduzione	koprodukcja
 compositore	kompozytor
-nanna	imię żeńskie
 comunicare	komunikować
 comunicato	komunikat
 corazza	kirys
-felicia	imię żeńskie Felicja
-filippa	imię żeńskie Filipa
 cartellone	afisz
 castano	kasztan
 castano	kasztanowy
@@ -7902,19 +7374,7 @@ peccare	grzeszyć
 pazzesco	szalony
 altopiano	wyżyna
 contestazione	kontestacja
-isabella	imię żeńskie Izabela
 canard	kaczka dziennikarska
-erica	imię żeńskie Eryka
-ester	imię żeńskie Estera
-gabriella	imię żeńskie Gabriela
-gina	imię żeńskie
-greta	imię żeńskie
-lina	imię żeńskie Lina
-lisa	imię żeńskie
-rosa	imię żeńskie Róża
-cecilia	imię żeńskie Cecylia
-carolina	imię żeńskie Karolina
-carla	imię żeńskie
 gelata	przymrozek
 isteria	histeria
 gentaglia	hołota
@@ -7929,12 +7389,8 @@ mormorare	szumieć
 illecito	nielegalny
 robusto	mocny
 rivalutazione	rewaloryzacja
-teodora	imię żeńskie Teodora
 illustrazione	ilustracja
 involontario	nieumyślny
-sibilla	Sybilla
-sonia	imię żeńskie Sonia
-stella	imię żeńskie Stella
 licenziamento	wypowiedzenie
 isolare	ilozować
 istigazione	namowa
@@ -8008,13 +7464,10 @@ colpevole	winowajca
 colpevole	winowajczyni
 colpevole	winny
 restituzione	zwrot
-amalia	imię żeńskie Amalia
-amelia	imię żeńskie Amelia
 organo	organ
 attrice	aktorka
 beatificazione	beatyfikacja
 fastidio	kłopot
-martina	imię żeńskie Martyna
 impari	nieparzysty
 opzione	wybór
 scelta	wybór
@@ -8035,7 +7488,6 @@ etere	eter
 eteromania	eteromania
 spaziotempo	czasoprzestrzeń
 pensiero	myśl
-cornelia	imię żeńskie Kornelia
 gay	gejowski
 gay	gej
 gay	homoseksualistka
@@ -8072,11 +7524,6 @@ disarmante	rozbrajający
 mineralogista	mineralog
 mineralogista	mineralog
 acciaccatura	stłuczenie
-ercole	Herkules
-antonio	imię męskie Antoni
-amedeo	imię męskie Amadeusz
-isaura	imię żeńskie Izaura
-massimiliano	imię męskie Maksymilian
 duodeno	dwunastnica
 elettrolisi	elektroliza
 deuterio	deuter
@@ -8173,7 +7620,6 @@ gonfio	spuchnięty
 graffiatura	rysa
 gonfiatura	obrzęk
 pagliaccio	pajac
-adria	Adria
 auto-	auto
 spilorcio	skąpy
 spionaggio	szpiegostwo
@@ -8191,7 +7637,6 @@ irrobustire	wzmacniać
 cavatappi	korkociąg
 echidna	kolczatka
 cherubino	cherubin
-siria	Syria
 coerenza	spójność
 oscilloscopio	oscyloskop
 schiarirsi	rozjaśnić się
@@ -8211,16 +7656,11 @@ zefiro	zefir
 zuavo	żuaw
 epoca	epoka
 rapinare	rabować
-danzica	Gdańsk
 tenrec	tenrek
 damo	chłopak
 samba	samba
 tuonare	grzmieć
 troncare	uciąć
-breslavia	Wrocław
-vilna	Wilno
-stettino	Szczecin
-londra	Londyn
 dinasta	dynasta
 aguti	aguti
 acrobazia	akrobacja
@@ -8265,8 +7705,6 @@ deluso	rozczarowany
 cicogna	bocian
 vanagloria	pycha
 uro	Bos primigenius Bojanus
-zaire	Zair
-zambezi	zob. Zambesi
 polmonite	zapalenie płuc
 politecnico	politechniczny
 politecnico	politechnika
@@ -8335,7 +7773,6 @@ hitleriano	hitlerowski
 hitleriano	hitlerowiec
 mito	mit
 mirra	mirra
-leopoli	Lwów
 abatino	młody ksiądz
 clemente	łaskawy
 clemente	srebrna moneta Klemensa VII
@@ -8489,7 +7926,6 @@ supersonico	naddźwiękowy
 superlavoro	nadmierna praca
 supernova	supernowa
 pleonasmo	pleonazm
-cornelio	imię męskie Korneliusz
 centurione	centurion
 acrofobia	akrofobia
 ontologia	ontologia
@@ -8538,20 +7974,15 @@ cembalo	klawesyn
 avventurina	awanturyn
 monofobia	monofobia
 judo	judo
-ing.	ingegnere → inż
 arrivederci	do zobaczenia
 arrivederci	do zobaczenia!
 c.s.	come sopra → jak wyżej
-c.p.	casella postale → skrytka pocztowa
-ecc.	Eccelenza → Ekscelencja
 ecc.	i tak dalej
 uff.	oficer
 eccetera	i tak dalej
-p.p.	Porto Pagato → porto opłacone
 p.zza	piazza → pl
 prescrizione	przepisanie
 s.p.m.	do rąk własnych
-s.p.a.	società per azioni → spółka akcyjna
 cap.	kpr
 cfr.	confronta → porównaj
 a.c.	anno corrente → bieżącego roku
@@ -8560,12 +7991,8 @@ sinonimo	synonim
 babuino	zob. babbuino
 daccapo	od początku
 corniola	owoc derenia
-anversa	Antwerpia
-cristo	Chrystus
 acromatico	achromatyczny
 alcole	zob. alcol
-zambesi	Zambezi
-tamigi	Tamiza
 afasia	afazja
 abietto	nikczemny
 bosniaca	Bośniaczka
@@ -8590,7 +8017,6 @@ fornitore	dostawca
 formaggino	serek topiony
 caricare	ładować
 fantasma	duch
-eugenio	imię męskie Eugeniusz
 rovina	ruina
 obesità	otyłość
 obiettività	obiektywność
@@ -8642,7 +8068,6 @@ arresto	wstrzymanie
 asterisco	gwiazdka
 asteroide	asteroida
 contentezza	zadowolenie
-talmud	Talmud
 paganesimo	pogaństwo
 abbacchiare	strącać tyką owoce z drzewa
 abbacchiato	przygnębiony
@@ -8762,7 +8187,6 @@ tofu	tofu
 soia	soja
 feta	feta
 orma	ślad
-dino	imię męskie
 accaduto	zdarzenie
 accaduto	zaistniały
 accadere	wydarzać się
@@ -8829,7 +8253,6 @@ kabuki	kabuki
 mercurio	rtęć
 odio	nienawiść
 gondoliera	gondoliera
-alberta	imię żeńskie Alberta
 kirundi	rundi
 jeep	dżip
 accettazione	akceptacja
@@ -8848,7 +8271,6 @@ accomodare	rozgościć się
 accomunare	łączyć
 swahili	suahilijski
 swahili	suahili
-bahamas	Bahamy
 zambiano	zambijski
 zambiano	Zambijczyk
 zambiana	Zambijka
@@ -8898,20 +8320,10 @@ tesoro	skarb
 bengali	bengalski
 bengali	bengalski
 whisky	whisky
-tokyo	Tokio
-beirut	Bejrut
-doha	Doha
-belfast	Belfast
-bonn	Bonn
 maori	Maorys
 maori	Maoryska
 maori	maoryski
 bislama	bislama
-hawaii	Hawaje
-hindukush	Hindukusz
-himalaya	Himalaje
-pamir	Pamir
-borneo	Borneo
 mele	tyłek
 trend	trend
 autoradio	radioodtwarzacz samochodowy
@@ -9037,7 +8449,6 @@ amarezza	gorzkość
 ferito	ranny
 ferito	ranny
 complicità	współudział
-ptah	Ptah
 incoloro	zob. incolore
 serenata	serenada
 wasabi	wasabi
@@ -9055,7 +8466,6 @@ colombiana	Kolumbijka
 cubana	Kubanka
 etimo	źródłosłów
 dentario	zębowy
-dominicana	Dominikana
 lontra	Lutrinae
 oceanico	oceaniczny
 offensivo	ofensywny
@@ -9105,7 +8515,6 @@ ce	tutaj
 merletto	koronka
 certamente	na pewno
 concentrare	koncentrować
-abramo	imię męskie Abraham
 funzionare	działać
 filosofo	filozof
 visitare	odwiedzać
@@ -9118,7 +8527,6 @@ insurrezionale	powstańczy
 duetto	duet
 metodologia	metodologia
 conosciuto	znany
-caterina	imię żeńskie Katarzyna
 amputazione	amputacja
 canadese	kanadyjski
 canadese	Kanadyjczyk
@@ -9181,7 +8589,6 @@ moldavo	mołdawski
 moldavo	Mołdawianin
 moldava	Mołdawianka
 cardamomo	Elettaria cardamomum
-martinica	Martynika
 curva	zakręt
 ogni	każdy
 ricevuta	pokwitowanie
@@ -9262,8 +8669,6 @@ rosolia	różyczka
 ablutomania	ablutomania
 paleografia	paleografia
 quel	ten
-bruno	imię męskie Bruno
-alfreda	imię żeńskie Alfreda
 pieno	pełny
 pieno	wypełniona przestrzeń
 provare	próbować
@@ -9432,7 +8837,6 @@ mola	kamień młyński
 trota	pstrąg
 scivolare	ślizgać
 artefatto	artefakt
-algeri	Algier
 immondezza	brud
 mondezza	zob. immondezza
 immondizia	śmieci
@@ -9462,7 +8866,6 @@ ozonoterapia	ozonoterapia
 allume	ałun
 atrofia	atrofia
 won	won
-idaho	Idaho
 vaticano	watykański
 generazione	generacja
 marciapiede	chodnik
@@ -9491,11 +8894,6 @@ fermio	ferm
 francio	frans
 gadolinio	gadolin
 germanio	german
-saul	Saul
-tore	imię męskie
-olav	imię męskie Olaf
-olof	imię męskie Olaf
-oscar	imię męskie Oskar
 macchia	plama
 anice	anyż
 moltiplicare	multiplikować
@@ -9533,9 +8931,6 @@ wolframio	wolfram
 santuario	sanktuarium
 sarcasmo	sarkazm
 insistere	nalegać
-adriana	imię żeńskie Adrianna
-amos	Amos
-adriano	imię męskie Adrian
 aeronomia	aeronomia
 veganismo	weganizm
 separare	separować
@@ -9546,12 +8941,6 @@ cretino	dotknięty kretynizmem
 cretino	kretyn
 totale	całkowity
 totale	całość
-gn	Genesi → Rdz
-lv	Levitico → Księga Kapłańska
-nm	Numeri → Księga Liczb
-dt	Deuteronomio → Księga Powtórzonego Prawa
-sof	Libro di Sofonia → Księga Sofoniasza
-bordeaux	Bordeaux
 rapporto	raport
 radicale	radykalny
 caratterizzare	charakteryzować
@@ -9567,7 +8956,6 @@ inclemenza	niełaskawość
 incentivazione	stymulowanie
 profitto	korzyść
 dragare	dragować
-trieste	Triest
 pinacoteca	pinakoteka
 innamorato	zakochany
 innamorato	zakochany
@@ -9610,14 +8998,11 @@ avocado	Persea americana
 morena	morena
 nadir	nadir
 facilitare	ułatwiać
-bretagna	Bretania
 sciovinismo	szowinizm
 specismo	szowinizm gatunkowy
-bettina	imię żeńskie
 fresia	frezja
 grog	grog
 zen	zen
-budda	Budda
 dalia	dalia
 valicare	przekraczać
 e-book	e-book
@@ -9632,7 +9017,6 @@ roulotte	przyczepa campingowa
 anticorpo	przeciwciało
 anti-	przed
 autoritario	autorytatywny
-veronica	imię żeńskie Weronika
 accoltellatore	nożownik
 incompleto	niekompletny
 frammentario	fragmentaryczny
@@ -9642,9 +9026,7 @@ impulsività	impulsywność
 butano	butan
 perigeo	perygeum
 foyer	foyer
-maghreb	Maghreb
 operazione	operacja
-fabio	imię męskie Fabiusz
 felicità	radość
 prossimo	bliski
 prossimo	bliźni
@@ -9653,9 +9035,6 @@ singolare	szczególny
 nessuno	nikt
 narrazione	narracja
 avvocatura	adwokatura
-edvigio	imię męskie
-azerbaigian	Azerbejdżan
-geronimo	imię męskie Hieronim
 dermato-	dermato
 oscuro	ciemny
 oscuro	ciemność
@@ -9677,9 +9056,6 @@ purga	środek przeczyszczający
 astato	astat
 astato	uzbrojony w dzidę
 assemblage	montaż
-claudia	imię żeńskie Klaudia
-abram	imię męskie Abram
-aurora	Aurora
 kolchoz	kołchoz
 compare	ojciec chrzestny
 gamella	menażka
@@ -9693,33 +9069,22 @@ tanto	tyle
 tanto	i tak
 frigo	lodówka
 incidente	wypadek
-alessandra	imię żeńskie Aleksandra
-alessia	imię żeńskie Aleksja
-alfonso	imię męskie Alfons
 aloe	aloes
-anastasia	imię żeńskie Anastazja
 andalusite	andaluzyt
 andesite	andezyt
-angela	imię żeńskie Angela
 stibnite	stibnit
 aragonite	aragonit
 araucaria	araukaria
-beatrice	imię żeńskie Beatrycze
-berenice	imię żeńskie Berenika
-bessarabia	Besarabia
 apnea	bezdech
 proteinuria	białkomocz
 underwear	bielizna
 datura	bieluń
-boris	imię męskie Borys
 breccia	wyrwa
-bruges	Brugia
 cementite	cementyt
 khan	chan
 zinnia	cynia
 zither	cytra
 chador	czador
-deianira	Dejanira
 diopside	diopsyd
 diorite	dioryt
 doge	doża
@@ -9749,9 +9114,7 @@ hoatzin	Opisthocomus hoazin Müller
 ilmenite	ilmenit
 impasto	mieszanie
 indole	charakter
-iago	imię męskie Jago
 glaucoma	jaskra
-yalta	Jałta
 yawl	jol
 iota	jota
 terrazzo	taras
@@ -9760,13 +9123,8 @@ bergamotto	Citrus bergamium
 machete	maczeta
 magnesite	magnezyt
 macroglossia	makroglosja
-masovia	Mazowsze
-masuria	Mazury
-messina	Mesyna
-mesoamerica	Mezoameryka
 mezuzah	mezuza
 millibar	milibar
-minorca	Minorka
 kazoo	mirliton
 sarcoma	mięsak
 mortadella	mortadela
@@ -9775,20 +9133,15 @@ mulatto	Mulat
 navigazione	nawigacja
 kainite	kainit
 canasta	kanasta
-cappadocia	Kapadocja
 caracal	Caracal caracal Schreber
 carbonado	karbonado
 carbonatite	karbonatyt
 carotene	karoten
-cassandra	Kasandra
 cassiterite	kasyteryt
-catania	Katania
 catatonia	katatonia
-kathmandu	Katmandu
 ketch	kecz
 kenosis	kenoza
 kibbutz	kibuc
-kyoto	Kioto
 curie	kiur
 clipper	kliper
 coloratura	koloratura
@@ -9807,7 +9160,6 @@ nucleotide	nukleotyd
 nuclide	nuklid
 infortunio	nieszczęście
 ocarina	okaryna
-occitania	Oksytania
 oligonucleotide	oligonukleotyd
 oncogene	onkogen
 oolite	oolit
@@ -9829,7 +9181,6 @@ organizzatore	organizator
 psicopatia	psychopatia
 psicoterapia	psychoterapia
 pseudoscienza	pseudonauka
-tatra	Tatry
 progressione	postęp
 ecologico	ekologiczny
 modernistico	modernistyczny
@@ -9862,11 +9213,7 @@ zoo-	zoo
 -logia	logia
 ante-	przed
 algo-	algo
-lucerna	Lucerna
-acadia	Akadia
 confederazione	konfederacja
-damiano	imię męskie Damian
-daniela	imię żeńskie Daniela
 comunicativo	komunikatywny
 bastante	dostateczny
 sorprendente	niespodziewany
@@ -9924,7 +9271,6 @@ indicare	pokazać
 immaginazione	wyobrażenie
 liquido	płyn
 liquido	płynny
-podlachia	Podlasie
 aggressività	agresywność
 aggressore	agresor
 argomentare	argumentować
@@ -9935,11 +9281,7 @@ autobiografico	autobiograficzny
 esperto	ekspert
 harissa	harissa
 arrabbiato	zdenerwowany
-grisostomo	imię męskie Chryzostom
 educare	edukować
-cirillo	imię męskie Cyryl
-aniceto	imię męskie Anicet
-anatolio	Anatol
 peluche	plusz
 punta	szpic
 vice-	wice
@@ -9949,15 +9291,10 @@ islamofobia	islamofobia
 rickshaw	riksza
 coito	spółkowanie
 scooter	skuter
-pavia	Pawia
-penelope	Penelopa
 pericope	perykopa
-pinocchio	Pinokio
-pisidia	Pizydia
 plutino	plutonek
 teratoma	potworniak
 progesterone	progesteron
-romagna	Romania
 salvo	ocalony
 salvo	poza
 sequoia	Sequoia
@@ -9969,7 +9306,6 @@ bulldozer	spycharka
 legume	strąk
 sulfone	zob. solfone
 siderite	syderyt
-shanghai	Szanghaj
 ripetizone	powtórzenie
 ricezione	odbiór
 ricolmo	pełen
@@ -9997,13 +9333,8 @@ sovrannaturale	nadprzyrodzony
 escatologia	eschatologia
 filosofare	filozofować
 tapioca	tapioka
-taranto	Tarent
-texas	Teksas
-tenerife	Teneryfa
 termite	termit
-trento	Trydent
 trilobite	trylobit
-tripolitania	Trypolitania
 lipoma	tłuszczak
 liposarcoma	tłuszczakomięsak
 verbena	werbena
@@ -10184,7 +9515,6 @@ zizzania	kąkol
 zuppiera	waza na zupę
 zuccata	główka
 ciclismo	kolarstwo
-arturo	imię męskie Artur
 revisionare	sprawdzać
 revisione	kontrola
 revisore	kontroler
@@ -10215,7 +9545,6 @@ prospettore	poszukiwacz złóż
 protrusione	uwypuklenie
 protrudere	wystawać
 protrazione	przedłużenie się
-claudio	imię męskie Klaudiusz
 protoplasmatico	protoplazmatyczny
 protone	proton
 protettorato	protektorat
@@ -10290,7 +9619,6 @@ snorkeling	snorkeling
 lo	wyraz nietłumaczony
 lo	go
 boxe	boks
-ernesto	imię męskie Ernest
 rosato	różowy
 dermatologico	dermatologiczny
 complicazione	komplikacja
@@ -10319,7 +9647,6 @@ personalismo	personalizm
 personalità	osobliwość
 proprietà	własność
 psicopatologia	psychopatologia
-alghero	Alghero
 pubblicista	publicysta
 pubblicista	publicystka
 peggiore	gorszy
@@ -10396,8 +9723,6 @@ urlare	krzyczeć
 utilitario	użyteczny
 utilità	użyteczność
 livrea	liberia
-como	miasto we Włoszech
-como	jezioro we Włoszech
 interessamento	zainteresowanie
 limitare	ograniczać
 limitare	próg
@@ -10481,7 +9806,6 @@ broccato	brokat
 nailon	nylon
 popeline	popelina
 chiffon	szyfon
-fap	filtr cząstek stałych
 pistone	tłok
 motore	poruszający
 motore	silnik
@@ -10524,7 +9848,6 @@ riutilizzare	ponownie wykorzystać
 salvare	ocalić
 antiossidante	antyoksydant
 ruta	Ruta graveolens
-nicodemo	imię męskie Nikodem
 zombie	zombi
 zombi	zombi
 tariffa	taryfa
@@ -10538,7 +9861,6 @@ articolazione	staw
 algerino	algierski
 algerino	Algierczyk
 ordine	ład
-alfredo	imię męskie Alfred
 allungare	wydłużać
 allontanare	oddalać
 allontanare	oddalać się
@@ -10573,7 +9895,6 @@ vivaismo	szkółka
 endoderma	endoderma
 ultramoderno	ultranowoczesny
 pirenaico	pirenejski
-rodolfo	imię męskie Rudolf
 legione	legion
 taccagno	groszorób
 bizzoso	grymaśny
@@ -10595,7 +9916,6 @@ anseatico	hanzeatycki
 arpista	harfista
 arpista	harfistka
 incolore	bezbarwny
-demetrio	Demetriusz
 retorico	retoryczny
 retorica	retoryka
 aposiopesi	zamilknięcie
@@ -10615,21 +9935,15 @@ q	piętnasta litera włoskiego alfabetu
 gaffe	gafa
 sumo	sumo
 marine	marine
-anastasio	imię męskie Anastazy
 commodoro	komodor
 margay	Leopardus wiedii Schinz
 kulak	kułak
 rally	rajd samochodowy
-abigail	imię żeńskie Abigail
-agar	imię żeńskie Hagar
 stalker	stalker
 interim	stan tymczasowy
 trattrice	traktrysa
-ambra	imię żeńskie Amber
 zephyr	zob. zefir
-cleopatra	imię żeńskie Kleopatra
 rebus	rebus
-apollonia	imię żeńskie Apolonia
 pullover	sweter
 cannibale	kanibal
 cannibale	kanibalka
@@ -10639,7 +9953,6 @@ c'	ci
 postmodernista	postmodernista
 postmodernista	postmodernistka
 postmodernista	postmodernistyczny
-cagliari	Cagliari
 invisibilità	niewidzialność
 gattopardo	serwal
 gattuccio	Scyliorhinus canicula
@@ -10649,7 +9962,6 @@ toponimia	toponimia
 terapeuta	terapeuta
 terapeuta	terapeutka
 correzione	korekta
-carlo	imię męskie Karol
 indeterminato	nieokreślony
 determinare	określać
 centinaio	setka
@@ -10662,8 +9974,6 @@ sobrio	trzeźwy
 pois	kuleczka
 ascia	siekiera
 elasticità	elastyczność
-lazzaro	imię męskie Łazarz
-aura	imię żeńskie
 numerale	liczebnik
 numerale	liczbowy
 trasferimento	przeniesienie
@@ -10796,15 +10106,11 @@ perfezionista	perfekcjonistka
 sud-est	południowy wschód
 zuccheriera	cukiernica
 epistolografia	epistolografia
-baviera	Bawaria
 unicolore	jednokolorowy
-boston	Boston
 slalomista	slalomista
 slalomista	slalomistka
 pedometro	krokomierz
-guayana	Gujana
 tutrice	opiekunka
-etruria	Etruria
 billboard	kilkusekundowy spot reklamowy
 limite	granica
 finito	skończony
@@ -10819,20 +10125,12 @@ identikit	portret pamięciowy
 ah	ach!
 take-away	sposób serwowania potraw
 precipitoso	stromy
-tony	imię męskie
 redigere	spisać
 p.	pagina → strona
-neanderthal	Neandertal
-neandertal	Neandertal
 multi-	multi
 rugby	rugby
-pp	polipropilene → polipropylen
 teoretico	teoretyk
 teoretico	teoretyczny
-leonardo	imię męskie Leonard
-priscilla	imię żeńskie Pryscylla
-roberta	imię żeńskie Roberta
-pepe	imię męskie
 luncheon	lunch
 lobby	lobby
 media	przeciętna
@@ -10846,13 +10144,7 @@ lungo	wzdłuż
 lungo	długość
 lungo	okres czasu
 selva	puszcza
-sydney	Sydney
-clara	imię żeńskie Klara
-simone	imię męskie Szymon
-bianca	imię żeńskie Bianka
-vanessa	imię żeńskie Wanesa
 arrivare	przyjeżdżać
-gemma	imię żeńskie Gemma
 osteoma	kostniak
 osteosarcoma	kostniakomięsak
 retsina	retsina
@@ -10863,8 +10155,6 @@ arabico	arabski
 asturiano	asturyjski
 asturiano	Asturyjczyk
 brioche	brioszka
-auriga	Woźnica
-nico	imię męskie
 fautore	zwolennik
 forzare	zmuszać
 fantascientifico	fantastycznonaukowy
@@ -10915,15 +10205,12 @@ nazionalista	nacjonalistyczny
 meccanicamente	mechanicznie
 filare	prząść
 lena	zapał
-colombo	imię męskie Kolumb
 varano	waran
-sam	Samuele → Księga Samuela
 farad	farad
 lumen	lumen
 ubbidientemente	posłusznie
 ubbidienza	posłuszeństwo
 utopistico	utopijny
-toni	imię męskie
 toga	toga
 legato	związany
 legato	legato
@@ -10931,11 +10218,9 @@ baobab	Adansonia digitata
 sudoku	sudoku
 termico	termiczny
 biomassa	biomasa
-ruanda	Rwanda
 trigenerazione	trójgeneracja
 islamita	muzułmanin
 islamita	muzułmanka
-belgrado	Belgrad
 attivismo	aktywizm
 etichetta	etykieta
 cannone	armata
@@ -10953,7 +10238,6 @@ globale	globalny
 gentilmente	miło
 ionosfera	jonosfera
 meccanismo	mechanizm
-gabriele	imię męskie Gabriel
 medicinale	medyczny
 medicinale	lek
 eredità	dziedziczenie
@@ -10984,7 +10268,6 @@ gravimetria	grawimetria
 gravezza	ciężkość
 gravitazionale	grawitacyjny
 gravitazione	grawitacja
-fabrizio	imię męskie Fabrycy
 gravosità	ciężar
 grecità	greckość
 guardina	areszt
@@ -11209,7 +10492,6 @@ esperantista	esperantysta
 esperantista	esperantystka
 esperantista	esperancki
 cabergolina	kabergolina
-gesù	Jezus
 micro-	mikro
 tradizionalmente	tradycyjnie
 plutocrate	plutokrata
@@ -11230,13 +10512,9 @@ iracheno	Irakijczyk
 irachena	Irakijka
 funzionale	funkcyjny
 competenza	znajomość rzeczy
-giacarta	Dżakarta
-giava	Jawa
 governatore	gubernator
 funzionario	funkcjonariusz
 assicurare	zapewniać
-filippine	Filipiny
-tigri	Tygrys
 patrimoniale	majątkowy
 foto-	foto
 tetraplegia	tetraplegia
@@ -11314,7 +10592,6 @@ indignazione	oburzenie
 compromesso	kompromis
 monoteistico	monoteistyczny
 economico	ekonomiczny
-giamaica	Jamajka
 emisfero	półkula
 geopolitica	geopolityka
 tecnologia	technologia
@@ -11366,7 +10643,6 @@ ornatista	dekoratorka
 aralia	aralia
 vascolare	naczyniowy
 mosto	moszcz
-siracusa	Syrakuzy
 portatile	laptop
 portatile	przenośny
 anticapitalismo	antykapitalizm
@@ -11387,7 +10663,6 @@ lana	wełna
 speedway	sport żużlowy
 saxofonista	zob. sassofonista
 dado	kość
-marina	imię żeńskie Marina
 deprecazione	błaganie
 davanti	przodem
 davvicino	z bliska
@@ -11481,7 +10756,6 @@ aerotecnica	aerotechnika
 agrafia	agrafia
 approssimazione	zbliżanie
 arenella	drobny piasek
-marsiglia	Marsylia
 generalesco	generalski
 volatilità	lotność
 tintore	farbiarz
@@ -11511,7 +10785,6 @@ marra	graca
 maronita	maronita
 maronita	maronitka
 maronita	maronicki
-atena	Atena
 maroso	bałwan morski
 carroponte	suwnica pomostowa
 carrozzabile	przystosowany dla ruchu kołowego
@@ -11525,7 +10798,6 @@ nominatività	imienność
 nominalismo	nominalizm
 disgrafia	dysgrafia
 disgraziatamente	niestety
-agostino	imię męskie Augustyn
 agostiniano	augustyński
 bulino	rylec
 burrascoso	burzliwy
@@ -11540,15 +10812,12 @@ purgante	przeczyszczający
 purgante	środek przeczyszczający
 lassativo	przeczyszczający
 lassativo	środek przeczyszczający
-bibbia	Biblia
-yahweh	Jahwe
 atto-	atto
 milli-	mili
 deca-	deka
 zetta-	zetta
 yotta-	jotta
 mota	błoto
-fi	Forza Italia → Naprzód Włochy
 cestino	koszyk
 battersela	zwiać
 mah	wyrażające niepewność
@@ -11658,17 +10927,8 @@ sorgere	wschodzić
 sorgere	pojawienie się
 sorgiva	źródło
 sorgivo	źródlany
-mac	Libro dei Maccabei → Mch
-domenica	imię żeńskie Dominika
 tronco	pień
 tronco	ucięty
-angelo	imię męskie
-valentina	imię żeńskie Walentyna
-valentino	imię męskie Walenty
-orsola	imię żeńskie Urszula
-chiara	imię żeńskie Klara
-giuseppina	imię żeńskie Józefina
-gianna	imię żeńskie Janina
 suburbano	podmiejski
 levare	podnosić
 levare	wzejście
@@ -11693,17 +10953,6 @@ cammelliere	wielbłądnik
 arrabbiare	wściekać się
 fegato	wątroba
 rodere	gryźć
-aloisio	imię męskie Alojzy
-enrico	imię męskie Henryk
-ilario	imię męskie Hilary
-tiziano	imię męskie Tycjan
-sergio	imię męskie Sergiusz
-roberto	imię męskie Robert
-raffaello	imię męskie Rafał
-mattia	imię męskie Maciej
-luigi	imię męskie Ludwik
-gaetano	imię męskie Kajetan
-enrica	imię żeńskie Henryka
 corniciaio	ramiarz
 erba	zioło
 cornicione	gzyms
@@ -11806,7 +11055,6 @@ ninfeo	w starożytnym Rzymie
 bestiame	bydło
 bestialità	bestialstwo
 bestiario	stróż dzikich zwierząt
-corano	Koran
 nobildonna	kobieta szlachetnie urodzona
 nobiliare	szlachecki
 ninna	w języku dziecięcym
@@ -12122,15 +11370,12 @@ tachigrafo	obrotomierz piszący
 tachimetro	obrotomierz
 russa	Rosjanka
 asiatica	Azjatka
-berlino	Berlin
 berlinese	berliński
 berlinese	berlińczyk
 berlinese	berlinianka
-cile	Chile
 cileno	chilijski
 cileno	Chilijczyk
 cilena	Chilijka
-perù	Peru
 peruviano	peruwiański
 peruviano	Peruwiańczyk
 peruviana	Peruwianka
@@ -12139,7 +11384,6 @@ risalito	wzbogacony
 austriacante	zwolennik panowania Austrii
 austriacante	zwolenniczka panowania Austrii
 bielorussa	Białorusinka
-cechia	Czechy
 ceca	narybek węgorza
 cipriota	cypryjski
 cipriota	Cypryjczyk
@@ -12348,8 +11592,6 @@ acetoso	octowy
 acetume	marynata
 acetosità	kwaśny smak
 slovacca	Słowaczka
-cremona	Cremona
-bergamo	Bergamo
 mandibola	żuchwa
 costolato	polędwica
 costolato	żebrowaty
@@ -12428,11 +11670,8 @@ nelle	przyimek in + rodzajnik określony le
 sulle	przyimek su + rodzajnik określony le
 dalle	przyimek da + rodzajnik określony le
 paralume	abażur
-pier	imię męskie
-pokémon	pokémon
 abbiccì	abecadło
 algebrico	algebraiczny
-celia	imię żeńskie Celia
 angoloso	kanciasty
 angoloide	kąt wielościenny
 angolosità	kanciastość
@@ -12441,7 +11680,6 @@ acutamente	ostro
 acutangolo	ostrokątny
 acutizzare	ostrzyć
 acutizzarsi	wzmóc się
-kashmir	Kaszmir
 obliquare	zgiąć
 obliquare	iść na ukos
 obliquarsi	zgiąć się
@@ -12584,7 +11822,6 @@ ventisei	dwadzieścia sześć
 ventisette	dwadzieścia siedem
 ventotto	dwadzieścia osiem
 ventinove	dwadzieścia dziewięć
-terra	Ziemia
 uranista	homoseksualista
 uranismo	homoseksualizm m
 uranografia	opis nieba
@@ -12866,92 +12103,10 @@ scusarsi	wytłumaczyć się
 regnicolo	obywatel monarchii
 regnicolo	mieszkający w monarchii
 regnare	królować
-alpi	Alpy
-amburgo	Hamburg
-ancona	Ankona
-ande	Andy
-antartide	Antarktyda
-antartica	Antarktyka
-appennini	Apeniny
-arctica	Arktyka
-ardenne	Ardeny
-arno	Arno
-atene	Ateny
-atlantico	Atlantyk
-avignone	Awinion
-balcani	Bałkany
-barcellona	Barcelona
-basilea	Bazylea
-berna	Berno
-birmania	Birma
-bogotà	Bogota
-borgogna	Burgundia
-bosforo	Bosfor
-brandeburgo	Brandenburgia
-brindisi	Brindisi
-cambogia	Kambodża
-carpazi	Karpaty
-casciubia	Kaszuby
-ciad	Czad
-varmia	Warmia
-verona	Werona
-volinia	Wołyń
-tago	Tag
-tanganica	Tanganika
-turingia	Turyngia
-tunisi	Tunis
-cuiavia	Kujawy
-costantinopoli	Konstantynopol
-damasco	Damaszek
-dresda	Drezno
-dublino	Dublin
-eufrate	Eufrat
 stile	styl
-gerusalemme	Jerozolima
-gibilterra	Gibraltar
-ginevra	Genewa
-guadalupa	Gwadelupa
-guiana	Gujana
-jesse	Jesse
-himalaia	Himalaje
-itaca	Itaka
-lapponia	Laponia
-leningrado	Leningrad
-lilla	Lille
-lione	Lyon
 tomahawk	tomahawk
-lubiana	Lublana
-lublino	Lublin
-lusazia	Łużyce
 qua	tu
 qua	kwa!
-magdeburgo	Magdeburg
-meno	Men
-mogadiscio	Mogadiszu
-mozambico	Mozambik
-padova	Padwa
-parigi	Paryż
-bosnia-erzegovina	Bośnia i Hercegowina
-perugia	Perugia
-pechino	Pekin
-pietroburgo	Petersburg
-siena	Siena
-siena	siena
-udine	Udine
-reno	Ren
-salonicco	Saloniki
-sassonia	Saksonia
-senna	Sekwana
-stoccolma	Sztokholm
-strasburgo	Strasburg
-sudafrica	Republika Południowej Afryki
-sudeti	Sudety
-treviso	Treviso
-alberto	imię męskie Albert
-mariano	imię męskie Marian
-luciano	imię męskie Łucjan
-salvatore	imię męskie Salwator
-rovigo	Rovigo
 pei	zob. per + i
 coi	przyimek con + rodzajnik określony i
 battericida	bakteriobójczy
@@ -12975,8 +12130,6 @@ sifilide	kiła
 tetanico	tężcowy
 teocratico	teokratyczny
 teocrazia	teokracja
-teodoro	imię męskie Teodor
-teofilo	imię męskie Teofil
 teologico	teologiczny
 teologo	teolog
 pieghevole	folder
@@ -13085,11 +12238,6 @@ economizzatore	oszczędzający
 economizzare	gospodarzyć oszczędnie
 economizzare	oszczędzać
 bufala	bawolica
-adolfo	imię męskie Adolf
-augusto	August
-anselmo	imię męskie Anzelm
-alessio	imię męskie Aleksy
-adele	imię żeńskie Adela
 violinistico	skrzypcowy
 sedersi	usiąść
 sederino	od sedere
@@ -13142,13 +12290,6 @@ adattarsi	przystosować się
 adattabile	nadający się do przystosowania
 adattabilità	zdolność przystosowania się
 adattamento	adaptacja
-basilio	imię męskie Bazyli
-benedetto	imię męskie Benedykt
-bernardo	imię męskie Bernard
-bonifacio	imię męskie Bonifacy
-davide	imię męskie Dawid
-brigida	imię żeńskie Brygida
-benedetta	imię żeńskie Benedykta
 cavolo	kapusta
 cavolo	a niech to!
 cavolata	bzdura
@@ -13160,9 +12301,6 @@ acetosa	Rumex acetosa
 acetosella	Oxalis acetosella
 carciofo	karczoch
 lenticchia	soczewica
-cristiano	imię męskie Krystian
-crispino	imię męskie Kryspin
-clemente	imię męskie Klemens
 candelaio	fabrykant lub sprzedawca świec
 candeletta	od
 candeliere	świecznik
@@ -13177,12 +12315,6 @@ macellazione	ubój
 macelleria	sklep mięsny
 baltico	bałtycki
 ventilazione	wietrzenie
-edmondo	imię męskie Edmund
-edoardo	imię męskie Edward
-emanuele	imię męskie Emanuel
-emilio	imię męskie Emil
-emiliano	imię męskie Emilian
-eusebio	imię męskie Euzebiusz
 ebanisteria	ebenisteria
 aporia	aporia
 fermo	nieruchomy
@@ -13376,7 +12508,6 @@ persuadibile	łatwy do przekonania
 persuadente	przekonywający
 borsa	torba
 spaniel	spaniel
-lei	zob. lei
 alsaziano	Alzatczyk
 alsaziano	alzacki
 alsaziana	Alzatka
@@ -13395,41 +12526,6 @@ dinastia	dynastia
 dinastico	dynastyczny
 diocesi	diecezja
 dioico	dwupienny
-gustavo	imię męskie Gustaw
-gregorio	imię męskie Grzegorz
-gilberto	imię męskie Gilbert
-gervasio	imię męskie Gerwazy
-feliciano	imię męskie Felicjan
-ferdinando	imię męskie Ferdynand
-flavio	imię męskie Flawiusz
-floriano	imię męskie Florian
-ezechiele	imię męskie Ezechiel
-fabiano	imię męskie Fabian
-donato	imię męskie Donat
-isacco	imię męskie Izaak
-lorenzo	imię męskie Laurencjusz
-isidoro	imię męskie Izydor
-ireneo	imię męskie Ireneusz
-ildefonso	imię męskie Ildefons
-ippolito	imię męskie Hipolit
-oliviero	imię męskie Oliwer
-ottaviano	imię męskie Oktawian
-norberto	imię męskie Norbert
-nicola	imię męskie Mikołaj
-maurizio	imię męskie Maurycy
-marcello	imię męskie Marceli
-leopoldo	imię męskie Leopold
-sebastiano	imię męskie Sebastian
-romualdo	imię męskie Romuald
-patrizio	imię męskie Patryk
-pancrazio	imię męskie Pankracy
-serafino	imię męskie Serafin
-vladimiro	imię męskie Włodzimierz
-vincenzo	imię męskie Wincenty
-vittorio	imię męskie Wiktor
-stanislao	imię męskie Stanisław
-severino	imię męskie Seweryn
-severina	imię żeńskie Seweryna
 monaco	mnich
 monaca	mniszka
 monacando	nowicjusz
@@ -13483,13 +12579,6 @@ abbandonatamente	bezwolnie
 abbandonarsi	przewracać się
 abbandonato	porzucony
 abbandonato	dziecko porzucone
-editta	imię żeńskie Edyta
-genoveffa	imię żeńskie Genowefa
-elena	imię żeńskie Helena
-costanza	imię żeńskie Konstancja
-ludmila	imię żeńskie Ludmiła
-rosalia	imię żeńskie Rozalia
-vittoria	imię żeńskie Wiktoria
 abbarbagliare	oślepiać
 abbarbicare	zapuszczać korzenie
 abbarbicarsi	zakorzeniać się
@@ -13587,7 +12676,6 @@ water-polo	piłka wodna
 wattometro	watomierz
 wattora	watogodzina
 welter	bokser wagi półciężkiej
-teneriffa	Teneryfa
 chiavistello	rygiel
 podcast	podcast
 einsteinio	einstein
@@ -13627,7 +12715,6 @@ gheriglio	jądro orzecha
 gherlino	lina splotu kablowego
 gherminella	sztuczka
 ghermire	złapać w szpony
-romeo	imię męskie Romeo
 abbattersi	upaść
 abbattitore	drwal
 abbattuta	ścinka drzew
@@ -13670,7 +12757,6 @@ facchinaggio	noszenie bagażów
 facchinata	ciężka praca
 facchinesco	ordynarny
 fabbrile	kowalski
-bahrein	Bahrajn
 fabbricato	budynek
 fabbricante	wytwórca
 fabbricante	wytwórczyni
@@ -13838,7 +12924,6 @@ ulcerato	owrzodzony
 ulceroso	wrzodowy
 zac	ciach!
 zac	zrobienie ciach
-zaccaria	imię męskie Zachariasz
 zaccherare	obryzgać
 zaccherone	brudas
 zaccheroso	ubłocony
@@ -13985,7 +13070,6 @@ zelantone	nadgorliwiec
 zelatore	gorliwiec
 zendado	fular
 zendale	fular
-zenone	imię męskie Zenon
 zeppo	napchany
 zeppola	ciasteczko
 zerbino	słomianka
@@ -14019,7 +13103,6 @@ zinzino	odrobinka
 zipolo	kołek
 zirlare	świstać jak drozd
 zirlo	świst drozda
-zita	imię żeńskie Zyta
 zitellone	stary kawaler
 zitellismo	staropanieństwo
 zittellone	zob. zitellone
@@ -14237,7 +13320,6 @@ pavone	Pavo cristatus
 altarino	ołtarzyk
 veste	suknia
 narcisismo	narcyzm
-narciso	Narcyz
 narciso	Narcissus
 tomba	grób
 tombale	grobowy
@@ -14254,9 +13336,6 @@ orzo	jęczmień
 angolana	Angolka
 angolano	angolski
 angolano	Angolczyk
-gibuti	Dżibuti
-gibuti	Dżibuti
-giordania	Jordania
 astrologare	wróżyć z gwiazd
 astrologico	astrologiczny
 astrologicamente	astrologicznie
@@ -14307,7 +13386,6 @@ alloro	wawrzyn
 cabbala	zob. cabala
 cabalare	fantazjować
 cabarettistico	kabaretowy
-olimpo	Olimp
 mattino	poranek
 mattinata	poranek
 mattiniero	osoba wcześnie wstająca
@@ -14337,7 +13415,6 @@ fringuello	Fringilla coelebs Linnaeus
 fenicottero	flaming
 ciuffolotto	Pyrrhula pyrrhula
 beccofrusone	Bombycilla garrulus
-olimpia	Olimpia
 folaga	Fulica Linnaeus
 cesena	Turdus pilaris
 ghiandaia	Garrulus glandarius
@@ -14388,7 +13465,6 @@ agitatore	agitator
 agitatrice	agitatorka
 agitazione	wzburzenie
 agitarsi	burzyć się
-paraguai	Paragwaj
 impala	Aepyceros melampus
 sisal	Agave sisalana
 henna	Lawsonia inermis
@@ -14396,10 +13472,8 @@ numbat	Myrmecobius Waterhouse
 sitatunga	Tragelaphus spekii
 parlato	mówiony
 copione	egzemplarz sztuki teatralnej
-babilonia	Babilonia
 ammirare	podziwiać
 apparenza	wygląd
-cantabria	Kantabria
 lavatrice	płuczka
 maratona	maraton
 tempio	świątynia
@@ -14420,9 +13494,6 @@ sociologismo	socjologizm
 ocularista	producent sztucznych oczu
 oculatamente	bacznie
 oroscopico	horoskopowy
-bernadette	imię żeńskie Bernadeta
-clotilde	imię żeńskie Klotylda
-marietta	imię żeńskie
 imprimatur	imprimatur
 perfettamente	doskonale
 acquerello	akwarela
@@ -14838,7 +13909,6 @@ sabotatore	sabotażysta
 sabotatore	sabotażowy
 sabotatrice	sabotażystka
 bantam	bantamka
-benevento	Benewent
 bulbul	bilbil
 biotite	biotyt
 boracite	boracyt
@@ -14886,7 +13956,6 @@ benevolo	życzliwy
 benevolenza	przychylność
 benevolmente	przychylnie
 tirchieria	sknerstwo
-aleppo	Aleppo
 cioccolato	czekolada
 cioccolatino	czekoladka
 cioccolataio	producent czekolady
@@ -14896,7 +13965,6 @@ pefloxacina	pefloksacyna
 gabonese	gaboński
 gabonese	Gabończyk
 gabonese	Gabonka
-comore	Komory
 propano	propan
 dogato	urząd doży
 dogale	należący do doży
@@ -14932,8 +14000,6 @@ scabroso	chropowaty
 tricheco	Odobenus rosmarus
 tasso	Meles meles
 loggia	loggia
-maldive	Malediwy
-kazakistan	Kazachstan
 gelatinoso	żelatynowy
 gelido	lodowaty
 gelidamente	chłodno
@@ -15058,7 +14124,6 @@ nord-ovest	północny zachód
 sud-ovest	południowy zachód
 morbido	miękki
 magrebina	zob. maghrebina
-magreb	zob. Maghreb
 afghano	zob. afgano
 afghano	zob. afgano
 afghana	zob. afgana
@@ -15098,7 +14163,6 @@ filippina	Filipinka
 giordano	jordański
 giordano	Jordańczyk
 giordana	Jordanka
-giordano	Jordan
 pachistana	Pakistanka
 pakistana	zob. pachistana
 pachistano	Pakistańczyk
@@ -15112,13 +14176,7 @@ estraparlamentare	zob. extraparlamentare
 estraparlamentare	zob. extraparlamentare
 estraparlamentare	zob. extraparlamentare
 veneta	mieszkanka Wenecji Euganejskiej
-veneto	Wenecja Euganejska
-puglia	Apulia
 lombarda	Lombardka
-marche	Marche
-basilicata	Basilicata
-molise	Molise
-wikizionario	Wikisłownik
 laziale	dotyczący Lacjum
 laziale	mieszkaniec Lacjum
 laziale	mieszkanka Lacjum
@@ -15184,8 +14242,6 @@ orecchione	duże ucho
 erbe	warzywa
 pomodorata	uderzenie pomidorem
 vetrocromia	obraz malowany na szkle
-mosè	Mojżesz
-gorizia	Gorycja
 adenocarcinoma	gruczolakorak
 fibroadenoma	gruczolakowłókniak
 ori	wyroby ze złota
@@ -15223,7 +14279,6 @@ madrilena	madrytka
 madrileno	madrycki
 madrileno	madrytczyk
 nordica	mieszkanka krajów północnych
-omero	Homer
 atlantico	atlantycki
 sammarinese	sanmaryński
 sammarinese	Sanmaryńczyk
@@ -15260,7 +14315,6 @@ indeterminativo	nieokreślony
 condizionale	warunkowy
 condizionale	zdanie warunkowe
 congiuntivo	łączący
-abele	imię męskie Abel
 abluzione	obmycie się
 astrochimica	astrochemia
 astrofotometro	astrofotometr
@@ -15313,7 +14367,6 @@ mettibocca	wścibska
 mettiscandali	wichrzyciel
 mettiscandali	wichrzycielka
 micio	kot domowy
-maometto	Mahomet
 antiguo-barbudano	odnoszący się do Antigui i Barbudy
 antiguo-barbudano	mieszkaniec Antigui i Barbudy
 antiguo-barbudana	mieszkanka Antigui i Barbudy
@@ -15353,7 +14406,6 @@ honduregna	Honduranka
 guianese	gujański
 guianese	Gujańczyk
 guianese	Gujanka
-dioniso	Dionizos
 asciugacapelli	suszarka do włosów
 massellare	kuć
 massellatura	kucie
@@ -15455,7 +14507,6 @@ diurno	dzienny
 diurno	diurnał
 doveri	ukłony
 famotidina	famotydyna
-bermude	Bermudy
 arubana	Arubanka
 arubano	arubański
 arubano	Arubańczyk
@@ -15555,7 +14606,6 @@ clarone	klarnet basowy
 clavicolare	obojczykowy
 clavicordo	klawikord
 clavicordio	zob. clavicordo
-cleofa	imię męskie Kleofas
 cleptomane	kleptomański
 cleptomane	kleptoman
 cleptomane	kleptomanka
@@ -15594,7 +14644,6 @@ ahimè	ach!
 coso	to
 portato	używany
 portato	poród
-cosma	imię męskie Kosma
 biofisico	biofizyczny
 biofisico	biofizyk
 bimano	dwuręki
@@ -15605,7 +14654,6 @@ biomeccanica	biomechanika
 biogenesi	biogeneza
 biogenetico	biogenetyczny
 polmonaria	Pulmonaria officinalis
-adone	Adonis
 orsino	niedźwiedzi
 serpillo	Thymus serpyllum
 papavero	Papaver
@@ -15659,7 +14707,6 @@ mandolinista	mandolinista
 mandolinista	mandolinistka
 mandolino	mandolina
 acetonico	acetonowy
-achille	Achilles
 affilarasoio	pas do ostrzenia brzytwy
 affilatoio	osełka
 affusto	łoże działa
@@ -15694,7 +14741,6 @@ namibiano	Namibijczyk
 namibiana	Namibijka
 napoleonica	napoleonistka
 napoleone	napoleondor
-napoleone	imię męskie Napoleon
 napoletana	neapolitanka
 narcoanalisi	narkoanaliza
 narcomania	narkomania
@@ -15707,7 +14753,6 @@ cotonaceo	bawełnopodobny
 leccapiatti	żarłok
 lecca-lecca	lizak
 losanga	romb
-lorenza	imię żeńskie Laurencja
 luppolo	Humulus lupulus
 esofago	przełyk
 frullana	kosa
@@ -15725,7 +14770,6 @@ orecchietta	przedsionek serca
 suffisso	przyrostek
 -aggio	tworzy rzeczowniki odrzeczownikowe
 -aggine	tworzy rzeczowniki odprzymiotnikowe
-gennaro	imię męskie January
 gareggiamento	współzawodnictwo
 gareggiatore	współzawodnik
 aggio	ażio
@@ -15734,18 +14778,11 @@ acquaforte	akwaforta
 acquafortista	akwaforcista
 acquafortista	akwaforcistka
 acquatinta	akwatinta
-timoteo	imię męskie Tymoteusz
-tobia	imię męskie Tobiasz
-caino	Kain
 femminista	feminista
 femminista	feministka
 femminista	feministyczny
 femministico	feministyczny
 onnipotente	wszechmocny
-onorio	imię męskie Honoriusz
-orione	Orion
-raimondo	imię męskie Rajmund
-rocco	imię męskie Roch
 frana	obsunięcie się
 fornaio	piekarz
 decennale	dziesięcioletni
@@ -15765,20 +14802,12 @@ sogliola	sola
 merlo	Turdus merula
 vocale	głosowy
 vocale	samogłoska
-agostina	imię żeńskie Augustyna
-gemelli	Bliźnięta
-cancro	Rak
-vergine	Panna
-bilancia	Waga
-capricorno	Koziorożec
-pesci	Ryby
 sestile	sekstyl
 semisestile	półsekstyl
 sesquiquadratura	półtorakwadratura
 quinconce	kwinkunks
 semiquadratura	półkwadratura
 trigono	trygon
-orazio	imię męskie Horacy
 orchite	zapalenie jądra
 macinacaffè	młynek do kawy
 monoatomico	jednoatomowy
@@ -15798,7 +14827,6 @@ monocolo	jednooki
 monocolo	monokl
 monna	pani
 aluatta	Alouatta
-aquileia	Akwileja
 aquileiese	akwilejski
 aquileiese	Akwilejczyk
 aquileiese	Akwilejka
@@ -15820,10 +14848,8 @@ stereofotogrammetria	stereofotogrametria
 scenografico	scenograficzny
 scenografo	scenograf
 scenografa	scenografka
-saverio	imię męskie Ksawery
 saturatore	saturator
 sarta	krawcowa
-samuele	imię męskie Samuel
 parrucca	peruka
 calembour	kalambur
 cercopiteco	Cercopithecus
@@ -15866,8 +14892,6 @@ lingotto	wlewek
 lesione	szkoda
 lenti	okulary
 lealtà	lojalność
-niccolò	imię męskie Mikołaj
-ibrahim	imię męskie Ibrahim
 isonomia	izonomia
 yottabyte	jottabajt
 yottabit	jottabit
@@ -15953,11 +14977,9 @@ conico	stożkowy
 conica	stożkowa
 abalienazione	abalienacja
 fata	dobra wróżka
-abcasia	Abchazja
 abcaso	abchaski
 abcaso	Abchaz
 abcasa	Abchazka
-abkhasia	Abchazja
 abkhaso	abchaski
 abkhaso	Abchaz
 abkhasa	Abchazka
@@ -16033,7 +15055,6 @@ formulare	formułować
 formicaio	mrowisko
 spironolattone	spironolakton
 poliandria	poliandria
-erzegovina	Hercegowina
 erzegovese	hercegowiński
 erzegovese	Hercegowińczyk
 erzegovese	Hercegowinka
@@ -16054,7 +15075,6 @@ cecoslovacco	Czechosłowak
 jugoslava	Jugosłowianka
 jugoslavo	jugosłowiański
 jugoslavo	Jugosłowianin
-cecenia	Czeczenia
 cecena	Czeczenka
 ceceno	czeczeński
 ceceno	Czeczen
@@ -16189,7 +15209,6 @@ geografa	geograf
 biologa	biolożka
 bassifondi	męty społeczne
 astro-	astro
-aria	imię żeńskie
 fornirsi	zaopatrzyć się
 polipo	polip
 pantofola	kapeć
@@ -16230,8 +15249,6 @@ avanti	proszę!
 avanti	przed
 avanti	poprzedni
 avanti	dziób
-bari	Bari
-aosta	Aosta
 ateniese	ateński
 ateniese	ateńczyk
 ateniese	atenka
@@ -16314,9 +15331,7 @@ mezzorilievo	płaskorzeźba
 colorimetrico	kolorymetryczny
 colorimetria	kolorymetria
 colorimetro	kolorymetr
-colosseo	Koloseum
 colubrina	kolubryna
-numidia	Numidia
 giubbotto	kurtka
 antiproiettile	kuloodporny
 girotondo	kółko
@@ -16393,7 +15408,6 @@ moka	mokka
 moka	moka
 quintale	kwintal
 mescolarsi	wmieszać się
-caledonia	Kaledonia
 clivia	Clivia Lindl
 parete	ściana
 petrogenesi	petrogeneza
@@ -16490,7 +15504,6 @@ fotogenicità	fotogeniczność
 fotogenico	fotogeniczny
 fotogiornale	gazeta ilustrowana
 diatesi	diateza
-amazzonia	Amazonia
 nitrobatterio	bakteria nitryfikacyjna
 tascapane	chlebak
 tautogramma	tautogram
@@ -16563,7 +15576,6 @@ zettagrammo	zettagram
 zettabit	zettabit
 eurocomunismo	eurokomunizm
 eurodeputato	eurodeputowany
-eurolandia	Euroland
 tricolore	trójbarwny
 tricolore	flaga trójbarwna
 amorfo	amorficzny
@@ -16582,7 +15594,6 @@ osare	ośmielić się
 indiano	indyjski
 indiano	Hindus
 indiana	Hinduska
-feliciana	imię żeńskie Felicjana
 cauzione	kaucja
 paglia	słoma
 paglia	słomkowy
@@ -16700,7 +15711,6 @@ sismometro	sejsmometr
 sismometria	sejsmometria
 sismometrico	sejsmometryczny
 sismoscopio	sejsmoskop
-atlante	Atlas
 atlantismo	atlantyzm
 apicoltore	pszczelarz
 apicoltura	pszczelarstwo
@@ -16800,17 +15810,11 @@ etera	hetera
 marea	pływ
 soldi	pieniądze
 egli	on
-efesto	Hefajstos
-vulcano	Wulkan
-poseidone	Posejdon
 vapori	wyziew
 vapore	para
 ammazzare	zabić
 ammazzare	zabić się
 corea	taniec
-iadi	Hiady
-artemide	Artemida
-estia	Hestia
 fottere	spółkować
 fotocellula	fotokomórka
 fotocolor	fotografia barwna
@@ -16998,7 +16002,6 @@ mozambicano	Mozambijczyk
 mozambicana	Mozambijka
 prego	modlitwa
 prego	proszę
-adalberto	imię męskie Wojciech
 muflone	Ovis aries musimon Pallas
 pluriennale	wieloletni
 sottomarino	podwodny
@@ -17067,7 +16070,6 @@ bancomat	bankomat
 fiocina	harpun
 acquifero	wodonośny
 carbonifero	węglonośny
-carbonifero	karbon
 conifero	szyszkorodny
 crocifero	niosący krzyż
 crocifero	niosący krzyż
@@ -17149,7 +16151,6 @@ epistemologia	epistemologia
 cubiforme	w kształcie sześcianu
 viscosimetro	wiskozymetr
 galvanometro	galwanometr
-platone	Platon
 veronese	weroński
 veronese	werończyk
 veronese	weronka
@@ -17177,7 +16178,6 @@ ergoterapia	ergoterapia
 opoterapia	opoterapia
 massoterapia	leczenie masażem
 fototerapia	światłolecznictwo
-kümmel	kminkówka
 paleontologia	paleontologia
 laserterapia	laseroterapia
 socioterapia	socjoterapia
@@ -17230,7 +16230,6 @@ poliammidico	poliamidowy
 poliammide	poliamid
 poliandrico	poliandryczny
 poliarchia	poliarchia
-policarpo	imię męskie Polikarp
 polifase	wielofazowy
 politeistico	politeistyczny
 poliuretano	poliuretan
@@ -17252,7 +16251,6 @@ parapioggia	parasol
 paracqua	parasol
 parafulmine	piorunochron
 parafumo	dymochłon
-paride	Parys
 oniomania	zakupoholizm
 onnivoro	wszystko jedzący
 pluricellulare	wielokomórkowy
@@ -17273,13 +16271,10 @@ pentagonale	pięciokątny
 pentagramma	pentagram
 pentametro	wiersz pięciostopowy
 pentano	pentan
-pentateuco	Pięcioksiąg
-pentecoste	Zesłanie Ducha Świętego
 accoccolarsi	przysiąść na piętach
 coccoloni	w kucki
 partenogenesi	partenogeneza
 partitamente	oddzielnie
-krapfen	pączek
 fatalisticamente	fatalistycznie
 fatalistico	fatalistyczny
 fatalone	uwodziciel
@@ -17310,9 +16305,7 @@ competitività	konkurencyjność
 competitivamente	konkurencyjnie
 competitivo	współzawodniczący
 competere	współzawodniczyć
-novecento	dwudziesty wiek
 novecentesco	dwudziestowieczny
-ottocento	dziewiętnasty wiek
 ottocentesco	dziewiętnastowieczny
 omologia	homologia
 omogramma	homogram
@@ -17416,9 +16409,6 @@ alcalinizzare	alkalizować
 pianetino	planetka
 eclissi	zaćmienie
 eclisse	zob. eclissi
-altare	Ołtarz
-boote	Wolarz
-cassiopea	Kasjopea
 stesso	ten sam
 stesso	ta sama osoba
 stesso	właśnie
@@ -17433,7 +16423,6 @@ vendicare	pomścić
 uvetta	winogronko
 unicorno	jednorogi
 unicorno	jednorożec
-unicorno	Jednorożec
 ubriacone	pijak
 trappola	pułapka
 timpano	kocioł
@@ -17468,15 +16457,6 @@ strallo	sztag
 ippoglosso	Hippoglossus hippoglossus
 chemisier	koszula damska
 osteomalacia	osteomalacja
-aquila	Orzeł
-aquila	imię męskie Akwila
-lucertola	Jaszczurka
-regolo	Węgielnica
-idra	Hydra
-balena	Wieloryb
-lupo	Wilk
-tucano	Tukan
-dorado	Złota Ryba
 tessere	tkać
 tessilsacco	worek na odzież
 tessitora	tkaczka
@@ -17493,57 +16473,14 @@ stuello	tampon
 encefalo	mózgowie
 banderuola	chorągiewka
 barbone	duża broda
-gru	Żuraw
-cigno	Łabędź
-eridano	Erydan
-ofiuco	Wężownik
 antiprotone	antyproton
 antitesi	antyteza
 sildenafil	sildenafil
-poppa	Rufa
-scultore	Rzeźbiarz
-cratere	Puchar
-cefeo	Cefeusz
-compasso	Cyrkiel
-delfino	Delfin
-dragone	Smok
-colomba	imię żeńskie Kolumba
-fenice	Feniks
-giraffa	Żyrafa
-bulino	Rylec
-lepre	Zając
-indiano	Indianin
-camaleonte	Kameleon
 emorragia	krwotok
 antifona	antyfona
 flemmone	ropowica
-mitteleuropa	Europa Środkowa
 piroga	piroga
-fornace	Piec
-triangolo	Trójkąt
 triangolazione	triangulacja
-scudo	Tarcza
-sestante	Sekstant
-carena	Kil
-corvo	Kruk
-lince	Ryś
-microscopio	Mikroskop
-serpente	Wąż
-pavone	Paw
-reticolo	Sieć
-perseo	Perseusz
-pegaso	Pegaz
-centauro	Centaur
-telescopio	Luneta
-freccia	Strzała
-orologio	Zegar
-ottante	Oktant
-pittore	Malarz
-volpetta	Lisek
-lira	Lutnia
-bussola	Kompas
-cavallino	Źrebię
-vela	Żagiel
 esplodere	eksplodować
 esplodere	oddać
 flemmonoso	ropowiczy
@@ -17557,7 +16494,6 @@ sovietico	obywatel Związku Radzieckiego
 esatto	dokładny
 esatto	właśnie
 sovietica	obywatelka Związku Radzieckiego
-aquario	Wodnik
 accaparrare	zadatkować
 alloggiare	ulokować
 alloggiare	mieszkać
@@ -17921,7 +16857,6 @@ andrologia	andrologia
 andrologo	androlog
 androloga	androlog
 andrologico	andrologiczny
-melissa	imię żeńskie Melisa
 trilogia	trylogia
 posologia	dawkowanie
 sierologo	serolog
@@ -18057,7 +16992,6 @@ posdomani	pojutrze
 posdomani	pojutrze
 bossolo	urna do głosowania
 rivoltella	rewolwer
-bibiana	imię żeńskie Bibiana
 buddistico	buddyjski
 buddhistico	zob. buddistico
 autobiografo	autobiograf
@@ -18066,7 +17000,6 @@ autobiografismo	autobiografizm
 autobiografa	autobiografka
 gonorrea	rzeżączka
 andalusa	Andaluzyjka
-abissinia	Abisynia
 abissino	abisyński
 abissino	Abisyńczyk
 abissina	Abisynka
@@ -18104,7 +17037,6 @@ idrofono	hydrofon
 idrofonico	hydrofonowy
 idroforo	doprowadzający wodę
 idrogeologia	hydrogeologia
-morfeo	Morfeusz
 zelantemente	gorliwie
 bacchetta	pręt
 collinare	pagórkowaty
@@ -18161,7 +17093,6 @@ schizofrenica	schizofreniczka
 fortuitamente	przypadkowo
 involontariamente	nieumyślnie
 simulare	udawać
-rigo	imię męskie
 penetrazione	penetracja
 produttività	produktywność
 cronicamente	chronicznie
@@ -18171,7 +17102,6 @@ allogeno	obcego pochodzenia
 allogeno	członek mniejszości narodowej
 insanguinare	zakrwawić
 gaucho	gaucho
-nazaret	Nazaret
 retoricamente	retorycznie
 retore	retor
 sottoascella	potnik
@@ -18211,14 +17141,12 @@ strage	masakra
 travaglio	mozół
 rottamare	złomować
 sindaco	burmistrz
-solone	Solon
 elastico	elastyczny
 minima	półnuta
 sospendere	zawiesić
 testimone	świadek
 testimone	świadek
 respingere	odrzucać
-liberio	imię męskie Liberiusz
 contrapposto	przeciwstawiony
 contrapposto	przeciwieństwo
 slegare	odwiązać
@@ -18226,7 +17154,6 @@ sleale	nielojalny
 slealtà	nielojalność
 pressoché	prawie
 voltometro	zob. voltmetro
-porto	Porto
 debito	odpowiedni
 debito	dług
 muffa	pleśń
@@ -18251,7 +17178,6 @@ canterellare	nucić
 canzonare	drwić
 capeggiare	stać na czele
 kaiser	członek męski
-lucca	Lukka
 corrompere	psuć
 coordinare	koordynować
 consultare	radzić się
@@ -18835,7 +17761,6 @@ tapiro	tapir
 dimettersi	zrezygnować
 cincillà	szynszyla
 labradorite	labrador
-laconia	Lakonia
 suricato	Suricata suricatta
 limonene	limonen
 capriola	sarna
@@ -18851,7 +17776,6 @@ formichiere	mrówkojad
 metaplasia	metaplazja
 marocchina	Marokanka
 angiosarcoma	naczyniakomięsak
-nadia	imię żeńskie Nadzieja
 alternare	czynić coś na przemian
 allevare	wychowywać
 alleggerire	odciążyć
@@ -19298,7 +18222,6 @@ cartone	karton
 assegno	zasiłek
 cupidigia	chciwość
 decenza	przyzwoitość
-malesia	Malezja
 universalità	powszechność
 universiade	uniwersjada
 universalizzazione	rozpowszechnianie
@@ -19447,8 +18370,6 @@ esploratore	badacz
 esploratore	badawczy
 ivi	tam
 saponite	saponit
-serafina	imię żeńskie Serafina
-shikoku	Sikoku
 alula	skrzydełko
 abbronzato	opalony
 accerchiare	otoczyć
@@ -19965,7 +18886,6 @@ pisciatoio	pisuar
 razionalità	racjonalność
 ematuria	krwiomocz
 vagotonia	wagotonia
-valeria	imię żeńskie Waleria
 adsorbimento	adsorpcja
 adulatore	pochlebny
 adulatore	pochlebca
@@ -20045,14 +18965,6 @@ anestetico	znieczulający
 anestetico	środek znieczulający
 angelico	anielski
 annualità	roczna pensja
-virgilio	imię męskie Wirgiliusz
-uberto	imię męskie Hubert
-silvano	imię męskie Sylwan
-riccardo	imię męskie Ryszard
-renato	imię męskie Renat
-gioacchino	imię męskie Joachim
-guglielmo	imię męskie Wilhelm
-ettore	imię męskie Hektor
 tecnicamente	technicznie
 affarista	aferzysta
 affarista	aferzystka
@@ -20204,7 +19116,6 @@ mezzaluna	sierp księżyca
 medioevo	średniowiecze
 liquidità	płynność
 lenza	wędka
-medioevo	zob. medioevo
 bassotto	niskawy
 bassotto	jamnik
 barcollare	chwiać się
@@ -20732,8 +19643,6 @@ corbezzolo	chruścina jagodna
 coraggiosamente	odważnie
 copernicio	kopernik
 cooptare	przyjąć
-umberto	imię męskie Humbert
-ruggero	imię męskie Roger
 gotico	gocki
 gotico	gocki
 gonzo	łatwowierny
@@ -20785,7 +19694,6 @@ vegano	wegański
 vegano	weganin
 deplorare	ubolewać
 denutrizione	niedożywienie
-jalta	Jałta
 denotare	wskazywać
 denominazione	nazwanie
 denominare	nazwać
@@ -22327,9 +21235,6 @@ ovaio	jajonośny
 ovaio	jajnik
 vaccaro	zob. vaccaio
 aeroslittante	poduszkowiec
-papuasia	Papua-Nowa Gwinea
-portorico	Puerto Rico
-seicelle	Seszele
 goto	gocki
 faroese	farerski
 faroese	farerski
@@ -22353,11 +21258,9 @@ concernere	dotyczyć
 connotare	konotować
 obbediente	posłuszny
 fiaccare	wyczerpać
-campidoglio	Kapitol
 desiare	pragnąć
 diletto	przyjemność
 diletto	luby
-nordamerica	Ameryka Północna
 ganghero	zawias
 spinace	szpinak
 asteria	rozgwiazda
@@ -22550,318 +21453,8 @@ imprigionamento	uwięzienie
 carceramento	uwięzienie
 galateo	etykieta
 isterismo	histeria
-rita	imię żeńskie Ryta
-dina	imię żeńskie
-clementina	imię żeńskie Klementyna
-lara	imię żeńskie
-simonetta	imię żeńskie
-arianna	imię żeńskie Ariadna
-candace	imię żeńskie Kandake
-rosina	imię żeńskie
 amicale	przyjazny
-enzo	imię męskie
-leonora	imię żeńskie Eleonora
-luana	imię żeńskie
 atonale	atonalny
-livia	imię żeńskie Liwia
-albina	imię żeńskie Albina
-bernadetta	imię żeńskie Bernadeta
-liliana	imię żeńskie Liliana
-ado	imię męskie
-alda	imię żeńskie
-galileo	imię męskie Galileusz
-gloria	imię żeńskie Gloria
-simona	imię żeńskie Szymona
-ines	imię żeńskie
-isidora	imię żeńskie Izydora
-antero	imię męskie Anter
-otmar	imię męskie Otmar
-romana	imię żeńskie Romana
-zina	imię żeńskie
-milena	imię żeńskie Milena
-flavia	imię żeńskie Flawia
-romola	imię żeńskie
-emanuela	imię żeńskie Emanuela
-fausto	imię męskie Faust
-rosario	imię męskie
-carmine	imię męskie
-aida	imię żeńskie Aida
-eulalia	imię żeńskie Eulalia
-vito	imię męskie Wit
-lino	imię męskie Linus
-gino	imię męskie
-adalgiso	imię męskie
-adelo	imię męskie
-adalindo	imię męskie
-adelardo	imię męskie Adelard
-abercio	imię męskie Abercjusz
-abdenago	imię męskie Abed-Nego
-adelfo	imię męskie
-abibo	imię męskie
-abdieso	imię męskie
-abdone	imię męskie Abdon
-abenzio	imię męskie
-abia	imię męskie
-abia	imię żeńskie
-abibone	imię męskie
-abilio	imię męskie
-abramio	imię męskie Abraham
-abudemio	imię męskie
-acacio	imię męskie Achacy
-acario	imię męskie
-acazio	imię męskie Achacy
-accorso	imię męskie
-accursio	imię męskie
-acepsima	imię męskie
-acilio	imię męskie
-acillino	imię męskie
-acindino	imię męskie
-aciscolo	imię męskie
-acrisio	imię męskie
-acuzio	imię męskie Akucjusz
-adalardo	imię męskie Adelard
-adalciso	imię męskie
-adalfredo	imię męskie
-adalgisio	imię męskie
-adalio	imię męskie
-adaloaldo	Adaloald
-adalrico	imię męskie
-adaulfo	imię męskie Adolf
-addai	imię męskie Tadeusz
-addo	imię męskie
-addolorato	imię męskie
-adelaido	imię męskie
-adelasio	imię męskie
-adelberto	imię męskie Adelbert
-adelchi	imię męskie
-adelfa	imię żeńskie
-adelindo	imię męskie
-adelino	imię męskie
-adelio	imię męskie
-adelisio	imię męskie
-adeliso	imię męskie
-adelmiro	imię męskie
-adelmo	imię męskie
-ademaro	imię męskie Ademar
-adeodato	imię męskie Bożydar
-aderito	imię męskie
-adilio	imię męskie
-adino	imię męskie
-adiuto	imię męskie
-admeto	imię męskie
-adorato	imię męskie
-adorno	imię męskie
-adrasto	imię męskie
-adrio	imię męskie
-agapito	imię męskie Agapit
-agatino	imię męskie
-agato	imię męskie
-agatocle	imię męskie
-agatodoro	imię męskie
-agatone	imię męskie Agaton
-agazio	imię męskie
-agenore	imię męskie Agenor
-agesilao	imię męskie
-aggeo	imię męskie Aggeusz
-agilulfo	imię męskie
-agnello	imię męskie
-agnesio	imię męskie
-agrippino	imię męskie
-aguinaldo	imię męskie
-aido	imię męskie
-aimone	imię męskie
-alachis	imię męskie
-alagis	imię męskie
-alahis	imię męskie
-alarico	imię męskie
-albio	imię męskie
-albizzo	imię męskie
-alboino	imię męskie
-alceo	imię męskie
-alcide	imię męskie
-alcino	imię męskie
-alciso	imię męskie
-aldobrando	imię męskie
-alduino	imię męskie
-aleardo	imię męskie
-alfiero	imię męskie
-alfio	imię męskie
-alghisio	imię męskie
-algisio	imię męskie
-algiso	imię męskie
-alicio	imię męskie
-alideo	imię męskie
-alido	imię męskie
-alighiero	imię męskie
-aligi	imię męskie
-alino	imię męskie
-alipio	imię męskie
-alisio	imię męskie
-aliso	imię męskie
-aliviero	imię męskie
-allegrino	imię męskie
-allegro	imię męskie
-almerino	imię męskie
-alperto	imię męskie Albert
-alpinolo	imię męskie
-alteo	imię męskie
-altero	imię męskie
-alvaro	imię męskie Alwar
-alvezio	imię męskie
-alvise	imię męskie
-amadeo	imię męskie Amadeusz
-amalio	imię męskie
-amandino	imię męskie
-amando	imię męskie
-amato	imię męskie Amat
-amelio	imię męskie Ameliusz
-aminta	imię męskie
-ampelio	imię męskie Ampeliusz
-anacleto	imię męskie Anaklet
-anania	imię męskie Ananiasz
-angelico	imię męskie
-aniello	imię męskie
-anito	imię męskie
-annetto	imię męskie
-annico	imię męskie
-annino	imię męskie
-annito	imię męskie
-annuccio	imię męskie
-annunciato	imię męskie
-annuncio	imię męskie
-annunziato	imię męskie
-annunzio	imię męskie
-ansprando	imię męskie
-antigono	imię męskie
-antimo	imię męskie Antym
-antino	imię męskie
-antonino	imię męskie Antonin
-apollonio	imię męskie Apoloniusz
-appio	imię męskie
-aquilino	imię męskie Akwilin
-arcangelo	imię męskie Archanioł
-archippo	imię męskie Archip
-arcisio	imię męskie
-ardito	imię męskie
-arduino	imię męskie
-argento	imię męskie
-argeo	imię męskie
-argio	imię męskie
-arianno	imię męskie
-arioaldo	imię męskie Harald
-aristofane	imię męskie Arystofanes
-ariulfo	imię męskie
-armelindo	imię męskie
-armellino	imię męskie
-armello	imię męskie
-armindo	imię męskie
-arminio	imię męskie Arminiusz
-arnolfo	imię męskie Arnolf
-aronzio	imię męskie
-arrigo	imię męskie
-arsacio	imię męskie
-arsenio	imię męskie Arseniusz
-arsilio	imię męskie
-artemio	imię męskie Artemiusz
-ascanio	Askaniusz
-aspasio	imię męskie
-assuntino	imię męskie
-assunto	imię męskie
-asterino	imię męskie
-asterio	imię męskie
-astero	imię męskie
-astolfo	imię męskie
-astrio	imię męskie
-atanasio	imię męskie Atanazy
-atos	imię męskie
-attalo	imię męskie
-attilio	imię męskie Atyliusz
-audenzio	imię męskie
-aureo	imię męskie Aureusz
-aurino	imię męskie
-auro	imię męskie
-ausilio	imię męskie
-autari	imię męskie
-avelino	imię męskie
-avelio	imię męskie
-averio	imię męskie
-aviero	imię męskie
-azadane	imię męskie
-azade	imię męskie
-azaria	imię męskie Azariasz
-azeglio	imię męskie
-azzo	imię męskie
-azzurrino	imię męskie
-azzurro	imię męskie
-babila	imię męskie Babilas
-baccio	imię męskie
-baciccia	imię męskie
-bacolo	imię męskie Bakchus
-baiulo	imię męskie
-balbino	imię męskie Balbin
-loreno	imię męskie
-immacolata	imię żeńskie
-saveria	imię żeńskie
-fiore	imię męskie
-fiorenzo	imię męskie Florencjusz
-amerigo	imię męskie Emeryk
-venanzio	imię męskie Wenancjusz
-ennio	imię męskie Enniusz
-andreina	imię żeńskie
-leida	Lejda
-berto	imię męskie
-fiorina	imię żeńskie
-leonilde	imię żeńskie
-generoso	imię męskie
-licia	imię żeńskie
-amintore	imię męskie
-bettino	imię męskie
-bortolo	imię męskie
-cecco	imię męskie
-calogero	imię męskie
-candido	imię męskie
-erminio	imię męskie
-elvio	imię męskie
-evaristo	imię męskie Ewaryst
-ezio	imię męskie Aecjusz
-eligio	imię męskie Eligiusz
-fulvio	imię męskie
-ferruccio	imię męskie
-fiorello	imię męskie
-fortunato	imię męskie Fortunat
-faustino	imię męskie Faustyn
-flaminio	imię męskie Flaminiusz
-gianluca	imię męskie
-gianpaolo	imię męskie
-giancarlo	imię męskie
-gianluigi	imię męskie
-gianmarco	imię męskie
-onorato	imię męskie Honorat
-gianfranco	imię męskie
-folco	imię męskie Fulko
-igino	imię męskie
-modesto	imię męskie Modest
-gaudenzio	imię męskie Gaudenty
-mansueto	imię męskie Manswet
-eleuterio	imię męskie Eleuteriusz
-gerlando	imię męskie
-faustiniano	imię męskie
-ermenegilda	imię żeńskie
-ermenegildo	imię męskie
-damaso	imię męskie Damazy
-veneranda	imię żeńskie
-branca	imię męskie
-branda	imię męskie
-branda	imię żeńskie
-brunetto	imię męskie
-dolcino	imię męskie
-guiscardo	imię męskie
-menalippo	imię męskie
-neri	imię męskie
-obizzo	imię męskie
-puccio	imię męskie
-ugolino	imię męskie
-vitaliano	imię męskie Witalian
 descrittivo	opisowy
 rovesciabile	odwracalny
 minareto	minaret
@@ -22954,7 +21547,6 @@ formalmente	formalnie
 lampreda	minóg
 calzatoio	łyżka do butów
 incolpare	obwiniać
-godzilla	Godzilla
 sovrastampa	nadruk
 sovrastampare	nadrukowywać
 pineta	las sosnowy
@@ -22982,7 +21574,6 @@ trasparenza	przezroczystość
 postbruciatore	dopalacz
 aviorimessa	hangar
 epiteto	epitet
-krapfen	pączek
 simpatetico	współczujący
 simpamina	amfetamina
 cancerologia	onkologia
@@ -22996,59 +21587,12 @@ decurtare	zmniejszyć
 delirare	majaczyć
 demandare	powierzyć
 filantropicamente	dobroczynnie
-gianni	imię męskie
 anfetaminico	amfetaminowy
 albagia	wyniosłość
 autocratico	autokratyczny
-albino	imię męskie Albin
-cipriano	imię męskie Cyprian
-celestina	imię żeńskie Celestyna
-celestino	imię męskie Celestyn
-dionigi	imię męskie Dionizy
-eustachio	imię męskie Eustachy
-sigismondo	imię męskie Zygmunt
-ladislao	imię męskie Władysław
-valdemaro	imię męskie Waldemar
-venceslao	imię męskie Wacław
-urbano	imię męskie Urban
-onofrio	imię męskie Onufry
-ottavio	imię męskie Oktawiusz
-corrado	imię męskie Konrad
-casimiro	imię męskie Kazimierz
-gaspare	imię męskie Kacper
-giustino	imię męskie Justyn
-giacinto	imię męskie Hiacynt
-giacinta	imię żeńskie Hiacynta
-ludovico	imię męskie Ludwik
-ludovica	imię żeńskie Ludwika
-costantino	imię męskie Konstanty
-ermanno	imię męskie Herman
-felice	imię męskie Feliks
-bronislao	imię męskie Bronisław
-tecla	imię żeńskie Tekla
-maia	imię żeńskie Maja
-malvina	imię żeńskie Malwina
-leocadia	imię żeńskie Leokadia
-agrippina	imię żeńskie Agrypina
-bonaventura	imię męskie Bonawentura
-onorata	imię żeńskie Honorata
-geltrude	imię żeńskie Gertruda
-galena	imię żeńskie Halina
-iolanda	imię żeńskie Jolanta
-michela	imię żeńskie Michalina
-odilia	imię żeńskie Otylia
-alessandria	Alessandria
-aquisgrana	Akwizgran
-dante	imię męskie Dante
-tito	imię męskie Tytus
-benito	imię męskie
-franco	imię męskie
-rinaldo	imię męskie
-polinesia	Polinezja
 polinesiano	polinezyjski
 polinesiano	Polinezyjczyk
 polinesiana	Polinezyjka
-era	Hera
 maldiviano	malediwski
 maldiviano	Malediwczyk
 maldiviana	Malediwka
@@ -23149,7 +21693,6 @@ gladiatorio	gladiatorski
 neofobia	neofobia
 triscaidecafobia	triskaidekafobia
 quantomeno	co najmniej
-mostar	Mostar
 etilista	alkoholik
 etilista	alkoholiczka
 interinale	tymczasowy
@@ -23186,7 +21729,6 @@ vegetalista	weganin
 vegetalista	weganka
 vegetalista	wegański
 allusivo	aluzyjny
-etolia	Etolia
 salafita	salafita
 salafita	salafitka
 salafita	salafistyczny
@@ -23828,7 +22370,6 @@ perdio	na Boga!
 autopiano	pianola
 eurasiatico	eurazjatycki
 eurasiatico	Eurazjata
-euridice	Eurydyka
 euripideo	Eurypidesowy
 euristica	heurystyka
 euristico	heurystyczny
@@ -24059,12 +22600,6 @@ coetaneo	równy wiekiem
 coetaneo	rówieśnik
 coetanea	rówieśniczka
 coesivo	spajający
-seicento	siedemnasty wiek
-settecento	osiemnasty wiek
-cinquecento	szesnasty wiek
-quattrocento	piętnasty wiek
-trecento	czternasty wiek
-duecento	trzynasty wiek
 azoturo	azydek
 avvocata	orędowniczka
 cittade	zob. città
@@ -24190,12 +22725,10 @@ nutrice	karmicielka
 nutritrice	żywicielka
 nutribile	nadający się do zjedzenia
 coniglicoltura	hodowla królików
-camerata	Camerata
 aponeurosi	rozcięgno
 carotide	tętnica szyjna
 carpatico	karpacki
 cartamodello	wykrój z papieru
-fiesole	Fiesole
 catatonico	katatoniczny
 catatonico	katatonik
 catatonica	katatoniczka
@@ -24228,7 +22761,6 @@ fiesolano	fiesolczyk
 fiesolano	fiesolski
 fiesolana	fiesolanka
 remora	Echeneidae
-sperlonga	Sperlonga
 erotomania	erotomania
 musicomania	melomania
 melomania	melomania
@@ -24292,7 +22824,6 @@ cuccurucù	kukuryku!
 chicchirichì	kukuryku!
 chicchirichì	kukuryku
 cuccuma	dzbanek do kawy
-vicenza	Vicenza
 vicentino	mieszkaniec Vicenzy
 vicentino	wicentyński
 vicentina	mieszkanka Vicenzy
@@ -24304,7 +22835,6 @@ guardiola	stróżówka
 cagionevole	chorowity
 etnonimo	etnonim
 etnopsichiatria	etnopsychiatria
-tonia	Tonia
 etnomusicologia	etnomuzykologia
 etnolinguistica	etnolingwistyka
 etnolinguistico	etnolingwistyczny
@@ -24371,7 +22901,6 @@ quadriennale	wystawa odbywająca się co cztery lata
 inculcare	wbić
 incultura	brak kultury
 incunabolo	inkunabuł
-lecco	Lecco
 vesuviano	wezuwiański
 stereografia	stereografia
 sterlina	funt szterling
@@ -24389,7 +22918,6 @@ cartomanzia	wróżenie z kart
 cartaginese	kartagiński
 cartaginese	Kartagińczyk
 cartaginese	Kartaginka
-cartagine	Kartagina
 ottentotto	Hotentot
 ottentotto	hotentocki
 plenum	plenum
@@ -24399,8 +22927,6 @@ saccarasi	sacharaza
 eccì	apsik!
 etciù	apsik!
 ricoprire	ponownie okryć
-baltica	Bałtyka
-ricardo	imię męskie Ryszard
 selvatico	dziki
 selvatico	zapach
 selvaggina	zwierzyna łowna
@@ -24420,12 +22946,9 @@ arbustivo	krzewiasty
 alberatura	zadrzewienie
 alberare	zadrzewić
 alberaggio	portowe
-tasmania	Tasmania
-termopili	Termopile
 pulisciorecchi	wacik do czyszczenia uszu
 puliscipiedi	wycieraczka
 pulisciscarpe	wycieraczka
-gargantua	Gargantua
 cuoriforme	sercowaty
 cuorcontento	wesołek
 calorimetrico	kalorymetryczny
@@ -24466,7 +22989,6 @@ ingessatura	gipsowanie
 dipanatoio	motowidło
 teutonico	teutoński
 cronologo	naukowiec zajmujący się chronologią
-crono	Kronos
 crittogramma	kryptogram
 croma	ósemka
 crocerossina	siostra Czerwonego Krzyża
@@ -24587,7 +23109,6 @@ corpino	stanik
 eliopausa	heliopauza
 eliosfera	heliosfera
 eliostato	heliostat
-eliodoro	imię męskie Heliodor
 eliofobia	heliofobia
 elioteismo	helioteizm
 eliotipia	heliotypia
@@ -24621,7 +23142,6 @@ plafoniera	plafoniera
 plesiosauro	plezjozaur
 pluf	plusk!
 plissé	plisowany
-bisanzio	Bizancjum
 discreto	umiarkowany
 ectopia	ektopia
 tino	kadź
@@ -24748,7 +23268,6 @@ geodinamica	geodynamika
 geofisico	geofizyczny
 geofisico	geofizyk
 geofisica	geofizyka
-krasnojarsk	Krasnojarsk
 tartrazina	tartrazyna
 pianto	płacz
 piallone	wielki strug
@@ -24968,52 +23487,12 @@ inscindibile	nierozłączny
 favolatore	gawędziarz
 deglutizione	łykanie
 inghiottimento	łykanie
-sudamerica	Ameryka Południowa
 ceneriera	popielniczka
 cannibalesco	ludożerczy
 serraturiere	ślusarz
 nullismo	nihilizm
 graffettatrice	zszywacz
 arabafenice	feniks
-rina	imię żeńskie
-clorinda	imię żeńskie
-flaminia	imię żeńskie Flaminia
-gandolfo	imię męskie
-gianmaria	imię męskie
-giggi	imię męskie
-gillo	imię męskie
-gioseffo	imię męskie Józef
-lando	imię męskie
-landolfo	imię męskie
-luchino	imię męskie
-manlio	imię męskie
-manno	imię męskie
-mariangela	imię żeńskie
-marsilio	imię męskie
-marzio	imię męskie
-mauro	imię męskie
-nevio	imię męskie
-oriana	imię żeńskie Oriana
-oddo	imię męskie
-pierangelo	imię męskie
-pierluigi	imię męskie
-prassede	imię żeńskie Prakseda
-rossa	imię żeńskie
-torquato	imię męskie
-vasco	imię męskie
-alceste	imię męskie
-alceste	imię żeńskie
-nicolao	imię męskie
-siro	imię męskie
-deodato	imię męskie Bożydar
-berardo	imię męskie Berard
-almerigo	imię męskie Emeryk
-almiro	imię męskie Almir
-palmiro	imię męskie
-araldo	imię męskie Harald
-aratone	imię męskie
-reginaldo	imię męskie
-ricciotti	imię męskie
 quercino	dębowy
 quercino	Eliomys quercinus
 querceta	dąbrowa
@@ -25046,7 +23525,6 @@ vendifumo	blagier
 vendifumo	blagierka
 veneficio	otrucie
 peracottaro	sprzedawca gotowanych gruszek
-mowgli	Mowgli
 narcolessia	narkolepsja
 seder	seder
 favoreggiare	faworyzować
@@ -25088,7 +23566,6 @@ bibliografico	bibliograficzny
 bibliograficamente	bibliograficznie
 bibliografo	bibliograf
 bibliografa	bibliografka
-andromache	Andromacha
 soleggiato	wystawiony na słońce
 solata	udar słoneczny
 solarità	jasność
@@ -25203,7 +23680,6 @@ somiglianza	podobieństwo
 specifico	określony
 specifico	specyfik
 socievole	społeczny
-ghetto	imię męskie
 spigola	Dicentrarchus labrax
 sommario	streszczenie
 sostituto	zastępca
@@ -25229,7 +23705,6 @@ affrettare	przyspieszać
 affrettare	śpieszyć się
 derivare	pochodzić
 inevaso	nie załatwiony
-charkiv	Charków
 autopullman	autokar
 neoplasia	neoplazja
 neoplasico	neoplastyczny
@@ -25477,8 +23952,6 @@ ideologa	ideolog
 ipogastrico	podbrzuszny
 impensato	niespodziewany
 imparagonabile	nieporównywalny
-nefertiti	Nefertiti
-sisifo	Syzyf
 menestrello	minstrel
 mecenate	mecenas
 mecenatismo	mecenat
@@ -25680,7 +24153,6 @@ difronte	naprzeciw
 difronte	przeciwległy
 caposcala	podest schodów
 caposcarico	lekkoduch
-viracocha	Wirakocza
 inserzione	włożenie
 insalivare	poślinić
 salivazione	ślinienie się
@@ -25808,7 +24280,6 @@ sigariera	pudełko na cygara
 semiasse	półoś
 semiaperto	półotwarty
 semigratuito	za pół ceny
-valerio	imię męskie Walery
 bruxismo	bruksizm
 alitosi	halitoza
 alluminato	glinian
@@ -25834,7 +24305,6 @@ umanizzare	czynić ludzkim
 ultramontanismo	ultramontanizm
 palafitta	pal
 acidosi	kwasica
-teobaldo	imię męskie Teobald
 vespro	zmierzch
 toponimo	toponim
 patogenesi	patogeneza
@@ -25959,7 +24429,6 @@ unigenito	jedyny
 unicamerale	jednoizbowy
 bercio	wycie
 berciare	wyć
-nordafrica	Afryka Północna
 nordafricano	północnoafrykański
 nordafricano	mieszkaniec Afryki Północnej
 macroregione	makroregion
@@ -26089,7 +24558,6 @@ lestofante	oszust
 lestofante	oszustka
 leucorrea	białe upławy
 leucoma	leukoma
-ostia	Ostia
 diagnosticamente	diagnostycznie
 subappalto	umowa podwykonawstwa
 subappaltatore	podwykonawca
@@ -26098,7 +24566,6 @@ sublinguale	podjęzykowy
 servofreno	hamulec ze wspomaganiem
 servomotore	siłownik
 turabuchi	zapchajdziura
-tersicore	Terpsychora
 tetralogia	tetralogia
 tetravalente	czterowartościowy
 tetravalenza	czterowartościowość
@@ -26132,7 +24599,6 @@ parafernale	należący do osobistego majątku żony
 paracadutistico	spadochroniarski
 paracentesi	paracenteza
 parallasse	paralaksa
-beschidi	Beskidy
 pirolisi	piroliza
 bagordo	hulanka
 bagordare	hulać
@@ -26163,7 +24629,6 @@ rampognare	udzielać reprymendy
 savoiardo	sabaudzki
 savoiardo	Sabaudczyk
 savoiarda	Sabaudka
-savoia	Sabaudia
 satrapia	satrapia
 satolla	obfity posiłek
 nuncupativo	ustny
@@ -26216,7 +24681,6 @@ infilare	włożyć
 pulirsi	wyczyścić się
 catarifrangente	odbijający światło
 catarifrangente	sygnalizator odblaskowy
-pittsburgh	Pittsburgh
 inemendabile	niepoprawny
 ineseguibile	niewykonalny
 ineloquente	nieelokwentny
@@ -26281,7 +24745,6 @@ pianificazione	planowanie
 piccardo	pikardyjski
 piccardo	Pikardyjczyk
 piccarda	Pikardyjka
-piccardia	Pikardia
 picnometro	piknometr
 picofarad	pikofarad
 piezoelettrico	piezoelektryczny
@@ -26370,7 +24833,6 @@ commentatore	komentator
 protesi	proteza
 quintadecima	środek pełni
 quintultimo	piąty od końca
-madonna	Madonna
 quinquagenario	pięćdziesięcioletni
 quinquagenario	pięćdziesięciolatek
 quinquagenaria	pięćdziesięciolatka
@@ -26406,10 +24868,6 @@ lipofibroma	tłuszczakowłókniak
 fibrolipoma	włókniakotłuszczak
 lipoproteina	lipoproteina
 iperlipemia	hiperlipidemia
-boiana	Buna
-aoos	Wjosa
-okavango	Okawango
-nipro	Dniepr
 sonnambulismo	somnambulizm
 insonne	czuwający
 sartoriale	krawiecki
@@ -26418,7 +24876,6 @@ satanista	satanista
 satanista	satanistka
 lugliatico	dojrzewający w lipcu
 locomozione	transport
-apollinare	imię męskie Apolinary
 francescano	franciszkański
 francescano	franciszkanin
 pratico	praktyczny
@@ -26488,7 +24945,6 @@ sottrarre	odejmować
 sussurrare	szeptać
 frenologico	frenologiczny
 frenologia	frenologia
-frigia	Frygia
 frigio	frygijski
 frigio	Frygijczyk
 fruttidoro	fructidor
@@ -26507,12 +24963,10 @@ catastrofista	katastrofista
 catastrofista	katastrofistka
 catastrofista	katastroficzny
 malevolenza	złowrogość
-gorgonia	Gorgonia
 ripopolamento	ponowne zaludnienie
 riscoppiare	ponownie wybuchnąć
 risconto	redyskonto
 riscontare	redyskontować
-cafarnao	Kafarnaum
 ipersessualità	hiperseksualność
 tuttoché	jakkolwiek
 melampiro	pszeniec
@@ -26525,7 +24979,6 @@ melanosoma	melanosom
 melanodermia	ostuda
 melanoforo	melanofor
 melanogenesi	melanogeneza
-slesia	Śląsk
 slesiano	śląski
 slesiano	Ślązak
 slesiana	Ślązaczka
@@ -26564,7 +25017,6 @@ telecinesi	telekineza
 telecinetico	telekinetyczny
 telecomandato	zdalnie sterowany
 teosofico	teozoficzny
-zabulon	imię męskie Zabulon
 sublunare	podksiężycowy
 abnegare	wyrzekać się
 adescare	wabić
@@ -26576,7 +25028,6 @@ controscarpa	przeciwskarpa
 controscritta	kopia dokumentu
 controfirmare	kontrasygnować
 controfirma	kontrasygnata
-canossa	Kanossa
 tastoni	po omacku
 aggravare	pogarszać
 aggravare	pogarszać się
@@ -26599,7 +25050,6 @@ granivoro	ziarnożerny
 p.es.	per esempio → np
 senatoriale	senatorski
 senatorato	senatorstwo
-sempronio	Iksiński
 escutere	przesłuchiwać
 escussione	przesłuchanie
 eleatico	eleacki
@@ -26632,7 +25082,6 @@ iperboloide	hiperboloida
 alfanumerico	alfanumeryczny
 allantoide	omocznia
 allantoideo	omoczniowy
-gioconda	Gioconda
 bottello	nalepka
 botteghino	sklepik
 solfifero	zawierający siarkę
@@ -26672,7 +25121,6 @@ gonnellino	krótka spódniczka
 saponificazione	zmydlanie
 saponificare	zmydlać
 saponificio	fabryka mydła
-loira	Loara
 pallavolistico	siatkarski
 concubito	spanie razem
 concubino	konkubent
@@ -26692,13 +25140,6 @@ mirmecologia	myrmekologia
 partecipe	uczestniczący
 resezione	resekcja
 confortevole	pocieszający
-alasca	Alaska
-appalachi	Appalachy
-archimede	imię męskie Archimedes
-artide	Arktyka
-asclepio	Asklepios
-atlantide	Atlantyda
-austria-ungheria	Austro-Węgry
 tetraplegico	tetraplegiczny
 tetraplegico	tetraplegik
 tetraborico	tetraborowy
@@ -26795,7 +25236,6 @@ motocarrozzetta	motocykl z bocznym wózkiem
 motocarrozzino	motocykl z bocznym wózkiem
 mucoso	śluzowaty
 mucina	mucyna
-mordecai	imię męskie Mordechaj
 macchiettista	karykaturzysta
 macchiettista	karykaturzystka
 metastasi	przerzut nowotworowy
@@ -26803,7 +25243,6 @@ automedonte	woźnica
 automobilastro	lichy kierowca
 iranico	irański
 iranico	Irańczyk
-ugarit	Ugarit
 topografo	topograf
 tiroxina	tyroksyna
 vetraio	hutnik szkła
@@ -26864,7 +25303,6 @@ litraggio	litraż
 chilolitro	kilolitr
 vol.	volume → t
 curcumina	kurkumina
-pio	imię męskie Pius
 vinicolo	winny
 voltmetro	woltomierz
 voltimetro	zob. voltmetro
@@ -26888,7 +25326,6 @@ scaduto	przedawniony
 gerosolimitano	jerozolimski
 gerosolimitano	jerozolimczyk
 gerosolimitana	jerozolimka
-tirza	Tirsa
 scadere	tracić wartość
 cromatico	chromatyczny
 cromaticamente	chromatycznie
@@ -26905,13 +25342,11 @@ tartagliare	bełkotać
 tassametro	taksometr
 encefalopatia	encefalopatia
 profeticamente	proroczo
-qoelet	Kohelet
 catalogare	katalogować
 catalogico	katalogowy
 catalessi	kataleksa
 catalettico	katalektyczny
 rituale	rytualny
-salomone	Salomon
 malocchio	złe oko
 amitto	humerał
 abituarsi	przyzwyczaić się
@@ -26930,14 +25365,11 @@ tacheometrico	tachymetryczny
 tacheometro	tachymetr
 ricordarsi	pamiętać
 stola	stuła
-masseo	imię męskie Masseo
 eccedenza	nadmiar
 linfa	limfa
 linfoadenopatia	limfadenopatia
 linfangite	zapalenie naczyń chłonnych
 linfonodo	węzeł chłonny
-nahum	imię męskie Nahum
-naum	imię męskie Nahum
 cistico	odnoszący się do pęcherzyka żółciowego
 cistoma	nowotwór torbielowaty
 disinformazione	dezinformacja
@@ -26945,16 +25377,13 @@ neurocibernetico	neurocybernetyczny
 neurocibernetica	neurocybernetyka
 afflitto	zasmucony
 afflitto	strapiony
-fmi	Fondo monetario internazionale → MFW
 neoliberismo	neoliberalizm
-licaonia	Likaonia
 clariano	klariański
 irace	góralek
 carmelitano	karmelitański
 carmelitano	karmelita
 didattica	dydaktyka
 viceparroco	wikary
-giosafat	Jozafat
 viceré	wicekról
 vicedirettore	wicedyrektor
 vicedirettrice	wicedyrektorka
@@ -26962,7 +25391,6 @@ viceconsole	wicekonsul
 vicepremier	wicepremier
 viceammiraglio	wiceadmirał
 all'inizio	na początku
-sdb	Salesiani di Don Bosco → Salezjanie
 equiangolo	równokątny
 francescanesimo	franciszkanizm
 androgeno	androgen
@@ -26996,13 +25424,10 @@ antitifico	przeciwdurowy
 antisportivo	niesportowy
 antisterico	działający przeciw histerii
 antisterico	środek przeciw histerii
-efraim	imię męskie Efraim
-noè	Noe
 attosecondo	attosekunda
 attometro	attometr
 attogrammo	attogram
 geopolimero	geopolimer
-betlemme	Betlejem
 pietrino	płytka
 lapidino	płytka
 lanciabombe	wyrzutnik bombowy
@@ -27026,9 +25451,7 @@ antiaerea	obrona przeciwlotnicza
 evangelistario	ewangelistarz
 evangelico	ewangeliczny
 evangelico	ewangelik
-betzaeta	Betesda
 evangelica	ewangeliczka
-tertulliano	imię męskie Tertulian
 ottimate	arystokrata
 ostrogoto	ostrogocki
 ostrogoto	Ostrogot
@@ -27056,8 +25479,6 @@ fiorettista	florecistka
 fioriera	żardiniera
 fiorone	pierwszy owoc figowca
 grafene	grafen
-hermon	Hermon
-atina	Atina
 lirica	liryka
 lirismo	liryzm
 cordialità	serdeczność
@@ -27066,10 +25487,8 @@ triolet	triolet
 liricamente	lirycznie
 anastrofe	anastrofa
 anasarca	puchlina
-samarcanda	Samarkanda
 gioielliere	jubiler
 gioielliera	jubilerka
-tabor	Tabor
 ferula	ferula
 direttoriale	dyrektorski
 malanno	nieszczęście
@@ -27128,11 +25547,7 @@ roccocò	rokoko
 rococò	rokoko
 pneumatologia	pneumatologia
 malata	chora
-pascasio	imię męskie Paschazjusz
-pasquale	Paschalis
 serafino	seraf
-cherubino	imię męskie Cherubin
-laterano	Lateran
 lateranense	laterański
 assisano	asyski
 assisano	asyżanin
@@ -27146,19 +25561,14 @@ passiflora	Passiflora L
 senese	sieneński
 senese	sieneńczyk
 senese	sienenka
-senese	Sieneńczyk
-senese	Sienenka
 ghibellino	gibeliński
 ghibellino	gibelin
 guelfo	należący do gwelfów
 guelfo	gwelf
-indocina	Indochiny
 gualdrappa	czaprak
-barabba	Barabasz
 barabba	złoczyńca
 cafarnao	zamieszanie
 curia	kuria
-haifa	Hajfa
 ciarpa	rupieć
 cianfrusaglia	rupieć
 russificazione	rusyfikacja
@@ -27167,33 +25577,20 @@ russicismo	rusycyzm
 rutena	Rusinka
 ruteno	rusiński
 ruteno	Rusin
-malachia	Malachiasz
 pubblicistica	publicystyka
-ecclesiaste	Eklezjastes
-qo	Libro di Qoelet → Księga Koheleta
-zc	Libro di Zaccaria → Księga Zachariasza
 treccia	warkocz
 esegeta	egzegeta
 esegetico	egzegetyczny
 protetico	protetyczny
-golgota	Golgota
-calvario	Kalwaria
-neemia	Nehemiasz
 galoppo	galop
-aventino	Awentyn
-quirinale	Kwirynał
 capitolino	kapitoliński
 aventiniano	awentyński
-bruto	Brutus
-quinto	imię męskie Kwintus
-lutazio	imię męskie Lutacjusz
 scespiriano	szekspirowski
 scespiriano	szekspirolog
 shakespeariano	szekspirowski
 shakespeariano	szekspirolog
 lidio	lidyjski
 lidio	Lidyjczyk
-palatino	Palatyn
 bibliofilo	bibliofil
 bibliofila	bibliofilka
 bibbio	świstun
@@ -27202,25 +25599,19 @@ bifido	rozdwojony
 bifolco	osoba zajmująca się wołami
 elettroscopico	elektroskopowy
 petrino	Piotrowy
-shekhinah	Szechina
 montanara	góralka
 cristologo	chrystolog
 ancella	służebnica
 immacolato	niepokalany
 lattico	mlekowy
 spietatezza	bezwzględność
-sofonia	Sofoniasz
 questuante	kwestarz
 pen-drive	pendrive
 chiavetta	pendrive
 pennetta	pendrive
 mongolico	mongolski
 mongolismo	mongolizm
-pasquetta	Poniedziałek Wielkanocny
-pasqua	Pascha
 pasquare	świętować paschę
-medjugorje	Medziugorie
-međugorje	Medziugorie
 etimologicamente	etymologicznie
 etimologo	etymolog
 etimologa	etymolożka
@@ -27237,23 +25628,14 @@ arcivescovato	arcybiskupstwo
 ragazzotto	wyrostek
 giovinetto	wyrostek
 apofisi	wyrostek
-sphynx	sfinks
-sfinge	Sfinks
 misogino	mizoginiczny
 misogino	mizogin
 monolitico	monolityczny
-giza	Giza
 carrettiere	woźnica
-lucio	imię męskie Lucjusz
 vegana	weganka
-fabiana	imię żeńskie Fabiana
-capua	Kapua
-toledo	Toledo
 animatore	animator
 animatrice	animatorka
-mc	Vangelo di Marco → Ewangelia Marka
 s.p.	sul ponticello → przy podstawku
-gv	Vangelo di Giovanni → Ewangelia Jana
 albertinismo	albertynizm
 francescana	franciszkanka
 duellare	pojedynkować się
@@ -27308,7 +25690,6 @@ noviziato	nowicjat
 novizio	nowicjusz
 novizia	nowicjuszka
 dalmatica	dalmatyka
-vinicio	imię męskie Winicjusz
 jagellonico	jagielloński
 jaghellonico	jagielloński
 lanoso	wełnisty
@@ -27325,26 +25706,16 @@ balbuziente	jąkający się
 balbuziente	jąkała
 balbuziente	jąkała
 saracinesca	brona
-moab	imię męskie Moab
-chronos	Chronos
-kairos	Kairos
-faenza	Faenza
 angelologia	angelologia
-loreto	Loreto
 lauretano	loretański
 lauretano	loretańczyk
-macerata	Macerata
 cloroplasto	chloroplast
 moabita	Moabita
 samaritana	Samarytanka
 imperituro	wiekopomny
-esaù	imię męskie Ezaw
 rondinella	jaskółeczka
-giobbe	Hiob
-zaccheo	Zacheusz
 contrattacco	kontratak
 controattacco	kontratak
-natanaele	imię męskie Natanael
 cocchio	kocz
 crucco	Niemiec
 crucco	szkopski
@@ -27356,19 +25727,13 @@ demonologico	demonologiczny
 demonologo	demonolog
 costantemente	stale
 perennemente	permanentnie
-sichem	imię męskie Sychem
-sichem	Moab
 cristogramma	chrystogram
 monastico	monastyczny
 monachesimo	monastycyzm
 monachismo	monastycyzm
-pacomio	imię męskie Pachomiusz
 dimestichezza	zażyłość
 confidenza	zaufanie
 scià	szach
-petronilla	imię żeńskie Petronela
-petronio	imię męskie Petroniusz
-isaia	imię męskie Izajasz
 isaiano	Izajaszowy
 spazzaturaio	śmieciarz
 crudità	surowość
@@ -27383,7 +25748,6 @@ cruscaiolo	sprzedawca otrąb
 cruscaio	sprzedawca otrąb
 cruscata	potrawa z otrąb
 cruscante	purysta
-crusca	Accademia della Crusca
 cruscheggiare	wyrażać się z przesadną poprawnością
 cruschello	mąka razowa
 cruscherello	mąka razowa
@@ -27397,19 +25761,12 @@ cuccagna	kraina szczęścia
 equilibratore	stabilizator
 equilibratore	wyrównawczy
 catacombale	katakumbowy
-elia	imię męskie Eliasz
-osea	imię męskie Ozeasz
 oseano	Ozeaszowy
 manul	manul
-gerico	Jerycho
-gomorra	Gomora
 telomero	telomer
-gioele	imię męskie Joel
 geremiade	jeremiada
 geremiano	Jeremiaszowy
 volinico	wołyński
-abeba	imię żeńskie Abeba
-sanremo	San Remo
 marïola	biedronka
 madonnella	biedronka
 purificatorio	puryfikaterz
@@ -27424,11 +25781,7 @@ presepe	stajenka betlejemska
 domenicano	dominikański
 domenicano	dominikanin
 beatificare	beatyfikować
-galapagos	Galapagos
-galápagos	Galapagos
-engelberto	imię męskie Engelbert
 kuwaitiana	Kuwejtka
-giudea	Judea
 giudeo	judejski
 giudeo	Judejczyk
 provinciale	prowincjalny
@@ -27436,11 +25789,6 @@ provinciale	prowincjusz
 provinciale	prowincjuszka
 provincialato	prowincjałat
 giudea	Judejka
-melchisedek	imię męskie Melchizedek
-melchisedec	imię męskie Melchizedek
-sila	imię męskie Sylas
-cloe	imię żeńskie Chloe
-mara	imię żeńskie Mara
 messinscena	inscenizacja
 sceneggiatura	inscenizacja
 luterana	luteranka
@@ -27458,14 +25806,9 @@ filisteo	filistyński
 filisteo	Filistyn
 a.c.	przed Chr
 tiberiense	tyberiadzki
-tiberiade	Tyberiada
-magdala	Magdala
 seggiovia	kolejka krzesełkowa
 seggiola	krzesło
-dolomiti	Dolomity
 luteina	luteina
-galazia	Galacja
-bajkal	Bajkał
 passeggiatina	spacerek
 anosmia	anosmia
 massonico	masoński
@@ -27474,12 +25817,7 @@ pittrice	malarka
 toledano	toledański
 toledano	toledańczyk
 isidoriano	izydoriański
-iside	Izyda
 ambrosiano	ambrozjański
-antiochia	Antiochia
-oronte	Orontes
-tevere	Tyber
-antioco	imię męskie Antioch
 antiocheno	antiocheński
 antiocheno	antiocheńczyk
 rosaio	rosarium
@@ -27502,30 +25840,19 @@ malacologia	malakologia
 malacologo	malakolog
 malacologico	malakologiczny
 soteriologo	soteriolog
-daghestan	Dagestan
 riattivare	reaktywować
 riattivazione	reaktywacja
 adipico	adypinowy
-calcedone	Chalcedon
-bitinia	Bitynia
-ponzio	Poncjusz
-plinio	imię męskie Pliniusz
-traiano	imię męskie Trajan
 bilateralmente	dwustronnie
 antidepressivo	lek przeciwdepresyjny
-cleto	imię męskie Klet
 meritocrazia	merytokracja
 siclo	szekel
-capodanno	zob. capodanno
 polistrumentista	multiinstrumentalista
 polistrumentista	multiinstrumentalistka
 pluristrumentista	multiinstrumentalista
 pluristrumentista	multiinstrumentalistka
 strumentista	instrumentalista
 strumentista	instrumentalistka
-hubal	Hubal
-ypres	Ieper
-carniola	Kraina
 rubellite	rubellit
 windsurf	windsurfer
 distinzione	rozróżnienie
@@ -27558,7 +25885,6 @@ dispotismo	despotyzm
 naia	wojsko
 antiochena	antiochenka
 parafrasi	parafraza
-ciriaco	imię męskie Cyriak
 magnitudo	magnituda
 ecumenico	ekumeniczny
 distimia	dystymia
@@ -27587,7 +25913,6 @@ secondario	drugorzędny
 intanto	tymczasem
 bandire	ogłaszać
 comunione	komunia
-loro	Państwo
 replicare	powtarzać
 resoconto	sprawozdanie
 rilievo	wzniesienie
@@ -27702,7 +26027,6 @@ antifemminista	antyfeminista
 antifemminista	antyfeministka
 eucaristico	eucharystyczny
 arista	schab
-lotario	imię męskie Lotar
 cybernauta	cybernauta
 cybernauta	cybernautka
 cibernauta	cybernauta
@@ -27710,7 +26034,6 @@ cibernauta	cybernautka
 panama	panama
 patatina	frytka
 borro	wyrwisko
-luisa	imię żeńskie
 ecolocalizzazione	echolokacja
 asbestosi	pylica azbestowa
 registratore	nagrywarka
@@ -27729,7 +26052,6 @@ predicazione	kaznodziejstwo
 maceratese	odnoszący się do Maceraty
 maceratese	mieszkaniec Maceraty
 maceratese	mieszkanka Maceraty
-famagosta	Famagusta
 agnellino	jagniątko
 ricostruzione	rekonstrukcja
 indigesto	niestrawny
@@ -27742,8 +26064,6 @@ assiduità	skrzętność
 assiduo	skrzętny
 assiduamente	skrzętnie
 ambasciatrice	ambasadorka
-serse	imię męskie Kserkses
-artaserse	imię męskie Artakserkses
 lagopo	Lagopus muta
 fignere	wyobrażać sobie
 palestinologia	palestynologia
@@ -27751,14 +26071,11 @@ palestinologo	palestynolog
 palestinologico	palestynologiczny
 paolino	pauliński
 paolino	paulin
-antonietta	imię żeńskie Antonietta
-teofila	imię żeńskie Teofila
 sodomita	sodomita
 sodomita	sodomski
 leprotto	zajączek
 glorioso	chwalebny
 gloriosamente	chwalebnie
-esquilino	Eskwilin
 shintoismo	shinto
 scintoismo	shinto
 subcontinente	subkontynent
@@ -27771,7 +26088,6 @@ ereticamente	heretycko
 arabizzazione	arabizacja
 eutichianismo	eutychianizm
 eutichianesimo	eutychianizm
-eutiche	imię męskie Eutyches
 totemismo	totemizm
 pirotecnico	pirotechniczny
 pirotecnico	pirotechnik
@@ -27782,14 +26098,10 @@ bimbino	dzidziuś
 bimbetto	dzidziuś
 bimbone	dzieciak
 ragazzino	chłopczyk
-rufo	imię męskie Rufus
 boy-friend	chłopak
 carismatico	charyzmatyczny
 carismatico	charyzmatyk
 carismatica	charyzmatyczka
-scipione	imię męskie Scypion
-kaliningrad	Królewiec
-germano	imię męskie German
 graduatoria	kolejność
 cantore	śpiewak
 cantorino	chłopiec chórzysta
@@ -27801,7 +26113,6 @@ trinchetto	fok
 bebè	niemowlaczek
 walkiria	walkiria
 deuteronomio	Księga Powtórzonego Prawa
-giosuè	imię męskie Jozue
 mono-	mono
 detto	mówienie
 detto	zwany
@@ -27813,16 +26124,11 @@ provvedenza	opatrzność
 provedenza	opatrzność
 diplomaticamente	dyplomatycznie
 diplomatichese	język dyplomacji
-levi	imię męskie Lewi
 sacerdotale	kapłański
 levitico	lewicki
 micotossina	mikotoksyna
 iperuricemia	hiperurykemia
 portiera	drzwiczki samochodu
-jacopo	imię męskie Jakub
-samuela	imię żeńskie Samuela
-gionatan	imię męskie Jonatan
-gionata	imię męskie Jonatan
 effeminatezza	zniewieściałość
 romitaggio	erem
 romito	samotny
@@ -27842,11 +26148,9 @@ scurrilmente	grubiańsko
 sguaiatamente	niegrzecznie
 trivialmente	ordynarnie
 sboccatamente	wulgarnie
-sisto	imię męskie Sykstus
 animistico	animistyczny
 acconciatore	fryzjer
 maoismo	maoizm
-ratisbona	Ratyzbona
 anarchicamente	anarchicznie
 polimorfismo	polimorfizm
 autonomista	autonomista
@@ -27861,12 +26165,10 @@ nominale	rzeczownikowy
 napolitana	neapolitanka
 traducibilità	przetłumaczalność
 polifagia	polifagia
-basan	Baszan
 iperfagia	hiperfagia
 pneumatologico	pneumatologiczny
 crocefisso	ukrzyżowany
 crocefisso	krucyfiks
-leopolda	imię żeńskie Leopolda
 corruccio	gniew
 corrucciare	rozwścieczyć
 nazaretano	nazaretański
@@ -27880,11 +26182,9 @@ nazoreo	zob. nazareo
 nazoreo	zob. nazareo
 nasoreo	zob. nazareo
 nasoreo	zob. nazareo
-aronne	imię męskie Aaron
 tessera	tessera
 ebola	ebola
 carismaticamente	charyzmatycznie
-otmaro	imię męskie Otmar
 transustanziazione	transsubstancjacja
 capoverde	Anas platyrhynchos
 rusticano	rustykalny
@@ -27920,9 +26220,6 @@ comunizzare	komunizować
 casanova	casanova
 telelavoro	telepraca
 cortisolo	kortyzol
-iacopo	imię męskie Jakub
-abacuc	imię męskie Habakuk
-abacucco	imię męskie Habakuk
 inossidabile	nierdzewny
 pado	Padus avium
 grappolo	grono
@@ -27947,7 +26244,6 @@ sanguinario	krwiożerczy
 sanguinario	krwiożerca
 esorbitante	wygórowany
 micella	micela
-cenerentola	Kopciuszek
 cenerentola	kopciuszek
 poveretto	biedaczyna
 poverina	biedaczka
@@ -27963,7 +26259,6 @@ poveraccio	biedaczyna
 bonaventurianesimo	bonawenturianizm
 bonaventuriano	bonawenturiański
 sonoro	dźwiękowy
-manciuria	Mandżuria
 niceno	nicejczyk
 nicena	nicejka
 mondializzazione	globalizacja
@@ -28011,30 +26306,18 @@ democratizzare	demokratyzować
 democratizzazione	demokratyzacja
 travestitismo	transwestytyzm
 sufico	suficki
-valacchia	Hospodarstwo Wołoskie
-oltenia	Oltenia
-muntenia	Muntenia
-castiglia	Kastylia
-baschiria	Baszkiria
-tutankhamon	Tutanchamon
-ai	Aj
 plasticità	plastyka
 tupaia	tupaja
-ovidio	Owidiusz
 creosolo	kreozol
 chiesuola	kościółek
 paesaggistico	krajobrazowy
 microregione	mikroregion
 faraonico	faraonowy
-ramesse	Ramzes
 adamitico	adamowy
-cecilio	imię męskie Cecyliusz
 tombola	tombola
 tombola	ups!
-venceslava	imię żeńskie Wacława
 rafaelliano	rafaelowski
 michelita	michalitka
-proto	imię męskie Prot
 beccare	dziobać
 beccare	sprzeczać się
 cucito	szycie
@@ -28194,14 +26477,9 @@ augello	ptak
 idiozia	idiotyzm
 optometrista	optometrysta
 edima	tydzień
-betta	imię żeńskie
-dionisia	imię żeńskie Dioniza
 vivandare	jeść
-alderico	imię męskie
 villata	wioska
 unquemai	nigdy
-silvana	imię żeńskie Sylwana
-guido	imię męskie
 adiramento	gniew
 12º	dwunasty
 quattrinaio	bogaty
@@ -28211,7 +26489,6 @@ contracettivo	antykoncepcyjny
 concepimento	poczęcie
 pigiapigia	tłum
 ammannimento	przygotowanie
-aretusa	imię żeńskie
 votaborse	drogi
 repertazione	produkcja
 tragetto	podróż
@@ -28235,8 +26512,6 @@ orizzon	horyzont
 agucchiare	szyć
 curbascio	bicz
 ipertrofico	hipertroficzny
-teocrito	imię męskie
-teodorico	imię męskie
 ascorbico	askorbinowy
 solidità	solidność
 quattamente	cicho
@@ -28257,13 +26532,11 @@ nubecolare	pochmurny
 abiatica	wnuczka
 adiutore	pomocnik
 aiutatore	pomocnik
-ronaldo	imię męskie
 bolivano	boliwijski
 annoiamento	nuda
 arpone	harpun
 marese	bagno
 verdiccio	zielonkawy
-cossovo	Kosowo
 alemannico	alemański
 baiuvaro	bawarski
 estremegno	estremadurski
@@ -28278,23 +26551,6 @@ nannodia	kołysanka
 vaporissaggio	parowanie
 oligocrazia	oligarchia
 fraina	gryka
-chicca	imię żeńskie
-chicco	imię męskie
-dore	imię męskie
-nanni	imię męskie
-pina	imię żeńskie
-peppino	imię męskie
-tonino	imię męskie
-beppino	imię męskie
-pinuccio	imię męskie
-peppone	imię męskie
-seppe	imię męskie
-peppenuzzo	imię męskie
-peppinello	imię męskie
-peppinetto	imię męskie
-peppo	imię męskie
-peppuccio	imię męskie
-geppino	imię męskie
 miliario	kamień milowy
 paracielo	baldachim
 circuimento	oszustwo
@@ -28316,152 +26572,12 @@ asessuale	aseksualny
 asessuato	aseksualny
 kilocaloria	kilokaloria
 chilocaloria	kilokaloria
-haratin	Haratyn
 incommestibile	niejadalny
 pastasciutta	makaron z sosem
 estetologia	estetyka
 alvino	jelitowy
 necroforo	grabarz
 beccamorto	grabarz
-grazia	imię żeńskie Gracja
-primo	imię męskie Prymus
-paola	imię żeńskie Paula
-rodrigo	imię męskie Rodryg
-alano	imię męskie Alan
-abundio	imię męskie Abundiusz
-abbondanzio	imię męskie Abundancjusz
-abbondazio	imię męskie Abundancjusz
-abbondio	imię męskie Abundiusz
-epifanio	imię męskie Epifaniusz
-silvio	imię męskie Sylwiusz
-assalonne	imię męskie Absalon
-marisa	imię żeńskie
-armando	imię męskie
-carola	imię żeńskie
-sandro	imię męskie
-raffaela	imię żeńskie Rafaela
-lamberto	imię męskie
-cosmo	imię męskie Kosma
-cosimo	imię męskie Kosma
-amleto	imię męskie
-arnaldo	imię męskie Arnold
-nunzio	imię męskie
-cinzia	imię żeńskie Cyntia
-concetta	imię żeńskie
-aurelio	imię męskie Aureliusz
-valdo	imię męskie
-ulrico	imię męskie Urlyk
-ugo	imię męskie Hugo
-terenzio	imię męskie Terencjusz
-guglielma	imię żeńskie Wilhelmina
-tiziana	imię żeńskie Tycjana
-rosalinda	imię żeńskie Rozalinda
-rolando	imię męskie Roland
-rossana	imię żeńskie Roksana
-debora	Debora
-randolfo	imię męskie
-quintino	imię męskie Kwintyn
-donata	imię żeńskie Donata
-donatella	imię żeńskie
-ottavia	imię żeńskie Oktawia
-osvaldo	imię męskie
-giorgia	imię żeńskie
-giuliana	imię żeńskie Julianna
-antonella	imię żeńskie
-giada	imię żeńskie
-raffaella	imię żeńskie Rafaela
-goffredo	imię męskie Godfryd
-nicoletta	imię żeńskie
-nicolò	imię męskie
-carmela	imię żeńskie Karmen
-carmelo	Karmel
-graziella	imię żeńskie
-lucrezia	imię żeńskie Lukrecja
-livio	imię męskie Liwiusz
-lionello	imię męskie
-ilaria	imię żeńskie Hilaria
-guglielmina	imię żeńskie
-guendalina	imię żeńskie
-gualtiero	imię męskie Walter
-gioia	imię żeńskie
-gioachino	imię męskie Joachim
-giambattista	imię męskie Jan Chrzciciel
-giacomina	imię żeńskie
-gherardo	imię męskie Gerard
-gervaso	imię męskie Gerwazy
-gerolamo	imię męskie Hieronim
-geraldina	imię żeńskie Geraldyna
-gelsomina	imię żeńskie Jaśmina
-gavino	imię męskie
-felicita	imię żeńskie Felicyta
-erasmo	imię męskie Erazm
-enrichetta	imię żeńskie
-eloisa	imię żeńskie
-egidio	imię męskie Idzi
-doriano	imię męskie Dorian
-dionisio	imię męskie Dionizy
-peppi	imię męskie
-ricarda	imię żeńskie Ryszarda
-marziale	imię męskie
-letizia	imię żeńskie Letycja
-ilda	imię żeńskie
-luciana	imię żeńskie Lucyna
-amilcare	imię męskie Hamilkar
-arnoldo	imię męskie Arnold
-asdrubale	imię męskie
-sestino	imię męskie
-isotta	imię żeńskie Izolda
-piera	imię żeńskie
-battista	imię męskie
-battista	imię żeńskie
-eriberto	imię męskie Herbert
-filiberto	imię męskie Filibert
-teodosio	imię męskie Teodozjusz
-gastone	imię męskie Gaston
-tristano	imię męskie Tristan
-giusto	imię męskie Just
-fausta	imię żeńskie Fausta
-iosè	imię żeńskie
-anselmuccio	imię męskie
-anteo	imię męskie
-bianco	imię męskie
-bonifazio	imię męskie Bonifacy
-azzolino	imię męskie
-cammilla	imię żeńskie Kamila
-cilestino	imię męskie
-federigo	imię męskie Fryderyk
-niccola	imię męskie
-clodoveo	imię męskie Chlodwig
-curzio	imię męskie
-danilo	imię męskie Daniel
-fiorella	imię żeńskie
-ildebrando	imię męskie Hildebrand
-jacopone	imię męskie
-ottorino	imię męskie
-pompilio	imię męskie Pompiliusz
-tullo	imię męskie
-vilfredo	imię męskie Wilfryd
-ueli	imię męskie
-frederico	imię męskie
-olavo	imię męskie Olaf
-murilo	imię męskie
-violante	imię żeńskie
-renza	imię żeńskie
-carluccio	imię męskie
-eligia	imię żeńskie Eligia
-firmino	imię męskie Firmin
-eutimio	imię męskie Eutymiusz
-benvenuto	imię męskie
-ricciardo	imię męskie Ryszard
-gigi	imię męskie
-lodovico	imię męskie Ludwik
-milvio	imię męskie
-clizia	imię żeńskie
-sinibaldo	imię męskie
-elpidio	imię męskie Elpidiusz
-errico	imię męskie
-anrico	imię męskie Henryk
-fedrico	imię męskie Fryderyk
 paleobotanico	paleobotaniczny
 paleobotanico	paleobotanik
 anatomicamente	anatomicznie
@@ -28550,7 +26666,6 @@ marinista	marinista
 marionetta	marionetka
 etimologista	etymolog
 etimologista	etymolożka
-baldassarre	imię męskie Baltazar
 mareogramma	mareogram
 marescialla	marszałkowa
 maresciallato	marszałkostwo
@@ -28563,7 +26678,6 @@ trisnonna	praprababcia
 erroneo	błędny
 erroneamente	błędnie
 erroneità	błędność
-erode	imię męskie Herod
 eroicomico	heroikomiczny
 erotomane	erotomański
 erotomane	erotoman
@@ -28646,13 +26760,11 @@ esculina	eskulina
 acrobatico	akrobatyczny
 giovinastro	młokos
 sbarbatello	młokos
-brunone	imię męskie Brunon
 risurrezione	zmartwychwstanie
 resurrezione	zmartwychwstanie
 rozza	chabeta
 brocco	odrośl
 bucefalo	chabeta
-bucefalo	Bucefał
 ghul	gul
 gigantismo	gigantyzm
 citotossicità	cytotoksyczność
@@ -28662,10 +26774,6 @@ surrealisticamente	surrealistycznie
 turibolo	trybularz
 rapsodo	rapsod
 rielezione	reelekcja
-tobruk	Tobruk
-tobruch	Tobruk
-montecassino	Monte Cassino
-tebe	Teby
 tebano	tebański
 tebano	tebańczyk
 mutagenicità	mutagenność
@@ -28694,20 +26802,15 @@ mandarancio	klementynka
 pomarancia	pomarańcza
 fumarola	fumarola
 isterectomia	histerektomia
-cirenaica	Cyrenajka
 autotomia	autotomia
 enteropatia	enteropatia
 yamatologia	japonistyka
-yamato	Japonia
 schistosomiasi	schistosomatoza
 sudeuropeo	południowoeuropejski
 sudeuropeo	mieszkaniec południowej Europy
 risolutezza	zdecydowanie
-salerno	Salerno
 transferrina	transferryna
-bengala	Bengal
 irrigare	irygować
-solimano	imię męskie Sulejman
 scalmo	dulka
 forcola	dulka
 gondoliere	gondolier
@@ -28739,7 +26842,6 @@ anonimamente	anonimowo
 -patia	patia
 impressionistico	impresjonistyczny
 intrepido	nieustraszony
-enisejsk	Jenisejsk
 governatorato	gubernatorstwo
 chinolina	chinolina
 malintenzionato	złowrogi
@@ -28762,7 +26864,6 @@ affondamento	tonięcie
 ufficialmente	oficjalnie
 tosare	naciąć
 stravaganza	zrządzenie
-corinto	Korynt
 abbronzarsi	opalać się
 matroneo	empora
 cogenerazione	kogeneracja
@@ -28840,7 +26941,6 @@ maggiorenne	pełnoletni
 maggiorenne	pełnoletni
 scadente	niskiej jakości
 stazionare	stacjonować
-golan	Golan
 austrofascismo	austrofaszyzm
 littore	liktor
 rundi	rundi
@@ -28884,12 +26984,10 @@ collaborazionismo	kolaboracjonizm
 collaborazionistico	kolaboracjonistyczny
 pelargonico	pelargonowy
 cronologista	naukowiec zajmujący się chronologią
-giovangiuseppe	imię męskie
 hawaiana	Hawajka
 avaiano	zob. hawaiano
 avaiano	zob. hawaiano
 euromagistrato	władze europejskie
-camorropoli	afera kamorystyczna
 camorrista	kamorysta
 camorrista	członkini kamory
 guerrigliero	partyzant
@@ -28925,18 +27023,12 @@ sfingeo	w formie sfinksa
 nottatina	od
 nottataccia	od
 giornataccia	od
-meclemburgo	Meklemburgia
 antropocentrico	antropocentryczny
 antropofagico	antropofagiczny
 salpingectomia	salpingektomia
 policistico	policystyczny
-ginepro	imię męskie Juniper
 ginepraio	gąszcz
 ginepreto	gąszcz jałowcowy
-o.k.	zob. OK
-o.k.	zob. OK
-o.k.	zob. OK
-o.k.	zob. OK
 d'accordo	dobrze
 d'accordo	zgoda
 daccordo	dobrze
@@ -28950,7 +27042,6 @@ enteroscopio	enteroskop
 enteroptosi	enteroptoza
 enteropeptidasi	enteropeptydaza
 enterochinasi	enterokinaza
-ippona	Hippona
 istogeno	histogen
 chicchirichí	kukuryku!
 chicchirichí	kukuryku
@@ -28961,12 +27052,6 @@ oniomaniaca	zakupoholiczka
 gerontofilo	gerontofil
 gerontofilo	gerontofilski
 gerontopsichiatria	gerontopsychiatria
-perusia	Peruzja
-florenzio	imię męskie Florencjusz
-etna	Etna
-fiorentina	imię żeńskie Florentyna
-florentino	imię męskie Florentyn
-fiorentino	imię męskie Florentyn
 perdindirindina	do diaska!
 perdinci	wyraża zaskoczenie
 dindirindina	tylko w wyrażeniu
@@ -29023,9 +27108,6 @@ europeistico	proeuropejski
 euro-listino	europejska ceduła giełdowa
 lodi	Jutrznia
 catabasi	katabaza
-italo	imię męskie
-italino	imię męskie
-alcibiade	imię męskie Alcybiades
 europeista	proeuropejski
 europeista	zwolennik proeuropeizmu
 europeista	zwolenniczka proeuropeizmu
@@ -29034,12 +27116,6 @@ un’	zob. una
 un’	zob. una
 sadomasochistico	sadomasochistyczny
 anelito	tęsknota
-esdra	imię męskie Ezdrasz
-natalino	imię męskie
-rosaria	imię żeńskie
-maurilio	imię męskie
-sandrino	imię męskie
-alessandrino	imię męskie
 lambretta	skuter
 motorscooter	skuter
 motoscuter	skuter
@@ -29070,7 +27146,6 @@ aggiunto	dodatkowy
 aggiunto	adiunkt
 moca	mokka
 moca	moka
-cesarea	Cezarea
 distruggitore	destrukcyjny
 distruggitore	niszczyciel
 distruttrice	niszczycielka
@@ -29084,11 +27159,7 @@ piccolo-borghese	drobnomieszczanka
 sacrosanto	przenajświętszy
 sacrificarsi	ofiarować się
 sacrilega	świętokradczyni
-macabeo	Machabeusz
-sira	Syrach
-sira	imię żeńskie
 sapienziale	mądrościowy
-siracide	Syracydes
 bacinella	miska
 comboniano	komboniański
 comboniano	kombonianin
@@ -29166,7 +27237,6 @@ bullone	śruba z nakrętką
 bullonare	łączyć śrubami
 obbligante	zobowiązujący
 obbligatoriamente	obligatoryjnie
-istria	Istria
 runico	runiczny
 boston	boston
 bostoniano	bostoński
@@ -29221,7 +27291,6 @@ plebaglia	pospólstwo
 ribaldaglia	motłoch
 volgo	lud
 filibustiere	pirat
-rojava	Rożawa
 hamza	hamza
 inconsapevole	nieświadomy
 inconsapevolmente	nieświadomie
@@ -29237,7 +27306,6 @@ diavoleria	diabelstwo
 diavolesco	diabelski
 bollettino	kwit
 bullettino	biuletyn
-geova	Jehowa
 orcio	dzban gliniany
 cingolo	bandolet do miecza
 spiritualità	duchowość
@@ -29287,7 +27355,6 @@ faticoso	męczący
 mordimento	gryzienie
 formalizzazione	formalizacja
 idiosincratico	idiosynkratyczny
-rino	imię męskie
 elasticamente	elastycznie
 colangio-pancreatografia	cholangiopankreatografia
 comportamentismo	behawioryzm
@@ -29307,15 +27374,12 @@ palpitare	o sercu drgać
 radiare	promieniować
 radiare	wykluczać
 alessitimia	aleksytymia
-arduina	imię żeńskie
 mannitolo	mannitol
 voluta	spirala
 volgarizzare	popularyzować
 usufruire	odnieść korzyść
-narenta	Neretwa
 scherzoso	żartobliwy
 filosemitismo	filosemityzm
-ferrara	Ferrara
 androfobia	androfobia
 antroposofico	antropozoficzny
 habitus	habitus
@@ -29337,10 +27401,7 @@ accessione	akces
 stolto	głupi
 stolto	głupi
 stemma	herb
-limassol	Limassol
-goa	Goa
 logicità	logiczność
-cirene	Cyrena
 cybercultura	cyberkultura
 bariatrico	bariatryczny
 lavello	zlew
@@ -29361,7 +27422,6 @@ jihadista	dżihadysta
 fornitura	dostawa
 etnogenesi	etnogeneza
 grampo	Grampus griseus
-ermentrude	imię żeńskie Ermentruda
 umanoide	humanoid
 umanoide	humanoidalny
 saponaro	mydlarz
@@ -29374,11 +27434,9 @@ salvatoriano	salwatoriański
 salvatoriano	salwatorianin
 salvatoriana	salwatorianka
 salvatrice	wybawicielka
-signore	Pan
 aspio	boleń
 pomello	gałka
 pomellino	gałka
-corinzia	Koryntia
 corinzio	koryncki
 corinzio	Koryntianin
 corintio	koryncki
@@ -29395,25 +27453,16 @@ scolorimento	odbarwienie
 sgobbare	harować
 vistosità	krzykliwość
 schifezza	obrzydlistwo
-meandro	Meander
 malabarese	malabarski
 malabarico	malabarski
-magnesia	Magnezja
-seleucia	Seleucja
 irbis	Panthera uncia Schreber
-ottone	imię męskie Otton
-oddone	imię męskie Otton
 predatore	drapieżnik
 yaguarondi	Puma yagouaroundi Geoffroy Saint-Hilaire
 servalo	Leptailurus serval Schreber
-zadok	imię męskie Sadok
-lugano	Lugano
 istrionismo	kabotynizm
 guerriere	zob. guerriero
-erico	imię męskie Eryk
 dov'	dove
 lurco	żarłoczny
-ulderico	imię męskie Urlyk
 orsa	niedźwiedzica
 washingtoniano	waszyngtoński
 washingtoniano	waszyngtończyk
@@ -29423,10 +27472,8 @@ procariote	prokariont
 interbancario	międzybankowy
 muffione	zob. muflone
 mufione	zob. muflone
-franca	imię żeńskie
 tripletta	hattrick
 chassidismo	chasydyzm
-viareggio	Viareggio
 viareggino	odnoszący się do Viareggio
 viareggino	mieszkaniec Viareggio
 viareggina	mieszkanka Viareggio
@@ -29444,7 +27491,6 @@ leggina	statut
 tigrillo	Leopardus tigrinus Schreber
 colocolo	Leopardus colocolo Molina
 cincinno	pukiel kędzierzawych włosów
-ascalona	Aszkelon
 geosfera	geosfera
 fantina	dżokej
 coltivatore	kultywator
@@ -29459,10 +27505,7 @@ svantaggio	minus
 spogliare	rozbierać / rozebrać
 distacco	oddzielenie
 chiglia	kil
-gabbriella	imię żeńskie Gabriela
 bertuccia	Macaca sylvanus Linnaeus
-barberia	Berberia
-homs	Hims
 orsolina	urszulanka
 crisoprasio	chryzopraz
 crisopraso	chryzopraz
@@ -29473,12 +27516,10 @@ salumiera	właścicielka wędliniarni
 salumaia	właścicielka wędliniarni
 mugo	Pinus mugo Turra
 luncheonette	rodzaj bufetu
-benigna	imię żeńskie Benigna
 sconvolgente	denerwujący
 sconvolgimento	przewrót
 scoraggiante	zniechęcający
 deprimente	przygnębiający
-massimino	imię męskie Maksymin
 labaro	labarum
 cacchio	bezowocny pąk
 cacchio	chuj
@@ -29488,7 +27529,6 @@ ferraio	kowal
 ferraiolo	peleryna kardynalska
 ferraiuolo	peleryna kardynalska
 ferraiolone	peleryna kardynalska
-massimina	imię żeńskie Maksymina
 sinantropismo	synantropizm
 predazione	drapieżnictwo
 frontman	frontman
@@ -29505,10 +27545,6 @@ pecorella	owieczka
 smarrito	zgubiony
 sarcasticamente	sarkastycznie
 liberale	liberalny
-metodio	imię męskie Metody
-mascarene	Maskareny
-michea	imię męskie Micheasz
-mileto	Milet
 miliziana	milicjantka
 lobbista	lobbysta
 lobbista	lobbystka
@@ -29538,7 +27574,6 @@ paragrafare	dzielić na paragrafy
 spioncino	judasz
 zerro	Spicara smaris Linnaeus
 reclutamento	rekrutacja
-lodovica	imię żeńskie Ludwika
 superordine	nadrząd
 virilità	męskość
 piccolino	maleńki
@@ -29566,31 +27601,21 @@ fumettistico	komiksowy
 fumettista	twórca komiksów
 fumettista	twórczyni komiksów
 pallio	paliusz
-riccarda	imię żeńskie Ryszarda
-topolino	Myszka Miki
 topolino	myszka
 pemfigo	pęcherzyca
 bestialmente	bestialsko
 gastronomicamente	gastronomicznie
-sidone	Sydon
-noemi	imię żeńskie Noemi
-macarsca	Makarska
 semicerchio	półkole
 semicircolo	półkole
 emistichio	hemistych
-bolzano	Bolzano
-eraclio	imię męskie Herakliusz
 cerebellare	móżdżkowy
 apoliticamente	apolitycznie
 antifonario	antyfonarz
 pollaio	kurnik
 efod	efod
-mattatia	imię męskie Matatiasz
 neogotico	neogotycki
 neogotico	neogotyk
-booz	imię męskie Booz
 dorio	tetrachord dorycki
-dazio	imię męskie Dacjusz
 esteticità	estetyczność
 falange	falanga
 transfobia	transfobia
@@ -29600,9 +27625,7 @@ scompartimento	przedział
 sistematizzare	systematyzować / usystematyzować
 sbuffare	parsknąć
 dosaggio	dawkowanie
-guarino	imię męskie Waryn
 illogicamente	nielogicznie
-cavalese	Cavalese
 all'oscuro	po ciemku
 tolda	pokład
 tomismo	tomizm
@@ -29637,7 +27660,6 @@ sodo	ciężki
 sodo	ciężko
 infreddatura	dreszcz
 porfirina	porfiryna
-talmud	Talmud
 valina	walina
 camarilla	kamaryla
 iporiflessia	hiporefleksja
@@ -29653,16 +27675,13 @@ amigdalite	angina
 pornocrazia	pornokracja
 mignottocrazia	pornokracja
 campanologia	kampanologia
-evarista	imię żeńskie Ewarysta
 orante	modlący się
 orante	orant
 orante	orantka
-telesforo	imię męskie Telesfor
 brocchetta	dzbanek
 brocchina	dzbanek
 brocchino	dzbanek
 pezzente	dziad
-sotero	imię męskie Soter
 tremendo	straszny
 triaca	odtrutka
 tressette	włoska gra w karty
@@ -29682,13 +27701,10 @@ treppiedi	statyw
 tresca	intryga
 trescare	hasać
 trespolo	kobyłka
-cefa	Kefas
-partia	Partia
 dizionarietto	słowniczek
 canzoniere	śpiewnik
 antitrinitarismo	antytrynitaryzm
 trinità	trójca
-trinità	Trójca Święta
 blogosfera	blogosfera
 arduo	mozolny
 sfavorevole	niepomyślny
@@ -29697,146 +27713,22 @@ baleniere	wielorybnik
 ramponiere	harpunnik
 discepola	uczennica
 alunna	uczennica
-efrem	imię męskie Efrem
 marciare	chodzić
 severità	surowość
-devoniano	dewon
-cambriano	kambr
-ordoviciano	ordowik
-siluriano	sylur
-carbonifero	karbon
-permiano	perm
-soletta	Solura
 fracido	przemoczony
 fradicio	o jedzeniu zgniły
 fradicio	zepsuta część owocu lub warzywa
 frazzo	zepsuta część owocu lub warzywa
 avvelenamento	zatrucie
 dieresi	przegłos
-rito	imię męskie
-filone	Filon
 seggio	fotel
 seggia	fotel
 segugio	ogar
-oriano	imię męskie
-cassiano	imię męskie Kasjan
 birbante	łajdak
 birbante	łajdaczka
 autofagia	autofagia
 ciceroniano	cyceroński
-simplicio	imię męskie Symplicjusz
-ernesta	imię żeńskie Ernesta
-lisandro	imię męskie Lizander
-clodovea	imię żeńskie
-adolfa	imię żeńskie Adolfa
-enza	imię żeńskie
-azeglia	imię żeńskie
-geppetto	imię męskie
-geppo	imię męskie
-geppi	imię żeńskie
-giusi	imię męskie
-giusi	imię żeńskie
-beppe	imię męskie
-peppe	imię męskie
-pino	imię męskie
-pippo	imię męskie
-giampiero	imię męskie
-gianpiero	imię męskie
-gianpiera	imię żeńskie
-giampiera	imię żeńskie
-salvatorino	imię męskie
-salvato	imię męskie
-salvo	imię męskie
-guccio	imię męskie
-arrighetto	imię męskie
-arriguccio	imię męskie
-arriguzzo	imię męskie
-arrigone	imię męskie
-arrighino	imię męskie
-righetto	imię męskie
-riguccio	imię męskie
-rigguzo	imię męskie
-guzzo	imię męskie
-rigone	imię męskie
-gone	imię męskie
-ghino	imię męskie
-rigoletto	imię męskie
-arriga	imię żeńskie
-marcantonio	imię męskie Marek Antoniusz
 marcantonio	dorodny
-pierantonio	imię męskie
-davino	imię męskie
-antonmaria	imię męskie
-antonello	imię męskie
-lillo	imię męskie
-tonello	imię męskie
-nello	imię męskie
-totò	imię męskie
-antonietto	imię męskie
-antoniotto	imię męskie
-antonioccio	imię męskie
-tonio	imię męskie
-toniolo	imię męskie
-nino	imię męskie
-nonio	imię męskie
-noccio	imię męskie
-fofò	imię męskie
-vanni	imię męskie
-teo	imię męskie
-cesco	imię męskie
-franceschino	imię męskie
-francescuccio	imię męskie
-francescuzzo	imię męskie
-fresco	imię męskie
-fra	imię męskie
-cecchino	imię męskie
-cesto	imię męskie
-checco	imię męskie
-ciccio	imię męskie
-cuccio	imię męskie
-cece	imię męskie
-giù	imię żeńskie Julka
-antò	imię męskie
-mariella	imię żeńskie
-pigi	imię męskie
-pierino	imię męskie
-pierotto	imię męskie
-pierina	imię żeńskie
-pieretta	imię żeńskie
-pieranna	imię żeńskie
-pierangela	imię żeńskie
-piercarlo	imię męskie
-piergiorgio	imię męskie
-piermaria	imię męskie
-pierpaolo	imię męskie
-simo	imię żeńskie
-giulietta	imię żeńskie
-andreino	imię męskie
-andreolo	imię męskie
-andreuccio	imię męskie
-andrietto	imię męskie
-andreano	imię męskie
-andro	Andros
-drea	imię męskie Andrzejek
-dea	imię męskie Andrzejek
-dozza	imię żeńskie Andrzejka
-andreana	imię żeńskie
-andreuccia	imię żeńskie
-andreuola	imię żeńskie
-andreola	imię żeńskie
-andreozza	imię żeńskie
-andrietta	imię żeńskie
-andrettina	imię żeńskie
-gabbriele	imię męskie Gabriel
-gabriello	imię męskie Gabriel
-gabbriello	imię męskie Gabriel
-gabri	imię męskie
-gabrio	imię męskie
-lele	imię męskie
-gello	imię męskie
-bello	imię męskie
-carinzia	Karyntia
-aiace	imię męskie Ajaks
 baccello	strąk
 districare	rozplątać / rozplątywać
 burbero	mrukliwy
@@ -29844,27 +27736,18 @@ burbero	mruk
 deprezzamento	obniżenie wartości
 esaurire	wyczerpywać / wyczerpać
 esaurire	wyczerpywać się / wyczerpać się
-amalfi	Amalfi
-lubenzio	Lubencjusz
 amigdalectomia	tonsillektomia
 ottangolo	ośmiokąt
-gianicolo	Janikulum
 appezzamento	kawał gruntu
 appezzare	podzielić na kawałki
 -mento	tworzy rzeczowniki odczasownikowe
 imbocco	wylot
 imboccatura	wylot
-acri	Akka
 carnismo	karnizm
-losanna	Lozanna
-ghesur	Geszur
-livorno	Livorno
 livornese	liworneński
 livornese	liworneńczyk
 livornese	mieszkanka Livorno
-friborgo	Fryburg
 glaciazione	zlodowacenie
-innocenzo	imię męskie Innocenty
 antischiavista	antyniewolniczy
 marsupiale	torbacz
 palermitana	palermianka
@@ -29878,8 +27761,6 @@ moralizzatrice	moralizatorka
 moralismo	moralizm
 opacizzante	matujący
 opacizzante	substancja matująca
-pietrino	Piotruś
-piacenza	Piacenza
 passionista	pasjonista
 passionista	pasjonistka
 passio	ewangeliczny opis Męki Pańskiej
@@ -29890,8 +27771,6 @@ ravennate	rawenka
 ravennate	raweński
 rebetiko	rebetiko
 televendita	telesprzedaż
-terranova	Nowa Fundlandia
-glarona	Glarus
 cipria	puder
 cismontano	znajdujący się po tej stronie gór
 cismontano	dialekt południowej Korsyki
@@ -29929,24 +27808,18 @@ beduina	beduina
 triestino	triesteński
 triestino	triesteńczyk
 triestina	triestenka
-brescia	Brescia
 bresciano	bresciański
 bresciano	brescianin
-prato	Prato
 colonnato	kolumnada
 colonnato	kolumnowy
 esecrazione	obelga
 saccheggiare	grabić / ograbić
-foggia	Foggia
-rimini	Rimini
 riminese	mieszkaniec Rimini
 riminese	mieszkanka Rimini
 riminese	rimiński
 beneventano	mieszkaniec Benewentu
 beneventano	benewencki
 beneventana	mieszkanka Benewentu
-carrara	Carrara
-mantova	Mantua
 mantovano	mantuańczyk
 mantovano	mantuański
 mantovana	mantuanka
@@ -29955,7 +27828,6 @@ carrarese	kararyjka
 carrarese	kararyjski
 aostano	mieszkaniec Aosty
 aostano	aostański
-arezzo	Arezzo
 aretino	aretyński
 aretino	aretyńczyk
 pratese	prateński
@@ -29965,24 +27837,14 @@ ferrarese	ferraryjka
 goriziano	gorycki
 goriziano	gorycjanin
 goriziana	gorycjanka
-cosenza	Cosenza
-timone	imię męskie Tymon
 foggiano	foggiański
 foggiano	mieszkaniec Foggii
 foggiana	mieszkanka Foggii
-chioggia	Chioggia
-lecce	Lecce
-viterbo	Viterbo
-spoleto	Spoleto
-sorrento	Sorrento
-potenza	Potenza
-monza	Monza
 sorrentino	mieszkaniec Sorrento
 sorrentino	sorrentyński
 viterbese	witerbski
 chioggiotto	chioggiański
 chioggiotto	mieszkaniec Chioggii
-aquino	Akwin
 aquinate	akwiński
 aquinate	akwińczyk
 aquinate	mieszkanka Akwinu
@@ -29990,14 +27852,12 @@ amalfitano	Amalfitanin
 amalfitano	amalfitański
 trevisano	mieszkaniec Treviso
 trevisano	trewizański
-catanzaro	Catanzaro
 capuano	kapuańczyk
 capuano	kapuański
 capuana	kapuanka
 lucchese	lukkański
 lucchese	lukkańczyk
 lucchese	lukkanka
-urbino	Urbino
 urbinate	urbińczyk
 urbinate	mieszkanka Urbino
 urbinate	urbiński
@@ -30005,27 +27865,20 @@ pavese	pawijczyk
 pavese	pawijka
 pavese	pawijski
 licentiose	swawolnie
-otranto	Otranto
 otrantino	otrancki
 otrantino	mieszkaniec Otranto
 pisano	pizański
 pisano	pizańczyk
 pisana	pizanka
 eptarchia	heptarchia
-rapallo	Rapallo
 rapallese	rapallski
 rapallese	mieszkaniec Rapalla
 rapallese	mieszkanka Rapalla
 piacentino	piacencki
 piacentino	mieszkaniec Piacenzy
-piombino	Piombino
-tivoli	Tivoli
-pesaro	Pesaro
 siracusano	syrakuzański
 siracusano	syrakuzanin
 siracusana	syrakuzanka
-vercelli	Vercelli
-marsala	Marsala
 scalo	postój
 scansare	omijać
 scartare	wypakować / wypakowywać
@@ -30033,25 +27886,15 @@ scongelare	rozmrażać / rozmrozić
 scottatura	oparzenie
 trasmettitore	nadawczy
 trasmettitore	nadajnik
-epiro	Epir
-l’aquila	L’Aquila
-pompei	Pompeje
 pompeiano	pompejański
 pompeiano	pompejańczyk
-norcia	Nursja
 mongolfiera	balon
 raccattapalle	chłopiec do piłek
 parestesia	parestezja
-agrigento	Agrigento
-carmagnola	Carmagnola
-orvieto	Orvieto
 orvietano	orwietański
 orvietano	mieszkaniec Orvieto
-gaeta	Gaeta
 gaetano	gaecki
 gaetano	mieszkaniec Gaety
-terni	Terni
-giura	Jura
 capoeira	capoeira
 deindustrializzazione	dezindustrializacja
 viticoltore	winogrodnik
@@ -30060,28 +27903,14 @@ polonizzare	polonizować
 prozio	wuj ojca lub matki
 proavo	pradziadek
 cattedralizio	przykatedralny
-frosinone	Frosinone
-rieti	Rieti
-lodi	Lodi
 machiavellico	odnoszący się do Niccolò Machiavellego
 machiavelliano	odnoszący się do Niccolò Machiavellego
-coca-cola	coca-cola
 acquariofilo	akwarysta
-dolindo	imię męskie
-bondo	imię męskie
-abondio	imię męskie Abundiusz
-aligio	imię męskie
-aligia	imię żeńskie
-amanzio	imię męskie Amancjusz
-amanzia	imię żeńskie
 crostatella	od crostata
 crostatina	od crostata
-faustina	imię żeńskie Faustyna
 dionisiaco	dionizyjski
 ugaritico	ugarycki
 ugaritico	ugarycki
-giona	Jonasz
-abdia	Abdiasz
 estraeuropeo	pozaeuropejski
 borsaiola	złodziejka kieszonkowa
 borseggiatrice	złodziejka kieszonkowa
@@ -30089,7 +27918,6 @@ borseggio	złodziejstwo kieszonkowe
 borseggiare	okradać
 scippare	ukraść
 scippo	ukradzenie
-baruc	Baruch
 sporofito	sporofit
 malese	malajski
 malese	Malaj
@@ -30100,44 +27928,18 @@ portuale	portowy
 portuale	portowiec
 portuale	pracowniczka portu
 cosmea	Cosmos bipinnatus Cav
-nabucodonosor	Nabuchodonozor
 inscrizione	inskrypcja
 cilindrico	cylindryczny
 pione	pion
 sconcertare	konsternować
 sconcertante	konsternujący
-samotracia	Samotraka
-nike	Nike
 bifobia	bifobia
 cattività	niewola
-plutarco	Plutarch
 lesbofobia	lesbofobia
 ambio	inochód
 genitrice	rodzicielka
 genetrice	rodzicielka
 flebografia	flebografia
-ginetta	imię żeńskie
-angilberto	imię męskie
-angelberto	imię męskie
-engilberto	imię męskie
-amico	imię męskie
-merigo	imię męskie
-merico	imię męskie
-emerico	imię męskie Emeryk
-almerico	imię męskie
-aimerico	imię męskie
-americo	imię męskie
-anassagora	imię męskie Anaksagoras
-ameriga	imię żeńskie
-almerica	imię żeńskie
-anacario	imię męskie
-anacaria	imię żeńskie
-ario	imię męskie Ariusz
-arrio	imię męskie
-arino	imię męskie
-ariello	imię męskie
-arietto	imię męskie
-ariotto	imię męskie
 copernicano	kopernikański
 habitué	stały bywalec
 habitué	stała bywalczyni
@@ -30161,12 +27963,9 @@ geoglifo	geoglif
 poliritmia	polirytmia
 artiodattili	Artiodactyla Owen
 ippopotami	Hippopotamidae Gray
-sciaffusa	Szafuza
-groninga	Groningen
 boscoso	lesisty
 boscosità	lesistość
 destabilizzazione	destabilizacja
-tiro	Tyr
 maltare	słodować
 ugualmente	podobnie
 visone	norka
@@ -30215,8 +28014,6 @@ caritevole	charytatywny
 caritatevolmente	charytatywnie
 etolico	etolski
 etolico	Etol
-acaia	Achaja
-beozia	Beocja
 unito	zjednoczony
 oscenamente	sprośnie
 osceno	sprośny
@@ -30229,7 +28026,6 @@ secca	mielizna
 crittologo	kryptolog
 elemosinare	prosić o jałmużnę
 megattera	Megaptera novaeangliae Borowski
-agamennone	Agamemnon
 ureterectomia	ureterektomia
 uretere	moczowód
 ectomia	usunięcie
@@ -30271,7 +28067,6 @@ lobectomia	wycięcie płatu
 bilobectomia	wycięcie obu płatów
 lizza	palisada
 suggestivamente	sugestywnie
-saulo	Szaweł
 cocchiume	otwór czopowy
 doga	klepka beczki
 aneurismectomia	wycięcie tętniaka
@@ -30291,21 +28086,18 @@ amilopectina	amylopektyna
 amistà	przyjaźń
 masochisticamente	masochistycznie
 masochistico	masochistyczny
-geremia	imię męskie Jeremiasz
 geremiata	jeremiada
 geremia	maruda
 gerarchizzare	hierarchizować
 gerarchizzazione	hierarchizacja
 gerarchicamente	hierarchicznie
 gerarca	hierarcha
-giuseppa	imię żeńskie Józefa
 geotropico	geotropiczny
 geomorfologicamente	geomorfologicznie
 geologicamente	geologicznie
 geoide	geoida
 comignolo	szczyt dachu
 colossale	kolosalny
-rodi	Rodos
 rodilegno	Cossus cossus
 perdilegno	Cossus cossus
 rodomonte	fanfaron
@@ -30338,7 +28130,6 @@ colorato	kolorowany
 piemia	ropnica
 pielite	odmiedniczkowe zapalenie nerek
 orgasmico	orgazmiczny
-orfeo	Orfeusz
 orfico	orficki
 orfico	orfik
 pelvimetro	miednicomierz
@@ -30355,7 +28146,6 @@ batuffolo	kłaczek
 insufficientemente	niedostatecznie
 infamemente	haniebnie
 inestetico	nieestetyczny
-kursaal	kursal
 kolchoziano	kołchozowy
 kolchoziano	kołchoźnik
 kolchoziana	kołchoźnica
@@ -30368,8 +28158,6 @@ kiribatese	kiribatyjski
 kiribatese	Kiribatyjczyk
 kiribatese	Kiribatyjka
 quirite	kwiryta
-quirino	Kwiryn
-quirina	imię żeńskie Kwiryna
 quiproquò	zob. qui pro quo
 quintavolo	pradziadek pradziadka
 quintavola	prababcia prababci
@@ -30399,7 +28187,6 @@ salcio	zob. salice
 salicineo	wierzbowy
 salicilismo	salicylizm
 luttuoso	żałobny
-lutero	Luter
 luteranesimo	luteranizm
 lutreola	Mustela lutreola
 luteo	żółtawy
@@ -30423,7 +28210,6 @@ quietismo	kwietyzm
 quietista	kwietysta
 quietista	kwietystka
 quietista	kwietystyczny
-edimburgo	Edynburg
 fienagione	sianokosy
 fienile	stodoła
 cavalleggero	kawalerzysta
@@ -30477,7 +28263,6 @@ iperpiano	hiperpłaszczyzna
 ipersuperficie	hiperpowierzchnia
 discordemente	niezgodnie
 discordare	nie zgadzać się
-benigno	imię męskie Benigny
 estraconiugale	zob. extraconiugale
 estratemporale	zob. extratemporale
 estraurbano	zob. extraurbano
@@ -30511,7 +28296,6 @@ cefalometria	kefalometria
 caldeo	chaldejski
 caldeo	Chaldejczyk
 baleniero	wielorybniczy
-eleazaro	imię męskie Eleazar
 laburista	laburzysta
 laburista	laburzystka
 laburista	laburzystowski
@@ -30528,7 +28312,6 @@ arterite	zapalenie tętnicy
 arteriale	tętniczy
 arterioso	tętniczy
 arteriola	tętniczka
-canarie	Kanary
 canaria	Kanaryjka
 khanato	chanat
 canato	zob. khanato
@@ -30538,7 +28321,6 @@ canapiero	konopny
 logicismo	logicyzm
 licantropia	likantropia
 licantropa	chora dotknięta likantropią
-luperco	Luperkus
 lupaia	legowisko wilka
 lupacchiotto	wilczę
 lupesco	wilczy
@@ -30611,30 +28393,6 @@ alternamente	na przemian
 gengivite	zapalenie dziąseł
 arroccamento	roszada
 arroccarsi	schować się
-firmina	imię żeńskie Firmina
-filiberta	imię żeńskie Filiberta
-giusta	imię żeńskie Justa
-tristana	imię żeńskie
-fiora	imię żeńskie
-fiorino	imię męskie
-fioretto	imię męskie
-fioretta	imię żeńskie
-fiorillo	imię męskie
-fiorilla	imię żeńskie
-federiga	imię żeńskie Fryderyka
-erberto	imię męskie Herbert
-abbondazia	imię żeńskie Abundancja
-abbondanzia	imię żeńskie Abundancja
-ildebranda	imię żeńskie Hildebranda
-ildo	imię męskie
-lucrezio	imię męskie Lukrecjusz
-letizio	imię męskie
-landa	imię żeńskie
-teodorica	imię żeńskie
-renzo	imię męskie
-pompilia	imię żeńskie
-graziano	imię męskie Gracjan
-graziana	imię żeńskie Gracjana
 fidiaco	Fidiaszowy
 fidanzarsi	zaręczyć się
 fidanzare	zaręczyć
@@ -30709,7 +28467,6 @@ ciucco	pijany
 clipeo	clipeus
 clivaggio	kliważ
 clonico	kloniczny
-clorindo	imię męskie
 coadiutrice	pomocnica
 coalizzare	zjednoczyć
 coartare	zmusić
@@ -30793,7 +28550,6 @@ macis	kwiat muszkatołowy
 maciullare	międlić
 maciulla	międlarka
 machiavellicamente	makiawelicznie
-agiaria	Adżaria
 acetaldeide	acetaldehyd
 piroetta	piruet
 pirometrico	pirometryczny
@@ -30822,8 +28578,6 @@ eristica	erystyka
 eristico	erystyczny
 eringio	mikołajek
 ergometrico	ergometryczny
-ippolita	imię żeńskie Hipolita
-ippocrate	Hipokrates
 ippocratico	Hipokratesowy
 ipoteticamente	hipotetycznie
 ipotiroidismo	niedoczynność tarczycy
@@ -30888,7 +28642,6 @@ interdizione	zakaz
 interdipendente	współzależny
 inalare	wdychać
 aliena	obca
-alighiera	imię żeńskie
 aligero	skrzydlaty
 alighiero	bosak
 invalida	inwalidka
@@ -30973,11 +28726,8 @@ tomistico	tomistyczny
 tombacco	tombak
 tomaia	przyszwa
 tomaio	przyszwa
-tolomeo	imię męskie Ptolemeusz
 lavoratrice	pracownica
 lavoratora	pracownica
-covid-19	COVID-19
-covid	COVID
 copolimero	kopolimer
 epidemicità	epidemiczność
 piedistallo	piedestał
@@ -31048,8 +28798,6 @@ contraccolpo	odrzut
 addentare	przegryzać
 dosimetrico	dozymetryczny
 piridina	pirydyna
-caienna	Kajenna
-mascate	Maskat
 oo-	oo
 ischemico	niedokrwienny
 tenno	tenno
@@ -31062,20 +28810,11 @@ romanziere	powieściopisarz
 romanziera	powieściopisarka
 oscillografo	oscylograf
 colectomia	kolektomia
-saragozza	Saragossa
 ciavardello	Sorbus torminalis L
 contrattura	przykurcz
 neuropatologo	neuropatolog
 pisside	cyborium
-kilimangiaro	Kilimandżaro
-cana	Kana Galilejska
 driomio	koszatka
-ubaldo	imię męskie Ubald
-dello	imię męskie
-baldo	imię męskie
-ubaldino	imię męskie
-ubaldello	imię męskie
-ubalduccio	imię męskie
 stigmatico	stygmatyk
 stigmatica	stygmatyczka
 ofidiofobia	ofidiofobia
@@ -31097,7 +28836,6 @@ leggendario	zbiór legend o świętych
 ambiguamente	niejednoznacznie
 sestetto	sekstet
 comandamento	przykazanie
-melanio	imię męskie Melaniusz
 guereza	Colobus guereza Rüppell
 gonfalone	gonfalon
 africanizzazione	afrykanizacja
@@ -31106,14 +28844,11 @@ propriamente	właściwie
 buffonata	błazeństwo
 bulbocastano	Cyperus esculentus L
 intrecciatura	plecenie
-gosen	Goszen
-goscen	Goszen
 interferone	interferon
 vicepretore	zastępca pretora
 saturo	nasycony
 saturare	nasycać
 saturarsi	nasycić się
-altera	imię żeńskie
 innatismo	innatyzm
 specificità	specyfika
 longevità	długowieczność
@@ -31131,7 +28866,6 @@ bastonare	okładać kijem
 campare	żyć
 cronometrista	chronometrażysta
 cronometrista	chronometrażystka
-sofronio	imię męskie Sofroniusz
 parvovirosi	parwowiroza
 teppismo	chuligaństwo
 teppa	chuliganeria
@@ -31144,18 +28878,10 @@ travertino	trawertyn
 elasmosauro	elasmozaur
 puffo	smerf
 puffa	smerfetka
-gargamella	Gargamel
-birba	Klakier
 neognati	Neognathae Pycraft
 permeabilità	przemakalność
 impermeabilità	nieprzemakalność
 pelagianesimo	pelagianizm
-dalmazio	imię męskie Dalmacjusz
-dalmazzo	imię męskie Dalmacjusz
-massimiano	imię męskie Maksymian
-massenzio	imię męskie Maksencjusz
-massenzia	imię żeńskie Maksencja
-massenza	imię żeńskie Maksencja
 bovina	samica wołowatych
 buina	obornik
 egizio	egipski
@@ -31183,12 +28909,7 @@ vestibolo	przedsionek
 triscele	triskelion
 bresaola	bresaola
 bozzetto	szkic
-giovita	imię męskie Jowita
-ifigenia	imię żeńskie Ifigenia
-efigenia	imię żeńskie Ifigenia
 zirconia	cyrkonia
-ottato	imię męskie Optat
-optato	imię męskie Optat
 soggiogamento	ujarzmienie
 soggiogare	ujarzmiać
 assoggettamento	ujarzmienie
@@ -31201,7 +28922,6 @@ scientology	scjentologia
 moschicida	muchobójczy
 disgelo	odwilż
 griko	griko
-gelasio	imię męskie Gelazjusz
 gelasiano	gelazjański
 burino	chłop
 burino	chłopski
@@ -31222,12 +28942,10 @@ all'italiana	na sposób włoski
 ipotecario	hipoteczny
 israelitico	izraelicki
 latinità	łacińskość
-ebisu	Ebisu
 macrofauna	makrofauna
 speculare	spekulować
 speculare	lustrzany
 amosiano	Amosowy
-esd	Esdra → Ezd
 libertinismo	libertynizm
 libertarianismo	libertarianizm
 farfallone	flirciarz
@@ -31235,15 +28953,12 @@ ermeticamente	hermetycznie
 equinoziale	równonocny
 eschio	Quercus petraea
 monasticamente	monastycznie
-ceslao	imię męskie Czesław
 efelante	ho-hoń
 effalumpo	ho-hoń
 valchiria	walkiria
 walchiria	walkiria
-nazianzo	Nazjanz
 nazianzeno	nazjański
 nazianzeno	nazjańczyk
-cesario	imię męskie Cezary
 emicellulosa	hemiceluloza
 polisaccaride	polisacharyd
 strutturalmente	strukturalnie
@@ -31256,12 +28971,8 @@ braciuola	kotlet
 villeggiante	letnik
 villeggiante	letniczka
 villeggiare	przebywać na wakacjach
-sefora	imię żeńskie Sefora
-zippora	imię żeńskie Sefora
-iesse	Jesse
 ovulare	jajeczkować
 ovulare	jajowy
-ceciliano	imię męskie Cecylian
 spazzoletta	zmiotka
 spazzolina	zmiotka
 burrata	burrata
@@ -31273,12 +28984,9 @@ possessorio	dotyczący posiadania
 posseditrice	posiadaczka
 posseditore	posiadacz
 tenuta	szczelność
-melusina	Meluzyna
 disinfezione	dezynfekcja
-assunzione	Wniebowzięcie
 birichinata	nieposłuszeństwo
 ominide	hominid
-oloferne	Holofernes
 deflagrazione	deflagracja
 diclorodifeniltricloroetano	dichlorodifenylotrichloroetan
 spiritano	duchacz
@@ -31288,8 +28996,6 @@ stoltezza	głupota
 scherno	kpiny
 schernitore	szyderczy
 schernitore	szyderca
-odisseo	Odyseusz
-ulisse	Ulisses
 omaso	księgi
 epatectomia	hepatektomia
 fiocamente	chrypliwie
@@ -31300,7 +29006,6 @@ respiratore	respirator
 gracchio	krakanie
 gracchiatore	gaduła
 gradinata	szerokie schody
-fridesvida	imię żeńskie Fredeswinda
 arrugginito	zardzewiały
 stagionalmente	sezonowo
 stagionalità	sezonowość
@@ -31310,17 +29015,12 @@ arabizzarsi	arabizować się
 astrattamente	abstrakcyjnie
 margraviato	margrabstwo
 eruttivo	erupcyjny
-cedron	Cedron
-isauria	Izauria
 cantabrico	kantabryjski
 cantabrico	Kantabryjczyk
 cinefilo	kinoman
-nerone	imię męskie Neron
 neroniano	Neronowy
 piantina	sadzonka
 patologicamente	patologicznie
-glicerio	imię męskie Gliceriusz
-tiberio	imię męskie Tyberiusz
 rumsteak	rumsztyk
 bicchierino	szklaneczka
 bicchierone	szklanica
@@ -31364,7 +29064,6 @@ pregustare	z góry cieszyć się na coś
 preaccennare	wspominać wcześniej
 intuire	uchwycić
 presentire	przeczuwać
-antifa	Antifa
 indubbio	niewątpliwy
 inconfutabilmente	niezaprzeczalnie
 innegabilmente	niezaprzeczalnie
@@ -31375,8 +29074,6 @@ discutibilmente	prawdopodobnie
 rispettosamente	z szacunkiem
 spettegolare	plotkować
 presule	prałat
-gaio	imię męskie Gajusz
-cesarino	imię męskie
 betalaina	betalaina
 ripercussione	oddźwięk
 riflesso	odbity
@@ -31390,7 +29087,6 @@ relativizzazione	relatywizacja
 relativizzare	relatywizować
 sgranatrice	odziarniarka
 apparare	przygotować
-eucherio	imię męskie Eucheriusz
 stracciatella	stracciatella
 stracciare	drzeć
 straccetto	szmatka
@@ -31401,7 +29097,6 @@ stracciarsi	podrzeć się
 striglia	zgrzebło
 strigliare	czyścić zgrzebłem
 strigliata	pociągnięcie zgrzebłem
-silverio	imię męskie Sylweriusz
 viatico	wiatyk
 infusione	napar
 schiettezza	szczerość
@@ -31461,22 +29156,14 @@ postumo	następstwo
 bratteato	brakteat
 predella	predella
 branchiale	skrzelowy
-melchiorre	imię męskie Melchior
-melchiore	imię męskie Melchior
 diligentemente	pilnie
 rigorosamente	surowo
 coscienziosamente	sumiennie
 responsabilmente	odpowiedzialnie
 meticolosamente	skrupulatnie
 meticoloso	skrupulatny
-raniero	imię męskie Rajner
 testimonia	świadek
 iponimia	hiponimia
-vincenza	imię żeńskie Wincenta
-vincenzina	imię żeńskie
-vincenzetta	imię żeńskie
-cencia	imię żeńskie
-concordio	imię męskie Konkordiusz
 verga	rózga
 vergaio	baca
 vergaro	baca
@@ -31524,7 +29211,6 @@ ditelismo	dioteletyzm
 duotelismo	dioteletyzm
 allucinogeno	halucynogenny
 allucinogeno	halucynogen
-consalvo	imię męskie Gonsalwy
 pulcinella	poliszynel
 pulcinellata	błazenada
 pulcinellesco	błazeński
@@ -31537,15 +29223,11 @@ polledro	źrebak
 messicanità	meksykańskość
 onoterapia	onoterapia
 megera	megiera
-sidonio	imię męskie Sydoniusz
 serbare	zachować
 rompighiaccio	łamiący lód
 rompighiaccio	lodołamacz
 vigogna	Vicugna vicugna Molina
 dragomanno	dragoman
-battria	Baktria
-battriana	Baktria
-bactriana	Baktria
 satrapo	satrapa
 mietitrebbiatrice	kombajn
 yankee	jankeski
@@ -31622,14 +29304,12 @@ paganizzare	poganieć
 paganeggiare	poganizować
 paganeggiare	poganieć
 meroplancton	meroplankton
-pentesilea	Pentezylea
 baciasanti	bigot
 baciapile	bigot
 beghino	begard
 begardo	begard
 murale	murowy
 murale	murale
-prisca	imię żeńskie Pryska
 arcione	łęk
 sinclinale	synklina
 anticlinale	antyklinalny
@@ -31643,7 +29323,6 @@ masnadiero	rozbójnik
 masnadiere	zob. masnadiero
 masnada	banda
 provenz.	provenzale → prowansalski
-provenza	Prowansja
 contea	hrabiostwo
 mutanda	majtki
 mutandone	majtki
@@ -31683,14 +29362,7 @@ quasimodo	związany z niedzielą przewodnią
 quasimodo	niedziela przewodnia
 leonardesco	leonardowski
 leonardesco	uczeń z pracowni Leonarda da Vinci
-tarcisio	imię męskie Tarsycjusz
-tarciso	imię męskie Tarsycjusz
-tarsicio	imię męskie Tarsycjusz
-tarsizio	imię męskie Tarsycjusz
-beda	imię męskie Beda
-baleari	Baleary
 balearico	balearski
-aquinate	Akwinata
 asinuccio	oślisko
 asinaccio	oślisko
 ferrigno	żelazisty
@@ -31720,12 +29392,10 @@ capezzone	kawecan
 capezzo	uzda
 capestro	sznur
 cremoso	z dużą zawartością śmietany
-cilicia	Cylicja
 visconte	wicehrabia
 viscontessa	wicehrabina
 confalone	gonfalon
 gonfaloniere	chorąży
-saladino	Saladyn
 anglofono	anglojęzyczny
 anglofono	anglofon
 anglofona	kobieta mówiąca po angielsku
@@ -31741,17 +29411,11 @@ bottoniera	guziki
 sbottonare	rozpinać guziki
 sbottonarsi	rozpinać się
 teatrabile	nadający się do wystawienia w teatrze
-dagoberto	imię męskie Dagobert
 imbrunire	brunatnieć
 imbrunire	brązowić
 imbrunire	zmierzch
 sull'	zob. su l’
-caifa	Kajfasz
-caifa	Hajfa
 caifasso	ktoś szpetny i ponury
-caifasso	imię męskie Kajfasz
-caifas	imię męskie Kajfasz
-efeso	Efez
 pictogramma	piktogram
 tessalonicese	odnoszący się do Tesaloniki
 tessalonicese	Tesaloniczanin
@@ -31815,9 +29479,6 @@ sudcoreano	Koreańczyk z Korei Południowej
 sudcoreano	południowokoreański
 nordcoreano	Koreańczyk z Korei Północnej
 nordcoreano	północnokoreański
-sem	Sem
-sarina	imię żeńskie Sara
-saretta	imię żeńskie Sara
 clorexidina	chloroheksydyna
 amantadina	amantadyna
 papuano	Papuańczyk
@@ -31825,7 +29486,6 @@ papuano	papuański
 kappaò	przez nokaut
 kappaò	nokaut
 ciuffetto	kosmyk
-iafet	Jafet
 basicità	zasadowość
 avventizio	tymczasowy
 novelliere	nowelista
@@ -31875,13 +29535,8 @@ motorizzato	zmotoryzowany
 motorizzare	zmotoryzować
 motorizzarsi	zmotoryzować się
 unicismo	hapax legomenon
-belucistan	Beludżystan
-jalalabad	Dżalalabad
 maragià	maharadża
 maràgia	maharadża
-khorasan	Chorasan
-pashtunistan	Pasztunistan
-pakhtunistan	Pasztunistan
 boriarsi	chełpić się
 intoccabile	nietykalny
 decino	dziesięciocentówka
@@ -31915,7 +29570,6 @@ fievolmente	słabo słabym głosem
 debolmente	słabo
 pag.	pagina → strona
 facochero	fakoszer
-nadab	imię męskie Nadab
 ammaraggio	wodowanie
 ammarare	wodować
 ammaramento	wodowanie
@@ -31926,12 +29580,9 @@ ormeggiarsi	zakotwiczyć się
 ormare	ścigać
 fagiuolo	fasola
 scottona	jałówka
-crisostomo	imię męskie Chryzostom
 monotipico	monotypowy
 apparizionistico	objawieniowy
-volínia	Wołyń
 sassifraga	Saxifraga L
-temistocle	imię męskie Temistokles
 graffitaro	grafficiarz
 graffire	wydrapywać
 graffiata	podrapanie
@@ -31974,14 +29625,9 @@ aracnide	pajęczak
 invertebrato	bezkręgowy
 invertebrato	bezkręgowiec
 invertebrata	kobieta pozbawiona kręgosłupa
-elfrida	imię żeńskie Elfryda
 precauzione	środek ostrożności
 improvvisatore	improwizator
 pentimento	skrucha
-eusebia	imię żeńskie Euzebia
-girolama	imię żeńskie Hieronima
-gerolama	imię żeńskie Hieronima
-geronima	imię żeńskie Hieronima
 metamorfico	metamorficzny
 metamorficamente	metamorficznie
 giannetto	dzianet
@@ -32003,14 +29649,6 @@ premurare	nalegać
 premurarsi	zatroszczyć się
 orribilmente	okropnie
 orribilità	okropność
-giacomino	imię męskie
-mino	imię męskie
-giacomello	imię męskie
-giacometto	imię męskie
-giacominuccio	imię męskie
-giaime	imię męskie
-abbone	imię męskie Abbo
-illuminato	imię męskie Illuminat
 mangiamoscerini	Conopophaga Vieillot
 moschino	muszka
 moscino	muszka
@@ -32066,7 +29704,6 @@ tangenziale	tangensowy
 ancorare	kotwić / zakotwić
 ancorare	kotwiczyć / zakotwiczyć
 cancerogenicità	rakotwórczość
-ruwenzori	Ruwenzori
 cranioplastica	kranioplastyka
 ogniqualvolta	ilekroć
 modernità	nowoczesność
@@ -32078,7 +29715,6 @@ snellire	odchudzać / odchudzić
 snellire	odchudzać się / odchudzić się
 mercenario	o żołnierzu
 mercenario	najemnik
-laramidia	Laramidia
 orgone	orgon
 fuoriclasse	bezkonkurencyjny
 furbescamente	chytrze
@@ -32097,7 +29733,6 @@ trinciare	porcjować
 chiaroveggente	jasnowidz
 chiaroveggente	jasnowidzka
 chiaroveggente	jasnowidzący
-gagauzia	Gagauzja
 ologramma	hologram
 antropol.	antropologico → antropologiczny
 neuropsichiatrico	neuropsychiatryczny
@@ -32112,7 +29747,6 @@ tsampa	tsampa
 solidale	solidarny
 pionieristico	pionierski
 motocross	motocross
-foligno	Foligno
 kajal	kohl
 pilliccia	dawna pisownia od
 pellicceria	futrzarstwo
@@ -32125,17 +29759,10 @@ pelletteria	kaletnictwo
 pellettiere	kaletnik
 pellettiera	kaletniczka
 menabò	makieta
-tacito	imię męskie Tacyt
-conisberga	Królewiec
 compieta	Kompleta
 anastomo	kleszczak
 falciatore	kosiarz
-paraclito	Paraklet
 miniare	iluminować
-blandina	imię żeńskie Blandyna
-blandino	imię męskie Blandyn
-mirone	imię męskie Miron
-evaldo	imię męskie Ewald
 imbottita	pierzyna
 gattonare	raczkować
 carrata	fura
@@ -32151,7 +29778,6 @@ fuggitivo	uciekinier
 farfara	Tussilago farfara L
 schiacciasassi	walec
 schiacciasassi	ugniatający
-iride	Iryda
 atleticamente	atletycznie
 farfaro	Tussilago farfara L
 farfugio	Tussilago farfara L
@@ -32173,7 +29799,6 @@ divinatore	wróżbiarski
 divinizzare	włączać w poczet bogów
 divinizzazione	deifikacja
 apoteosi	apoteoza
-michelangelo	Michał Anioł
 taverna	tawerna
 tavernaio	karczmarz
 tavernaia	karczmarka
@@ -32183,7 +29808,6 @@ tavernetta	od taverna
 tavernella	od taverna
 tavernaccia	od
 bettola	knajpa
-dnestr	Dniestr
 sfociare	o cieku wodnym
 sfociare	poszerzyć ujście rzeki
 sfocio	ujście cieku
@@ -32197,13 +29821,10 @@ niffo	pysk
 niffolo	pysk
 ghigno	złośliwy uśmieszek
 ghignare	śmiać się szyderczo
-enisej	Jenisej
-vosgi	Wogezy
 pescivendola	sprzedawczyni ryb
 pesciaiola	sprzedawczyni ryb
 lazzaretto	szpital zakaźny
 lazzeretto	szpital zakaźny
-baldovino	imię męskie Baldwin
 baldovino	osioł
 baldovino	głupi
 pinocchio	orzeszek piniowy
@@ -32230,22 +29851,15 @@ gl'	zob. gli
 giovenco	byczek
 pescegatto	sumik
 smembrare	rozdzielić
-simmaco	imię męskie Symmachus
 dragamine	trałowiec
 dragaggio	dragowanie
 draglia	sztag
 traglia	sztag
-mardocheo	Mardocheusz
 mardocheo	niedojda
 mardochea	niedojda
 portineria	portiernia
 portinaio	dozorca
 portinaia	dozorczyni
-paropamiso	Hindukusz
-parapamiso	Hindukusz
-biagia	imię żeńskie Błażeja
-biagina	imię żeńskie
-biagino	imię męskie
 bleso	sepleniący
 bleso	sepleniący
 disorientato	zdezorientowany
@@ -32257,7 +29871,6 @@ spaesamento	zdezorientowanie
 interdetto	interdykt
 interdetto	ubezwłasnowolniony
 interdetta	ubezwłasnowolniona
-alpinus	alpejski
 almificus	błogosławiący
 almo	życiodajny
 almuzia	almucja
@@ -32265,11 +29878,6 @@ almuzio	almucja
 raccoglitore	zbieracz
 raccoglitore	zbierający
 saimiri	Saimiri sciureus Linnaeus
-alfeo	imię męskie Alfeusz
-mimmo	imię męskie
-mimma	imię żeńskie
-mimì	imię żeńskie
-mimì	imię męskie
 mimmo	bobo
 mimma	bobas
 illuministico	oświeceniowy
@@ -32279,29 +29887,15 @@ tascabile	wydanie kieszonkowe
 pocket-book	wydanie kieszonkowe
 rompitasche	nudziarz
 rompitasche	nudziara
-gs	Giosuè → Joz
-gdc	Giudici → Sdz
-gdt	Giuditta → Jdt
-maccabeo	Machabeusz
-maccabeo	Machabeusz
 asmoneo	hasmonejski
-asmoneo	Hasmoneusz
-asmoneo	Hasmoneusz
 canonica	probostwo
 graffetta	spinacz
-eufemio	imię męskie Eufemiusz
 bentonico	bentoniczny
 brigantaggio	zbójnictwo
-crispo	imię męskie Kryspus
-casimira	imię żeńskie Kazimiera
 taxì	taksówka
 pugnalata	dźgnięcie
 pugnalatore	nożownik
-rocca	imię żeńskie
-rocchino	imię męskie
-rocchetto	imię męskie
 teodosiano	teodozjański
-tiburzio	imię męskie Tyburcjusz
 laura	ławra
 ortoressia	ortoreksja
 ossessivo	obsesyjny
@@ -32354,10 +29948,8 @@ alleviare	łagodzić
 transitare	przechodzić
 virare	obracać
 ribassare	obniżać
-itala	imię żeńskie
 pralina	pralina
 supercontinente	superkontynent
-beniamina	imię żeńskie Beniamina
 detestarsi	nienawidzić się
 disprezzarsi	lekceważyć się
 depigmentazione	depigmentacja
@@ -32378,8 +29970,6 @@ libertade	wolność
 sloto	złoty
 sloti	złoty
 presentatore	konferansjer
-mefistofele	Mefistofeles
-mefistofele	Mefistofeles
 mefistofelico	mefistofeliczny
 mefistofelicamente	mefistofelicznie
 endodermico	endodermalny
@@ -32415,7 +30005,6 @@ armonium	fisharmonia
 zitellonismo	staropanieństwo
 zitellona	od zitella
 zitellaccia	od zitella
-disma	imię męskie Dyzma
 somatico	somatyczny
 psicoanalisi	psychoanaliza
 canagliata	nikczemność
@@ -32436,13 +30025,9 @@ corredare	zaopatrzyć
 corredarsi	zaopatrzyć się
 corredino	wyprawka dla noworodka
 auretta	wietrzyk
-auretta	imię żeńskie
-rosamunda	imię żeńskie Rozamunda
-rosmunda	imię żeńskie Rozamunda
 marsuino	Phocoena phocoena Linnaeus
 uistitì	Mico Lesson
 infra-	infra
-larnaca	Larnaka
 plebiscitario	plebiscytowy
 imenoforo	hymenofor
 allocoria	allochoria
@@ -32451,15 +30036,10 @@ autocoro	autochoryczny
 autocoria	autochoria
 autodisseminazione	autochoria
 oplà	hopla
-ascania	imię żeńskie
 antireligiosità	antyreligijność
-redentore	w chrześcijaństwie Odkupiciel
 redentore	odkupieńczy
 redentore	odkupiciel
-nicomedia	Nikomedia
-archelao	imię męskie Archelaus
 prigioniera	więźniarka
-vandea	Wandea
 patatine	chipsy
 fritto	smażony
 fritto	smażona potrawa
@@ -32495,10 +30075,8 @@ cancellierato	kanclerstwo
 cancelleresco	kancelaryjny
 grancancelliere	wielki kanclerz
 grancancellierato	urząd wielkiego kanclerza
-pirro	Pyrrus
 pirrico	pyrrusowy
 vittoriuccia	od vittoria
-pierantonia	imię żeńskie
 caparra	zadatek
 pegno	zastaw
 potoroo	Potoroini J.E. Gray
@@ -32509,11 +30087,6 @@ sopraffollamento	tłok
 autobiograficità	autobiograficzność
 cicciolo	skwarek
 metrico	metryczny
-caterinina	imię żeńskie
-caterinotta	imię żeńskie
-caterino	imię męskie
-catterino	imię męskie
-catterina	imię żeńskie Katarzyna
 fessa	pęknięcie
 fesso	pęknięty
 fesso	szczelina
@@ -32538,16 +30111,8 @@ potta	srom
 potta	przechwalca
 sorca	Rattus norvegicus Berkenhout
 aracneo	pajęczy
-ildegarda	imię żeńskie Hildegarda
-ildegardo	imię męskie
 bassetto	niski
 telepredicatore	teleewangelista
-tofo	imię męskie
-tofano	imię męskie
-ciofo	imię męskie
-f1	Formula 1 → Formuła 1
-erodoto	imię męskie Herodot
-alicarnasso	Halikarnas
 lupatto	wilczek
 lupetto	wilczek
 schiacciata	zgniecenie
@@ -32570,13 +30135,7 @@ pieve	parafia
 pievano	proboszcz
 prudere	swędzieć
 regredire	ustępować
-eleno	Helenos
-cassandro	imię męskie Kasander
-getsemani	Getsemani
 ulivo	Olea europaea L
-eilat	Ejlat
-asdod	Aszdod
-olao	imię męskie Olaf
 ospedaliere	szpitalny
 ospedaliere	pracownik szpitala
 ospedaliera	pracowniczka szpitala
@@ -32594,8 +30153,6 @@ parlatorio	rozmównica
 parlatoio	rozmównica
 lanternone	od lanterna
 lanternino	od lanterna
-tommasa	imię żeńskie Tomasza
-saturnino	imię męskie Saturnin
 evangelicalismo	ewangelikalizm
 giudeocristiano	judeochrześcijański
 giudeocristiano	judeochrześcijanin
@@ -32605,14 +30162,10 @@ trambusto	zamęt
 ghettoblaster	boombox
 radioregistratore	radiomagnetofon kasetowy
 aseità	aseitas
-temi	Temida
-carmenta	Karmenta
 camena	kamena
-liborio	imię męskie Liboriusz
 mocciolo	glut
 moccolo	ogarek
 ignaziano	ignacjański
-ezechia	Ezechiasz
 tenebrismo	tenebryzm
 tenebroso	ciemny
 pangrattato	bułka tarta
@@ -32621,8 +30174,6 @@ imboschire	dziczeć
 imboschirsi	pokryć się lasem
 fromboliere	procarz
 farraginoso	zagmatwany
-simoncino	imię męskie
-serenissima	Republika Wenecka
 pastora	pasterka
 gesmino	Jasminum L
 retaggio	spadek
@@ -32633,14 +30184,10 @@ riunito	połączony
 freeganismo	freeganizm
 crepi	niech zdechnie
 chattare	czatować
-fortuna	Fortuna
-fortunata	imię żeńskie Fortunata
 front-man	frontman
 apofatico	apofatyczny
 centrifugato	mus
 centrifugato	odwirowany
-rosalba	imię żeńskie
-annalena	imię żeńskie
 frociaggine	pedalstwo
 frocesco	pedalski
 frocetto	od frocio
@@ -32661,7 +30208,6 @@ omosex	homoseksualny
 omosex	homoseksualista
 omosex	homoseksualistka
 checca	pedał
-checca	imię żeńskie
 culattone	pedał
 omofilo	homoseksualny
 omofilo	homoseksualista
@@ -32691,15 +30237,12 @@ bussone	dawny instrument dęty
 ancia	stroik
 lucifero	niosący światło
 lucifero	jutrznia
-lucifero	Lucyfer
 astrofotografo	astrofotograf
-pafnuzio	imię męskie Pafnucy
 teorizzare	teoretyzować
 teorizzare	teoretyzować
 es-	eks
 pallamanista	piłkarz ręczny
 pallamanista	piłkarka ręczna
-spiridione	imię męskie Spirydion
 temperato	umiarkowany
 esordio	wstęp
 mandobanjo	bandżola
@@ -32717,7 +30260,6 @@ conflittualità	konfliktowość
 insincerità	nieszczerość
 motocampestre	crossowy
 motocampestre	motocross
-brusselle	Bruksela
 cercametalli	wykrywacz metalu
 segnapassi	rozrusznik serca
 traforo	tunel
@@ -32739,7 +30281,6 @@ stra-	…używany do wskazania nadmiaru
 listino	lista → tasiemeczka
 morituro	umierający
 ostrakon	ostrakon
-palio	Palio
 iure	giure → prawo
 aeroscafo	poduszkowiec
 lusingare	pochlebiać
@@ -32769,7 +30310,6 @@ sbucciare	obierać
 abalienare	pozbawiać
 usanza	zwyczaj
 rincoglionito	ogłupiony
-l'aquila	L'Aquila
 proibitivamente	zabraniająco
 mansione	zadanie
 mercatistica	marketing
@@ -32801,7 +30341,6 @@ acciaccare	miażdżyć
 avvitare	przykręcać śrubą/śrubami
 ippocampo	hipokamp
 corroborare	wzmacniać
-epifania	Objawienie Pańskie
 sintonizzatore	tuner
 temporizzatore	minutnik
 sospir	apokopa od
@@ -32877,7 +30416,6 @@ punteggio	punktacja
 spasmolitico	spazmolityczny
 approfonditamente	dogłębnie
 tocoferolo	tokoferol
-emiliana	imię żeńskie
 farmacodinamica	farmakodynamika
 acetilcolinesterasi	acetylocholinoesteraza
 decarbonizzazione	dekarbonizacja
@@ -32907,6 +30445,1091 @@ geoeconomia	geoekonomia
 subaffittuario	podnajemca
 subinquilino	sublokator
 andromania	nimfomania
+gargolla	rzygacz
+austria	Austria
+albania	Albania
+norvegia	Norwegia
+estonia	Estonia
+dominica	Dominika
+lusitania	Luzytania
+canada	Kanada
+europa	Europa
+europa	Europa
+argentina	Argentyna
+afghanistan	Afganistan
+africa	Afryka
+alaska	Alaska
+algeria	Algieria
+america	Ameryka
+amsterdam	Amsterdam
+andorra	Andora
+angola	Angola
+arabia	Arabia
+aristotele	Arystoteles
+arizona	Arizona
+armenia	Armenia
+asia	Azja
+australia	Australia
+azerbaijan	Azerbejdżan
+baltico	Bałtyk
+bavaria	Bawaria
+bolivia	Boliwia
+bruxelles	Bruksela
+bucarest	Bukareszt
+budapest	Budapeszt
+bulgaria	Bułgaria
+california	Kalifornia
+camerun	Kamerun
+caucaso	Kaukaz
+ceylon	Cejlon
+confucio	Konfucjusz
+congo	Kongo
+corea	Korea
+corsica	Korsyka
+cracovia	Kraków
+creta	Kreta
+crimea	Krym
+cuba	Kuba
+danubio	Dunaj
+dnepr	Dniepr
+elba	Łaba
+elba	Elba
+eos	Eos
+eros	Eros
+esopo	Ezop
+eurasia	Eurazja
+finlandia	Finlandia
+friburgo	Fryburg
+galilea	Galilea
+galles	Walia
+gange	Ganges
+germania	Niemcy
+groenlandia	Grenlandia
+helsinki	Helsinki
+india	Indie
+indonesia	Indonezja
+iran	Iran
+iraq	Irak
+irlanda	Irlandia
+islanda	Islandia
+istanbul	Stambuł
+italia	Włochy
+jugoslavia	Jugosławia
+kosovo	Kosowo
+labrador	Labrador
+lettonia	Łotwa
+lituania	Litwa
+lorena	Lotaryngia
+macedonia	Macedonia
+manica	Kanał La Manche
+marocco	Maroko
+marte	Mars
+mediterraneo	Morze Śródziemne
+mercurio	Merkury
+mesopotamia	Mezopotamia
+messia	Mesjasz
+micronesia	Mikronezja
+montenegro	Czarnogóra
+moravia	Morawy
+nigeria	Nigeria
+nilo	Nil
+normandia	Normandia
+nubia	Nubia
+oceania	Oceania
+pacifico	Pacyfik
+palestina	Palestyna
+paraguay	Paragwaj
+parma	Parma
+persia	Persja
+polonia	Polska
+ravenna	Rawenna
+roma	Rzym
+romania	Rumunia
+russia	Rosja
+sahara	Sahara
+samaria	Samaria
+saturno	Saturn
+scandinavia	Skandynawia
+senegal	Senegal
+serbia	Serbia
+seychelles	Seszele
+siberia	Syberia
+sicilia	Sycylia
+singapore	Singapur
+sion	Syjon
+sion	Syjon
+slovenia	Słowenia
+sodoma	Sodoma
+sudan	Sudan
+sumatra	Sumatra
+transilvania	Siedmiogród
+troia	Troja
+turchia	Turcja
+urano	Uranos
+vaticano	Watykan
+venere	Wenera
+venezuela	Wenezuela
+vesuvio	Wezuwiusz
+vienna	Wiedeń
+vietnam	Wietnam
+vladivostok	Władywostok
+volga	Wołga
+gallia	Galia
+praga	Praga
+afganistan	Afganistan
+etiopia	Etiopia
+haiti	Haiti
+georgia	Gruzja
+lipsia	Lipsk
+aquitania	Akwitania
+pasquetta	Poniedziałek Wielkanocny
+pasqua	Pascha
+barbados	Barbados
+benin	Benin
+bermuda	Bermudy
+bhutan	Bhutan
+kiev	Kijów
+wikipedia	Wikipedia
+moldovia	Mołdawia
+malta	Malta
+monaco	Monako
+adriatico	Adriatyk
+angelus	Anioł Pański
+anglo	Angl
+anguilla	Anguilla
+bahrain	Bahrajn
+bosnia	Bośnia
+campania	Kampania
+chicago	Chicago
+colonia	Kolonia
+francia	Francja
+grecia	Grecja
+libano	Liban
+lima	Lima
+mensa	Góra Stołowa
+mosca	Moskwa
+oder	Odra
+orange	Oranje
+po	Pad
+pomerania	Pomorze
+rabat	Rabat
+remo	Remigiusz
+ruhr	Ruhra
+seul	Seul
+siam	Syjam
+tantalo	Tantal
+varsavia	Warszawa
+belgio	Belgia
+olanda	Holandia
+reykjavík	Reykjavík
+bielorussia	Białoruś
+croazia	Chorwacja
+cipro	Cypr
+danimarca	Dania
+liechtenstein	Liechtenstein
+lussemburgo	Luksemburg
+lussemburgo	Luksemburg
+moldavia	Mołdawia
+ungheria	Węgry
+ucraina	Ukraina
+portogallo	Portugalia
+svizzera	Szwajcaria
+svezia	Szwecja
+spagna	Hiszpania
+slovacchia	Słowacja
+tanzania	Tanzania
+pakistan	Pakistan
+nepal	Nepal
+turkmenistan	Turkmenistan
+kenia	Kenia
+tailandia	zob. Thailandia
+thailandia	Tajlandia
+kirghizistan	Kirgistan
+kenya	Kenia
+giove	Jowisz
+nettuno	Neptun
+plutone	Pluton
+nairobi	Nairobi
+remigio	Remigiusz
+chiesa	Kościół katolicki
+firenze	Florencja
+copenaghen	Kopenhaga
+abkhazia	Abchazja
+aruba	Aruba
+bangladesh	Bangladesz
+belize	Belize
+botswana	Botswana
+brunei	Brunei
+burundi	Burundi
+colombia	Kolumbia
+ecuador	Ekwador
+eritrea	Erytrea
+gabon	Gabon
+ghana	Ghana
+grenada	Grenada
+guatemala	Gwatemala
+guernsey	Guernsey
+guinea	Gwinea
+guinea-bissau	Gwinea Bissau
+guyana	Gujana
+honduras	Honduras
+jersey	Jersey
+kazakhstan	Kazachstan
+kiribati	Kiribati
+kuwait	Kuwejt
+laos	Laos
+lesotho	Lesotho
+liberia	Liberia
+madagascar	Madagaskar
+malawi	Malawi
+mauritania	Mauretania
+mauritius	Mauritius
+mongolia	Mongolia
+nagorno-karabakh	Górski Karabach
+namibia	Namibia
+nauru	Nauru
+nicaragua	Nikaragua
+niger	Niger
+oman	Oman
+palau	Palau
+panama	Panama
+panama	Panama
+transnistria	Naddniestrze
+qatar	Katar
+samoa	Samoa
+somalia	Somalia
+suriname	Surinam
+swaziland	Suazi
+togo	Togo
+tonga	Tonga
+tunisia	Tunezja
+tuvalu	Tuvalu
+uganda	Uganda
+uruguay	Urugwaj
+uzbekistan	Uzbekistan
+vanuatu	Vanuatu
+yemen	Jemen
+zambia	Zambia
+zimbabwe	Zimbabwe
+ebro	Ebro
+orinoco	Orinoko
+natale	Boże Narodzenie
+eris	Eris
+eris	Eris
+deimos	Deimos
+libia	Libia
+madrid	Madryt
+andalusia	Andaluzja
+washington	Waszyngton
+washington	Waszyngton
+ceuta	Ceuta
+pisa	Piza
+melilla	Melilla
+assisi	Asyż
+bratislava	Bratysława
+vilnius	Wilno
+gambia	Gambia
+mali	Mali
+lidia	Lidia
+lombardia	Lombardia
+luanda	Luanda
+abruzzo	Abruzja
+torino	Turyn
+lazio	Lacjum
+piemonte	Piemont
+milano	Mediolan
+umbria	Umbria
+sardegna	Sardynia
+kabul	Kabul
+kabul	Kabul
+tirana	Tirana
+baku	Baku
+manila	Manila
+tbilisi	Tbilisi
+bagdad	Bagdad
+teheran	Teheran
+ottawa	Ottawa
+ottawa	Ottawa
+astana	Astana
+managua	Managua
+oslo	Oslo
+islamabad	Islamabad
+bangkok	Bangkok
+ankara	Ankara
+apollo	Apollo
+messico	Meksyk
+andromeda	Andromeda
+diana	Diana
+bologna	Bolonia
+emilia-romagna	Emilia-Romania
+vistola	Wisła
+kinshasa	Kinszasa
+banjul	Bandżul
+antananarivo	Antananarywa
+vientiane	Wientian
+myanmar	Myanmar
+sarajevo	Sarajewo
+giappone	Japonia
+gdynia	Gdynia
+zagabria	Zagrzeb
+palermo	Palermo
+dio	Bóg
+venezia	Wenecja
+gondwana	Gondwana
+panamá	Panama
+panamá	Panama
+tibet	Tybet
+genova	Genua
+luna	Księżyc
+egitto	Egipt
+scorpione	Skorpion
+leone	Lew
+sagittario	Strzelec
+toro	Byk
+ariete	Baran
+cecoslovacchia	Czechosłowacja
+zurigo	Zurych
+cina	Chiny
+napoli	Neapol
+alsazia	Alzacja
+azzorre	Azory
+brasile	Brazylia
+scozia	Szkocja
+toscana	Toskania
+figi	Fidżi
+lisbona	Lizbona
+alvernia	Owernia
+aragona	Aragonia
+mosa	Moza
+paleoproterozoico	paleoproterozoik
+israele	Izrael
+urali	Ural
+paleogene	paleogen
+siviglia	Sewilla
+inghilterra	Anglia
+catalogna	Katalonia
+liguria	Liguria
+calabria	Kalabria
+grigioni	Gryzonia
+rebecca	Rebeka
+giuda	Judasz
+triassico	trias
+tagikistan	Tadżykistan
+tolosa	Tuluza
+matilde	Matylda
+sole	Słońce
+tirolo	Tyrol
+taiwan	Tajwan
+modena	Modena
+pirenei	Pireneje
+nizza	Nicea
+osaka	Osaka
+madera	Madera
+ognissanti	Wszystkich Świętych
+gaza	Gaza
+medusa	Meduza
+acquario	zob. Aquario
+sibilla	Sybilla
+ercole	Herkules
+adria	Adria
+siria	Syria
+danzica	Gdańsk
+breslavia	Wrocław
+vilna	Wilno
+stettino	Szczecin
+londra	Londyn
+zaire	Zair
+zambezi	zob. Zambesi
+leopoli	Lwów
+anversa	Antwerpia
+cristo	Chrystus
+zambesi	Zambezi
+tamigi	Tamiza
+talmud	Talmud
+bahamas	Bahamy
+tokyo	Tokio
+beirut	Bejrut
+doha	Doha
+belfast	Belfast
+bonn	Bonn
+hawaii	Hawaje
+hindukush	Hindukusz
+himalaya	Himalaje
+pamir	Pamir
+borneo	Borneo
+ptah	Ptah
+dominicana	Dominikana
+martinica	Martynika
+algeri	Algier
+idaho	Idaho
+saul	Saul
+amos	Amos
+bordeaux	Bordeaux
+trieste	Triest
+bretagna	Bretania
+budda	Budda
+maghreb	Maghreb
+azerbaigian	Azerbejdżan
+aurora	Aurora
+bessarabia	Besarabia
+bruges	Brugia
+deianira	Dejanira
+yalta	Jałta
+masovia	Mazowsze
+masuria	Mazury
+messina	Mesyna
+mesoamerica	Mezoameryka
+minorca	Minorka
+cappadocia	Kapadocja
+cassandra	Kasandra
+catania	Katania
+kathmandu	Katmandu
+kyoto	Kioto
+occitania	Oksytania
+tatra	Tatry
+lucerna	Lucerna
+acadia	Akadia
+podlachia	Podlasie
+anatolio	Anatol
+pavia	Pawia
+penelope	Penelopa
+pinocchio	Pinokio
+pisidia	Pizydia
+romagna	Romania
+shanghai	Szanghaj
+taranto	Tarent
+texas	Teksas
+tenerife	Teneryfa
+trento	Trydent
+tripolitania	Trypolitania
+alghero	Alghero
+como	miasto we Włoszech
+como	jezioro we Włoszech
+demetrio	Demetriusz
+cagliari	Cagliari
+baviera	Bawaria
+boston	Boston
+guayana	Gujana
+etruria	Etruria
+neanderthal	Neandertal
+neandertal	Neandertal
+sydney	Sydney
+auriga	Woźnica
+ruanda	Rwanda
+belgrado	Belgrad
+gesù	Jezus
+giacarta	Dżakarta
+giava	Jawa
+filippine	Filipiny
+tigri	Tygrys
+giamaica	Jamajka
+siracusa	Syrakuzy
+marsiglia	Marsylia
+atena	Atena
+bibbia	Biblia
+yahweh	Jahwe
+corano	Koran
+berlino	Berlin
+cile	Chile
+perù	Peru
+cechia	Czechy
+cremona	Cremona
+bergamo	Bergamo
+pokémon	pokémon
+kashmir	Kaszmir
+terra	Ziemia
+alpi	Alpy
+amburgo	Hamburg
+ancona	Ankona
+ande	Andy
+antartide	Antarktyda
+antartica	Antarktyka
+appennini	Apeniny
+arctica	Arktyka
+ardenne	Ardeny
+arno	Arno
+atene	Ateny
+atlantico	Atlantyk
+avignone	Awinion
+balcani	Bałkany
+barcellona	Barcelona
+basilea	Bazylea
+berna	Berno
+birmania	Birma
+bogotà	Bogota
+borgogna	Burgundia
+bosforo	Bosfor
+brandeburgo	Brandenburgia
+brindisi	Brindisi
+cambogia	Kambodża
+carpazi	Karpaty
+casciubia	Kaszuby
+ciad	Czad
+varmia	Warmia
+verona	Werona
+volinia	Wołyń
+tago	Tag
+tanganica	Tanganika
+turingia	Turyngia
+tunisi	Tunis
+cuiavia	Kujawy
+costantinopoli	Konstantynopol
+damasco	Damaszek
+dresda	Drezno
+dublino	Dublin
+eufrate	Eufrat
+gerusalemme	Jerozolima
+gibilterra	Gibraltar
+ginevra	Genewa
+guadalupa	Gwadelupa
+guiana	Gujana
+jesse	Jesse
+himalaia	Himalaje
+itaca	Itaka
+lapponia	Laponia
+leningrado	Leningrad
+lilla	Lille
+lione	Lyon
+lubiana	Lublana
+lublino	Lublin
+lusazia	Łużyce
+magdeburgo	Magdeburg
+meno	Men
+mogadiscio	Mogadiszu
+mozambico	Mozambik
+padova	Padwa
+parigi	Paryż
+bosnia-erzegovina	Bośnia i Hercegowina
+perugia	Perugia
+pechino	Pekin
+pietroburgo	Petersburg
+siena	Siena
+siena	siena
+udine	Udine
+reno	Ren
+salonicco	Saloniki
+sassonia	Saksonia
+senna	Sekwana
+stoccolma	Sztokholm
+strasburgo	Strasburg
+sudafrica	Republika Południowej Afryki
+sudeti	Sudety
+treviso	Treviso
+rovigo	Rovigo
+augusto	August
+lei	zob. lei
+teneriffa	Teneryfa
+bahrein	Bahrajn
+narciso	Narcyz
+gibuti	Dżibuti
+gibuti	Dżibuti
+giordania	Jordania
+olimpo	Olimp
+olimpia	Olimpia
+paraguai	Paragwaj
+babilonia	Babilonia
+cantabria	Kantabria
+benevento	Benewent
+aleppo	Aleppo
+comore	Komory
+maldive	Malediwy
+kazakistan	Kazachstan
+magreb	zob. Maghreb
+giordano	Jordan
+veneto	Wenecja Euganejska
+puglia	Apulia
+marche	Marche
+basilicata	Basilicata
+molise	Molise
+wikizionario	Wikisłownik
+mosè	Mojżesz
+gorizia	Gorycja
+omero	Homer
+maometto	Mahomet
+dioniso	Dionizos
+bermude	Bermudy
+adone	Adonis
+achille	Achilles
+caino	Kain
+orione	Orion
+gemelli	Bliźnięta
+cancro	Rak
+vergine	Panna
+bilancia	Waga
+capricorno	Koziorożec
+pesci	Ryby
+aquileia	Akwileja
+abcasia	Abchazja
+abkhasia	Abchazja
+erzegovina	Hercegowina
+cecenia	Czeczenia
+bari	Bari
+aosta	Aosta
+colosseo	Koloseum
+numidia	Numidia
+caledonia	Kaledonia
+amazzonia	Amazonia
+eurolandia	Euroland
+atlante	Atlas
+efesto	Hefajstos
+vulcano	Wulkan
+poseidone	Posejdon
+iadi	Hiady
+artemide	Artemida
+estia	Hestia
+carbonifero	karbon
+platone	Platon
+kümmel	kminkówka
+paride	Parys
+pentateuco	Pięcioksiąg
+pentecoste	Zesłanie Ducha Świętego
+krapfen	pączek
+novecento	dwudziesty wiek
+ottocento	dziewiętnasty wiek
+altare	Ołtarz
+boote	Wolarz
+cassiopea	Kasjopea
+unicorno	Jednorożec
+aquila	Orzeł
+lucertola	Jaszczurka
+regolo	Węgielnica
+idra	Hydra
+balena	Wieloryb
+lupo	Wilk
+tucano	Tukan
+dorado	Złota Ryba
+gru	Żuraw
+cigno	Łabędź
+eridano	Erydan
+ofiuco	Wężownik
+poppa	Rufa
+scultore	Rzeźbiarz
+cratere	Puchar
+cefeo	Cefeusz
+compasso	Cyrkiel
+delfino	Delfin
+dragone	Smok
+fenice	Feniks
+giraffa	Żyrafa
+bulino	Rylec
+lepre	Zając
+indiano	Indianin
+camaleonte	Kameleon
+mitteleuropa	Europa Środkowa
+fornace	Piec
+triangolo	Trójkąt
+scudo	Tarcza
+sestante	Sekstant
+carena	Kil
+corvo	Kruk
+lince	Ryś
+microscopio	Mikroskop
+serpente	Wąż
+pavone	Paw
+reticolo	Sieć
+perseo	Perseusz
+pegaso	Pegaz
+centauro	Centaur
+telescopio	Luneta
+freccia	Strzała
+orologio	Zegar
+ottante	Oktant
+pittore	Malarz
+volpetta	Lisek
+lira	Lutnia
+bussola	Kompas
+cavallino	Źrebię
+vela	Żagiel
+aquario	Wodnik
+abissinia	Abisynia
+morfeo	Morfeusz
+nazaret	Nazaret
+solone	Solon
+porto	Porto
+lucca	Lukka
+laconia	Lakonia
+malesia	Malezja
+shikoku	Sikoku
+medioevo	zob. medioevo
+jalta	Jałta
+papuasia	Papua-Nowa Gwinea
+portorico	Puerto Rico
+seicelle	Seszele
+campidoglio	Kapitol
+nordamerica	Ameryka Północna
+adaloaldo	Adaloald
+ascanio	Askaniusz
+leida	Lejda
+godzilla	Godzilla
+krapfen	pączek
+alessandria	Alessandria
+aquisgrana	Akwizgran
+polinesia	Polinezja
+era	Hera
+mostar	Mostar
+etolia	Etolia
+euridice	Eurydyka
+seicento	siedemnasty wiek
+settecento	osiemnasty wiek
+cinquecento	szesnasty wiek
+quattrocento	piętnasty wiek
+trecento	czternasty wiek
+duecento	trzynasty wiek
+camerata	Camerata
+fiesole	Fiesole
+sperlonga	Sperlonga
+vicenza	Vicenza
+tonia	Tonia
+lecco	Lecco
+cartagine	Kartagina
+baltica	Bałtyka
+tasmania	Tasmania
+termopili	Termopile
+gargantua	Gargantua
+crono	Kronos
+bisanzio	Bizancjum
+krasnojarsk	Krasnojarsk
+sudamerica	Ameryka Południowa
+mowgli	Mowgli
+andromache	Andromacha
+charkiv	Charków
+nefertiti	Nefertiti
+sisifo	Syzyf
+viracocha	Wirakocza
+nordafrica	Afryka Północna
+ostia	Ostia
+tersicore	Terpsychora
+beschidi	Beskidy
+savoia	Sabaudia
+pittsburgh	Pittsburgh
+piccardia	Pikardia
+madonna	Madonna
+boiana	Buna
+aoos	Wjosa
+okavango	Okawango
+nipro	Dniepr
+frigia	Frygia
+gorgonia	Gorgonia
+cafarnao	Kafarnaum
+slesia	Śląsk
+canossa	Kanossa
+sempronio	Iksiński
+gioconda	Gioconda
+loira	Loara
+alasca	Alaska
+appalachi	Appalachy
+artide	Arktyka
+asclepio	Asklepios
+atlantide	Atlantyda
+austria-ungheria	Austro-Węgry
+ugarit	Ugarit
+tirza	Tirsa
+qoelet	Kohelet
+salomone	Salomon
+licaonia	Likaonia
+giosafat	Jozafat
+noè	Noe
+betlemme	Betlejem
+betzaeta	Betesda
+hermon	Hermon
+atina	Atina
+samarcanda	Samarkanda
+tabor	Tabor
+pasquale	Paschalis
+laterano	Lateran
+senese	Sieneńczyk
+senese	Sienenka
+indocina	Indochiny
+barabba	Barabasz
+haifa	Hajfa
+malachia	Malachiasz
+ecclesiaste	Eklezjastes
+golgota	Golgota
+calvario	Kalwaria
+neemia	Nehemiasz
+aventino	Awentyn
+quirinale	Kwirynał
+bruto	Brutus
+palatino	Palatyn
+shekhinah	Szechina
+sofonia	Sofoniasz
+pasquetta	Poniedziałek Wielkanocny
+pasqua	Pascha
+medjugorje	Medziugorie
+međugorje	Medziugorie
+sphynx	sfinks
+sfinge	Sfinks
+giza	Giza
+capua	Kapua
+toledo	Toledo
+chronos	Chronos
+kairos	Kairos
+faenza	Faenza
+loreto	Loreto
+macerata	Macerata
+giobbe	Hiob
+zaccheo	Zacheusz
+sichem	Moab
+crusca	Accademia della Crusca
+gerico	Jerycho
+gomorra	Gomora
+sanremo	San Remo
+galapagos	Galapagos
+galápagos	Galapagos
+giudea	Judea
+tiberiade	Tyberiada
+magdala	Magdala
+dolomiti	Dolomity
+galazia	Galacja
+bajkal	Bajkał
+iside	Izyda
+antiochia	Antiochia
+oronte	Orontes
+tevere	Tyber
+daghestan	Dagestan
+calcedone	Chalcedon
+bitinia	Bitynia
+ponzio	Poncjusz
+capodanno	zob. capodanno
+hubal	Hubal
+ypres	Ieper
+carniola	Kraina
+loro	Państwo
+famagosta	Famagusta
+esquilino	Eskwilin
+kaliningrad	Królewiec
+ratisbona	Ratyzbona
+basan	Baszan
+cenerentola	Kopciuszek
+manciuria	Mandżuria
+valacchia	Hospodarstwo Wołoskie
+oltenia	Oltenia
+muntenia	Muntenia
+castiglia	Kastylia
+baschiria	Baszkiria
+tutankhamon	Tutanchamon
+ai	Aj
+ovidio	Owidiusz
+ramesse	Ramzes
+cossovo	Kosowo
+haratin	Haratyn
+debora	Debora
+carmelo	Karmel
+bucefalo	Bucefał
+tobruk	Tobruk
+tobruch	Tobruk
+montecassino	Monte Cassino
+tebe	Teby
+cirenaica	Cyrenajka
+yamato	Japonia
+salerno	Salerno
+bengala	Bengal
+enisejsk	Jenisejsk
+corinto	Korynt
+golan	Golan
+camorropoli	afera kamorystyczna
+meclemburgo	Meklemburgia
+ippona	Hippona
+perusia	Peruzja
+etna	Etna
+cesarea	Cezarea
+macabeo	Machabeusz
+sira	Syrach
+siracide	Syracydes
+istria	Istria
+rojava	Rożawa
+geova	Jehowa
+narenta	Neretwa
+ferrara	Ferrara
+limassol	Limassol
+goa	Goa
+cirene	Cyrena
+signore	Pan
+corinzia	Koryntia
+meandro	Meander
+magnesia	Magnezja
+seleucia	Seleucja
+lugano	Lugano
+viareggio	Viareggio
+ascalona	Aszkelon
+barberia	Berberia
+homs	Hims
+mascarene	Maskareny
+mileto	Milet
+topolino	Myszka Miki
+sidone	Sydon
+macarsca	Makarska
+bolzano	Bolzano
+cavalese	Cavalese
+talmud	Talmud
+cefa	Kefas
+partia	Partia
+trinità	Trójca Święta
+devoniano	dewon
+cambriano	kambr
+ordoviciano	ordowik
+siluriano	sylur
+carbonifero	karbon
+permiano	perm
+soletta	Solura
+filone	Filon
+andro	Andros
+carinzia	Karyntia
+amalfi	Amalfi
+lubenzio	Lubencjusz
+gianicolo	Janikulum
+acri	Akka
+losanna	Lozanna
+ghesur	Geszur
+livorno	Livorno
+friborgo	Fryburg
+pietrino	Piotruś
+piacenza	Piacenza
+terranova	Nowa Fundlandia
+glarona	Glarus
+brescia	Brescia
+prato	Prato
+foggia	Foggia
+rimini	Rimini
+carrara	Carrara
+mantova	Mantua
+arezzo	Arezzo
+cosenza	Cosenza
+chioggia	Chioggia
+lecce	Lecce
+viterbo	Viterbo
+spoleto	Spoleto
+sorrento	Sorrento
+potenza	Potenza
+monza	Monza
+aquino	Akwin
+catanzaro	Catanzaro
+urbino	Urbino
+otranto	Otranto
+rapallo	Rapallo
+piombino	Piombino
+tivoli	Tivoli
+pesaro	Pesaro
+vercelli	Vercelli
+marsala	Marsala
+epiro	Epir
+l’aquila	L’Aquila
+pompei	Pompeje
+norcia	Nursja
+agrigento	Agrigento
+carmagnola	Carmagnola
+orvieto	Orvieto
+gaeta	Gaeta
+terni	Terni
+giura	Jura
+frosinone	Frosinone
+rieti	Rieti
+lodi	Lodi
+coca-cola	coca-cola
+giona	Jonasz
+abdia	Abdiasz
+baruc	Baruch
+nabucodonosor	Nabuchodonozor
+samotracia	Samotraka
+nike	Nike
+plutarco	Plutarch
+sciaffusa	Szafuza
+groninga	Groningen
+tiro	Tyr
+acaia	Achaja
+beozia	Beocja
+agamennone	Agamemnon
+saulo	Szaweł
+rodi	Rodos
+orfeo	Orfeusz
+kursaal	kursal
+quirino	Kwiryn
+lutero	Luter
+edimburgo	Edynburg
+canarie	Kanary
+luperco	Luperkus
+agiaria	Adżaria
+ippocrate	Hipokrates
+caienna	Kajenna
+mascate	Maskat
+saragozza	Saragossa
+kilimangiaro	Kilimandżaro
+cana	Kana Galilejska
+gosen	Goszen
+goscen	Goszen
+gargamella	Gargamel
+birba	Klakier
+ebisu	Ebisu
+nazianzo	Nazjanz
+iesse	Jesse
+melusina	Meluzyna
+assunzione	Wniebowzięcie
+oloferne	Holofernes
+odisseo	Odyseusz
+ulisse	Ulisses
+cedron	Cedron
+isauria	Izauria
+antifa	Antifa
+battria	Baktria
+battriana	Baktria
+bactriana	Baktria
+pentesilea	Pentezylea
+provenza	Prowansja
+baleari	Baleary
+aquinate	Akwinata
+cilicia	Cylicja
+saladino	Saladyn
+caifa	Kajfasz
+caifa	Hajfa
+efeso	Efez
+sem	Sem
+iafet	Jafet
+belucistan	Beludżystan
+jalalabad	Dżalalabad
+khorasan	Chorasan
+pashtunistan	Pasztunistan
+pakhtunistan	Pasztunistan
+volínia	Wołyń
+ruwenzori	Ruwenzori
+laramidia	Laramidia
+gagauzia	Gagauzja
+foligno	Foligno
+conisberga	Królewiec
+paraclito	Paraklet
+iride	Iryda
+michelangelo	Michał Anioł
+dnestr	Dniestr
+enisej	Jenisej
+vosgi	Wogezy
+mardocheo	Mardocheusz
+paropamiso	Hindukusz
+parapamiso	Hindukusz
+alpinus	alpejski
+maccabeo	Machabeusz
+maccabeo	Machabeusz
+asmoneo	Hasmoneusz
+asmoneo	Hasmoneusz
+mefistofele	Mefistofeles
+mefistofele	Mefistofeles
+larnaca	Larnaka
+redentore	w chrześcijaństwie Odkupiciel
+nicomedia	Nikomedia
+vandea	Wandea
+pirro	Pyrrus
+alicarnasso	Halikarnas
+eleno	Helenos
+getsemani	Getsemani
+eilat	Ejlat
+asdod	Aszdod
+temi	Temida
+carmenta	Karmenta
+ezechia	Ezechiasz
+serenissima	Republika Wenecka
+fortuna	Fortuna
+lucifero	Lucyfer
+brusselle	Bruksela
+palio	Palio
+l'aquila	L'Aquila
+epifania	Objawienie Pańskie
 giaffa	Jafa
 biscaglia	Biskaja
-gargolla	rzygacz

@@ -48,11 +48,23 @@ internal var trySwitching = false
 /** Switches the write tab to a language as its row does (translating the box). */
 internal var tryGo: ((String) -> Unit)? = null
 
+/** The script the keyboard switched to (its key next to 🌐): the box and the
+ *  alphabet row follow; set while the write tab is built. */
+internal var tryScriptFollow: ((Script.Mode) -> Unit)? = null
+
+/** The word-by-word translation in the write box (Wiktionary). On; Interslavic
+ *  stays out of it until its dictionary's licence is settled (owner 261127).
+ *  Off: the language row holds the keyboard's languages only and switches
+ *  the keyboard, the text stays as typed; an alphabet the language has not
+ *  goes to Interslavic. */
+internal const val TRY_TRANSLATE = true
+
 /** Builds the try tab into [root]. */
 internal fun SetupActivity.buildTryTab(root: LinearLayout) {
     // Callbacks of the screen built before this one must not fire.
     tryGo = null
     tryFollow = null
+    tryScriptFollow = null
     // A box to try the keyboard right here (iOS `try_head`): it tells "the
     // keyboard is broken" from "it is not switched on", and is a place to
     // write without opening another app.
@@ -87,14 +99,16 @@ internal fun SetupActivity.buildTryTab(root: LinearLayout) {
             android.text.InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
     })
     // Attribution the licence asks for, under the box the translation lands in.
-    if (glossReach(Lang.current(this)).isNotEmpty()) root.addView(TextView(this).apply {
+    if (TRY_TRANSLATE && glossReach(Lang.current(this)).isNotEmpty()) root.addView(TextView(this).apply {
         text = "Wiktionary · CC BY-SA 4.0"
         textSize = 11f
         setTextColor(cGloss)
         setPadding(0, (2 * resources.displayMetrics.density).toInt(), 0, 0)
     })
 
-    addLearnChips(mirrors, tryBox)
+    // No word chips above the box any more: they repeated the text in it
+    // (owner 261127); words to learn are added in 🎓. Kept for later.
+    if (false) addLearnChips(mirrors, tryBox)
     addScriptRow(root, tryBox, root.indexOfChild(frame))
     // A language switched from this screen rebuilds it; the text typed so
     // far comes back, with the keyboard up.
@@ -148,9 +162,15 @@ private fun SetupActivity.fromGlossForm(s: String, lang: String): String {
 internal fun SetupActivity.translateBox(text: String, from: String, to: String): CharSequence {
     val src = toGlossForm(text, from)
     if (to !in glossReach(from)) {
-        // No gloss (Interslavic): the text stays, in the new language's alphabet.
+        // No gloss (Interslavic): the words stay as typed. Only a code of
+        // letters (Latin, Morse, runes) follows the new language; Cyrillic or
+        // Glagolitic would spell another language's words in it (owner 261127:
+        // English came out in Cyrillic under ISV).
         tryPairs = emptyMap(); tryPairsLang = null
-        return fromGlossForm(Script.back(src, glossForm(from), from), to)
+        val latin = boxLatin(text, Script.chosen(this, from), from)
+        val m = Script.chosen(this, to)
+        return if (m == Script.Mode.LATIN || m == Script.Mode.MORSE || Script.runeRow(m) != null)
+            Script.convert(latin, m, to) else latin
     }
     val tPl = if (from == Lang.PL || to != Lang.PL) Gloss.table(this, Lang.PL) else emptyMap()
     val tFrom = if (from != Lang.PL) Gloss.table(this, from) else tPl
@@ -213,6 +233,14 @@ internal fun SetupActivity.narrow(b: Button) {
 }
 
 
+/** Box text written in [m] of [lang] back to Latin - unless it is not in [m]
+ *  at all (a kept text in Latin under a Morse or rune language). */
+private fun boxLatin(s: String, m: Script.Mode, lang: String): String = when {
+    m == Script.Mode.MORSE && s.any { it.isLetter() } -> s
+    Script.runeRow(m) != null && s.none { it in 'ᚠ'..'᛿' } -> s
+    else -> Script.back(s, m, lang)
+}
+
 internal fun SetupActivity.addLanguageRow(root: LinearLayout, box: android.widget.EditText) {
     val d = resources.displayMetrics.density
     // Alphabetical, as every list of languages (owner 261118): the keyboard's
@@ -223,7 +251,8 @@ internal fun SetupActivity.addLanguageRow(root: LinearLayout, box: android.widge
     // project's own language), then the keyboard's languages and the ones
     // the text can only be translated into, all alphabetical together
     // (owner 261121); the second kind is paler.
-    val all = (on + glossReach(cur)).distinct().sortedWith(compareBy({ it != Lang.ISV }, { it }))
+    val all = (on + (if (TRY_TRANSLATE) glossReach(cur) else emptyList())).distinct()
+        .sortedWith(compareBy({ it != Lang.ISV }, { it }))
     if (all.size < 2) return
     val chips = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
@@ -245,7 +274,22 @@ internal fun SetupActivity.addLanguageRow(root: LinearLayout, box: android.widge
             // the original comes back, not a translation of a translation.
             val turn = tryTurn
             val result: CharSequence =
-                if (turn != null && turn.to == from && turn.from == l && turn.after == typed) {
+                // No translation: the text stays as typed, never put into
+                // another language's alphabet (words are not letters).
+                if (!TRY_TRANSLATE) {
+                    // ...but the letters follow the new language's alphabet
+                    // when it is a code of letters (Latin, Morse, runes: owner
+                    // 261127, PL Glagolitic -> EN Morse converted nothing).
+                    // Cyrillic or Glagolitic for another language's words
+                    // would misspell them: those stay in Latin.
+                    val newM = Script.chosen(this@addLanguageRow, l)
+                    val latin = boxLatin(typed, Script.chosen(this@addLanguageRow, from), from)
+                    if (typed.isBlank()) ""
+                    else if (newM == Script.Mode.LATIN || newM == Script.Mode.MORSE || Script.runeRow(newM) != null)
+                        Script.convert(latin, newM, l)
+                    else latin
+                }
+                else if (turn != null && turn.to == from && turn.from == l && turn.after == typed) {
                     // ...in the alphabet chosen for it now (Glagolitic picked in
                     // the row below brings Polish back in Glagolitic).
                     val now = Script.chosen(this@addLanguageRow, l)
@@ -253,7 +297,7 @@ internal fun SetupActivity.addLanguageRow(root: LinearLayout, box: android.widge
                     else Script.convert(Script.back(turn.before.toString(), turn.script, l), now, l)
                 }
                 else if (typed.isBlank()) "" else translateBox(typed, from, l)
-            tryTurn = if (typed.isBlank()) null
+            tryTurn = if (typed.isBlank() || !TRY_TRANSLATE) null
                 else TryTurn(from, android.text.SpannableString(box.text ?: typed), l, result.toString(),
                     Script.chosen(this@addLanguageRow, from))
             // The box is always in the keyboard's language: a translation
@@ -331,6 +375,17 @@ internal fun SetupActivity.addScriptRow(root: LinearLayout, box: android.widget.
     val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
     val buttons = ArrayList<Button>()
     fun shade(m: Script.Mode, on: Script.Mode) = if (m == on) 1f else if (m in own) 0.55f else 0.3f
+    // The script the box is written in now; the text is rewritten from it.
+    var shown = Script.chosen(this, lang)
+    fun rewrite(to: Script.Mode) {
+        if (to == shown) return
+        val latin = boxLatin(box.text?.toString().orEmpty(), shown, lang)
+        shown = to
+        box.setText(Script.convert(latin, to, lang))
+        box.setSelection(box.text?.length ?: 0)
+        for ((i, b) in buttons.withIndex()) b.alpha = shade(modes[i], to)
+    }
+    tryScriptFollow = { rewrite(it) }
     for (m in modes) buttons.add(Button(this).apply {
         text = Script.name(m)
         isAllCaps = false
@@ -339,17 +394,14 @@ internal fun SetupActivity.addScriptRow(root: LinearLayout, box: android.widget.
         alpha = shade(m, Script.chosen(this@addScriptRow, lang))
         setOnClickListener {
             if (m !in own) { otherScript(m, lang); return@setOnClickListener }
-            val old = Script.chosen(this@addScriptRow, lang)
+            val old = shown
             // Tapping the alphabet already on turns it off: back to the
             // language's own script, as a switch is expected to behave.
             val to = if (m == old) own.first() else m
             if (to == old) return@setOnClickListener
-            val latin = Script.back(box.text?.toString().orEmpty(), old, lang)
+            rewrite(to)
             Script.setMode(this@addScriptRow, to)
-            box.setText(Script.convert(latin, to, lang))
-            box.setSelection(box.text?.length ?: 0)
             ImeService.running?.rebuildView(false)
-            for ((i, b) in buttons.withIndex()) b.alpha = shade(modes[i], to)
         }
         row.addView(this)
     })
@@ -374,7 +426,15 @@ private fun SetupActivity.otherScript(m: Script.Mode, lang: String) {
     // Interslavic and Cyrillic) before one written only in it (Belarusian):
     // the text changes alphabet, not people.
     fun added(l: String) = Script.offered(l).first() != m
-    val to = on.firstOrNull { it in has && added(it) && it in reach }
+    // Without translation: Interslavic, the safe place for an alphabet when
+    // nothing says where else (owner 261127), the runes' Norwegian otherwise.
+    val to = if (!TRY_TRANSLATE) (if (Lang.ISV in has) Lang.ISV else on.firstOrNull { it in has } ?: has.sorted().first())
+        else on.firstOrNull { it in has && added(it) && it in reach }
+        // With text in the box, a language it can be translated into: the
+        // keyboard's, else Bulgarian for Cyrillic (owner 261127: English +
+        // АБВ should change the text, not land untranslated on Interslavic).
+        ?: (if (tryText().isBlank()) null else on.firstOrNull { it in has && it in reach }
+            ?: Lang.BG.takeIf { m == Script.Mode.CYRILLIC && it in has && it in reach })
         ?: on.firstOrNull { it in has && added(it) }
         ?: on.firstOrNull { it in has }
         ?: (if (Lang.ISV in has) Lang.ISV else has.sorted().first())
@@ -412,8 +472,14 @@ internal fun SetupActivity.addLearnChips(root: LinearLayout, box: android.widget
     fun update() {
         chips.removeAllViews()
         var typed = box.text?.toString().orEmpty()
-        if (Script.chosen(this, lang) == Script.Mode.MORSE) typed = Morse.decode(typed, lang)
-        Script.runeRow(Script.chosen(this, lang))?.let { typed = Runes.decodeLossy(typed, it) }
+        // Decoded only when the text IS in that script: a language switched
+        // with the text kept leaves Latin in the box of a Morse language, and
+        // "jak sie pisze" decoded as Morse came out as one word.
+        if (Script.chosen(this, lang) == Script.Mode.MORSE && typed.none { it.isLetter() })
+            typed = Morse.decode(typed, lang)
+        Script.runeRow(Script.chosen(this, lang))?.let { row ->
+            if (typed.any { it in 'ᚠ'..'᛿' }) typed = Runes.decodeLossy(typed, row)
+        }
         if (lang == Lang.PL && Script.mode(this, lang) == Script.Mode.GLAGOLITIC)
             typed = Script.back(typed, Script.Mode.GLAGOLITIC, Lang.PL)
         val words = token.findAll(typed).map { it.value }

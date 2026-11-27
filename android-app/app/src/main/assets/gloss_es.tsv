@@ -31,11 +31,9 @@ u	u
 universal	powszechny
 a	…wyrażający kierunek → do
 a	a
-ag	Libro de Ageo → Księga Aggeusza
 al	zob. a + el
 altar	ołtarz
 alud	lawina
-am	Libro de Amós → Am
 ambos	obaj
 anas	imię żeńskie Anna
 arde	palić się
@@ -68,7 +66,6 @@ e	e
 el	nie tłumaczy się
 en	w
 erar	przygotowywać grządki pod uprawę
-est	Libro de Ester → Est
 far	zob. hacer
 favor	przysługa
 fin	koniec
@@ -105,7 +102,6 @@ mir	egzamin na stanowisko lekarza stażysty
 mor	miłość
 mur	mysz
 mus	mus
-ne	Libro de Nehemías → Ne
 ni	ani
 ni	ni
 nivel	poziom
@@ -146,8 +142,6 @@ sol	słońce
 son	przyjemny dźwięk
 sub	pod
 sud	południe
-sur	południe
-austria	Austria
 historia	historia
 para	dla
 para	zatrzymywać
@@ -156,7 +150,6 @@ be	beczenie
 be	onomatopeja be
 he	oto
 x	nazwa litery x
-albania	Albania
 lato	szeroki
 mecenas	mecenas
 radio	promień
@@ -166,7 +159,6 @@ verde	zielony
 verde	zieleń
 gris	szary
 gris	szary
-ia	inteligencia artificial → SI
 dolina	lej krasowy
 jara	Cistus czystek
 kimono	kimono
@@ -181,16 +173,13 @@ mela	farba do znakowania owiec
 mora	zwłoka
 mora	mieszkać
 zinc	cynk
-estonia	Estonia
 mafia	mafia
 colon	okrężnica
 control	kontrola
-ue	Unión Europea → UE
 den	dawać
 victoria	zwycięstwo
 victoria	zwycięstwo!
 leo	o osobie
-leo	Lew
 non	nie
 non	nieparzysty
 non	numer nieparzysty
@@ -259,8 +248,6 @@ martes	wtorek
 miércoles	środa
 sábado	sobota
 viernes	piątek
-dominica	Dominika
-lusitania	Luzytania
 res	sztuka
 res	re
 memoria	pamięć
@@ -269,20 +256,15 @@ lupa	lupa
 parasol	parasol plażowy
 sin	bez
 sin	bezalkoholowy
-cr	Libro de las Crónicas → Krn
 no	nie
-pr	Libro de los Proverbios → Prz
 y	i
-sm	Libro de Samuel → Sm
 vara	pręt
 patria	ojczyzna
 kilo	kilogram
 lea	czytać
-europa	Europa
 autor	autor
 pana	sztruks
 pana	kumpel
-islandia	Islandia
 robot	robot
 lupanar	dom publiczny
 burdel	dom publiczny
@@ -501,7 +483,6 @@ arco	łuk
 arder	palić się
 ardor	żar
 are	orać
-argentina	Argentyna
 argentino	srebrzysty
 argentino	Argentyńczyk
 argento	srebro
@@ -594,92 +575,9 @@ alternante	zmienny
 ante	przed
 ante	łoś
 anteriormente	poprzednio
-alaska	Alaska
-ambrosio	imię męskie Ambroży
-andalucía	Andaluzja
-andorra	Andora
-angola	Angola
-ariadna	imię żeńskie Ariadna
-armenia	Armenia
-asia	Azja
-australia	Australia
 belga	belgijski
 belga	Belg
 belga	Belgijka
-bolivia	Boliwia
-brasil	Brazylia
-brasilia	Brasília
-bucarest	Bukareszt
-bulgaria	Bułgaria
-california	Kalifornia
-chechenia	Czeczenia
-chile	Chile
-china	Chiny
-chipre	Cypr
-congo	Kongo
-corea	Korea
-cracovia	Kraków
-creta	Kreta
-crimea	geogr Krym
-cuba	Kuba
-danubio	Dunaj
-esopo	Ezop
-finlandia	Finlandia
-francisco	imię męskie Franciszek
-friburgo	Fryburg
-galicia	Galicia
-galilea	Galilea
-gibraltar	Gibraltar
-groenlandia	Grenlandia
-guam	Guam
-homero	Homer
-india	Indie
-indonesia	Indonezja
-iraq	Irak
-irlanda	Irlandia
-israel	Izrael
-italia	Włochy
-jacobo	imię męskie Jakub
-justino	Justyn
-lituania	Litwa
-macedonia	Macedonia
-marte	Mars
-mercurio	Merkury
-mesopotamia	Mezopotamia
-micronesia	Mikronezja
-minos	Minos
-montenegro	Czarnogóra
-moravia	Morawy
-neptuno	Neptun
-nigeria	Nigeria
-nilo	Nil
-palestina	Palestyna
-paraguay	Paragwaj
-parma	Parma
-polonia	Polska
-roma	Rzym
-salvador	imię męskie
-samaria	Samaria
-saturno	Saturn
-selena	imię żeńskie Selena
-senegal	Senegal
-serbia	Serbia
-seychelles	Seszele
-siberia	Syberia
-sicilia	Sycylia
-silesia	Śląsk
-sodoma	Sodoma
-sudetes	Sudety
-transilvania	Siedmiogród
-urano	Uranos
-varsovia	Warszawa
-vaticano	Watykan
-venezuela	Wenezuela
-venus	Wenus
-venus	Wenus
-vietnam	Wietnam
-vladivostok	Władywostok
-yugoslavia	Jugosławia
 baca	bagażnik dachowy
 balar	beczeć
 ballar	tańczyć i śpiewać
@@ -1710,18 +1608,9 @@ humano	istota ludzka
 humidificar	nawilżać
 humorista	humorysta
 humus	humus
-suecia	Szwecja
 mapa	mapa
-praga	Praga
-rt	Libro de Rut → Rt
-rut	imię żeńskie Rut
-rut	Libro de Rut → Rt
-ap	Apocalipsis → Ap
-jr	Libro de Jeremías → Jr
-jdt	Libro de Judit → Jdt
 opera	operować
 temperatura	temperatura
-georgia	Gruzja
 grupa	zad
 droga	narkotyk
 vinco	druciane kółko
@@ -1928,7 +1817,6 @@ liberar	uwalniać
 libere	uwalniać
 libido	libido
 libra	funt
-libra	Waga
 libra	wyzwalać
 librero	księgarz
 licite	licytować
@@ -2622,7 +2510,6 @@ revelar	odkrywać
 reverso	tył
 revestir	dekorować
 revista	czasopismo
-aquitania	Akwitania
 rigor	rygor
 rima	rym
 roba	kraść
@@ -3077,7 +2964,6 @@ uno	ktoś
 uno	jakiś
 minuta	brudnopis
 come	jeść
-florida	Floryda
 ajo	czosnek
 doma	tresura
 sandwich	kanapka
@@ -3126,8 +3012,6 @@ basen	opierać
 bebe	niemowlę
 bebe	niemowlę
 bebe	pić
-barbados	Barbados
-biblia	Biblia
 celo	zapał
 domo	kopuła
 dolar	ociosywać
@@ -3139,8 +3023,6 @@ general	generał
 hui	uciekać
 internet	internet
 jama	pokarm
-kiev	Kijów
-wikipedia	Wikipedia
 motor	ruchowy
 motor	silnik
 metal	metal
@@ -3159,33 +3041,12 @@ pedofilia	pedofilia
 palma	palma
 palma	gaj palmowy
 palto	awokado
-panonia	Panonia
 ruda	ruta
 remen	wiosłować
-rumania	Rumunia
-rusia	Rosja
-portugal	Portugalia
-malta	Malta
 seria	tworzyć serie
 sincero	szczery
 tenis	tenis
 actor	aktor
-alpes	Alpy
-altar	Ołtarz
-bosnia	Bośnia
-colonia	Kolonia
-domingo	imię męskie Dominik
-es	Libro de Esdras → Ezd
-francia	Francja
-grecia	Grecja
-leo	Lew
-libra	Waga
-lima	Lima
-nix	Nix
-padua	Padwa
-pomerania	Pomorze
-re	Libro de los Reyes → Krl
-si	Libro del Sirácides → Syr
 malta	słód
 mi	mój
 mi	mi
@@ -3218,10 +3079,7 @@ burro	osioł
 graba	ryć
 la	la
 pa	apokopa od para
-liechtenstein	Liechtenstein
-moldavia	Mołdawia
 voz	głos
-nasa	NASA
 ka	ka
 sala	sala
 sala	solić
@@ -3302,9 +3160,6 @@ mozo	chłopak
 brea	żywica
 rato	chwila
 mujer	kobieta
-dinamarca	Dania
-noruega	Norwegia
-alemania	Niemcy
 palabra	słowo
 diccionario	słownik
 leche	mleko
@@ -3325,7 +3180,6 @@ estar	być
 tomate	Lycopersicon esculentum
 plante	protest
 plante	sadzić
-paris	Parys
 prestar	pożyczać
 ayudar	pomagać
 trabajo	praca
@@ -3444,7 +3298,6 @@ soldado	żołnierz
 soldado	żołnierka
 soldado	spawać
 cesto	kosz
-letonia	Łotwa
 cuerno	róg
 camarero	kelner
 guinda	wiśnia
@@ -3571,7 +3424,6 @@ mejor	lepiej
 mejor	lepszy
 cansado	zmęczony
 hoy	dzisiaj
-españa	Hiszpania
 bordillo	krawężnik
 bombilla	od bomba
 brocha	pędzel
@@ -3974,7 +3826,6 @@ desplomarse	pochylać się
 despreciar	pogardzać
 destacarse	wyróżniać się
 destapar	odkrywać
-borgoña	Burgundia
 destinar	przeznaczać / przeznaczyć
 destornillar	odkręcać
 desvalorizar	pomniejszyć wartość
@@ -3989,8 +3840,6 @@ disfrutar	odczuwać przyjemność
 anaranjado	pomarańczowy
 naranja	pomarańczowy
 naranja	pomarańcza
-jaime	imię męskie Jakub
-ana	imię żeńskie Anna
 disimular	ukrywać
 disimular	udawać
 disparar	strzelać
@@ -4006,12 +3855,6 @@ parta	członkini ludu Partów
 parta	dzielić
 echar	rzucać
 economizar	oszczędzać
-teresa	imię żeńskie Teresa
-abisinia	Abisynia
-abjasia	Abchazja
-apeninos	Apeniny
-egipto	Egipt
-áfrica	Afryka
 ejecutar	wykonywać
 ejercitar	ćwiczyć
 oso	niedźwiedź
@@ -4025,7 +3868,6 @@ ballena	wieloryb
 seguir	podążać za
 fobia	fobia
 mesa	stół
-tanzania	Tanzania
 taca	łata
 revuelo	zamieszanie
 multa	mandat
@@ -4055,11 +3897,9 @@ guanábana	guanábana
 piano	pianino
 piano	piano
 hola	cześć
-norte	północ
 puerto	port
 ayuda	pomoc
 ayuda	pomagać
-irak	Irak
 aya	piastunka
 banda	wstęga
 bao	pokładnik
@@ -4101,31 +3941,19 @@ tumbo	upadek
 uso	użycie
 enciclopedia	encyklopedia
 tesauro	tezaurus
-nepal	Nepal
-sl	sociedad limitada → sp. z o.o
-kenia	Kenia
 azúcar	cukier
 sucre	sucre
 café	kawa
 café	kolor kawowy
-tailandia	Tajlandia
-kirguizistán	Kirgistan
-croacia	Chorwacja
 talo	plecha
 mies	żniwo
 use	używać
 liar	wiązać
 rojo	czerwony
 rojo	czerwień
-júpiter	Jowisz
-plutón	Pluton
-tierra	Ziemia
 rosado	różowy
 ratón	mysz
 tela	tkanina
-pablo	Paweł
-frida	imię żeńskie
-pedro	imię męskie Piotr
 escabel	stołek
 jaleo	wrzawa
 mofa	drwina
@@ -4142,15 +3970,10 @@ señor	pan
 señora	pani
 analfabeta	analfabetka
 venir	przychodzić
-nairobi	Nairobi
 vierte	wylewać
 púlpito	ambona
 manoscopio	manometr
-benín	Benin
-esteban	imię męskie Stefan
 roe	gryźć
-remigio	Remigiusz
-adelaida	imię żeńskie Adelajda
 albo	biały
 bota	bukłak
 bota	podrzucać
@@ -4159,7 +3982,6 @@ setiembre	wrzesień
 convenio	umowa
 patera	mała łódka
 patera	ż od patero
-copenhague	Kopenhaga
 estrella	gwiazda
 gata	kocica
 bajo	niski
@@ -4221,54 +4043,10 @@ amarillo	żółty
 gel	żel
 octavo	ósmy
 octavo	ósma część
-fobos	Fobos
 noveno	dziewiąty
 pelvis	miednica
 abdomen	brzuch
-aruba	Aruba
-bangladesh	Bangladesz
-burundi	Burundi
-chad	Czad
-colombia	Kolumbia
-ecuador	Ekwador
-eritrea	Erytrea
-malvinas	Malwiny
-ghana	Ghana
-guatemala	Gwatemala
-guernsey	Guernsey
-guinea	Gwinea
-guinea-bissau	Gwinea Bissau
-guyana	Gujana
-honduras	Honduras
-jamaica	Jamajka
-kiribati	Kiribati
-kuwait	Kuwejt
-laos	Laos
-liberia	Liberia
-madagascar	Madagaskar
-malawi	Malawi
-mauritania	Mauretania
-mayotte	Majotta
-mongolia	Mongolia
-montserrat	imię żeńskie Montserrat
-montserrat	Montserrat
-mozambique	Mozambik
-namibia	Namibia
-nauru	Nauru
-nicaragua	Nikaragua
-transnistria	Naddniestrze
-qatar	Katar
-samoa	Samoa
-somalia	Somalia
-togo	Togo
-tuvalu	Tuvalu
-uganda	Uganda
-uruguay	Urugwaj
 cha	herbata
-vanuatu	Vanuatu
-yemen	Jemen
-zambia	Zambia
-ebro	Ebro
 abajo	na dole
 ensillar	siodłać
 ensuciar	brudzić
@@ -4528,7 +4306,6 @@ vislumbrar	ledwie widzieć
 votar	głosować
 votar	uchwalać
 gula	łakomstwo
-ceres	Ceres
 desconocer	nie znać
 lean	czytać
 machen	uderzać
@@ -4592,7 +4369,6 @@ acelerador	akcelerator
 acelerar	przyśpieszać
 acento	akcent
 acera	chodnik
-navidad	Boże Narodzenie
 acidez	kwasowość
 aclaración	wyjaśnienie
 acogida	przyjęcie
@@ -4620,7 +4396,6 @@ aislamiento	izolacja
 ajeno	obcy
 alambre	drut
 azucarera	cukiernica
-japón	Japonia
 medio	średni
 medio	środek
 medio	na pół
@@ -4635,8 +4410,6 @@ alboroto	hałas
 alcachofa	karczoch
 alcance	zasięg
 director	dyrektor
-eris	Eris
-eris	Eris
 bayoneta	bagnet
 cisne	łabędź
 intérprete	tłumacz
@@ -4890,7 +4663,6 @@ cómo	jak
 ele	el
 este	ten
 este	ten
-este	wschód
 halla	napotykać
 salami	salami
 humar	dymić
@@ -4933,7 +4705,6 @@ porque	dlatego że
 desgracia	nieszczęście
 desdicha	nieszczęście
 desdichado	nieszczęsny
-deimos	Deimos
 pianista	pianista
 pianista	pianistka
 política	polityka
@@ -4987,11 +4758,9 @@ aroma	aromat
 aroma	kwiat akacji amerykańskiej
 cerda	szczecina
 delgado	szczupły
-jordania	Jordania
 río	rzeka
 hinduista	hinduistyczny
 hinduista	hinduista
-libia	Libia
 gripe	grypa
 lose	wykładać płytami
 masa	masa
@@ -5033,7 +4802,6 @@ principal	podstawowy
 principal	naczelnik
 derecha	prawa ręka
 derecha	w prawo zwrot!
-gobierno	rząd
 gobernante	rządzący
 gobernante	rządząca
 gobernante	rządzący
@@ -5063,7 +4831,6 @@ rival	rywal
 rival	rywalka
 rival	rywalizujący
 mere	zob. meramente
-este	wschód
 deprisa	szybko
 piojo	wesz
 polilla	mól
@@ -5191,7 +4958,6 @@ luego	zatem
 suegro	teść
 suegra	teściowa
 serpiente	wąż
-señor	Pan
 gibón	gibon
 gacela	gazela
 glotón	żarłoczny
@@ -5214,7 +4980,6 @@ turón	tchórz
 zorrillo	Mephitis
 suciedad	brud
 ángel	anioł
-madrid	Madryt
 cosecha	żniwa
 libre	wolny
 libre	wyzwalać
@@ -5267,7 +5032,6 @@ caldera	kocioł
 fallen	zawodzić
 dad	dawać
 cause	powodować
-andes	Andy
 melocotón	brzoskwinia
 cereza	czereśnia
 frambuesa	malina
@@ -5314,7 +5078,6 @@ nata	śmietana
 nata	urodzony
 queso	ser
 yogur	jogurt
-adn	ácido desoxirribonucleico → DNA
 paté	pasztet
 mantequilla	masło
 harina	mąka
@@ -5329,7 +5092,6 @@ perpetuo	wieczny
 bada	nosorożec
 happening	happening
 lino	len
-aries	Baran
 doble	podwójny
 fan	fan
 fan	fanka
@@ -5363,7 +5125,6 @@ ese	tamten
 ese	es
 ella	ona
 otro	inny
-juan	imię męskie Jan
 jeroglífico	hieroglificzny
 jeroglífico	hieroglif
 botella	butelka
@@ -5403,7 +5164,6 @@ baile	taniec
 daño	szkoda
 cenicero	popielniczka
 fiesta	święto
-pascua	Wielkanoc
 importante	ważny
 tipo	typ
 sensible	wrażliwy
@@ -5553,7 +5313,6 @@ yate	jacht
 donante	dawca
 comestible	jadalny
 comestible	artykuł spożywczy
-magdalena	imię żeńskie Magdalena
 adecuar	dostosować
 clip	spinacz
 sí	sobie
@@ -5641,7 +5400,6 @@ canción	pieśń
 probable	prawdopodobny
 paso	krok
 rodilla	kolano
-ceuta	Ceuta
 corral	podwórko
 corrida	bieg
 crisis	kryzys
@@ -5656,9 +5414,7 @@ oído	słuchać
 atención	uwaga
 vigilancia	dozór
 picador	pikador
-pisa	Piza
 interlingua	interlingua
-internet	Internet
 plural	rozmaity
 poncho	ponczo
 poncho	spokojny
@@ -5673,7 +5429,6 @@ karate	karate
 karaoke	karaoke
 maduro	dojrzały
 juicioso	rozumny
-melilla	Melilla
 ballad	tańczyć i śpiewać
 temprano	wczesny
 temprano	wcześnie
@@ -5731,7 +5486,6 @@ suma	dodawać
 fábrica	fabryka
 región	region
 isla	wyspa
-península	półwysep
 civilización	cywilizacja
 enseñanza	nauka
 progreso	postęp
@@ -5746,7 +5500,6 @@ dolmen	dolmen
 aeroplano	aeroplan
 barco	okręt
 tramo	parcela
-job	Hiob
 casto	czysty
 castizo	rasowy
 casualidad	przypadek
@@ -5793,12 +5546,10 @@ regañar	kłócić się
 enmoquetar	kryć
 conducir	prowadzić
 conducir	prowadzić
-s.	San → św
 s.	siglo → wiek
 regular	regularny
 regular	regulować
 sida	AIDS
-nobel	Nobel
 etnia	etnia
 anhedonia	anhedonia
 t.	tomo → t
@@ -5810,8 +5561,6 @@ embarazo	ciąża
 mimo	mim
 enorme	ogromny
 aikido	aikido
-daniel	imię męskie Daniel
-azores	Azory
 mentira	kłamstwo
 verdad	prawda
 sitio	miejsce
@@ -5845,7 +5594,6 @@ presidente	prezydent
 guía	przewodnik
 guía	przewodniczka
 guía	prowadzić
-hungría	Węgry
 guanábano	flaszowiec miękkociernisty
 bita	poler
 caber	mieścić się
@@ -5871,8 +5619,6 @@ vago	próżniak
 frase	zdanie
 ana	łokieć
 ana	na receptach
-gambia	Gambia
-mali	Mali
 impulsivo	żywiołowy
 creativo	twórczy
 creativo	reklamowiec
@@ -5880,9 +5626,6 @@ laborioso	pracowity
 maligno	zły
 taciturno	małomówny
 mazurca	mazurek
-cristina	imię żeńskie Krystyna
-laura	imię żeńskie Laura
-lidia	imię żeńskie Lidia
 marino	morski
 marino	marynarz
 marina	wybrzeże
@@ -5895,7 +5638,6 @@ ananá	ananas
 goloso	łakomy
 lampada	porcja ziemi
 lucid	błyszczeć
-bolonia	Bolonia
 mio	…używany do przywoływania kota
 vasto	rozległy
 nuda	węzeł
@@ -5924,8 +5666,6 @@ entusiasta	entuzjasta
 entusiasta	entuzjastka
 diversamente	inaczej
 tundra	tundra
-singapur	Singapur
-surinam	Surinam
 che	ej!
 che	nazwa dwuznaku ch
 estero	potok
@@ -6000,10 +5740,6 @@ fatalista	fatalistka
 modo	sposób
 orgulloso	dumny
 arrogante	arogancki
-kabul	Kabul
-santiago	imię męskie Jakub
-quito	Quito
-manila	Manila
 conciencia	sumienie
 moralidad	moralność
 justicia	sprawiedliwość
@@ -6022,8 +5758,6 @@ intelecto	intelekt
 capacidad	zdolność
 capacitado	zdolny
 paseo	przejażdżka
-asunción	Wniebowzięcie
-praia	Praia
 viaje	podróż
 viajero	podróżnik
 peregrino	pielgrzym
@@ -6083,7 +5817,6 @@ latinista	latynistyczny
 latinista	latynista
 latinista	latynistka
 hemo-	hemo
-victoria	imię żeńskie
 discurso	przemówienie
 conferencia	konferencja
 chute	zażycie
@@ -6121,8 +5854,6 @@ reflexivo	odbijający
 pensativo	zamyślony
 distinto	odmienny
 interpretativo	interpretacyjny
-abel	imię męskie Abel
-abraham	Abraham
 contaminación	zanieczyszczenie
 enfermera	pielęgniarka
 intenso	intensywny
@@ -6131,7 +5862,6 @@ trompeta	trąba
 trompeta	trębacz
 centímetro	centymetr
 necesidad	potrzeba
-samuel	imię męskie Samuel
 enciclopedismo	encyklopedyzm
 enciclopedista	encyklopedysta
 enciclopedista	encyklopedystka
@@ -6176,7 +5906,6 @@ léxico	leksyka
 oportuno	odpowiedni
 licitar	licytować
 grupo	grupa
-oeste	zachód
 masculino	męski
 gozo	przyjemność
 beato	szczęśliwy
@@ -6197,41 +5926,16 @@ descanso	odpoczynek
 fraude	oszustwo
 petición	prośba
 rápidamente	szybko
-gabriel	imię męskie Gabriel
-adela	imię żeńskie Adela
-amanda	imię żeńskie Amanda
-anita	imię żeńskie Anita
-aurelia	imię żeńskie Aurelia
-balbina	imię żeńskie Balbina
-berta	imię żeńskie
-diana	imię żeńskie Diana
-emilia	imię żeńskie Emilia
-eufemia	imię żeńskie
-eugenia	imię żeńskie Eugenia
-filomena	imię żeńskie
-gabriela	imię żeńskie Gabriela
-julia	imię żeńskie Julia
 arquitectura	architektura
 física	fizyka
 eficiente	skuteczny
-karina	imię żeńskie Karina
-lolita	imię żeńskie Lolita
-manuela	imię żeńskie
-marcelina	imię żeńskie
-natalia	imię żeńskie Natalia
-ofelia	imię żeńskie
-olga	imię żeńskie Olga
-paulina	imię żeńskie Paulina
 estancia	pobyt
-sandra	imię żeńskie Sandra
-sara	imię żeńskie Sara
 llanto	płacz
 esperanza	nadzieja
 plazo	termin
 monedero	portmonetka
 moneda	moneta
 cercano	bliski
-noe	imię żeńskie
 elenco	lista
 moderno	nowoczesny
 psicologismo	psychologizm
@@ -6287,7 +5991,6 @@ humilde	skromny
 profundo	głęboki
 hondo	głęboki
 humillar	spuszczać
-federico	imię męskie Fryderyk
 hallazgo	odkrycie
 hincha	kibic
 hincha	kobieta kibic
@@ -6322,23 +6025,14 @@ tale	ścinać
 rusofobia	rusofobia
 hooligan	chuligan
 croquis	szkic
-banjul	Bandżul
-antananarivo	Antananarywa
 metafísica	metafizyka
-teherán	Teheran
-omán	Oman
-turkmenistán	Turkmenistan
-uzbekistán	Uzbekistan
 aspiradora	odkurzacz
 aspiradora	wdychający
 planchado	prasowanie
 planchado	prasować
 cara	twarz
 peine	grzebień
-sarajevo	Sarajewo
 máquina	maszyna
-berlín	Berlin
-bogotá	Bogota
 boîte	dyskoteka
 afiliar	przyłączać
 inglés	angielski
@@ -6394,7 +6088,6 @@ castóreo	kastoreum
 astrónomo	astronom
 líquido	płynny
 líquido	płyn
-lisboa	Lizbona
 fideísmo	fideizm
 pescador	rybak
 bordado	haft
@@ -6488,7 +6181,6 @@ luminoso	jasny
 eterno	wieczny
 barranco	wąwóz
 ordinario	zwykły
-pangea	Pangea
 workshop	warsztat
 mosquete	muszkiet
 fresno	Fraxinus excelsior
@@ -6501,7 +6193,6 @@ palito	kij
 paladar	podniebienie
 comandante	komendant
 comandante	kobieta komendant
-palermo	Palermo
 dudoso	wątpliwy
 explicación	wytłumaczenie
 comandanta	majorowa
@@ -6554,7 +6245,6 @@ hormona	hormon
 lis	kosaciec
 honrado	uczciwy
 honradez	uczciwość
-moscú	Moskwa
 abisal	głębinowy
 acordeón	akordeon
 actriz	aktorka
@@ -6676,7 +6366,6 @@ acaecimiento	wydarzenie
 chico	chłopak
 chico	mały
 acaecer	zdarzać się
-parís	Paryż
 terremoto	trzęsienie ziemi
 admire	podziwiać
 torso	tors
@@ -6694,7 +6383,6 @@ telespectadora	telewidz
 espectador	obserwujący
 espectador	widz
 dios	bóg
-dios	Bóg
 sirenio	syrena
 abasia	abazja
 abiogénesis	abiogeneza
@@ -6728,7 +6416,6 @@ cucharadita	łyżeczka
 fogoso	ognisty
 suyo	jego
 suyo	jego
-bélgica	Belgia
 búlgara	Bułgarka
 búlgaro	bułgarski
 búlgaro	Bułgar
@@ -6762,8 +6449,6 @@ incrementarse	wzrastać
 visita	wizyta
 visita	odwiedzać
 urgencia	nagłość
-zaragoza	Saragossa
-aragón	Aragonia
 aragonés	aragoński
 aragonés	Aragończyk
 noruego	norweski
@@ -6775,7 +6460,6 @@ nicaragüense	Nikaraguanka
 neozelandés	nowozelandzki
 neozelandés	Nowozelandczyk
 neozelandesa	Nowozelandka
-panamá	Panama
 panameño	panamski
 panameño	Panamczyk
 laringe	krtań
@@ -6808,7 +6492,6 @@ ningún	żaden
 aberración	aberracja
 aberrante	aberracyjny
 abducción	abdukcja
-aquisgrán	Akwizgran
 sicológico	psychologiczny
 sicología	psychologia
 sicólogo	psycholog
@@ -6820,7 +6503,6 @@ abdominal	brzuszny
 abdominales	ćwiczenia wzmacniające mięśnie brzucha
 abanicar	wahlować
 abanicar	w bejsbolu
-córcega	Korsyka
 tailandés	tajlandzki
 tailandés	Tajlandczyk
 tailandesa	Tajlandka
@@ -6867,7 +6549,6 @@ andorrano	andorski
 andorrano	Andorczyk
 andorrana	Andorka
 inglesa	Angielka
-inglaterra	Anglia
 angoleño	angolijski
 angoleño	Angolijczyk
 angoleña	Angolijka
@@ -6954,13 +6635,10 @@ cuidado	troska
 femenino	żeński
 femenino	żeński
 dromedario	dromader
-viena	Wiedeń
 vienés	wiedeński
 vienés	wiedeńczyk
 falso	fałszywy
 falso	obszycie
-luna	Księżyc
-holanda	Holandia
 holandés	holenderski
 holandés	Holender
 holandesa	Holenderka
@@ -6973,7 +6651,6 @@ esclavitud	niewolnictwo
 esclavizar	czynić niewolnikiem
 esclavo	niewolnik
 esclava	niewolnica
-david	imię męskie Dawid
 supera	przewyższać
 ritual	rytuał
 ritual	rytualny
@@ -6989,7 +6666,6 @@ completamente	całkowicie
 ara	ołtarz
 ara	ara
 ara	orać
-lev	Libro del Levítico → Kpł
 diverso	różnorodny
 aster	aster
 música	muzyka
@@ -7018,7 +6694,6 @@ brama	ryczenie
 brama	o bydle
 poesía	poezja
 hiena	hiena
-dorotea	imię żeńskie Dorota
 polen	pyłek
 vista	widok
 vista	widzieć
@@ -7039,7 +6714,6 @@ pudra	gnoić
 timo	oszustwo
 carestía	drożyzna
 incurable	nieuleczalny
-miguel	imię męskie Michał
 insoluble	nierozpuszczalny
 bardo	bard
 aristocracia	arystokracja
@@ -7050,16 +6724,12 @@ asuncena	asuncionka
 asunceña	asuncionka
 lindo	śliczny
 lindo	piękniś
-judit	imię żeńskie Judyta
 biblioteca	biblioteka
 promesa	obietnica
 pantera	lampart
-román	imię męskie
-cataluña	Katalonia
 fagot	fagot
 fagot	fagocistka
 preludio	preludium
-canarias	Wyspy Kanaryjskie
 territorial	terytorialny
 agio	ażio
 bruscamente	nagle
@@ -7071,8 +6741,6 @@ internauta	internauta
 noble	szlachetny
 noble	szlachcic
 noble	szlachcianka
-jesús	Jezus
-vístula	Wisła
 piel	skóra
 sodio	sód
 hockey	hokej
@@ -7098,25 +6766,15 @@ futurista	futurysta
 futurista	futurystka
 seduce	uwodzić
 anfiteatro	amfiteatr
-irene	imię żeńskie Irena
-antonia	imię żeńskie Antonia
-elvira	imię żeńskie Elwira
-silvia	imię żeńskie Sylwia
-madeira	Madera
-andrea	imię żeńskie Andrea
 abjure	wyrzekać się
 infinito	nieskończony
 infinito	dal
 infinito	niezmiernie
-novokuznetsk	Nowokuźnieck
 fuma	palenie
 fuma	palić
 collera	chomąto
 decorativo	dekoracyjny
-mario	imię męskie
-matilde	imię żeńskie
 cima	wierzchołek
-zakopane	Zakopane
 regato	strumyk
 cinta	tasiemka
 siciliano	Sycylijczyk
@@ -7152,7 +6810,6 @@ polisemia	wieloznaczność
 antibiótico	antybiotyczny
 antibiótico	antybiotyk
 tantalio	tantal
-tántalo	Tantal
 seudónimo	pseudonimowy
 seudónimo	pseudonim
 siberiano	syberyjski
@@ -7175,19 +6832,6 @@ narrativa	beletrystyka
 narrativa	narracyjny
 cintura	talia
 antropomorfismo	antropomorfizm
-canadá	Kanada
-haití	Haiti
-méxico	Meksyk
-perú	Peru
-bielorrusia	Białoruś
-eslovaquia	Słowacja
-eslovenia	Słowenia
-rumanía	Rumunia
-suiza	Szwajcaria
-turquía	Turcja
-ucrania	Ukraina
-escocia	Szkocja
-nif	número de identificación fiscal → NIP
 ecuador	równik
 estepa	step
 laberinto	labirynt
@@ -7199,7 +6843,6 @@ fantasioso	pełen wyobraźni
 prima	kuzynka
 abad	opat
 abadesa	opatka
-américa	Ameryka
 socialista	socjalista
 socialista	socjalistka
 socialista	socjalistyczny
@@ -7211,7 +6854,6 @@ gordo	gruby
 griego	grecki
 griego	Grek
 alumbrar	oświetlać
-patricia	imię żeńskie
 fruto	owoc
 investigación	badanie
 comprobar	sprawdzać
@@ -7220,8 +6862,6 @@ bote	puszka
 bote	podrzucać
 chuleta	kotlet
 plena	popularny afroantylski taniec i śpiew
-zimbabue	Zimbabwe
-yibuti	Dżibuti
 autista	autystyczny
 autista	autysta
 autista	autystka
@@ -7243,7 +6883,6 @@ azimut	azymut
 cinismo	cynizm
 begonia	begonia
 mandolina	mandolina
-macao	Makau
 allí	tam
 confianza	ufność
 maestro	mistrzowski
@@ -7256,12 +6895,6 @@ tornillo	śruba
 destornillador	śrubokręt
 torneo	turniej
 diversión	rozrywka
-afganistán	Afganistan
-bahréin	Bahrajn
-bután	Bhutan
-camboya	Kambodża
-filipinas	Filipiny
-irán	Iran
 aniversario	rocznica
 asociación	stowarzyszenie
 efecto	efekt
@@ -7282,7 +6915,6 @@ estival	letni
 estímulo	bodziec
 esquina	węgieł
 interés	interes
-oceanía	Oceania
 acero	stal
 olmo	wiąz
 silicio	krzem
@@ -7318,7 +6950,6 @@ anatómico	anatom
 protestante	protestancki
 protestante	protestant
 protestante	protestantka
-londres	Londyn
 efectuar	wykonywać
 emotivo	emocjonalny
 mucosa	śluzówka
@@ -7332,11 +6963,7 @@ caballería	kawaleria
 jengibre	imbir
 curvo	krzywy
 cupo	kwota
-gaza	Gaza
 medicamentoso	leczniczy
-támesis	Tamiza
-barcelona	Barcelona
-barcelona	klub sportowy Barcelona
 perder	tracić
 perder	tracić kolor
 tío	wujek
@@ -7364,17 +6991,12 @@ ateniense	ateńczyk
 bedel	woźny
 bedel	woźna
 medusa	meduza
-medusa	Meduza
 vete	odchodzić
 mamut	mamut
 sociología	socjologia
 sociológico	socjologiczny
 sociólogo	socjolog
 socióloga	socjolog
-emelia	imię żeńskie Emilia
-emelina	imię żeńskie Emilia
-emilita	imię żeńskie Emilia
-mila	imię żeńskie
 soluble	rozpuszczalny
 ateísta	ateistyczny
 ateísta	ateistka
@@ -7387,7 +7009,6 @@ asunceno	asuncioński
 asunceno	asunciończyk
 asunceño	asuncioński
 asunceño	asunciończyk
-felipe	imię męskie Filip
 abastecer	zaopatrywać
 abogada	adwokat
 abnegarse	wyrzekać się
@@ -7408,14 +7029,12 @@ paquistaní	pakistański
 paquistaní	Pakistańczyk
 pakistaní	pakistański
 pakistaní	Pakistańczyk
-pakistán	Pakistan
 penalti	rzut karny
 archivero	archiwista
 éxtasis	ekstaza
 alcohólico	alkoholowy
 alcohólico	alkoholik
 góndola	gondola
-venecia	Wenecja
 veneciano	wenecki
 veneciano	wenecjanin
 veneciana	zob. veneciano ż
@@ -7466,7 +7085,6 @@ entalpía	entalpia
 trágico	tragiczny
 trágico	tragediopisarz
 trágicamente	tragicznie
-colón	Kolumb
 colón	colón
 colombiano	kolumbijski
 colombiano	Kolumbijczyk
@@ -7493,7 +7111,6 @@ romper	rozbijać
 anochecer	zapadać zmierzch lub noc
 anochecer	zmrok
 matice	o kolorach
-luxemburgo	Luksemburg
 luxemburgués	luksemburski
 luxemburgués	Luksemburczyk
 bíblico	biblijny
@@ -7533,17 +7150,14 @@ epidídimo	najądrze
 vesícula	pęcherzyk
 anunciar	ogłaszać
 anunciación	ogłoszenie
-anunciación	Zwiastowanie
 absolver	zwalniać
 aborrecer	czuć niechęć / odrazę do czegoś
 sobrino	siostrzeniec
 nicotina	nikotyna
 manicomio	zakład psychiatryczny
 misterioso	tajemniczy
-lc	evangelio según San Lucas → Łk
 parisino	paryski
 parisino	paryżanin
-aladino	Aladyn
 arrejuntarse	żyć na kocią łapę
 apoderarse	przywłaszczać sobie
 apostasía	apostazja
@@ -7571,17 +7185,10 @@ bielorruso	białoruski
 bielorruso	Białorusin
 reino	królestwo
 abracadabra	abrakadabra
-ulrica	imię żeńskie
 surf	surfing
 surfista	surfer
 surfista	surferka
-josefina	imię żeńskie
-paula	imię żeńskie Paula
-ester	imię żeńskie Estera
 momia	mumia
-ruth	imię żeńskie Rut
-rosa	imię żeńskie Róża
-hilda	imię żeńskie Hilda
 limeño	limski
 limeño	limianin
 limeña	rodzaj żeński od limeño
@@ -7589,13 +7196,8 @@ limeña	limianka
 japonés	japoński
 japonés	Japończyk
 japonesa	Japonka
-cecilia	imię żeńskie Cecylia
 príncipe	książę
 príncipe	pierwszy
-carolina	imię żeńskie
-carla	imię żeńskie
-teodora	imię żeńskie
-sonia	imię żeńskie Sonia
 borracho	pijany
 borracho	pijak
 periferia	obwód
@@ -7609,22 +7211,14 @@ atardecer	zmierzch
 atender	załatwiać kogoś
 atender	uważać
 lavadora	pralka
-alicia	imię żeńskie Alicja
-alma	imię żeńskie Alma
-amalia	imię żeńskie Amalia
-amelia	imię żeńskie Amelia
-inés	imię żeńskie Agnieszka
 fastidio	nuda
 cagar	srać
 cagar	srać
-martina	imię żeńskie
 curioso	ciekawski
 curioso	ciekawski
-tomás	imię męskie Tomasz
 habanero	hawański
 habanero	hawańczyk
 habanera	hawanka
-nicolás	imię męskie Mikołaj
 hioides	kość gnykowa
 marrón	brąz
 marrón	brązowy
@@ -7639,7 +7233,6 @@ islandesa	Islandka
 gay	gej
 gay	gejowski
 aula	aula
-báltico	Bałtyk
 fatalismo	fatalizm
 bisílabo	dwusylabowy
 exasperación	oburzenie
@@ -7676,7 +7269,6 @@ topográfico	topograficzny
 topógrafo	topograf
 topógrafa	topograf
 artístico	artystyczny
-antonio	imię męskie Antoni
 diámetro	średnica
 duodeno	dwunastnica
 cráneo	czaszka
@@ -7743,7 +7335,6 @@ astrología	astrologia
 áureo	aureus
 bambú	Bambusa arundinacea
 banal	banalny
-belén	Betlejem
 marfil	kość słoniowa
 cremallera	drążek zębaty
 ciento	sto
@@ -7751,7 +7342,6 @@ ciento	liczba sto
 terrario	terrarium
 quilla	stępka
 urbanización	urbanizacja
-siria	Syria
 dentro	wewnątrz
 vosotros	wy
 ubre	wymię
@@ -7771,9 +7361,6 @@ uzbeka	Uzbeczka
 afgana	Afganka
 uruguayo	urugwajski
 uruguayo	Urugwajczyk
-botsuana	Botswana
-etiopía	Etiopia
-gabón	Gabon
 escocés	szkocki
 escocés	Szkot
 cazador	myśliwy
@@ -7801,10 +7388,8 @@ nebuloso	mglisty
 balad	beczeć
 dinastía	dynastia
 samba	samba
-breslavia	Wrocław
 dinástico	dynastyczny
 dinasta	dynasta
-estocolmo	Sztokholm
 relojero	zegarmistrz
 relojera	zegarmistrz
 cóndor	kondor
@@ -7888,7 +7473,6 @@ mito	mit
 mirra	mirra
 cito	…używany do wołania psa
 monstruo	monstrum
-óder	Odra
 tango	tango
 clemente	łaskawy
 marcial	wojenny
@@ -7916,11 +7500,9 @@ gineta	zob. jineta
 oto	rodzaj sowy
 transformación	transformacja
 pseudociencia	pseudonauka
-atenas	Ateny
 columpio	huśtawka
 mura	zob. amura
 mura	zamurowywać
-josé	imię męskie Józef
 ciempiés	stonoga
 escolopendra	wij
 brava	chełpliwość
@@ -7951,15 +7533,12 @@ grapa	zszywka
 imperialista	imperialistyczny
 imperialista	imperialista
 imperialista	imperialistka
-cárpatos	Karpaty
-cáncer	Rak
 cáncer	nowotwór
 cáncer	spod znaku Raka
 monópode	monopod
 astucia	przebiegłość
 microscópico	mikroskopijny
 mediterráneo	śródziemnomorski
-mediterráneo	Morze Śródziemne
 axón	akson
 guadaña	kosa
 guadañar	kosić
@@ -7976,8 +7555,6 @@ villancico	kolęda
 electrón	elektron
 portaviones	lotniskowiec
 portaaviones	lotniskowiec
-cee	Comunidad Económica Europea → EWG
-cerdeña	Sardynia
 república	republika
 olímpico	olimpijski
 olor	zapach
@@ -7987,7 +7564,6 @@ oponente	przeciwnik
 oponente	przeciwniczka
 próximamente	niebawem
 ironía	ironia
-pacífico	Pacyfik
 superlativo	najlepszy
 superlativo	superlatywa
 supernova	supernowa
@@ -8007,17 +7583,12 @@ chasco	niepowodzenie
 cráter	krater
 táctica	taktyka
 táctica	taktyczna
-aristóteles	Arystoteles
-sena	Sekwana
 senado	senat
 bautismo	chrzest
 ontología	ontologia
 etimología	etymologia
-argelia	Algieria
-amberes	Antwerpia
 antropológico	antropologiczny
 antropólogo	antropolog
-moldava	Wełtawa
 alfiler	szpilka
 bañera	wanna
 biólogo	biolog
@@ -8079,7 +7650,6 @@ carnicería	sklep mięsny
 endurecer	utwardzać
 enfadar	zezłościć
 músculo	mięsień
-cristo	Chrystus
 afasia	afazja
 georgiano	gruziński
 georgiano	Gruzin
@@ -8089,7 +7659,6 @@ dana	odcięty niż górny
 banalizar	banalizować
 satélite	satelita
 fantasma	duch
-eugenio	imię męskie Eugeniusz
 bacará	bakarat
 bacarrá	bakarat
 bache	wybój
@@ -8131,7 +7700,6 @@ arriesgado	ryzykowny
 arriesgado	ryzykować
 arresto	areszt
 arrojo	śmiałość
-valencia	Walencja
 valencia	wartościowość
 ¿	odwrócony znak zapytania
 asterisco	asterysk
@@ -8149,10 +7717,7 @@ egipcia	Egipcjanka
 peruano	peruwiański
 peruano	Peruwiańczyk
 peruana	Peruwianka
-nochevieja	sylwester
-nochebuena	Wigilia
 iodo	jod
-milán	Mediolan
 libreto	libretto
 intención	zamiar
 austriaca	Austriaczka
@@ -8280,7 +7845,6 @@ francés	Francuz
 francesa	Francuzka
 felación	fellatio
 abanar	wachlować
-rin	Ren
 jeep	dżip
 senegalés	senegalski
 senegalés	Senegalczyk
@@ -8314,7 +7878,6 @@ chile	ostra papryka
 esencia	esencja
 potencial	potencjalny
 potencial	potencjał
-bahamas	Bahamy
 esencial	istotny
 greña	kołtun
 etíope	etiopski
@@ -8336,7 +7899,6 @@ blog	blog
 nigeriano	nigeryjski
 nigeriano	Nigeryjczyk
 nigeriana	Nigeryjka
-mauricio	imię męskie Maurycy
 mauriciano	maurytyjski
 mauriciano	Maurytyjczyk
 mauriciana	Maurytyjka
@@ -8345,14 +7907,9 @@ mozambiqueño	Mozambijczyk
 mozambiqueña	Mozambijka
 tesoro	skarb
 prado	łąka
-beirut	Bejrut
 espiga	kłos
-stepanakert	Stepanakert
-longyearbyen	Longyearbyen
 mata	krzew
 mata	zabijać
-honolulu	Honolulu
-pamir	Pamir
 sérum	serum
 citrón	cytryna
 semifinalista	półfinałowy
@@ -8382,7 +7939,6 @@ trípode	statyw
 triunfo	zwycięstwo
 trigo	pszenica
 interminable	niekończący się
-arn	ácido ribonucleico → kwas rybonukleinowy
 traducir	tłumaczyć
 numera	numerować
 manche	plamić
@@ -8404,11 +7960,9 @@ nano-	nano
 nervoso	żyłowaty
 aerolito	aerolit
 aforismo	aforyzm
-estambul	Stambuł
 estandarte	sztandar
 telenovela	opera mydlana
 bieldo	widły
-bósforo	Bosfor
 caballa	makrela
 magno	wielki
 minarete	minaret
@@ -8447,7 +8001,6 @@ narra	w wozie
 narra	pterokarpus sandałowy
 narra	opowiadać
 excepto	oprócz
-antártida	Antarktyda
 alerce	modrzew
 clemencia	łaskawość
 amo	właściciel
@@ -8492,7 +8045,6 @@ intolerable	nieznośny
 avetorillo	bączek
 avetoro	bąk
 barnacla	bernikla
-jesucristo	Jezus Chrystus
 lavabo	umywalka
 lección	lekcja
 gobio	kiełb
@@ -8501,13 +8053,10 @@ tenca	Tinca tinca
 eglefino	Melanogrammus aeglefinus
 gallineta	Helicolenus dactylopterus
 rodaballo	Psetta maxima
-ereván	Erywań
-tiflis	Tbilisi
 alemana	Niemka
 análisis	analiza
 andorra	latawica
 anguilas	tory wodowaniowe
-anguila	Anguilla
 argentinismo	argentynizm
 argentina	Argentynka
 antártico	antarktyczny
@@ -8515,7 +8064,6 @@ arubeño	arubański
 arubeño	Arubańczyk
 arubeña	Arubanka
 australiana	Australijka
-azerbaiyán	Azerbejdżan
 azerbaiyano	azerbejdżański
 azerbaiyano	Azerbejdżanin
 azerbaiyana	Azerbejdżanka
@@ -8531,7 +8079,6 @@ bahamesa	Bahamka
 bahreiní	bahrański
 bahreiní	Bahrańczyk
 bahreiní	Bahranka
-bangladés	Bangladesz
 bangladesí	bangladeski
 bangladesí	obywatel Bangladeszu
 bangladesí	obywatelka Bangladeszu
@@ -8543,7 +8090,6 @@ morcilla	kaszanka
 beninés	beniński
 beninés	Benińczyk
 beninesa	Beninka
-bermudas	Bermudy
 bermudeño	bermudzki
 bermudeño	obywatel Bermudów
 bermudeña	obywatelka Bermudów
@@ -8551,7 +8097,6 @@ bermudas	bermudy
 butanés	bhutański
 butanés	Bhutańczyk
 butanesa	Bhutanka
-ptah	Ptah
 inhale	wdychać
 unicelular	jednokomórkowy
 núcleo	jądro
@@ -8567,7 +8112,6 @@ brasilero	brazylijski
 brasilero	Brazylijczyk
 serenata	serenada
 brasilera	Brazylijka
-brunéi	Brunei
 bruneano	brunejski
 bruneano	Brunejczyk
 bruneana	Brunejka
@@ -8583,17 +8127,14 @@ caboverdiana	obywatelka Republiki Zielonego Przylądka
 camboyano	kambodżański
 camboyano	Kambodżanin
 camboyana	Kambodżanka
-camerún	Kamerun
 camerunés	kameruński
 camerunés	Kameruńczyk
 camerunesa	Kamerunka
 miso	miso
 comino	kmin
-horus	Horus
 caimanés	kajmański
 caimanés	Kajmańczyk
 caimanesa	Kajmanka
-chequia	Czechy
 checa	Czeszka
 chilena	Chilijka
 abominable	odrażający
@@ -8602,7 +8143,6 @@ filología	filologia
 ciprio	cypryjski
 ciprio	Cypryjczyk
 colombiana	Kolumbijka
-comoras	Komory
 comorense	komoryjski
 comorense	Komoryjczyk
 curruca	pokrzewka
@@ -8634,7 +8174,6 @@ dinamarquesa	Dunka
 dominiqués	dominicki
 dominiqués	Dominikańczyk
 dominiquesa	Dominikanka
-dominicana	Dominikana
 oceánico	oceaniczny
 oceanografía	oceanografia
 oceanográfico	oceanograficzny
@@ -8687,7 +8226,6 @@ vértice	wierzchołek
 abominación	obrzydzenie
 fiyiano	fidżyjski
 fiyiano	Fidżyjczyk
-fiyi	Fidżi
 fiyiana	Fidżyjka
 mayúsculo	pokaźny
 mayúscula	majuskuła
@@ -8711,15 +8249,12 @@ gibraltareño	gibraltarski
 gibraltareño	Gibraltarczyk
 gibraltareña	Gibraltarka
 griega	Greczynka
-granada	Grenada
 granadino	grenadyjski
 granadino	Grenadyjczyk
 granadina	Grenadyjka
 groenlandés	grenlandzki
 groenlandés	Grenlandczyk
 groenlandesa	Grenlandka
-guadalupe	Gwadelupa
-guadalupe	imię męskie Guadalupe
 primordial	pierwszorzędny
 guameño	guamski
 guameño	Guamczyk
@@ -8807,7 +8342,6 @@ edredón	pierzyna
 eíder	Somateria mollissima
 crítico	krytyczny
 crítico	krytyk
-cádiz	Kadyks
 gaditano	kadyksyjski
 gaditano	kadyksyjczyk
 gaditana	kadyksyjka
@@ -8876,7 +8410,6 @@ interesante	interesujący
 impar	nieparzysty
 implante	implant
 abiertamente	otwarcie
-líbano	Liban
 libanés	libański
 libanés	Libańczyk
 libanesa	Libanka
@@ -8892,7 +8425,6 @@ keniata	kenijski
 keniata	Kenijczyk
 keniata	Kenijka
 anatomía	anatomia
-kirguistán	Kirgistan
 kirguís	kirgiski
 kirguís	Kirgiz
 kirguís	Kirgizka
@@ -8915,7 +8447,6 @@ kuwaití	Kuwejtka
 laosiano	laotański
 laosiano	Laotańczyk
 laosiana	Laotanka
-lesoto	Lesotho
 lesotense	lesotyjski
 lesotense	Lesotyjczyk
 lesotense	Lesotyjka
@@ -8932,7 +8463,6 @@ enemigo	wróg
 libia	Libijka
 libio	libijski
 libio	Libijczyk
-jerusalén	Jerozolima
 jerosolimitano	jerozolimski
 jerosolimitano	jerozolimczyk
 jerosolimitana	jerozolimka
@@ -8949,7 +8479,6 @@ budista	buddystka
 budismo	buddyzm
 calumnioso	oszczerczy
 camisón	koszula nocna
-pekín	Pekin
 pekinés	pekiński
 pekinés	pekińczyk
 pekinesa	pekinka
@@ -8966,25 +8495,20 @@ malgache	Madagaskarczyk
 malgache	Madagaskarka
 subfusil	pistolet maszynowy
 metralleta	pistolet maszynowy
-malasia	Malezja
 malasio	malezyjski
 malasio	Malezyjczyk
 malasia	Malezyjka
-malaui	Malawi
 malauí	malawijski
 malauí	Malawijczyk
 malauí	Malawijka
-maldivas	Malediwy
 maldiva	Malediwka
 maldivo	malediwski
 maldivo	Malediwczyk
 malí	malijski
 malí	Malijczyk
-malí	Mali
 maltés	maltański
 maltés	Maltańczyk
 maltesa	Maltanka
-marruecos	Maroko
 marroquí	marokański
 marroquí	Marokańczyk
 marroquí	Marokanka
@@ -8992,7 +8516,6 @@ inane	daremny
 agorafobia	agorafobia
 antropofobia	antropofobia
 astrafobia	astrafobia
-méjico	Meksyk
 rabino	rabin
 rabí	rabin
 continuará	ciąg dalszy nastąpi
@@ -9019,7 +8542,6 @@ entrelazar	przeplatać
 termómetro	termometr
 entregar	doręczać
 teoría	teoria
-martinica	Martynika
 martiniqués	martynikański
 martiniqués	Martynikańczyk
 masacre	masakra
@@ -9038,7 +8560,6 @@ eufemismo	eufemizm
 ajedrecista	szachista
 ajedrecista	szachistka
 pérgola	pergola
-mónaco	Monako
 monegasco	monakijski
 monegasco	Monakijczyk
 monegasca	Monakijka
@@ -9049,7 +8570,6 @@ montserratense	montserracki
 montserratense	Montserratczyk
 montserratense	Montserratka
 peluquero	fryzjer
-tte.	teniente → por
 políglota	poliglota
 políglota	poliglotka
 poliglota	poliglota
@@ -9084,7 +8604,6 @@ abotonar	zapinać na guziki
 abotonar	pączkować
 abra	mała zatoka
 abra	otworzyć
-níger	Niger
 nigerino	nigerski
 nigerino	Nigerczyk
 nigerina	Nigerka
@@ -9112,7 +8631,6 @@ detallado	szczegółowy
 ermita	pustelnia
 estrés	stres
 simetría	symetria
-cuaternario	czwartorzęd
 cuaternario	poczwórny
 pipa	fajka
 pipa	bombowo
@@ -9140,14 +8658,12 @@ tenismesista	pingpongista
 tenismesista	pingpongistka
 tenimesista	pingpongista
 tenimesista	pingpongistka
-guadiana	Gwadiana
 apatía	apatia
 apático	apatyczny
 apático	apatyk
 apática	apatyczka
 tunecino	tunezyjski
 tunecino	Tunezyjczyk
-túnez	Tunezja
 tunecina	Tunezyjka
 zimbabuense	zimbabwejski
 zimbabuense	Zimbabweńczyk
@@ -9192,7 +8708,6 @@ paleografía	paleografia
 epidemiológico	epidemiologiczny
 epidemiólogo	epidemiolog
 epidemióloga	epidemiolog
-ariel	imię męskie Ariel
 corsé	gorset
 óvulo	jajo
 marchito	zwiędły
@@ -9276,7 +8791,6 @@ hecho	akt
 treparriscos	Tichodroma muraria
 actinio	aktyn
 abano	duży wachlarz
-rocosas	Góry Skaliste
 intervención	interwencja
 episódico	epizodyczny
 absorción	absorpcja
@@ -9293,7 +8807,6 @@ chabacano	chavacano
 chabola	chałupa
 chacha	niania
 chacharear	paplać
-lázaro	Łazarz
 chacota	raban
 chafar	gnieść
 chaflán	ukos
@@ -9444,12 +8957,8 @@ dólar	dolar
 dolador	ociosujący
 dolador	cieśla
 carámbano	sopel
-zeus	Zeus
-corán	Koran
-carlos	Karol
 burbujear	bulgotać
 campanario	dzwonnica
-sol	Słońce
 confortable	komfortowy
 inicio	początek
 cardiología	kardiologia
@@ -9478,7 +8987,6 @@ web	witryna internetowa
 armado	uzbrojony
 armado	zbroić
 amoniaco	amoniak
-amón	Amon
 batofobia	batofobia
 carretilla	taczka
 balsamera	naczynie
@@ -9544,7 +9052,6 @@ sociolingüística	socjolingwistyka
 chino	chiński
 chino	Chińczyk
 clero	kler
-géminis	Bliźnięta
 gemínidas	geminidy
 géminis	osoba urodzona pod znakiem Bliźniąt
 abreviar	skracać
@@ -9580,7 +9087,6 @@ quinina	chinina
 fermio	ferm
 celofán	celofan
 topología	topologia
-katmandú	Katmandu
 hidrostática	hydrostatyka
 hidrostático	hydrostatyczny
 diente	ząb
@@ -9594,10 +9100,8 @@ galio	gal
 gadolinio	gadolin
 germanio	german
 hafnio	hafn
-aarón	imię męskie Aaron
 tona	śmietanka
 abogacía	adwokatura
-rafael	imię męskie Rafał
 rupia	rupia
 holmio	holm
 yodo	jod
@@ -9657,7 +9161,6 @@ circonio	cyrkon
 teluro	tellur
 cobres	instrumenty dęte blaszane
 bemba	usta o grubych / mięsistych wargach
-adviento	adwent
 neogriego	nowogrecki
 neogriego	nowogrecki
 barítono	baryton
@@ -9667,12 +9170,10 @@ irónicamente	ironicznie
 frigorífico	chłodzący
 frigorífico	chłodnia
 sarcasmo	sarkazm
-cuasimodo	Domingo de Cuasimodo
 abonarse	prenumerować
 masonería	masoneria
 masónico	masoński
 erupción	erupcja
-joel	imię męskie Joel
 agonía	agonia
 esquí	narta
 esquiador	narciarz
@@ -9681,11 +9182,8 @@ mecanismo	mechanizm
 halo	halo
 exaltación	egzaltacja
 riel	szyna
-adriana	imię żeńskie
 concluir	kończyć
 concluir	kończyć się
-adrián	imię męskie Adrian
-adriano	imię męskie Adrian
 protón	proton
 preferir	woleć
 aerómetro	aerometr
@@ -9741,14 +9239,6 @@ agnóstico	agnostyczny
 agnóstico	agnostyk
 aórtico	aortalny
 aortitis	zapalenie aorty
-gn	Libro del Génesis → Rdz
-lv	Libro del Levítico → Kpł
-nm	Libro de los Números → Lb
-dt	Libro del Deuteronomio → Pwt
-neh	Libro de Nehemías → Ne
-tob	Libro de Tobías → Tb
-sir	Libro del Sirácides → Syr
-abd	Libro de Abdías → Księga Abdiasza
 lentamente	powoli
 palíndromo	palindrom
 título	tytuł
@@ -9757,7 +9247,6 @@ división	podział
 encontrar	spotykać
 peer	pierdzieć
 avemaría	zdrowaśka
-vih	virus de inmunodeficiencia humana → HIV
 locomotora	lokomotywa
 anda	nosze
 anda	iść
@@ -9777,8 +9266,6 @@ oficial	rzemieślnik
 oficial	kobieta oficer
 partida	odjazd
 sensato	rozsądny
-argel	Algier
-orán	Oran
 fisión	rozszczepienie
 gracias	dziękuję
 astronómico	astronomiczny
@@ -9806,7 +9293,6 @@ sor	siostra
 bodega	piwnica win
 público	jawny
 público	publiczność
-sebastián	Sebastian
 pesado	ciężki
 pesado	ważyć
 lavavajillas	zmywarka
@@ -9841,7 +9327,6 @@ antes	wcześniejszy
 sus	…używany do dodawania otuchy
 carnívoro	mięsożerny
 carnívoro	zwierzę mięsożerne
-carnívoros	Carnivora
 adelanto	wynalazek
 juego	gra
 directora	dyrektorka
@@ -9882,8 +9367,6 @@ bibliotecario	bibliotekarz
 bibliotecaria	bibliotekarka
 biblioteconomía	bibliotekoznawstwo
 -ario	…tworzący przymiotniki odrzeczownikowe
-maría	imię żeńskie Maria
-martín	imię męskie Marcin
 acreditación	akredytacja
 acreditativo	potwierdzający
 viticultura	winogrodnictwo
@@ -9919,7 +9402,6 @@ emisor	nadawca
 octano	oktan
 octanaje	liczba oktanowa
 octal	ósemkowy
-sur	południe
 diáspora	diaspora
 egocéntrico	egocentryczny
 hormigón	beton
@@ -9946,7 +9428,6 @@ tenista	tenisistka
 tangible	dotykalny
 barroco	barokowy
 hostia	hostia
-barroco	barok
 caja	pudełko
 patinador	jeżdżący na łyżwach
 patinador	łyżwiarz
@@ -9959,12 +9440,10 @@ tráiler	przyczepa ciężarówki
 ladilla	Pthirus pubis
 pesimismo	pesymizm
 ciclomotor	motorower
-fabio	imię męskie Fabiusz
 centésimo	setny
 centésimo	jedna setna
 centeno	setny
 centeno	żyto
-bárbara	imię żeńskie Barbara
 sanguina	sangwina
 dermatosis	dermatoza
 dermato-	dermato
@@ -10018,7 +9497,6 @@ orangerie	oranżeria
 purga	środek przeczyszczający
 carrocería	karoseria
 astato	astat
-claudia	imię żeńskie
 energía	energia
 guapo	przystojny
 lluvia	deszcz
@@ -10046,9 +9524,7 @@ sismológico	sejsmologiczny
 amiba	ameba
 incidente	wydarzenie
 agnosia	agnozja
-alfonso	imię męskie
 aloe	aloes
-anastasia	imię żeńskie Anastazja
 anorgasmia	anorgazmia
 avatar	reinkarnacja
 avitaminosis	awitaminoza
@@ -10061,10 +9537,8 @@ diuresis	diureza
 exegesis	egzegeza
 elector	wybierający
 elector	wyborca
-esdras	Ezdrasz
 esposo	małżonek
 esposas	kajdanki
-fernando	imię męskie
 vial	drogowy
 vial	aleja
 fractal	fraktalny
@@ -10078,13 +9552,8 @@ gnosis	gnoza
 catástrofe	katastrofa
 semen	nasienie
 ecosistema	ekosystem
-jacinta	imię żeńskie
 homeostasis	homeostaza
-ignacio	imię męskie Ignacy
 incunable	inkunabuł
-isabel	imię żeńskie Elżbieta
-isis	Izyda
-jacqueline	imię żeńskie
 ion	jon
 iota	jota
 lictor	liktor
@@ -10096,7 +9565,6 @@ tártaro	Tatar
 ocaso	zachód
 relación	sprawozdanie
 tranquilidad	spokój
-tauro	Byk
 palestino	palestyński
 palestino	Palestyńczyk
 machete	tasak
@@ -10136,10 +9604,7 @@ bonaerense	mający związek z prowincją Buenos Aires
 bonaerense	mieszkaniec prowincji Buenos Aires
 bonaerense	mieszkanka prowincji Buenos Aires
 beso	pocałunek
-judas	Judasz
-oeste	zachód
 hemangioma	naczyniak krwionośny
-judea	Judea
 complexión	kompleksja
 comunicación	komunikacja
 indiferente	obojętny
@@ -10172,7 +9637,6 @@ participación	uczestnictwo
 pensamiento	myśl
 taberna	tawerna
 latín	łacina
-gante	Gandawa
 biosfera	biosfera
 ornitólogo	ornitolog
 ornitología	ornitologia
@@ -10278,7 +9742,6 @@ comparable	porównywalny
 visible	widzialny
 epifito	epifityczny
 equitativamente	równo
-lucerna	Lucerna
 ilimitado	nieograniczony
 suceso	wydarzenie
 novel	nowy
@@ -10287,7 +9750,6 @@ novel	nowa
 picar	kłuć
 picar	drapać
 jamás	nigdy
-daniela	imię żeńskie Daniela
 comunicativo	komunikatywny
 bastante	dostateczny
 bastante	dostatecznie
@@ -10323,10 +9785,7 @@ puntualmente	punktualnie
 puntual	punktualny
 puntualidad	punktualność
 harissa	harissa
-aniceto	imię męskie
-anatolio	Anatol
 peluche	plusz
-bruselas	Bruksela
 bruselense	brukselski
 bruselense	brukselczyk
 punta	szpic
@@ -10370,7 +9829,6 @@ vendido	sprzedany
 mojado	zmoczony
 mojado	moczenie
 monótono	monotonny
-sevilla	Sewilla
 sevillano	sewilski
 sevillano	sewilczyk
 atraer	przyciągać
@@ -10388,7 +9846,6 @@ patinete	hulajnoga
 precolombino	prekolumbijski
 precisión	precyzja
 unto	smarowidło
-enrique	imię męskie Henryk
 carguero	noszący ciężary
 carguero	tragarz
 loncha	plasterek
@@ -10409,7 +9866,6 @@ insole	nasłoneczniać
 peyorativo	pejoratywny
 semiconductor	półprzewodnikowy
 semiconductor	półprzewodnik
-salamanca	Salamanka
 salvo	bezpieczny
 salvo	poza
 silo	silos
@@ -10418,11 +9874,8 @@ ratio	stosunek
 resort	centrum wypoczynkowe/turystyczne
 taco	kołek
 tapioca	tapioka
-texas	Teksas
-tenerife	Teneryfa
 terabyte	terabajt
 transversal	poprzeczny
-trento	Trydent
 pulse	naciskać
 lipoma	tłuszczak
 verbena	werbena
@@ -10461,7 +9914,6 @@ quimono	kimono
 boya	boja
 tridente	trójzębny
 tridente	trójząb
-arturo	imię męskie Artur
 versión	wersja
 bajío	niski
 bajío	mielizna
@@ -10486,17 +9938,12 @@ sedicente	rzekomy
 excepcional	wyjątkowy
 observación	obserwacja
 maquinilla	maszynka do golenia
-hugo	imię męskie Hugo
-claudio	imię męskie
 párrafo	paragraf
-elías	imię męskie Eliasz
-eduardo	imię męskie Edward
 pugna	walka
 pugna	walczyć
 rubio	jasny
 rubio	blondyn
 bañar	kąpać
-paquistán	Pakistan
 últimamente	ostatnio
 monosílabo	jednosylabowy
 monosílabo	monosylaba
@@ -10548,7 +9995,6 @@ vertebrado	ułożony
 vertebrado	kręgowiec
 maratón	maraton
 maratón	maraton
-omar	imię męskie Omar
 torpe	niemrawy
 oratoria	krasomówstwo
 ninfa	nimfa
@@ -10609,7 +10055,6 @@ puerco	brudny
 vómer	lemiesz
 anillo	pierścień
 jubileo	odpust zupełny
-jorge	imię męskie Jerzy
 ética	etyka
 ético	etyczny
 ético	etyk
@@ -10617,7 +10062,6 @@ profesión	zawód
 agronomía	agronomia
 agrónomo	agronom
 agrónomo	agronomiczny
-ernesto	imię męskie Ernest
 caos	chaos
 cardiólogo	kardiolog
 cardióloga	kobieta kardiolog
@@ -10629,7 +10073,6 @@ ideólogo	ideolog
 ideóloga	kobieta ideolog
 púnico	punicki
 púnico	punicki
-sudán	Sudan
 sudanés	sudański
 sudanés	Sudańczyk
 sudanesa	Sudanka
@@ -10668,7 +10111,6 @@ brujo	czarnoksiężnik
 surrealista	surrealistyczny
 surrealista	surrealista
 surrealista	surrealistka
-atlántico	Atlantyk
 atlántico	atlantycki
 balonmano	piłka ręczna
 superrealista	surrealistyczny
@@ -10699,7 +10141,6 @@ sentina	zęza
 anagrama	anagram
 truismo	truizm
 cortés	dworny
-kirguisia	Kirgistan
 atento	czujny
 cubierta	nakrycie
 lumbo	krzyż
@@ -10830,8 +10271,6 @@ ficus	figowiec
 ruta	droga
 diurético	moczopędny
 diurético	środek moczopędny
-adelina	imię żeńskie
-nicodemo	imię męskie Nikodem
 beneficioso	dochodowy
 galón	galon
 abacá	Musa textilis
@@ -10864,7 +10303,6 @@ sustantivo	rzeczownikowy
 sustantivo	rzeczownik
 luso	portugalski
 luso	Portugalczyk
-alfredo	imię męskie Alfred
 bondadoso	dobrotliwy
 bondad	dobroć
 abrochar	zapinać
@@ -10918,16 +10356,12 @@ amperio	amper
 petaca	kufer
 cántaro	dzban
 pirenaico	pirenejski
-pirineos	Pireneje
-pirineo	Pireneje
-rodolfo	imię męskie Rudolf
 virulento	wirusowy
 arpista	harfista
 arpista	harfistka
 anseático	hanzeatycki
 hanseático	hanzeatycki
 fático	fatyczny
-demetrio	Demetriusz
 incaico	inkaski
 anacoluto	anakolut
 realidad	rzeczywistość
@@ -10945,10 +10379,8 @@ barato	tani
 barato	tania sprzedaż
 barato	tanio
 protección	ochrona
-bce	Banco Central Europeo → CBE
 romperse	rozbić się
 cantidad	ilość
-aquiles	Achilles
 molar	trzonowy
 molar	ząb trzonowy
 molar	podobać się
@@ -10973,9 +10405,7 @@ termes	termit
 marine	marine
 marine	marine
 marine	marynować
-ezra	Ezdrasz
 adaptable	możliwy do przystosowania
-anastasio	imię męskie Anastazy
 dictadura	dyktatura
 origami	origami
 moquillo	nosówka
@@ -10994,12 +10424,10 @@ jazmín	Jasminum
 sane	leczyć
 bingo	bingo
 bingo	bingo!
-aland	Wyspy Alandzkie
 déficit	deficyt
 leona	lwica
 diagrama	diagram
 flotilla	flota
-ángel	imię męskie Anioł
 consecuencia	skutek
 epidermis	naskórek
 halitosis	halitoza
@@ -11023,9 +10451,7 @@ cognitivismo	kognitywizm
 cognición	poznanie
 zurear	o gołębiach
 grapadora	zszywacz
-cagliari	Cagliari
 copie	kopiować
-candela	imię żeńskie Candela
 autodidacta	będący samoukiem
 autodidacta	samouk
 lego	laicki
@@ -11036,7 +10462,6 @@ terapeuta	terapeutka
 terapéutico	terapeutyczny
 destructivo	destrukcyjny
 tránsito	przechodzenie
-tránsito	Wniebowzięcie
 herida	rana
 herida	ranić
 mural	ścienny
@@ -11074,7 +10499,6 @@ imprimir	drukować
 ciudadela	cytadela
 colina	wzgórze
 aguanieve	deszcz ze śniegiem
-tíber	Tyber
 regar	podlewać
 aminoácido	aminokwas
 insuficiente	niedostateczny
@@ -11090,7 +10514,6 @@ cazadora	kurtka
 periclasa	peryklaz
 pericarpio	owocnia
 bandeja	taca
-atlántida	Atlantyda
 hemorragia	krwotok
 oropéndola	Oriolus oriolus
 oriol	Oriolus oriolus
@@ -11148,14 +10571,12 @@ cuadriga	kwadryga
 aerobús	aerobus
 forastero	zamiejscowy
 forastero	przybysz
-jordán	Jordan
 jordán	źródło młodości
 satisfecho	zadowolony
 barbián	śmiały
 barbián	śmiałek
 baratija	drobiazg
 hoplita	hoplita
-baviera	Bawaria
 indispensable	nieodzowny
 exiguo	znikomy
 epístola	list
@@ -11166,7 +10587,6 @@ xi	ksi
 ecléctico	eklektyczny
 eclecticismo	eklektyzm
 correcto	poprawny
-guayana	Gujana
 salón	salon
 fórceps	kleszcze porodowe
 patrocinar	patronować
@@ -11219,14 +10639,12 @@ histeria	histeria
 sentar	sadzać
 sentar	leżeć
 parábola	parabola
-alicante	Alicante
 suplicar	błagać
 cuchillo	nóż
 adobe	adobe
 adobe	marynować
 niña	dziewczynka
 seco	suchy
-kazajistán	Kazachstan
 helar	zamrażać
 helar	panować mróz
 pronunciación	wymowa
@@ -11234,7 +10652,6 @@ visor	wizjer
 trueno	grzmot
 antónimo	antonimiczny
 antónimo	antonim
-luis	imię męskie
 hijita	córeczka
 izquierda	lewa ręka
 cite	cytować
@@ -11249,18 +10666,14 @@ p.	página → s
 incomprehensible	niezrozumiały
 divisible	podzielny
 indivisible	niepodzielny
-neandertal	Neandertal
 fume	palić
 rugby	rugby
 semi-	pół
 whiskey	whisky
 caña	piwo z beczki
 irresistible	nieodparty
-pp	Partido Popular → Partia Ludowa
 vernal	wiosenny
-leonardo	imię męskie
 jaula	klatka
-pepe	imię męskie Józek
 sueco	szwedzki
 sueco	Szwed
 sueca	Szwedka
@@ -11272,17 +10685,13 @@ media	pośredniczyć
 selva	puszcza
 matadero	rzeźnia
 permafrost	wieczna zmarzlina
-clara	imię żeńskie Klara
-diego	Diego
 acariciar	pieścić
 vivid	żyć
 geometría	geometria
-caín	imię męskie Kain
 fiebre	gorączka
 cacique	kacyk
 hematoma	krwiak
 quintal	kwintal
-yolanda	Jolanta
 paraguas	parasol
 electricidad	elektryczność
 retsina	retsina
@@ -11293,18 +10702,14 @@ bengalí	bengalski
 bengalí	Bengalczyk
 bengalí	Bengalka
 vuelo	lot
-laponia	Laponia
-isa	imię żeńskie
 ancla	kotwica
 asturiano	asturyjski
 asturiano	Asturyjczyk
 placebo	placebo
-can	Caja Navarra → Kasa Oszczędności Nawarry
 geo	antyterrorysta
 geo	antyterrorysta
 soja	Glycine max
 barriga	kałdun
-nico	imię męskie
 sinceramente	szczerze
 misoginia	mizoginia
 imaginación	wyobraźnia
@@ -11313,7 +10718,6 @@ impaciente	niecierpliwy
 inauguración	inauguracja
 indiferencia	obojętność
 indigestión	niestrawność
-sam	Libro de Samuel → Sm
 tesla	tesla
 gnomon	gnomon
 homo-	homo
@@ -11324,8 +10728,6 @@ dirigible	sterowiec
 irresponsable	nieodpowiedzialny
 mecánica	mechanika
 térmico	termiczny
-ruanda	Rwanda
-tayikistán	Tadżykistan
 droguería	drogeria
 abaratar	obniżać cenę
 abarrancadero	grzęzawisko
@@ -11338,7 +10740,6 @@ juzgar	sądzić kogoś
 locución	zwrot
 expresión	ekspresja
 expresar	wyrażać
-ígor	Igor
 instrucción	instrukcja
 intervalo	interwał
 inyección	zastrzyk
@@ -11353,8 +10754,6 @@ incómodo	niewygodny
 imposible	o osobie
 imprudencia	nieostrożność
 independientemente	niezależnie
-isaías	imię męskie Izajasz
-éufrates	Eufrat
 xenófobo	ksenofobiczny
 xenófobo	ksenofob
 xenófilo	ksenofil
@@ -11374,13 +10773,6 @@ infidelidad	niewierność
 desorganización	dezorganizacja
 desorientación	dezorientacja
 disciplinario	dyscyplinarny
-adriático	Adriatyk
-constantinopla	Konstantynopol
-belgrado	Belgrad
-abruzos	Abruzja
-florencia	Florencja
-marsella	Marsylia
-múnich	Monachium
 activismo	aktywizm
 esperma	sperma
 credibilidad	wiarygodność
@@ -11423,13 +10815,10 @@ gentilmente	uprzejmie
 ionosfera	jonosfera
 encalvecer	łysieć
 pl.	plaza → plac
-jerónimo	imię męskie Hieronim
-cristóbal	imię męskie Krzysztof
 cristobalita	krystobalit
 des-	dez
 nesciencia	ignorancja
 ignorancia	ignorancja
-alejandro	imię męskie Aleksander
 malsano	niezdrowy
 ikebana	ikebana
 tendinitis	zapalenie ścięgna
@@ -11451,8 +10840,6 @@ oriundo	pochodzący
 irreversible	nieodwracalny
 reversible	możliwy do oddania/zwrócenia
 crecer	rosnąć
-mediodía	południe
-mediodía	południe
 mostrar	pokazywać
 muchacha	dziewczyna
 perdonar	wybaczać
@@ -11463,8 +10850,6 @@ anamnesis	anamneza
 esperantista	esperancki
 esperantista	esperantysta
 esperantista	esperantystka
-ibiza	Ibiza
-ibiza	samochód marki SEAT
 timbre	dzwonek
 cabergolina	kabergolina
 a-	a
@@ -11509,14 +10894,12 @@ tetraplejia	tetraplegia
 tetraplejía	tetraplegia
 rayo	promień
 angioma	naczyniak
-timor	Timor
 salutación	powitanie
 tendencia	tendencja
 secundario	wtórny
 secundario	sekundnik
 pavoroso	przerażający
 objetividad	obiektywność
-sofía	Sofia
 talón	pięta
 proselitismo	prozelityzm
 prosélito	prozelita
@@ -11535,14 +10918,11 @@ afro-	afro
 panarabismo	panarabizm
 vasco	baskijski
 vasco	Bask
-sudáfrica	Republika Południowej Afryki
 abjurar	wyrzekać się
 acumular	gromadzić
 aldea	wioska
 tristemente	smutno
 preparación	przygotowanie
-leiden	Lejda
-lupe	imię żeńskie Guadalupe
 debacle	ruina
 aserrar	piłować
 toronjo	Citrus paradisi
@@ -11560,7 +10940,6 @@ desaparecer	znikać
 desaparecer	sprzątnąć
 cerezo	Prunus avium
 mosto	moszcz winny
-siracusa	Syrakuzy
 calzada	utwardzona droga
 parcialmente	częściowo
 doctrinario	doktryner
@@ -11614,11 +10993,7 @@ dado	kość
 dado	dany
 dado	dawać
 ye	y
-mallorca	Majorka
-marina	imię żeńskie Marina
 archipiélago	archipelag
-archipiélago	Morze Egejskie
-egeo	Morze Egejskie
 egeo	egejski
 marque	znakować
 pulgón	mszyca
@@ -11644,7 +11019,6 @@ adúltero	cudzołożący
 adúltero	cudzołożnik
 adúltera	cudzołożnica
 cromatina	chromatyna
-vulgata	Wulgata
 lenitivo	łagodzący
 lenitivo	środek uśmierzający
 lene	miękki
@@ -11670,11 +11044,8 @@ bombonera	bomboniera
 temporáneo	chwilowy
 zódiac	motorowy ponton
 canónigo	kanonik
-dora	imię żeńskie
-hestia	Hestia
 deca-	deka
 nevada	opad śniegu
-altái	Ałtaj
 quiosco	kiosk
 pupitre	pulpit
 pizarra	tablica
@@ -11726,10 +11097,8 @@ jaque	szach
 jaque	uciekaj! goń się!
 hogar	palenisko
 hoguera	ognisko
-mac	Libro de las Macabeos → Mch
 tronco	pień
 ogaño	latoś
-valentina	imię żeńskie
 anís	Pimpinella anisum
 suburbano	podmiejski
 suburbano	mieszkaniec przedmieścia
@@ -11746,8 +11115,6 @@ súplica	prośba
 suprimir	znosić
 susto	strach
 mutuamente	wzajemnie
-sergio	imię męskie Sergiusz
-roberto	imię męskie Robert
 desodorante	odwaniający
 desodorante	dezodorant
 orina	mocz
@@ -11793,7 +11160,6 @@ ocupado	zajęty
 pelirrojo	rudy
 diva	diwa
 diva	boski
-haarlem	Haarlem
 jesuita	jezuita
 jesuita	jezuicki
 prestador	pożyczający
@@ -11813,14 +11179,12 @@ elfo	elf
 ido	otumaniony
 ido	zależnie od środka lokomocji
 mochila	plecak
-cremona	Cremona
 tortura	tortura
 mire	patrzeć
 hamburguesa	kotlet mielony
 repasar	powtarzać
 bloc	blok
 dalle	kosa
-celia	imię żeńskie Celina
 intermodal	intermodalny
 imperceptible	niedostrzegalny
 venere	wielbić
@@ -11830,18 +11194,8 @@ tory	torysowski
 zoofobia	zoofobia
 zootecnia	zootechnika
 hura	karbunkuł
-basilea	Bazylea
-berna	Berno
-birmania	Birma
-verona	Werona
-volinia	Wołyń
 puta	kurwa
-delia	imię żeńskie
 graven	obciążać
-udine	Udine
-alberto	imię męskie Albert
-mariano	imię męskie
-teodoro	imię męskie
 cariad	powodować
 corista	chórzysta
 corista	chórzystka
@@ -11851,15 +11205,8 @@ ebonita	ebonit
 ebriedad	pijaństwo
 ebullición	wrzenie
 transcontinental	transkontynentalny
-adolfo	imię męskie Adolf
 sedentario	siedzący
 epa	hej
-basilio	imię męskie
-bernardo	imię męskie
-bonifacio	imię męskie Bonifacy
-clemente	imię męskie Klemens
-emilio	imię męskie Emil
-eusebio	imię męskie Euzebiusz
 repetir	powtarzać
 repetir	odbijać się
 gazpacho	zupa gazpacho
@@ -11867,7 +11214,6 @@ delicioso	pyszny
 civilizar	cywilizować
 equilibrio	równowaga
 arzobispo	arcybiskup
-dresde	Drezno
 aburrir	nudzić
 acelga	Beta vulgaris subsp. cicla L
 almacén	magazyn
@@ -11891,8 +11237,6 @@ acercar	zbliżać
 mete	wkładać
 adquirir	nabywać
 cartilaginoso	chrząstkowy
-mamíferos	Mammalia
-aves	Aves
 sustituir	zastępować
 neumático	pneumatyczny
 neumático	opona
@@ -11913,22 +11257,8 @@ fondo	dno
 pare	zatrzymywać
 alfalfa	lucerna
 asina	tak
-gustavo	imię męskie
-gregorio	imię męskie
-gilberto	imię męskie
-gervasio	imię męskie Gerwazy
-feliciano	imię męskie
-ferdinando	imię męskie Ferdynand
-lorenzo	imię męskie Laurencjusz
-isidoro	imię męskie Izydor
-ireneo	imię męskie Ireneusz
-leopoldo	imię męskie Leopold
-severino	imię męskie Seweryn
-estanislao	imię męskie Stanisław
-severina	imię żeńskie Seweryna
 almeja	małż jadalny
 bucal	ustny
-elena	imię żeńskie Helena
 determinado	określony
 determinado	określać
 nupcial	ślubny
@@ -11997,15 +11327,11 @@ gastroenteritis	wirusowe zakażenie przewodu pokarmowego
 gastroenterología	gastroenterologia
 entonación	intonacja
 veda	zakaz
-veda	Weda
 védico	wedyjski
 vedismo	wedyzm
 morfología	morfologia
 macedónico	macedoński
 ulcera	powodować owrzodzenie
-aitor	imię męskie
-ainhoa	imię żeńskie
-leire	imię żeńskie
 dimensión	rozmiar
 dadaísmo	dadaizm
 dadaísta	dadaistyczny
@@ -12032,7 +11358,6 @@ numérico	liczbowy
 intranet	intranet
 europea	europejska
 europea	Europejka
-piscis	Ryby
 papamóvil	papamobile
 gastrointestinal	żołądkowo-jelitowy
 bromear	żartować
@@ -12048,9 +11373,7 @@ cuatrero	koniokrad
 retreta	capstrzyk
 boza	faleń
 narcisismo	narcyzm
-narciso	Narcyz
 narciso	Narcissus
-narcisa	imię żeńskie Narcyza
 trabalenguas	łamaniec językowy
 mentón	podbródek
 rascacielos	drapacz chmur
@@ -12072,8 +11395,6 @@ artrópodo	stawonóg
 colza	rzepak
 wok	wok
 aries	urodzony pod znakiem Barana
-aries	Baran
-aries	Baran
 etnólogo	etnolog
 doctorarse	doktoryzować się
 médica	lekarka
@@ -12085,13 +11406,11 @@ pavón	paw
 devenir	zdarzyć się
 devenir	zmiana
 clientelismo	nepotyzm
-olimpo	Olimp
 granado	Punica granatum
 urogallo	Tetrao urogallus
 garzo	niebieskawy
 garzo	bedłka
 categoría	kategoria
-olimpia	Olimpia
 coven	kopać
 carraca	karaka
 reparto	rozdział
@@ -12110,8 +11429,6 @@ impala	Aepyceros melampus
 sisal	sizal
 esquirol	łamistrajk
 esponja	gąbka
-norteamérica	Ameryka Północna
-iberoamérica	Iberoameryka
 fimosis	stulejka
 arcabuz	arkebuz
 herramientas	narzędzia
@@ -12128,16 +11445,11 @@ coordenada	współrzędna
 constelación	konstelacja
 acimut	azymut
 cénit	zenit
-norte	północ
 hidromiel	miód pitny
-babilonia	Babilonia
 biografía	biografia
-cantabria	Kantabria
 pornografía	pornografia
 guionista	scenarzysta
 guionista	scenarzystka
-comores	Komory
-córdoba	Kordoba
 soberanía	suwerenność
 poli	glina
 poli	glina
@@ -12148,11 +11460,9 @@ acústica	akustyka
 globalización	globalizacja
 escritura	pisanie
 fierro	żelazo
-escandinavia	Skandynawia
 paralelo	równoległy
 paralelo	równoleżnik
 escultura	rzeźba
-balcanes	Bałkany
 etnografía	etnografia
 fonética	fonetyka
 consonante	rymujący się
@@ -12162,7 +11472,6 @@ seta	grzyb
 yema	pączek
 patrón	patron
 tecnológicamente	technologicznie
-marcelo	Marceli
 propuesta	propozycja
 propina	napiwek
 prórroga	przedłużenie
@@ -12207,7 +11516,6 @@ formalista	formalista
 formalista	formalistka
 complejo	skomplikowany
 complejo	kompleks
-clotilde	imię żeńskie Klotylda
 camioneta	furgonetka
 letrero	napis
 autoestop	autostop
@@ -12284,12 +11592,9 @@ ocurrente	dowcipny
 ahuehuete	Taxodium mucronatum
 pe	pe
 nesciente	nieświadom
-pib	producto interior bruto → PKB
 sabina	Juniperus sabina
-benevento	Benewent
 bulbul	bilbil
 biota	biota
-kilimanjaro	Kilimandżaro
 humanitario	humanitarny
 maquillaje	makijaż
 alacrán	skorpion
@@ -12380,7 +11685,6 @@ esconder	chować
 aritmética	arytmetyczka
 década	dekada
 evolución	ewolucja
-extremadura	Estremadura
 oficialmente	oficjalnie
 ideologización	ideologizacja
 neofascismo	neofaszyzm
@@ -12506,8 +11810,6 @@ hipoteca	hipoteka
 palme	gaj palmowy
 limnología	limnologia
 dilema	dylemat
-lucía	Łucja
-julio	imię męskie Juliusz
 obedecer	słuchać
 obedecer	wynikać
 lanzar	rzucać
@@ -12520,7 +11822,6 @@ encerar	o zbożach
 encerrar	zamykać
 quejarse	skarżyć się
 dibujo	rysunek
-dioniso	Dionizos
 pon	autostop
 pon	kłaść
 poselectoral	powyborczy
@@ -12603,9 +11904,7 @@ mediano	średni
 descontento	niezadowolony
 descontento	niezadowolenie
 tamaño	rozmiar
-lorenza	imię żeńskie
 sentarse	siadać
-adán	imię męskie Adam
 bandada	stado
 hectárea	hektar
 paréntesis	nawias
@@ -12614,7 +11913,6 @@ triglifo	tryglif
 tríglifo	tryglif
 acantilado	tarasowaty
 acantilado	urwisko
-javier	imię męskie Ksawery
 sarta	rząd
 desastre	nieszczęście
 cercopiteco	Cercopithecus
@@ -12655,7 +11953,6 @@ odia	nienawidzić
 puto	pieprzony
 puto	bierny homoseksualista
 tímidamente	nieśmiało
-anatolia	Anatolia
 grafía	grafia
 acuícola	wodny
 alegal	nieprzewidziany prawem
@@ -12683,18 +11980,15 @@ plusmarquista	rekordzista
 plusmarquista	rekordzistka
 aposta	umyślnie
 antituberculoso	przeciwgruźliczy
-pelayo	imię męskie Pelagiusz
 cojonudo	wspaniały
 cojonudo	zajebiście
 peronismo	peronizm
 ahorro	oszczędzanie
-gales	Walia
 galés	walijski
 galés	Walijczyk
 fenicio	fenicki
 fenicio	Fenicjanin
 fenicia	Fenicjanka
-fenicia	Fenicja
 pilote	pal
 visite	odwiedzać
 mangue	zob. menda → ktoś
@@ -12776,7 +12070,6 @@ autoestopista	autostopowiczka
 hermanastro	przyrodni brat
 hermanastra	przyrodnia siostra
 hermanastros	przyrodnie rodzeństwo
-menorca	Minorka
 guaraná	Paullinia cupana
 tutearse	tykać się
 tuteo	mówienie sobie po imieniu
@@ -12785,8 +12078,6 @@ espermatozoario	plemnik
 espermatozoo	spermatozoid
 pg.	página → str
 pág.	página → str
-p.	padre → o
-pnt.	pontífice → pap
 pza.	plaza → pl
 plza.	plaza → pl
 triptongo	tryftong
@@ -12834,7 +12125,6 @@ alantoides	taki
 experiencia	doznanie
 mitológico	mitologiczny
 mitológico	mitolog
-latinoamérica	Ameryka Łacińska
 latinoamericano	latynoamerykański
 latinoamericano	Latynos
 iberoamericano	iberoamerykański
@@ -12913,7 +12203,6 @@ alhorre	smółka
 meconio	smółka
 algazara	okrzyki radości
 cosmo-	kosmo
-península	półwysep
 econazol	ekonazol
 planetoide	planetoida
 pasmo	spazm
@@ -12930,7 +12219,6 @@ resumidamente	w sumie
 resumir	streszczać
 hado	fatum
 cafiche	alfons
-centroamérica	Ameryka Centralna
 pugilato	boks
 singapurense	singapurski
 singapurense	Singapurczyk
@@ -12990,7 +12278,6 @@ ciegamente	ślepo
 atañer	dotyczyć
 abiótico	abiotyczny
 cristianizar	chrystianizować
-atlanta	Atlanta
 litosfera	litosfera
 mientras	tymczasem
 mientras	podczas gdy
@@ -13122,7 +12409,6 @@ salpicar	o cieczy
 decentemente	przyzwoicie
 indiano	indyjski
 indiano	mężczyzna pochodzący z Ameryki
-feliciana	imię żeńskie
 calculable	policzalny
 tranquilamente	spokojnie
 fluir	o ciekach wodnych
@@ -13270,7 +12556,6 @@ elegía	elegia
 numéricamente	liczbowo
 marea	pływ morski
 fracción	ułamek
-vulcano	Wulkan
 alminar	minaret
 urinario	moczowy
 urinario	pisuar
@@ -13342,12 +12627,10 @@ jónico	joński
 jónico	Jończyk
 adriático	adriatycki
 criba	sito
-eratóstenes	Eratostenes
 especialmente	szczególnie
 paellera	naczynie do przyrządzania paelli
 paellero	dotyczący paelli
 paellero	piec lub piecyk do przyrządzania paelli
-iva	impuesto sobre el valor añadido → VAT
 sétimo	siódmy
 miope	krótkowzroczny
 miope	krótkowidz
@@ -13365,7 +12648,6 @@ curta	garbować
 rapaz	łupieżczy
 rapaz	ptak drapieżny
 rapaz	dzieciak
-adalberto	imię męskie Adalbert
 paradisíaco	rajski
 grama	perz
 neto	czysty
@@ -13470,16 +12752,11 @@ solsticio	przesilenie
 lanzallamas	miotacz ognia
 tirita	plasterek
 tirita	dygotać
-tesalia	Tesalia
-boyero	Wolarz
-vesubio	Wezuwiusz
 huy	oj
 ténder	tender
 rasen	wygładzać
-checoslovaquia	Czechosłowacja
 flui	o ciekach wodnych
 beisbol	baseball
-bosnia-herzegovina	Bośnia i Hercegowina
 gentío	tłum
 recién	niedawno
 recién	zaledwie
@@ -13489,8 +12766,6 @@ apabullante	oszałamiający
 seguido	z rzędu
 seguido	następnie
 seguido	podążać za
-gobierno	rząd
-pegaso	Pegaz
 fichaje	transfer
 millonario	milionowy
 millonario	milioner
@@ -13505,7 +12780,6 @@ mortadela	mortadela
 ventilador	wiatrak
 polvos	puder
 vendimia	winobranie
-mateo	imię męskie Mateusz
 esencialismo	esencjalizm
 levadizo	o moście
 polvoriento	zakurzony
@@ -13609,7 +12883,6 @@ transiberiano	pociąg kolei transsyberyjskiej
 transalpino	transalpejski
 transandino	transandyjski
 transpirenaico	transpirenejski
-orión	Orion
 oriónida	gwiazda spadająca z roju Orionid
 inminente	zbliżający się
 goleador	strzelecki
@@ -13641,7 +12914,6 @@ posesor	posiadacz
 tenaz	silnie przywierający lub przylegący
 remolcador	holowniczy
 remolcador	holownik
-castilla	Kastylia
 monástico	klasztorny
 monásticamente	klasztornie
 unicornio	jednorożec
@@ -13651,7 +12923,6 @@ interurbano	międzymiastowy
 asignatura	przedmiot
 inalterable	nienaruszalny
 extraescolar	pozaszkolny
-iglesia	Kościół
 eclesiástico	kościelny
 eclesiástico	duchowny
 significativamente	znacząco
@@ -13755,7 +13026,6 @@ serbia	Serbka
 seychellense	seszelski
 seychellense	Seszelczyk
 seychellense	Seszelka
-suazilandia	Suazi
 suazi	suazyjski
 suazi	Suazyjczyk
 suazi	Suazyjka
@@ -13770,14 +13040,12 @@ tayiko	Tadżyk
 tayika	Tadżyjka
 ampute	amputować
 arroyo	strumień
-tallin	Tallinn
 corografía	chorografia
 ramadán	ramadan
 hidromasaje	hydromasaż
 togolés	togijski
 togolés	Togijczyk
 togolesa	Togijka
-trípoli	Trypolis
 tripolitano	trypolitański
 tripolitano	trypolitańczyk
 tripolitana	trypolitanka
@@ -13794,8 +13062,6 @@ todoterreno	samochód terenowy
 pesquero	rybacki
 pesquero	statek rybacki
 descifrar	rozszyfrowywać
-everest	Mount Everest
-éverest	Mount Everest
 tectónico	tektoniczny
 tectónica	tektonika
 calculador	obliczający
@@ -13833,7 +13099,6 @@ minimalista	minimalistyczny
 minimalista	minimalista
 minimalista	minimalistka
 minimalismo	minimalizm
-catar	Katar
 compilación	kompilacja
 impreso	drukowany
 impreso	druk
@@ -13924,7 +13189,6 @@ afro	Afrykanin
 eccema	egzema
 asmática	astmatyczka
 quimioluminiscencia	chemiluminescencja
-bibiana	imię żeńskie Bibiana
 emigre	emigrować
 cabe	stuknięcie
 cabe	obok
@@ -13933,7 +13197,6 @@ autobiógrafa	autobiografka
 autobiógrafo	autobiograf
 biógrafo	biograf
 biógrafa	biografka
-andrés	imię męskie Andrzej
 aristocrático	arystokratyczny
 dé	dawać
 abisinio	abisyński
@@ -13951,12 +13214,10 @@ banquete	bankiet
 voleibol	siatkówka
 artesano	rzemieślnik
 artesano	rzemieślniczy
-yeniséi	Jenisej
 hidromel	miód pitny
 tira	pas
 tira	ciągnąć
 moqueta	mokiet
-morfeo	Morfeusz
 camomila	rumianek
 violeta	fiołek
 violeta	barwnik fiołkowy/fioletowy
@@ -13967,7 +13228,6 @@ tarar	tarować
 mirada	spojrzenie
 positivar	otrzymywać pozytyw
 positivizar	nadawać charakter pozytywny
-turín	Turyn
 telegráficamente	telegraficznie
 asiática	Azjatka
 ibérico	iberyjski
@@ -13983,7 +13243,6 @@ meteorológico	meteorologiczny
 meteorización	wietrzenie
 ciudad-estado	miasto-państwo
 territorio	terytorium
-seúl	Seul
 emisario	wysłannik
 fantástico	fantastyczny
 citad	cytować
@@ -13998,14 +13257,11 @@ neoyorquino	nowojorski
 neoyorquino	nowojorczyk
 neoyorquina	ż od neoyorquino
 neoyorquina	nowojorczanka
-nazaret	Nazaret
 sénior	senior
 tocayo	imiennik
 nona	ż od nono
 nona	nona
-peloponeso	Peloponez
 debe	debet
-sólon	Solon
 elasticidad	elastyczność
 equipe	ekwipować
 arritmia	arytmia
@@ -14014,7 +13270,6 @@ incólume	nietknięty
 meublé	dom publiczny
 fidelidad	wierność
 grunge	grunge
-mercedes	imię żeńskie Mercedes
 alófono	alofon
 alófono	innojęzyczny
 marimba	marimba
@@ -14027,25 +13282,20 @@ mastitis	zapalenie sutka
 adora	uwielbiać
 tramojo	powrósło
 volitivo	wolicjonalny
-romanticismo	romantyzm
-romanticismo	romantyzm
 hamada	hamada
 gire	skręcać
 oxímoron	oksymoron
 lasaña	lasagne
 arquitecta	architektka
-cnel.	coronel → pułkownik
 activa	aktywować
 citara	ściana boczna szerokości cegły
 ballen	tańczyć i śpiewać
 conmemorativo	pamiątkowy
-zoraida	imię żeńskie
 conmemorar	upamiętniać
 conmemoratorio	pamiątkowy
 conmemorable	godny upamiętnienia
 conmemoración	upamiętnienie
 cronómetro	chronometr
-poseidón	Posejdon
 alhelí	lewkonia
 gerbera	gerbera
 esca	tucz
@@ -14077,14 +13327,10 @@ danta	łoś
 jala	jedzenie
 jala	wtrząchać
 ancestro	przodek
-laconia	Lakonia
 lamé	lama
 lamé	lizać
 listeriosis	listerioza
-málaga	Malaga
 metaplasia	metaplazja
-murcia	Murcja
-tadeo	Tadeusz
 inmóvil	nieruchomy
 expapa	były papież
 orbitar	o pojeździe lub obiekcie kosmicznym
@@ -14118,7 +13364,6 @@ refutable	podważalny
 desagradecido	o osobie
 desagradecido	niewdzięcznik
 atrio	atrium
-tales	Tales
 cloruro	chlorek
 vermicular	robaczywy
 enuresis	moczenie mimowolne
@@ -14138,7 +13383,6 @@ fu	…naśladujący prychnięcie kota
 fallo	błąd
 fallo	niemający karty do koloru
 metalización	metalizacja
-serafina	imię żeńskie
 spirulina	spirulina
 serpol	Thymus serpyllum
 nórdico	nordycki
@@ -14170,12 +13414,10 @@ feminismo	feminizm
 feminista	feministyczny
 feminista	feminista
 feminista	feministka
-valeria	imię żeńskie Waleria
 vigente	obowiązujący
 velódromo	welodrom
 runa	litera z alfabetu run
 runa	Indianin
-renato	imię męskie
 alimentación	żywność
 atracción	atrakcja
 arriba	na górze
@@ -14198,9 +13440,7 @@ mercante	handlarka
 lona	brezent
 astigmatismo	astygmatyzm
 ártico	arktyczny
-ártico	Arktyka
 orto	wschód
-medioevo	średniowiecze
 baronesa	kobieta posiadająca godność barona
 diga	mówić
 culinaria	sztuka kulinarna
@@ -15044,7 +14284,6 @@ encuesta	ankieta
 encuestar	ankietować
 encuestador	ankieter
 encuestadora	ankieterka
-palaos	Palau
 chucla	Spicara maena
 partenopeo	neapolitański
 partenopeo	neapolitańczyk
@@ -15105,7 +14344,6 @@ desigualdad	nierówność
 alforfón	Fagopyrum esculentum gryka
 recreación	rekreacja
 brócol	brokuł
-blas	Błażej
 zaida	żuraw stepowy
 distorsión	deformacja
 panteísmo	panteizm
@@ -15281,135 +14519,7 @@ influyente	wpływowy
 péndulo	wiszący
 péndulo	wahadło
 francotirador	snajper
-margarita	imię żeńskie Małgorzata
-tania	imię żeńskie
-manuel	imię męskie
-adolpho	imię męskie
-juanita	imię żeńskie
-paulette	imię żeńskie
-mariana	imię żeńskie
-esmeralda	imię żeńskie
-ramona	imię żeńskie Ramona
-evita	imię żeńskie
-lilia	imię żeńskie
-soraya	imię żeńskie
 extinción	wyginięcie
-liliana	imię żeńskie
-gema	imię żeńskie
-gloria	imię żeńskie Gloria
-luz	imię żeńskie
-natividad	imię żeńskie
-pilar	imię żeńskie
-su	od Susana
-yago	imię męskie
-ángeles	imię żeńskie
-máximo	imię męskie Maksym
-zulma	imię żeńskie
-pío	imię męskie Pius
-rocío	imię żeńskie
-sancho	imię męskie
-lourdes	imię żeńskie Lourdes
-soledad	imię żeńskie
-tiare	imię żeńskie
-amaya	imię żeńskie
-juliana	imię żeńskie Juliana
-blanca	imię żeńskie Blanka
-antero	imię męskie
-milagros	imię żeńskie
-flavia	imię żeńskie Flawia
-marcelino	imię męskie Marcellinus
-altagracia	imię żeńskie
-benita	imię żeńskie
-edmundo	imię męskie
-maite	imię żeńskie Maite
-ascensión	imię żeńskie
-encarnación	imię żeńskie
-rosario	imię żeńskie
-purificación	imię żeńskie
-remedios	imię żeńskie
-inmaculada	imię żeńskie
-amparo	imię żeńskie
-desamparados	imię żeńskie
-consuelo	imię żeńskie
-consolación	imię żeńskie
-aída	imię żeńskie
-caridad	imię żeńskie
-óscar	imię męskie
-hortensia	imię żeńskie Hortensja
-araceli	imię żeńskie
-dominga	imię żeńskie
-leticia	imię żeńskie
-eulalia	imię żeńskie Eulalia
-nilda	imię żeńskie
-vito	imię męskie Wit
-agapito	imię męskie
-amadeo	imię męskie Amadeusz
-amelio	imię męskie Ameliusz
-antonino	imię męskie Antonin
-aquilino	imię męskie Akwilin
-arsenio	imię męskie Arseniusz
-atanasio	imię męskie Atanazy
-evaristo	imię męskie Ewaryst
-modesto	imię męskie
-juano	imię męskie
-dayana	imię żeńskie
-efraín	imię męskie
-fidel	Fidel
-fadrique	imię męskie Fryderyk
-ferrando	imię męskie
-fernán	imię męskie
-fermín	imię męskie
-fermina	imię żeńskie
-fabricio	imię męskie
-fabricia	imię żeńskie
-facundo	imię męskie
-facunda	imię żeńskie
-fulco	imię męskie
-fulca	imię żeńskie
-floro	imię męskie
-florio	imię męskie
-floria	imię żeńskie
-froilán	imię męskie
-froilana	imię żeńskie
-froila	imię męskie
-fulberto	imię męskie
-fulberta	imię żeńskie
-álvaro	imię męskie Alwar
-álvara	imię żeńskie
-agustín	imię męskie Augustyn
-agustina	imię żeńskie
-pascual	imię męskie
-pascuala	imię żeńskie
-violeta	imię żeńskie Wioleta
-íñigo	imię męskie
-eloy	imię męskie
-oriol	imię męskie
-nuria	imię żeńskie
-begoña	imię żeńskie
-vanesa	imię żeńskie
-almudena	imię żeńskie
-mireia	imię żeńskie
-aimar	imię męskie
-ginés	imię męskie
-alodia	imię żeńskie
-lope	imię męskie
-haydée	imię żeńskie
-segundo	imię męskie
-citlali	imię żeńskie
-piedad	imię żeńskie
-juanfran	imię męskie
-enka	imię żeńskie
-paqui	imię żeńskie
-octavio	imię męskie
-ordoño	imię męskie
-iñaki	imię męskie
-raimundo	Rajmund
-raimunda	imię żeńskie
-hipólito	imię męskie
-maribel	imię żeńskie
-chema	imię męskie
-ruy	imię męskie
-nerea	imię żeńskie
 descriptivo	opisowy
 eliminación	eliminacja
 aniquilación	wyniszczenie
@@ -15450,7 +14560,6 @@ modificación	modyfikacja
 ochomil	ośmiotysięcznik
 abatí	kukurydza
 abatí	obalać
-cartago	Kartagina
 extremadamente	ekstremalnie
 ondulado	falisty
 escarbadientes	wykałaczka
@@ -15544,10 +14653,8 @@ sotanas	sutanna
 lija	papier ścierny
 lija	ż od lijo
 lija	wygładzać/czyścić papierem ściernym
-maica	imię żeńskie Maica
 intercesor	orędujący
 intercesor	orędownik
-godzilla	Godzilla
 aparentar	udawać
 aparentar	udawać
 apodar	nadawać przydomek
@@ -15591,20 +14698,11 @@ cacofonía	kakofonia
 miligramo	miligram
 tarot	tarot
 ms.	manuscrito → rękopis
-aquilina	imię żeńskie Akwilina
-aristófanes	imię męskie Arystofanes
 zorrino	skunks
 palor	bladość
-ágata	imię żeńskie Agata
 anfetamínico	amfetaminowy
 anfetamínico	narkoman amfetaminowy
 autocrático	samowładczy
-celestina	imię żeńskie Celestyna
-ladislao	imię męskie
-urbano	imię męskie Urban
-casimiro	imię męskie Kazimierz
-tecla	imię żeńskie Tekla
-benito	imię męskie
 relampaguear	o niebie podczas burzy
 relampagueo	o niebie podczas burzy
 sofisma	sofizmat
@@ -15676,7 +14774,6 @@ apuñalado	sztyletowaty
 apuñalado	zasztyletować
 duela	klepka
 duela	ociosywać
-mostar	Mostar
 imposibilitado	o osobie
 imposibilitado	uniemożliwiać
 venera	muszla
@@ -15707,16 +14804,13 @@ dipolo	dipol
 duopolio	duopol
 aludir	wzmiankować
 alusivo	aluzyjny
-etolia	Etolia
 faxear	faksować
-crispín	imię męskie Kryspin
 coinquilino	współlokator
 amargura	gorzkość
 sucesor	następca
 teológico	teologiczny
 amistoso	przyjazny
 amígdala	migdałek
-sajonia	Saksonia
 hurí	hurysa
 gerontología	gerontologia
 excarcelar	uwalniać z więzienia
@@ -15998,8 +15092,6 @@ trompetista	trębacz
 trompetista	trębaczka
 sortear	losować
 bilé	szminka
-marcos	imię męskie Marek
-benedicto	imię męskie Benedykt
 sextante	sekstant
 pastelero	cukiernik
 pastelero	cukierniczy
@@ -16019,7 +15111,6 @@ achís	apsik!
 atchís	apsik!
 quevedos	binokle
 fémina	kobieta
-báltica	Bałtyka
 carterista	kieszonkowiec
 carterista	kieszonkowiec
 colíder	współlider
@@ -16029,17 +15120,12 @@ dedillo	paluszek
 masturbarse	onanizować się
 masturbar	masturbować
 nártex	narteks
-ricardo	imię męskie Ryszard
 albañal	ściek
 albañar	ściek
-acv	ataque cerebrovascular
-tasmania	Tasmania
-termópilas	Termopile
 avara	skąpiec
 indecible	nie do opisania
 cojones	jaja
 cojones	odzwierciedla różne stany ducha
-gargantúa	Gargantua
 partesana	partyzana
 fasces	rózgi liktorskie
 calorimetría	kalorymetria
@@ -16050,7 +15136,6 @@ fucsia	fuksja
 fucsia	fuksja
 fucsia	koloru fuksja
 tranco	długi krok
-yuba	Dżuba
 clavado	przybity
 clavado	gwoździowanie
 clavado	wbijać
@@ -16135,8 +15220,6 @@ semejante	podobieństwo
 soltar	rozwiązywać
 ánimo	duch
 ánimo	odwagi!
-ío	Io
-ío	Io
 transgénero	transpłciowy
 transgénero	osoba transpłciowa
 enfermar	wywoływać chorobę
@@ -16317,7 +15400,6 @@ ocla	wodorost
 cucharita	łyżeczka do herbaty
 vatio	wat
 entretener	zabawiać
-índico	Indyk
 gozne	zawias
 piscolabis	przekąska
 tentempié	przekąska
@@ -16336,21 +15418,11 @@ encarcelamiento	uwięzienie
 lavativa	lewatywa
 sequedad	suchość
 cómodamente	wygodnie
-benjamín	imię męskie Beniamin
-víctor	imię męskie
-jesusa	imię żeńskie
-ainara	imię żeńskie
-deodato	imię męskie Bożydar
-daritza	imię żeńskie
-genaro	imię męskie
-rodolfa	imię żeńskie
-jorgelina	imię żeńskie
 finarse	umierać
 acervo	dziedzictwo
 cincha	popręg
 oftalmológico	oftalmologiczny
 oftalmología	oftalmologia
-mowgli	Mowgli
 neurobiología	neurobiologia
 narcolepsia	narkolepsja
 nanotecnología	nanotechnologia
@@ -16390,7 +15462,6 @@ veras	brzeg
 veras	kuna leśna
 apícola	pszczelarski
 carbonífero	węglonośny
-carbonífero	karbon
 carbonar	zwęglać
 carbonarse	zwęglać się
 estéticamente	estetycznie
@@ -16398,7 +15469,6 @@ asocio	związek
 tacos	lata
 ocultismo	okultyzm
 diatriba	diatryba
-járkov	Charków
 neoplasia	neoplazja
 vexilología	weksylologia
 pólipo	polip
@@ -16430,7 +15500,6 @@ sube	wspinać się
 regicida	królobójczy
 regicida	królobójca
 regicida	królobójczyni
-marisol	Marisol
 cagalera	sraczka
 aponer	odnośnie przydawki rzeczownikowej
 paleontólogo	paleontolog
@@ -16476,7 +15545,6 @@ amura	przednie zwężenie burt
 aspergear	zob. asperjar
 judaico	żydowski
 hebraísmo	hebraizm
-jura	Jura
 peno	kartagiński
 estilográfica	wieczne pióro
 exosfera	egzosfera
@@ -16506,8 +15574,6 @@ fumado	zjarany
 fumado	palenie
 fumado	palić
 roso	łysy
-visnú	Wisznu
-sísifo	Syzyf
 capacete	hełm
 timar	wyłudzić
 landó	lando
@@ -16529,7 +15595,6 @@ sintagma	syntagma
 marengo	rybak
 marengo	ciemnoszary
 marcir	zob. marchitar
-prometeo	Prometeusz
 velozmente	szybko
 desplazarse	poruszać się
 untada	wysmarowana czymś kromka chleba
@@ -16577,7 +15642,6 @@ liposoluble	rozpuszczalny w tłuszczu
 licopeno	likopen
 bulgur	bulgur
 dominó	domino
-viracocha	Wirakocza
 salernitano	salerneński
 salernitano	mieszkaniec Salerna
 piara	stado
@@ -16635,7 +15699,6 @@ herborista	zielarz
 herborista	zielarka
 herborizar	zbierać zioła i rośliny
 herboristería	sklep zielarski
-sancha	imię żeńskie
 futurólogo	futurolog
 futurología	futurologia
 blenorragia	rzeżączka
@@ -16713,9 +15776,7 @@ nestoriano	nestoriański
 onicólisis	onycholiza
 nestorianismo	nestorianizm
 nestoriana	nestorianka
-ostia	Ostia
 introspección	introspekcja
-misuri	Missouri
 misuriano	związany ze stanem lub rzeką Missouri
 misuriano	mieszkaniec stanu Missouri
 misuriana	związany ze stanem lub rzeką Missouri
@@ -16734,7 +15795,6 @@ anacronismo	anachronizm
 pentagrama	pięciolinia
 nostramo	bosman
 paleolítico	paleolityczny
-paleolítico	paleolit
 neandertal	neandertalczyk
 céreo	woskowy
 internacionalismo	internacjonalizm
@@ -16746,7 +15806,6 @@ aristócrata	arystokratka
 ununcuadio	ununquadium
 halógeno	halogenowy
 halógeno	halogen
-abigaíl	imię żeńskie Abigail
 presupuesto	budżet
 residencia	rezydencja
 abstención	abstynencja
@@ -16756,7 +15815,6 @@ fagotista	fagocistka
 posvacacional	powakacyjny
 adecuación	dostosowanie
 genoma	genom
-pittsburgh	Pittsburgh
 podología	podologia
 antero	garbarz
 balotado	balotować
@@ -16979,7 +16037,6 @@ desencadenar	uwolnić
 apóstata	apostata
 apóstata	apostata
 cuantificar	wyrażać
-belice	Belize
 beliceño	belizeński
 beliceño	Belizeńczyk
 peluco	cebula
@@ -17040,7 +16097,6 @@ géiser	gejzer
 podar	przycinać
 reja	lemiesz
 exprimidor	wyciskacz
-namur	Namur
 insomnio	bezsenność
 obispar	objąć urząd biskupa
 satanismo	satanizm
@@ -17134,10 +16190,8 @@ flagelo	bicz
 arbotante	łuk oporowy
 hipersomnia	hipersomnia
 teorema	twierdzenie
-gioconda	Gioconda
 proactividad	proaktywność
 proactivo	proaktywny
-joaquín	imię męskie Joachim
 sátrapa	satrapa
 sátrapa	kobieta bazyliszek
 sátrapa	przebiegły
@@ -17145,7 +16199,6 @@ antincendios	przeciwpożarowy
 antiincendios	przeciwpożarowy
 depender	zależeć
 congreso	kongres
-congreso	Kongres
 corindón	korund
 celebro	mózg
 mesoterapia	mezoterapia
@@ -17181,7 +16234,6 @@ panamericanismo	panamerykanizm
 mazapán	marcepan
 mucoso	śluzowaty
 musicológico	muzykologiczny
-ugarit	Ugarit
 tiroxina	tyroksyna
 metátesis	przestawka
 ligurio	liguryjski
@@ -17212,7 +16264,6 @@ ubicación	umieszczanie
 probabilidad	prawdopodobieństwo
 presidenta	prezydentka
 narcodrón	dron do transportu narkotyków
-cafarnaúm	Kafarnaum
 indoloro	bezbolesny
 gradiente	gradient
 gradiente	pochyłość
@@ -17304,7 +16355,6 @@ farmacodependiente	chory lekozależny
 farmacodependiente	chora lekozależna
 antagonismo	antagonizm
 distrofia	dystrofia
-normandía	Normandia
 antiinflamatorio	przeciwzapalny
 antiinflamatorio	środek przeciwzapalny
 fototransistor	fototranzystor
@@ -17314,7 +16364,6 @@ acordeonista	akordeonista
 acordeonista	akordeonistka
 acequia	kanał irygacyjny
 ablación	odcięcie
-noé	Noe
 decámetro	dekametr
 decagramo	dekagram
 espuma	piana
@@ -17392,12 +16441,10 @@ agredir	atakować
 rumiar	przeżuwać
 abismal	głębinowy
 abismal	gwóźdź przytwierdzający grot do lancy
-saná	Sana
 estafilococo	gronkowiec
 tanga	stringi
 tanga	drewniany
 tanga	oszukać
-samarcanda	Samarkanda
 tampón	tampon
 pétreo	kamienny
 piclado	piklowanie
@@ -17454,13 +16501,11 @@ gemología	gemmologia
 gendarmería	żandarmeria
 fotocopiadora	fotokopiarka
 fuselaje	kadłub samolotu
-cant	Cantar de los Cantares → Pnp
 predicador	głoszący
 predicador	kaznodzieja
 carpintería	stolarstwo
 tárgum	targum
 astrónoma	astronomka
-shekhiná	Szechina
 bífido	rozdwojony
 fonología	fonologia
 espumarajo	piana
@@ -17499,15 +16544,11 @@ yuxtaponer	zestawić koło siebie
 intrascendente	nieważny
 lactosa	laktoza
 clictivismo	kliktywizm
-lucio	imię męskie Lucjusz
 edecán	adiutant
 edecán	hostessa
 vegana	weganka
 húsar	huzar
 sarampión	odra
-fabiana	imię żeńskie Fabiana
-capua	Kapua
-toledo	Toledo
 arremolinarse	wirować
 peliagudo	trudny
 perecer	zginąć
@@ -17534,7 +16575,6 @@ visas	wiza
 fortepiano	fortepian
 garbanzo	ciecierzyca
 bromatología	bromatologia
-kurdistán	Kurdystan
 coreográfico	choreograficzny
 gitana	Cyganka
 ciénaga	błoto
@@ -17555,12 +16595,10 @@ palurdo	prostacki
 palurdo	prostak
 torpeza	niezręczność
 demostino	demostenesowski
-demóstenes	Demostenes
 detonador	detonujący
 detonador	detonator
 relato	opowiadanie
 desfragmentación	defragmentacja
-úrsula	imię żeńskie Urszula
 talibán	talib
 talibán	talibski
 coquetear	kokietować
@@ -17665,7 +16703,6 @@ plañidero	płaczliwy
 bravucón	pyszałek
 puntilloso	drażliwy
 tachar	wykreślić
-vasconia	Baskonia
 galvanización	galwanizacja
 garabatos	bazgroły
 insulso	bez smaku
@@ -17819,7 +16856,6 @@ cutis	cera
 rocío	rosa
 persuasión	perswazja
 baldaquín	baldachim
-loreto	Loreto
 lauretano	loretański
 islamofascismo	islamofaszyzm
 hiato	rozziew
@@ -17861,7 +16897,6 @@ agazaparse	przycupnąć
 cadalso	szafot
 chivo	koziołek
 juerga	zabawa
-oseas	Ozeasz
 peleón	kłótliwy
 apacible	spokojny
 empeño	upór
@@ -17879,9 +16914,7 @@ fumador	palący
 fumador	palacz
 anconitano	ankoński
 anconitano	ankończyk
-galápagos	Galapagos
 esnobismo	snobizm
-wikcionario	Wikisłownik
 paternalismo	paternalizm
 esclarecer	wyjaśnić
 rencor	uraza
@@ -17893,8 +16926,6 @@ toledano	toledański
 toledano	toledańczyk
 isidoriano	izydoriański
 dómino	domino
-alsacia	Alzacja
-daguestán	Dagestan
 cisterciense	cysterski
 cisterciense	cysters
 cisterciense	cysterka
@@ -17903,13 +16934,9 @@ antidepresivo	antydepresant
 neuropático	neuropatyczny
 bimetalismo	bimetalizm
 islamización	islamizacja
-reikiavik	Reykjavík
 meritocracia	merytokracja
-navarra	Nawarra
 séquel	szekel
 cuerdo	rozsądny
-hubal	Hubal
-carniola	Kraina
 yuzu	Citrus × junos
 asbestosis	azbestoza
 equinodermo	szkarłupień
@@ -17960,7 +16987,6 @@ turinés	turyńczyk
 turinés	turyński
 piebaldismo	piebaldyzm
 hipergamia	hipergamia
-estrasburgo	Strasburg
 biopic	biografia filmowa
 hemofilia	hemofilia
 -gamia	gamia
@@ -17992,7 +17018,6 @@ sinfónico	symfoniczny
 minuciosamente	drobiazgowo
 metformina	metformina
 extramatrimonial	pozamałżeński
-tajo	Tag
 sufragista	sufrażystowski
 sufragista	sufrażysta
 sufragista	sufrażystka
@@ -18006,7 +17031,6 @@ parafilia	parafilia
 metonimia	metonimia
 artritis	zapalenie stawów
 asepsia	jałowość
-tkm	te quiero mucho → bardzo cię kocham
 teodolito	teodolit
 heparina	heparyna
 travieso	niegrzeczny
@@ -18035,7 +17059,6 @@ descentralización	decentralizacja
 xilografía	drzeworyt
 homogamia	homogamia
 molibdenita	molibdenit
-luisa	imię żeńskie
 radioterapeuta	radioterapeuta
 radioterapeuta	radioterapeutka
 apologética	apologetyka
@@ -18043,7 +17066,6 @@ regencia	regencja
 nómada	nomada
 nómada	nomada
 nómada	koczowniczy
-turbo	Turbo
 sepelio	pogrzeb
 cuanto	kwant
 cuanto	wszystko
@@ -18284,14 +17306,12 @@ fariseo	faryzeusz
 varianza	wariancja
 totemismo	totemizm
 impresionismo	impresjonizm
-rufo	imię męskie Rufus
 alelo	allel
 destinataria	odbiorczyni
 destinataria	docelowy
 petifoque	latacz
 bioma	biom
 musicología	muzykologia
-josué	Jozue
 mono-	mono
 hijoputa	skurwiel
 yerba	trawa
@@ -18299,7 +17319,6 @@ soroche	choroba wysokościowa
 micotoxina	mikotoksyna
 hiperuricemia	hiperurykemia
 damán	góralek
-piamonte	Piemont
 correspondencia	korespondencja
 orgiástico	orgiastyczny
 polacra	polacca
@@ -18308,7 +17327,6 @@ mecanografía	maszynopisanie
 averroísmo	awerroizm
 nomadismo	koczownictwo
 parasitismo	pasożytnictwo
-ratisbona	Ratyzbona
 polimorfismo	polimorfizm
 tantrismo	tantryzm
 amaño	spryt
@@ -18326,7 +17344,6 @@ logopedia	logopedia
 numen	bóstwo
 progresivamente	stopniowo
 abrahámico	abrahamowy
-abrahán	Abraham
 suicidología	suicydologia
 astrofísico	astrofizyczny
 astrofísico	astrofizyk
@@ -18353,7 +17370,6 @@ comprimir	sciskać
 jainismo	dźinizm
 cabrito	koźlę
 kibutz	kibuc
-esaú	imię męskie Ezaw
 escolta	eskorta
 apilar	układać w stos
 posproducción	postprodukcja
@@ -18368,7 +17384,6 @@ casanova	casanova
 donjuán	donżuan
 teletrabajo	telepraca
 pogonofobia	pogonofobia
-habacuc	Habakuk
 autoría	autorstwo
 partición	partycja
 certificado	polecony
@@ -18389,8 +17404,6 @@ sanguinario	krwiożerczy
 precipitado	przyspieszony
 prófugo	uciekinier
 katiuska	gumowiec
-cenicienta	Kopciuszek
-buenaventura	imię męskie Bonawentura
 buenaventuriano	bonawenturiański
 digrama	dwuznak
 vacuola	wakuola
@@ -18409,7 +17422,6 @@ quehaceres	zajęcia
 enfurruñarse	złościć się
 neumología	pulmonologia
 noradrenalina	noradrenalina
-mesías	chrześcijaństwo Mesjasz
 canzoncillos	kalesony
 víveres	pożywienie
 actorzuelo	aktorzyna
@@ -18476,7 +17488,6 @@ púa	kolec
 pregón	obwieszczenie
 carcajada	wybuch śmiechu
 geopolítica	geopolityka
-buriatia	Buriacja
 haplotipo	haplotyp
 ahijada	chrześniaczka
 chuchería	drobiazg
@@ -18493,7 +17504,6 @@ ahínco	zapał
 mugriento	brudny
 hinchazón	obrzęk
 monaguillo	ministrant
-troya	Troja
 velocista	sprinter
 zancada	sus
 tocador	toaletka
@@ -18507,14 +17517,12 @@ adueñarse	przywłaszczyć sobie
 arriate	kwietnik
 insólito	niezwykły
 renglón	linijka
-ai	Aj
 amortiguar	amortyzować
 pitido	gwizd
 quedo	spokojny
 taladradora	wiertarka
 visillo	firanka
 centellear	błyszczeć
-ovidio	Owidiusz
 acrecentar	powiększyć
 bloguear	blogować
 bitácora	naktuz
@@ -18528,7 +17536,6 @@ estruendo	hałas
 sobresaltar	wystraszyć
 microrregión	mikroregion
 rayano	graniczący
-tutankamón	Tutanchamon
 tachuela	gwoździk tapicerski
 boceto	szkic
 tintinear	dzwonić
@@ -18552,9 +17559,7 @@ mella	wyszczerbienie
 mortaja	całun
 rebotar	odbijać
 tapón	korek
-cecilio	imię męskie Cecyliusz
 descristianización	dechrystianizacja
-wenceslao	imię męskie Wacław
 orco	ork
 dicotomía	dychotomia
 cerrado	zamknięty
@@ -18568,7 +17573,6 @@ balcanización	bałkanizacja
 datilera	Phoenix dactylifera L
 antinatalismo	antynatalizm
 sargazo	Sargassum gronorost
-guyarat	Gudźarat
 democratismo	demokratyzm
 epigenética	epigenetyka
 cloramina	chloroamina
@@ -18626,9 +17630,7 @@ nefritis	zapalenie nerek
 neurastenia	neurastenia
 optometrista	optometrysta
 optometrista	optometrystka
-dionisia	imię żeńskie Dioniza
 anión	anion
-catalina	imię żeńskie Katarzyna
 vigoroso	energiczny
 fortachón	silny
 napias	nos
@@ -18640,7 +17642,6 @@ reciedumbre	siła
 vaciamiento	pusty
 vaciamiento	pustka
 redondel	kółko
-macarena	imię żeńskie
 lametazo	dotyk
 clitoridectomía	klitoridektomia
 calmamente	spokojnie
@@ -18665,14 +17666,11 @@ trilogía	trylogia
 nobiliario	szlachetny
 noblote	szlachetny
 trasunto	kopia
-germán	imię męskie
 germanístico	niemiecki
 ajustadamente	dokładnie
 british	brytyjski
-itahisa	imię żeńskie
 parangonar	porównać
 acompañamiento	akompaniament
-hañagua	imię żeńskie
 printear	drukować
 culpabilizar	obwiniać
 incardinar	zawierać
@@ -18680,14 +17678,12 @@ poltrón	leniwy
 espelunca	jaskinia
 revesar	wymiotować
 ribete	granica
-derque	imię męskie
 apaciblemente	delikatnie
 dulzor	słodycz
 capitoste	szef
 inhabitual	nietypowy
 remplazar	zastąpić
 gracieta	żart
-marcela	imię żeńskie Marcela
 hipocondrio	podżebrze
 despeñadero	klif
 hullero	węgiel
@@ -18788,9 +17784,7 @@ ancianidad	starość
 cernidor	sito
 alcoholizado	alkoholowy
 verdel	makrela
-ronaldo	imię męskie
 eslavística	slawistyka
-bernardino	imię męskie
 apelativo	nazwisko
 indumentaria	odzież
 lumbrícido	dżdżownica
@@ -18831,10 +17825,6 @@ tijerilla	skorek
 inmaterialidad	niematerialność
 indisociable	nierozłączny
 indesligable	nierozłączny
-baréin	Bahrajn
-imelda	imię żeńskie
-águeda	imię żeńskie Agata
-somalilandia	Somaliland
 reparación	naprawa
 disolución	rozpuszczenie
 emulsión	emulsja
@@ -18852,35 +17842,6 @@ comible	jadalny
 violoncelo	wiolonczela
 violoncelo	wiolonczelistka
 cuentachistes	komediant
-paco	imię męskie Franek
-lola	imię żeńskie
-marquito	imię męskie
-abelito	imię męskie
-chuy	imię męskie
-adolfito	imię męskie
-anabel	imię żeńskie
-juanito	imię męskie Janek
-luisito	imię męskie
-lucha	imię żeńskie
-martita	imię żeńskie
-lali	imię żeńskie
-miguelito	imię męskie
-lalo	imię męskie
-javi	imię męskie
-lito	imię męskie
-manolo	imię męskie
-joselito	imię męskie
-francisquito	imię męskie
-manuelita	imię żeńskie
-inma	imię żeńskie
-concha	imię żeńskie
-lupita	imię żeńskie
-fito	imię męskie
-geo	imię męskie
-geo	imię żeńskie
-licha	imię żeńskie
-carito	imię żeńskie
-poncho	imię męskie
 fluctuación	fluktuacja
 cumplidor	rzetelny
 inicial	początkowy
@@ -18954,120 +17915,6 @@ incomible	niejadalny
 cancilla	brama
 portillo	brama
 sepulturero	grabarz
-rodrigo	imię męskie Rodryg
-abundio	imię męskie Abundiusz
-albano	imię męskie
-azucena	imię żeńskie
-silvio	imię męskie Sylwiusz
-esperanza	imię żeńskie Nadzieja
-absalón	imię męskie
-edgardo	imię męskie
-thiare	imię żeńskie
-yesenia	imię żeńskie
-alondra	imię żeńskie
-alejandra	Aleksandra
-armando	imię męskie
-vicente	imię męskie
-raúl	imię męskie
-verónica	imię żeńskie
-gershu	imię męskie
-beatriz	imię żeńskie
-camila	imię żeńskie Kamila
-leonor	imię żeńskie
-angélica	imię żeńskie
-patricio	imię męskie
-vicenta	imię żeńskie Wincencja
-ángela	imię żeńskie
-carlota	imię żeńskie
-estefanía	imię żeńskie
-josefa	imię żeńskie Józefa
-iván	imię męskie Iwan
-tomasa	imię żeńskie
-valentín	imię męskie Walenty
-ernestina	imię żeńskie
-julián	imię męskie Julian
-aurelio	imię męskie Aureliusz
-humberto	imię męskie
-rolando	imię męskie Roland
-rogelio	imię męskie
-fabián	imię męskie Fabian
-antonieta	imię żeńskie
-mónica	imię żeńskie Monika
-natalio	imię męskie
-mayte	imię żeńskie
-egidio	imię męskie
-dionisio	imię męskie Dionizy
-damián	imię męskie
-isidro	imię męskie
-ricarda	imię żeńskie Ryszarda
-marcial	imię męskie
-felisa	imię żeńskie
-noelia	imię żeńskie
-adelia	imię żeńskie
-graciela	imię żeńskie
-enriqueta	imię żeńskie
-felipa	imię żeńskie
-guillermina	imię żeńskie
-joaquina	imię żeńskie
-micaela	imię żeńskie
-miguela	imię żeńskie
-estela	imię żeńskie
-fernanda	imię żeńskie
-ilda	imię żeńskie
-luciana	imię żeńskie
-rosalía	imię żeńskie
-brunilda	imię żeńskie
-felicidad	imię żeńskie
-canuto	imię męskie
-cayetano	imię męskie
-justo	imię męskie
-tristán	imię męskie Tristan
-cándido	imię męskie
-cándida	imię żeńskie
-mireya	imię żeńskie
-mirella	imię żeńskie
-javiera	imię żeńskie
-ramiro	imię męskie
-ramira	imię żeńskie
-keiko	Keiko
-kenji	imię męskie
-oswaldo	imię męskie
-vane	imię żeńskie
-paulito	imię męskie
-pablito	imię męskie
-santi	imię męskie
-justín	imię męskie
-catrina	imię żeńskie
-conrado	imię męskie
-cosme	Kosma
-calixto	imię męskie
-jairo	imię męskie
-natán	imię męskie
-murillo	imię męskie
-braulio	imię męskie
-emelda	imię żeńskie
-dámaso	imię męskie
-édgar	imię męskie
-juanca	imię męskie
-kaori	imię żeńskie
-jimena	imię żeńskie
-arantxa	imię żeńskie
-adisoda	imię żeńskie
-beneharo	imię męskie
-cobura	imię żeńskie
-firjas	imię męskie
-echedey	imię męskie
-hernando	imię męskie
-kebehi	imię męskie
-asdrúbal	imię męskie
-meagens	imię żeńskie
-shizuko	imię żeńskie
-efrén	imię męskie
-camilo	imię męskie Kamil
-paloma	imię żeńskie
-maximiliano	imię męskie Maksymilian
-gracia	imię żeńskie
-baltasar	imię męskie Baltazar
 antracología	antrakologia
 laicidad	laickość
 satíricamente	satyrycznie
@@ -19084,12 +17931,10 @@ nanómetro	nanometr
 clortetraciclina	chlorotetracyklina
 despenalización	depenalizacja
 proporcionalmente	proporcjonalnie
-chernóbil	Czarnobyl
 drogodependencia	narkomania
 autoerotismo	autoerotyzm
 orwelliano	orwellowski
 crisoberilo	chryzoberyl
-zúrich	Zurych
 hemofobia	hemofobia
 empanadilla	pierożek
 psicópata	psychopata
@@ -19125,7 +17970,6 @@ alcohólica	alkoholiczka
 bacteriano	bakteryjny
 organizador	organizator
 baht	bat
-resurrección	Zmartwychwstanie Chrystusa
 gigantismo	gigantyzm
 citotoxicidad	cytotoksyczność
 diplomático	dyplomata
@@ -19160,15 +18004,11 @@ ekística	ekistyka
 divergencia	dywergencja
 malintencionado	wrogi
 histerectomía	histerektomia
-cirenaica	Cyrenajka
 repatriación	repatriacja
 hipersensibilidad	nadwrażliwość
 esquistosomiasis	schistosomatoza
-salerno	Salerno
 transferrina	transferryna
-salomón	Salomon
 pirueta	piruet
-matías	imię męskie Maciej
 psicoanálisis	psychoanaliza
 pasteurización	pasteryzacja
 mohel	mohel
@@ -19189,7 +18029,6 @@ instancia	zabieganie
 exactitud	dokładność
 perjudicial	szkodliwy
 lesivo	szkodliwy
-susana	imię żeńskie Zuzanna
 suborden	podrząd
 colostomía	kolostomia
 ileostomía	ileostomia
@@ -19202,9 +18041,7 @@ gobernativo	gubernatorski
 melodramático	melodramatyczny
 cálao	dzioborożec
 toco	toko
-corinto	Korynt
 galvanómetro	galwanometr
-armagedón	Armagedon
 búnker	bunkier
 matroneo	empora
 cogeneración	kogeneracja
@@ -19240,36 +18077,17 @@ escéptico	sceptyk
 hemoglobinuria	hemoglobinuria
 macrosomía	makrosomia
 poliquístico	policystyczny
-junípero	imię męskie Juniper
 alcaparrera	Capparis spinosa
 alcaparro	Capparis spinosa
 malevolencia	złowrogość
 alcaparrón	kapar
-hipona	Hippona
 salterio	psałterz
-mantua	Mantua
-florentino	imię męskie Florentyn
-florentín	imię męskie Florentyn
 fibroblasto	fibroblast
 fitoterapia	fitoterapia
-deut	Libro del Deuteronomio → Pwt
-jos	Libro de Josué → Joz
 aterosclerótico	miażdżycowy
-oliverio	imię męskie Oliwier
-columba	imię żeńskie Kolumba
 gelotología	gelotologia
 mielga	lucerna
-tobías	Tobiasz
-cesarea	Cezarea
-rávena	Rawenna
-ravena	Rawenna
-macabeo	Machabeusz
-prov	Libro de los Proverbios → Prz
-ec	Libro del Eclesiastés → Koh
 güisqui	whisky
-sirac	Syrach
-sirácides	Syracydes
-sirácida	Syracydes
 responsorial	responsorialny
 responsorio	responsorium
 tipológicamente	typologicznie
@@ -19279,10 +18097,8 @@ idiopático	idiopatyczny
 procreación	prokreacja
 extensor	rozciągający
 extensor	prostownik
-shanghái	Szanghaj
 nefasto	nieszczęsny
 gratuitamente	za darmo
-zabulón	Zabulon
 barbaridad	barbarzyństwo
 ejecutivo	wykonawczy
 parasitología	parazytologia
@@ -19290,17 +18106,13 @@ pepsina	pepsyna
 comensal	biesiadnik
 bostoniano	bostoński
 bostoniano	bostończyk
-crístofer	imię męskie Krzysztof
 recepcionista	recepcjonista
 recepcionista	recepcjonistka
 psicosis	psychoza
 cortisona	kortyzon
-moisés	Mojżesz
 contemplación	kontemplacja
-is	Libro de Isaías → Iz
 pustulosis	krostowatość
 norteamericano	północnoamerykański
-alejandría	Aleksandria
 emetofobia	emetofobia
 máncer	bękart
 chingada	dziwka
@@ -19314,10 +18126,7 @@ homilía	homilia
 doblegar	zginać
 homilético	homiletyczny
 neuroléptico	neuroleptyk
-ricardín	Rysio
-ricardito	Rysio
 gomina	żel do włosów
-bajchisarái	Bakczysaraj
 aplastapatatas	tłuczek do ziemniaków
 golfillo	urwis
 pilluelo	urwis
@@ -19326,8 +18135,6 @@ tolueno	toluen
 resinoso	żywiczny
 puntillismo	pointylizm
 glucómetro	glukometr
-álvarez	Alwarez
-rojava	Rożawa
 cíngulo	cingulum
 espiritualidad	duchowość
 persecutorio	prześladowczy
@@ -19339,7 +18146,6 @@ adiabático	adiabatyczny
 indeterminismo	indeterminizm
 antipartícula	antycząstka
 domesticidad	domatorstwo
-cachemira	Kaszmir
 cinarizina	cynaryzyna
 criptología	kryptologia
 glotocronología	glottochronologia
@@ -19397,7 +18203,6 @@ siévert	siwert
 pérfido	przewrotny
 pérfido	przeniewierca
 bariátrico	bariatryczny
-septuaginta	Septuaginta
 argentinidad	argentyńskość
 patético	patetyczny
 audiovisualidad	audiowizualność
@@ -19418,7 +18223,6 @@ péptido	peptyd
 diferenciación	różnicowanie
 trasalpino	transalpejski
 filosemitismo	filosemityzm
-ferrara	Ferrara
 nanosegundo	nanosekunda
 androfobia	androfobia
 dardo	rzutka
@@ -19428,7 +18232,6 @@ cremación	kremacja
 introducción	wprowadzenie
 antracita	antracyt
 renovable	odnawialny
-cirene	Cyrena
 quinesiología	kinezjologia
 desmoronar	erodować
 deslizar	zsunąć się
@@ -19441,12 +18244,10 @@ teneso	tenes
 oganesón	oganeson
 logotipo	logotyp
 jornalero	robotnik dniówkowy
-ermentrudis	Ermentruda
 palmeta	linijka/rózga
 latifundista	latyfundystyczny
 latifundista	latyfundysta
 latifundista	latyfundystka
-seat	seat
 parcela	parcela
 tilapia	tilapia
 palidez	bladość
@@ -19466,14 +18267,12 @@ favicón	favikona
 favicono	favikona
 peletero	kuśnierski
 peletero	kuśnierz
-otón	Otton
 félido	kotowaty
 solitariamente	samotnie
 entronización	intronizacja
 eucariótico	eukariotyczny
 procariótico	eukariotyczny
 interbancario	międzybankowy
-acrópolis	Akropol
 desterrar	wydalać / wydalić
 carismático	charyzmatyczny
 heurístico	heurystyczny
@@ -19484,19 +18283,13 @@ pelta	pelta
 peltasta	peltasta
 satén	satyna
 higuera	drzewo figowe
-homs	Hims
-maximino	Maksymin
 oprobio	wstyd
-albión	Albion
 sinantrópia	synantropizm
 cortejo	konkury
-mesina	Mesyna
 sarcasticamente	sarkastycznie
 kornerupina	kornerupin
 albahaca	bazylia
-mileto	Milet
 milicia	milicja
-fátima	imię żeńskie Fatima
 serafín	seraf
 mamacita	od
 envenenamiento	zatrucie
@@ -19526,7 +18319,6 @@ patrióticamente	patriotycznie
 dublinés	dublińczyk
 dublinés	dubliński
 mariología	mariologia
-guillermo	imię męskie Wilhelm
 pénfigo	pęcherzyca
 aeronáutico	lotniczy
 andradita	andradyt
@@ -19539,9 +18331,6 @@ apoliticamente	apolitycznie
 antifonario	antyfonarz
 tantra	tantra
 efod	efod
-matatías	Matatiasz
-booz	imię męskie Booz
-zacarías	Zachariasz
 dorio	związany z Dorami
 dorio	Dor
 pleuritis	zapalenie opłucnej
@@ -19564,7 +18353,6 @@ inge	inżynier
 peonía	peonia
 abiete	jodła
 tahona	piekarnia
-zenaida	imię żeńskie
 amolar	ostrzyć
 baila	tańczyć
 altero	kupa
@@ -19601,7 +18389,6 @@ brega	harować
 gabela	podatek
 paralelepípedo	równoległościan
 paralelepipédico	równoległościenny
-cristián	imię męskie
 paraplejia	paraplegia
 suberina	suberyna
 epicúreo	epikurejski
@@ -19636,7 +18423,6 @@ arreglo	naprawa
 ascenso	awans
 neumoconiosis	pylica płuc
 progresismo	progresywność
-komi	Komi
 sufragio	pomoc
 atarazar	gryźć
 calefactar	ogrzewać
@@ -19684,38 +18470,27 @@ pornocracia	pornokracja
 orante	modlący się
 orante	orant
 orante	orantka
-telesforo	imię męskie Telesfor
 glocalización	glokalizacja
 feticida	płodobójczy
 feticida	płodobójca
 feticida	płodobójczyni
 hemodinámica	hemodynamika
-cefas	Kefas
 tacón	obcas
 antitrinitarismo	antytrynitaryzm
 blogosfera	blogosfera
-baskortostán	Baszkortostan
 arduo	mozolny
 trabajoso	mozolny
 solastalgia	solastalgia
-basilea-campiña	Bazylea-Okręg
-basilea-campaña	Bazylea-Okręg
 fosilizar	skamienieć
 tontucio	głupkowaty
 tontucio	półgłupek
-segovia	Segowia
-agatón	imię męskie Agaton
-basilea-ciudad	Bazylea-Miasto
-chuvasia	Czuwaszja
 ruandesa	Rwandyjka
 ruandesa	ż od ruandés
-prípiat	Prypeć
 ciceroniano	cyceroński
 desensibilización	desensytyzacja
 córdoba	cordoba oro
 paje	paź
 licorina	likoryna
-ingusetia	Inguszetia
 aeromancia	aeromancja
 axinomancia	aksynomancja
 alectomancia	alektriomancja
@@ -19724,7 +18499,6 @@ naira	naira
 yambo	jamb
 ecuánime	zrównoważony
 ciudadanía	obywatelstwo
-amalfi	Amalfi
 amigdalectomía	tonsillektomia
 octágono	ośmiokątny
 octágono	ośmiokąt
@@ -19736,8 +18510,6 @@ congregación	kongregacja
 almiar	stóg
 henil	stodoła
 potenciómetro	potencjometr
-lausana	Lozanna
-gesur	Geszur
 burra	oślica
 hembra	samica
 burrada	grupa osłów
@@ -19749,18 +18521,11 @@ rucio	siwy
 rucio	osioł
 rozno	osioł
 acémila	zwierzę juczne
-livorno	Livorno
 finesa	Finka
 finesa	fiński
-oviedo	Oviedo
 frontón	fronton
-inocencio	Innocenty
 disonante	dysonansowy
-ginebra	Genewa
 abolla	wgniatać
-kabardia-balkaria	Kabardo-Bałkaria
-kabardino-balkaria	Kabardyno-Bałkaria
-ramón	imię męskie Rajmund
 palermitana	palermianka
 palermitano	palermianin
 palermitano	palermski
@@ -19769,12 +18534,9 @@ intersexual	interseksualista
 intersexual	interseksualistka
 papiloma	brodawczak
 moralismo	moralizm
-titán	Tytan
 voleibolista	siatkarz
 voleibolista	siatkarka
-kalmukia	Kałmucja
 compresibilidad	ściśliwość
-encélado	Enceladus
 copropiedad	współwłasność
 copropietario	współwłaściciel
 copropietaria	współwłaścielka
@@ -19782,10 +18544,8 @@ propietaria	właścicielka
 lusofilia	luzofilia
 lusitanofilia	luzofilia
 murga	murga
-glaris	Glarus
 exónimo	egzonim
 listrosaurio	lystrozaur
-alepo	Aleppo
 veronés	weroński
 veronés	werończyk
 veronesa	weronka
@@ -19804,10 +18564,8 @@ beduíno	Beduin
 antiarrugas	przeciwzmarszczkowy
 somatología	somatologia
 termogénesis	termogeneza
-brescia	Brescia
 enjambre	rój
 octogonal	ośmiokątny
-arezzo	Arezzo
 aretino	aretyński
 aretino	aretyńczyk
 temblor	drżenie
@@ -19815,8 +18573,6 @@ plumín	stalówka
 portaplumas	obsadka
 amalfitano	Amalfitanin
 amalfitano	amalfitański
-asís	Asyż
-karacháyevo-cherkesia	Karaczajo-Czerkiesja
 capuano	kapuański
 capuano	kapuańczyk
 cremonés	kremoński
@@ -19824,80 +18580,61 @@ ferrarés	ferraryjski
 anconitana	ankonka
 anconitana	ankoński
 retazo	skrawek
-pavía	Pawia
 ravenés	raweński
 ravenés	raweńczyk
 paviano	pawijski
 paviano	pawijczyk
 paviana	pawijka
 paviana	pawijski
-nápoles	Neapol
 mantuano	mantuańczyk
 mantuano	mantuański
 mantuana	mantuanka
-liorna	Livorno
 livornés	liworneński
 paduano	padewski
 paduano	padewczyk
-grisones	Gryzonia
 patavino	padewski
 patavino	padewczyk
 paduana	padewka
 patavina	padewka
-fauno	Faun
 pisano	pizański
 pisano	pizańczyk
 pisana	pizanka
 espinosaurio	spinozaur
 heptarquía	heptarchia
 milanesa	mediolanka
-módena	Modena
 modenés	modeński
 modenés	modeńczyk
 modenesa	modenka
-aquilea	Akwileja
-tívoli	Tivoli
 parmesana	parmenka
 siracusano	syrakuzański
 siracusano	syrakuzanin
 siracusana	syrakuzanka
-rímini	Rimini
 mosasaurio	mozazaur
 epicontinental	epikontynentalny
 tardígrado	niesporczak
-pompeya	Pompeje
 pompeyano	pompejański
 pompeyano	pompejańczyk
 pompeyana	pompejanka
 megaterio	megaterium
 parestesia	parestezja
-agrigento	Agrigento
 elasmoterio	elasmoterium
-orvieto	Orvieto
 capoeira	capoeira
-jakasia	Chakasja
 reindustrialización	reindustrializacja
 desindustrialización	dezindustrializacja
-bérgamo	Bergamo
 alférez	chorąży
 alférez	podporucznik
 vicealmirante	wiceadmirał
 vicealmirante	wiceadmirał
 europeización	europeizacja
-benicio	imię męskie Benicjusz
-honolulú	Honolulu
 pucha	kurwa
 pucha	ja cię kręcę! kurczę!
-faustina	imię żeńskie Faustyna
 dionisiaco	dionizyjski
 dionisíaco	dionizyjski
 ugarítico	ugarycki
 ugarítico	ugarycki
-padre	Ojciec
 desfiladero	wąwóz
 sembrador	siejący
 sembrador	siewca
-baruc	Baruch
 mantilla	mantyla
 salomónico	salomonowy
 salva	imię męskie
@@ -19917,13 +18654,10 @@ rinitis	nieżyt nosa
 rinología	rynologia
 retinopatía	retinopatia
 marqués	markiz
-nabucodonosor	Nabuchodonozor
 trans-	trans
 elogia	chwalić
 cilíndrico	cylindryczny
 heresiarca	herezjarcha
-véneto	Wenecja Euganejska
-lombardía	Lombardia
 contraalmirante	kontradmirał
 contraalmirante	kontradmirał
 contralmirante	kontradmirał
@@ -19934,7 +18668,6 @@ núclido	nuklid
 bifobia	bifobia
 acaballar	pokrywać
 litógrafo	litograf
-esuatini	Eswatini
 quesadilla	quesadilla
 lesbofobia	lesbofobia
 copernicano	kopernikański
@@ -19947,20 +18680,6 @@ custodio	kustosz
 biquini	bikini
 biquini	bikini
 industricidio	zabijanie przemysłu
-casubia	Kaszuby
-marburgo	Marburg
-mecklemburgo	Meklemburgia
-groninga	Groningen
-güeldres	Geldria
-bolduque	's-Hertogenbosch
-flesinga	Vlissingen
-aviñón	Awinion
-augsburgo	Augsburg
-coblenza	Koblencja
-coburgo	Coburg
-tubinga	Tybinga
-sajonia-anhalt	Saksonia-Anhalt
-ekaterimburgo	Jekaterynburg
 hepatología	hepatologia
 vitíligo	bielactwo nabyte
 acético	octowy
@@ -19972,18 +18691,13 @@ lipídico	lipidowy
 prematuro	przedwczesny
 prematuro	wcześniak
 elecciones	wybory
-sídney	Sydney
 telaraña	pajęczyna
 epicrisis	epikryza
 uréter	moczowód
 micelio	grzybnia
-lusacia	Łużyce
 internacionalista	internacjonalistyczny
 internacionalista	internacjonalista
 internacionalista	internacjonalistka
-maguncia	Moguncja
-constanza	Konstancja
-cornualles	Kornwalia
 porfiria	porfiria
 microonda	mikrofala
 habano	hawański
@@ -20047,7 +18761,6 @@ zaga	obrońca
 grabe	ryć
 putón	kurwisko
 ranúnculo	jaskier
-roldán	imię męskie Roland
 fitoestrógeno	fitoestrogen
 termoquímica	termochemia
 termia	termia
@@ -20058,7 +18771,6 @@ morfóloga	morfolog
 mormón	mormoński
 mormón	mormon
 clámide	chlamida
-omnipotente	Wszechmogący
 sotavento	zawietrzna
 habiloso	sprytny
 cate	bania
@@ -20075,7 +18787,6 @@ minúscula	mała litera
 minúscula	mała litera
 partidario	partyjny
 partidario	zwolennik
-micenas	Mykeny
 ultrasónica	ultraakustyka
 ultrasónica	ultradźwiękowy
 latania	latania
@@ -20125,7 +18836,6 @@ ecuatorial	równikowy
 sestercio	sesterc
 alergología	alergologia
 anestesiología	anestezjologia
-cenozoico	kenozoik
 hijastro	pasierb
 edadismo	ageizm
 ribosoma	rybosom
@@ -20144,7 +18854,6 @@ blanca	biały
 leprosería	leprozorium
 subsecuentemente	w następstwie
 noroccidental	północno-zachodni
-juana	imię żeńskie Janina
 juana	marycha
 perceptrón	perceptron
 fanotrón	gazotron
@@ -20156,7 +18865,6 @@ hidroxilación	hydroksylowanie
 baúl	kufer
 póntico	pontyjski
 voyerismo	oglądactwo
-mecklemburgo-antepomerania	Meklemburgia-Pomorze Przednie
 antirracista	antyrasistowski
 beneficencia	dobroczynność
 coloso	kolos
@@ -20253,7 +18961,6 @@ anaglifo	anaglif
 encefalitis	zapalenie mózgu
 recesión	recesja
 trombosis	zakrzepica
-génova	Genua
 heraldista	heraldyk
 heraldista	kobieta heraldyk
 botellín	buteleczka
@@ -20280,7 +18987,6 @@ icario	ikarowy
 icáreo	ikarowy
 carnotauro	karnotaur
 mapache	Procyon szop
-bernarda	imię żeńskie Bernarda
 agridulce	kwaśnosłodki
 atípico	nietypowy
 lexicalización	leksykalizacja
@@ -20456,29 +19162,21 @@ encuadernación	bindowanie
 gordiano	gordyjski
 autorregulación	autoregulacja
 homeostático	homeostatyczny
-melanio	imię męskie Melaniusz
 africanización	afrykanizacja
 bufonada	bufonada
 innatismo	innatyzm
 especificidad	specyfika
 hematología	hematologia
 ecolocación	echolokacja
-sofronio	imię męskie Sofroniusz
 elasmosaurio	elasmozaur
 pelagianismo	pelagianizm
 telebasura	telewizyjny chłam
-maximiano	imię męskie Maksymian
-majencio	imię męskie Maksencjusz
-majencia	imię żeńskie Maksencja
 zataar	zatar
 etimólogo	etymolog
 cartujo	kartuz
 cartujo	kartuzjański
 cartuja	kartuzja
 covidiota	covidiota
-a.	Alteza → Mość
-abdías	Abdiasz
-johannesburgo	Johannesburg
 felón	dwulicowy
 felón	dwulicowiec
 impotente	z impotencją
@@ -20515,56 +19213,28 @@ creacionista	kreacjonista
 creacionista	kreacjonistka
 vistosidad	okazałość
 visualmente	wzrokowo
-eoceno	eocen
 eoceno	eoceński
 quimiofobia	chemiofobia
 antirrevolucionario	antyrewolucyjny
 antirrevolucionario	antyrewolucjonista
-hispanoamérica	Hispanoameryka
 hipotecario	hipoteczny
-ebisu	Ebisu
 macrofauna	makrofauna
-orcus	Orkus
-gén	Libro del Génesis → Rdz
-génesis	Genesis
-génesis	imię żeńskie
-éx	Libro del Éxodo → Wj
-éxod	Libro del Éxodo → Wj
-andrómaca	Andromacha
-núm	Libro de los Números → Lb
-jc	Libro de los Jueces → Sdz
-jue	Libro de los Jueces → Sdz
-cró	Libro de las Crónicas → Krn
-esd	Libro de Esdras → Ezd
-nehemías	imię męskie Nehemiasz
 génesis	geneza
-cochabamba	Cochabamba
-sal	Libro de los Salmos → Ps
-pro	Libro de los Proverbios → Prz
-ecl	Libro del Eclesiastés → Koh
-eclesiastés	Eklezjastes
 cántico	kantyk
-sab	Libro de la Sabiduría → Mdr
 taiwanés	Tajwańczyk
 taiwanés	tajwański
-jeremías	imię męskie Jeremiasz
 herméticamente	hermetycznie
 hidroalcohólico	hydroalkoholowy
 aristocráticamente	arystokratycznie
-ceslao	imię męskie Czesław
 contraindicación	przeciwwskazanie
 efelante	ho-hoń
 valquiria	walkiria
 valkiria	walkiria
-nacianzo	Nazjanz
-cesáreo	imię męskie Cezary
-hilario	imię męskie Hilary
 estructuralmente	strukturalnie
 soriasis	łuszczyca
 soriásico	łuszczycowy
 logia	loggia
 sílex	krzemień
-jesé	Jesse
 ovular	jajeczkować
 porra	pałka
 interferir	ingerować
@@ -20574,11 +19244,9 @@ discursar	prowadzić dyskurs
 bufonería	błazeństwo
 papisa	papieżyca
 metaxá	metaxa
-melusina	Meluzyna
 fitoterapeuta	zielarz
 fitoterapeuta	zielarka
 homínido	hominid
-holofernes	Holofernes
 metacognición	metakognicja
 prestamista	pożyczkodawca
 prestamista	pożyczkodawczyni
@@ -20594,7 +19262,6 @@ locuaz	gadatliwy
 hechizar	zaczarować
 antitóxico	antytoksyczny
 antitóxico	środek antytoksyczny
-odiseo	Odyseusz
 importador	importujący
 importador	importer
 omaso	księgi
@@ -20638,7 +19305,6 @@ contramanifestación	kontrmanifestacja
 desamarrar	odwiązywać
 viña	winnica
 insepulto	niepogrzebany
-morelia	Morelia
 masón	mason
 masona	masonka
 mensajero	zwiastujący
@@ -20660,15 +19326,11 @@ criminólogo	kryminolog
 conservador	konserwatywny
 conservador	konserwatysta
 conservadora	konserwatystka
-euquerio	imię męskie Eucheriusz
 colposcopia	kolposkopia
 colposcopía	kolposkopia
 colposcopio	kolposkop
 planeador	szybowiec
 planeo	szybowanie
-aníbal	imię męskie Hannibal
-amancio	imię męskie Amancjusz
-silverio	imię męskie Sylweriusz
 monstruoso	szpetny
 viático	dieta
 ázoe	azot
@@ -20713,7 +19375,6 @@ paremiológico	paremiologiczny
 reliquiario	relikwiarz
 relicario	relikwiarz
 ándito	krużganek
-míriam	imię żeńskie Miriam
 epanáfora	epanafora
 faisana	bażancica
 mercero	sprzedawca męskiej odzieży
@@ -20733,7 +19394,6 @@ secreter	sekretarzyk
 áulico	dworzanin
 enfático	nadęty
 estrellamar	rozgwiazda
-precámbrico	prekambr
 plumaje	upierzenie
 decimonónico	dziewiętnastowieczny
 azteca	aztecki
@@ -20823,7 +19483,6 @@ químicamente	chemicznie
 oenegé	organizacja pozarządowa
 hipófisis	przysadka mózgowa
 armilar	armilarny
-beda	imię męskie Beda
 forense	sądowy
 forense	lekarz sądowy
 forense	lekarka sądowa
@@ -20848,7 +19507,6 @@ idiocia	idiotyzm
 informatizar	komputeryzować
 informatización	komputeryzacja
 canalón	rynna
-cilicia	Cylicja
 fantasear	fantazjować
 fantasear	wyobrażać sobie
 guiñar	mrugać
@@ -20860,7 +19518,6 @@ podagra	podagra
 empollón	kujon
 empollón	kujonowaty
 escarbar	grzebać
-éfeso	Efez
 triptófano	tryptofan
 triptofano	tryptofan
 narguile	nargile
@@ -20937,7 +19594,6 @@ melancolía	melancholia
 dependencia	zależność
 referéndum	referendum
 saquear	grabić
-nínive	Niniwa
 yeso	gips
 estéril	bezowocny
 asaltar	szturmować
@@ -20946,7 +19602,6 @@ huso	wrzeciono
 valuar	szacować
 sólido	solidny
 sólido	ciało stałe
-wilfredo	imię męskie
 voivodía	województwo
 consecutivamente	kolejno
 oxalato	chem szczawian
@@ -21035,7 +19690,6 @@ maniqueísmo	manicheizm
 maniqueo	manichejski
 maniqueo	manichejczyk
 quimioterapéutico	chemioterapeutyczny
-eusebia	imię żeńskie Euzebia
 amotinar	podburzać
 motín	bunt
 amotinarse	buntować się
@@ -21065,7 +19719,6 @@ alimentario	żywieniowy
 dardos	lotki
 empeorar	pogarszać
 empeorar	pogarszać się
-tse	Tarjeta Sanitaria Europea → EKUZ
 desocupado	pusty
 desocupado	bezrobotny
 intranquilo	niespokojny
@@ -21235,10 +19888,8 @@ plegaria	błaganie
 ajusticiar	stracić kogoś
 encefalografía	encefalografia
 glabela	gładzizna
-saúl	imię męskie
 aurelianense	orleański
 agrupamiento	grupowanie
-oriente	Wschód
 doblegarse	zginać się
 policondensación	polikondensacja
 condensación	skraplanie
@@ -21346,11 +19997,9 @@ tragaluz	okno dachowe
 pústula	krosta
 influjo	wpływ
 ininteligibilidad	niezrozumiałość
-curazao	Curaçao
 neerlandés	holenderski
 neerlandés	Holender
 sizigia	syzygium
-laramidia	Laramidia
 mangual	kiścień
 rompecabezas	puzzle
 ósmosis	osmoza
@@ -21363,7 +20012,6 @@ sobrequilla	nadstępka
 taparrabo	przepaska biodrowa
 taparrabos	przepaska biodrowa
 pide	prosić
-ítaca	Itaka
 pusilánime	bojaźliwy
 pusilánime	bojaźliwiec
 pusilánime	kobieta bojaźliwa/strachliwa
@@ -21423,7 +20071,6 @@ googlear	guglować
 pélet	pelet
 ennegrecer	czernić
 ennegrecer	czernieć
-gagauzia	Gagauzja
 conticinio	cisza nocna
 deshelar	rozmrażać
 diezmo	dziesięcina
@@ -21488,14 +20135,11 @@ trófico	troficzny
 faja	pas
 racionalismo	racjonalizm
 humanidad	ludzkość
-shevah	imię męskie Szewach
 disfótico	dysfotyczny
 matero	lubiący pić yerba mate
 matero	smakosz yerba mate
 cementerial	cmentarny
 triquina	włosień
-ébola	ebola
-ébola	ebola
 isoquimena	izochimena
 isoquímena	izochimena
 isótera	izotera
@@ -21571,14 +20215,12 @@ escrutador	skrutator
 luxación	zwichnięcie
 alaude	skowronek
 imborrable	niezatarty
-pachamama	Pachamama
 sangradura	dół łokciowy
 hipercolesterolemia	hipercholesterolemia
 colesterolemia	cholesterolemia
 ecotono	ekoton
 rapé	tabaka
 tándem	tandem
-kaliningrado	Królewiec
 sobrestimar	przeceniać
 caftán	kaftan
 alzhéimer	alzheimer
@@ -21627,8 +20269,6 @@ covada	kuwada
 maníaco	maniakalny
 maníaco	maniak
 corva	podkolanie
-pancracio	imię męskie Pankracy
-khankendi	Chankendi
 scordatura	scordatura
 clínico	kliniczny
 clínico	klinicysta
@@ -21694,7 +20334,6 @@ cacarañado	dziobaty
 generalísimo	generalissimus
 declarativo	deklaratywny
 ictiológico	ichtiologiczny
-lárnaca	Larnaka
 ultraderecha	skrajna prawica
 disnea	duszność
 beatificación	beatyfikacja
@@ -21710,7 +20349,6 @@ abandonista	defetystka
 firmes	baczność!
 espermicida	spermicyd
 espermicida	plemnikobójczy
-tepito	Tepito
 mesmerismo	mesmeryzm
 pañal	pielucha
 ahorita	teraz
@@ -21723,7 +20361,6 @@ bibliófilo	bibliofilski
 bibliófilo	bibliofil
 quiasmo	chiazm
 apagarse	gasnąć
-niágara	Niagara
 silenciador	tłumik
 mofle	rura wydechowa
 insondable	niezgłębiony
@@ -21739,7 +20376,6 @@ anomia	anomia
 eludir	unikać
 contadero	policzalny
 contadero	turnikiet
-pepito	imię męskie
 anquilosis	ankyloza
 trasquilar	strzyc
 pellejo	skóra
@@ -21777,8 +20413,6 @@ menospreciar	nie doceniać
 cuatrimotor	czterosilnikowy
 cuatrimotor	samolot/pojazd czterosilnikowy
 ménsula	stolik
-perfecto	imię męskie
-saturnino	imię męskie Saturnin
 panamá	kapelusz panama
 jipijapa	kapelusz panama
 cabizbajo	z opuszczoną głową
@@ -21796,7 +20430,6 @@ huevera	jajczarka
 genitales	narządy płciowe
 metacrilato	metakrylan
 rebajas	wyprzedaż
-occidente	Zachód
 apurar	kończyć
 coño	pizda
 coño	skąpiec
@@ -21810,7 +20443,6 @@ marsellés	marsylski
 marsellés	marsylianin
 chaquetón	kurtka
 preventa	przedsprzedaż
-bretaña	Bretania
 cólico	kolkowy
 cólico	kolka
 proximooriental	bliskowschodni
@@ -21824,8 +20456,6 @@ hidrocarburo	węglowodór
 infructuosamente	bezowocnie
 infructuosidad	bezowocność
 desistir	zaprzestać
-pafnucio	imię męskie Pafnucy
-tebas	Teby
 taladro	wiertło
 caramba	wyrażający zdziwienie lub złość
 frasco	flakon
@@ -22029,7 +20659,6 @@ pescadera	handlarka ryb
 muñequita	laleczka
 udómetro	deszczomierz
 rallar	trzeć
-inquisición	inkwizycja
 inquisición	dochodzenie
 tendencioso	tendencyjny
 eudemonía	eudajmonia
@@ -22055,7 +20684,6 @@ maeso	mistrz
 precavido	przezorny
 trinchera	okop
 filípica	filipika
-đ	de → z
 hiperón	hiperon
 hiperplasia	rozrost
 cornamenta	poroże
@@ -22180,7 +20808,6 @@ visado	wiza
 visado	wizować
 dominico	dominikanin
 dominico	dominikański
-prusia	Prusy
 cautín	lutownica
 corónimo	choronim
 lecha	mlecz
@@ -22273,7 +20900,6 @@ niveladora	równiarka
 motoniveladora	równiarka samobieżna
 vatímetro	watomierz
 salvavidas	koło ratunkowe
-sahel	Sahel
 cotiledón	liścień
 autoconfianza	pewność siebie
 neuropsiquiátrico	neuropsychiatryczny
@@ -22408,7 +21034,6 @@ sexóloga	seksuolożka
 sacerdocio	kapłaństwo
 denominación	nazwa
 asimetría	asymetria
-arquímedes	Archimedes
 inexacto	niedokładny
 microbioma	mikrobiom
 piamontés	piemoncki
@@ -22480,14 +21105,12 @@ delineante	kreślarz
 delineante	kreślarka
 ametropía	ametropia
 demarcación	demarkacja
-camberra	Canberra
 charlatana	szarlatanka
 embaucadora	oszustka
 embaucadora	oszukańczy
 cháchara	paplanina
 areópago	areopag
 gozada	radocha
-areópago	najwyższa rada w starożytnych Atenach
 aritmomancia	arytmomancja
 aritmomancía	arytmomancja
 embaucador	oszukańczy
@@ -22669,7 +21292,6 @@ ciberseguridad	cyberbezpieczeństwo
 lameculos	dupoliz
 lameculos	dupoliz
 pentecostalismo	pentekostalizm
-pentecostés	Zielone Świątki
 refrigerante	chłodziwo
 regeneración	regeneracja
 renovación	renowacja
@@ -22683,7 +21305,6 @@ interferométrico	interferometryczny
 biombo	parawan
 genograma	genogram
 genealógico	genealogiczny
-stávropol	Stawropol
 islamófobo	islamofobiczny
 islamizar	islamizować
 polímata	polimat
@@ -22757,7 +21378,6 @@ alimentador	podawarka
 dispensador	dozownik
 aritmomanía	arytmomania
 ojete	dziurka
-lucrecia	imię żeńskie
 sanguja	pijawka
 periodontal	okołozębowy
 concordancia	zgoda
@@ -22830,7 +21450,6 @@ extravertida	ekstrawertyczka
 polemología	polemologia
 reincidente	recydywista
 perrero	hycel
-vizcaya	Biskaja
 semidesértico	półpustynny
 enigmáticamente	enigmatycznie
 pléyade	plejada
@@ -22845,3 +21464,761 @@ armañac	armaniak
 intrepidez	nieustraszoność
 embalse	zalew
 gárgola	rzygacz
+sur	południe
+austria	Austria
+albania	Albania
+estonia	Estonia
+leo	Lew
+dominica	Dominika
+lusitania	Luzytania
+europa	Europa
+islandia	Islandia
+argentina	Argentyna
+alaska	Alaska
+andalucía	Andaluzja
+andorra	Andora
+angola	Angola
+armenia	Armenia
+asia	Azja
+australia	Australia
+bolivia	Boliwia
+brasil	Brazylia
+brasilia	Brasília
+bucarest	Bukareszt
+bulgaria	Bułgaria
+california	Kalifornia
+chechenia	Czeczenia
+chile	Chile
+china	Chiny
+chipre	Cypr
+congo	Kongo
+corea	Korea
+cracovia	Kraków
+creta	Kreta
+crimea	geogr Krym
+cuba	Kuba
+danubio	Dunaj
+esopo	Ezop
+finlandia	Finlandia
+friburgo	Fryburg
+galicia	Galicia
+galilea	Galilea
+gibraltar	Gibraltar
+groenlandia	Grenlandia
+guam	Guam
+homero	Homer
+india	Indie
+indonesia	Indonezja
+iraq	Irak
+irlanda	Irlandia
+israel	Izrael
+italia	Włochy
+justino	Justyn
+lituania	Litwa
+macedonia	Macedonia
+marte	Mars
+mercurio	Merkury
+mesopotamia	Mezopotamia
+micronesia	Mikronezja
+minos	Minos
+montenegro	Czarnogóra
+moravia	Morawy
+neptuno	Neptun
+nigeria	Nigeria
+nilo	Nil
+palestina	Palestyna
+paraguay	Paragwaj
+parma	Parma
+polonia	Polska
+roma	Rzym
+samaria	Samaria
+saturno	Saturn
+senegal	Senegal
+serbia	Serbia
+seychelles	Seszele
+siberia	Syberia
+sicilia	Sycylia
+silesia	Śląsk
+sodoma	Sodoma
+sudetes	Sudety
+transilvania	Siedmiogród
+urano	Uranos
+varsovia	Warszawa
+vaticano	Watykan
+venezuela	Wenezuela
+venus	Wenus
+venus	Wenus
+vietnam	Wietnam
+vladivostok	Władywostok
+yugoslavia	Jugosławia
+suecia	Szwecja
+praga	Praga
+georgia	Gruzja
+libra	Waga
+aquitania	Akwitania
+florida	Floryda
+barbados	Barbados
+biblia	Biblia
+kiev	Kijów
+wikipedia	Wikipedia
+panonia	Panonia
+rumania	Rumunia
+rusia	Rosja
+portugal	Portugalia
+malta	Malta
+alpes	Alpy
+altar	Ołtarz
+bosnia	Bośnia
+colonia	Kolonia
+francia	Francja
+grecia	Grecja
+leo	Lew
+libra	Waga
+lima	Lima
+nix	Nix
+padua	Padwa
+pomerania	Pomorze
+liechtenstein	Liechtenstein
+moldavia	Mołdawia
+dinamarca	Dania
+noruega	Norwegia
+alemania	Niemcy
+paris	Parys
+letonia	Łotwa
+españa	Hiszpania
+borgoña	Burgundia
+abisinia	Abisynia
+abjasia	Abchazja
+apeninos	Apeniny
+egipto	Egipt
+áfrica	Afryka
+tanzania	Tanzania
+norte	północ
+irak	Irak
+nepal	Nepal
+kenia	Kenia
+tailandia	Tajlandia
+kirguizistán	Kirgistan
+croacia	Chorwacja
+júpiter	Jowisz
+plutón	Pluton
+tierra	Ziemia
+pablo	Paweł
+nairobi	Nairobi
+benín	Benin
+remigio	Remigiusz
+copenhague	Kopenhaga
+fobos	Fobos
+aruba	Aruba
+bangladesh	Bangladesz
+burundi	Burundi
+chad	Czad
+colombia	Kolumbia
+ecuador	Ekwador
+eritrea	Erytrea
+malvinas	Malwiny
+ghana	Ghana
+guatemala	Gwatemala
+guernsey	Guernsey
+guinea	Gwinea
+guinea-bissau	Gwinea Bissau
+guyana	Gujana
+honduras	Honduras
+jamaica	Jamajka
+kiribati	Kiribati
+kuwait	Kuwejt
+laos	Laos
+liberia	Liberia
+madagascar	Madagaskar
+malawi	Malawi
+mauritania	Mauretania
+mayotte	Majotta
+mongolia	Mongolia
+montserrat	Montserrat
+mozambique	Mozambik
+namibia	Namibia
+nauru	Nauru
+nicaragua	Nikaragua
+transnistria	Naddniestrze
+qatar	Katar
+samoa	Samoa
+somalia	Somalia
+togo	Togo
+tuvalu	Tuvalu
+uganda	Uganda
+uruguay	Urugwaj
+vanuatu	Vanuatu
+yemen	Jemen
+zambia	Zambia
+ebro	Ebro
+ceres	Ceres
+navidad	Boże Narodzenie
+japón	Japonia
+eris	Eris
+eris	Eris
+este	wschód
+deimos	Deimos
+jordania	Jordania
+libia	Libia
+gobierno	rząd
+este	wschód
+señor	Pan
+madrid	Madryt
+andes	Andy
+aries	Baran
+pascua	Wielkanoc
+ceuta	Ceuta
+pisa	Piza
+internet	Internet
+melilla	Melilla
+península	półwysep
+job	Hiob
+nobel	Nobel
+azores	Azory
+hungría	Węgry
+gambia	Gambia
+mali	Mali
+bolonia	Bolonia
+singapur	Singapur
+surinam	Surinam
+kabul	Kabul
+quito	Quito
+manila	Manila
+asunción	Wniebowzięcie
+praia	Praia
+abraham	Abraham
+oeste	zachód
+banjul	Bandżul
+antananarivo	Antananarywa
+teherán	Teheran
+omán	Oman
+turkmenistán	Turkmenistan
+uzbekistán	Uzbekistan
+sarajevo	Sarajewo
+berlín	Berlin
+bogotá	Bogota
+lisboa	Lizbona
+pangea	Pangea
+palermo	Palermo
+moscú	Moskwa
+parís	Paryż
+dios	Bóg
+bélgica	Belgia
+zaragoza	Saragossa
+aragón	Aragonia
+panamá	Panama
+aquisgrán	Akwizgran
+córcega	Korsyka
+inglaterra	Anglia
+viena	Wiedeń
+luna	Księżyc
+holanda	Holandia
+cataluña	Katalonia
+canarias	Wyspy Kanaryjskie
+jesús	Jezus
+vístula	Wisła
+madeira	Madera
+novokuznetsk	Nowokuźnieck
+zakopane	Zakopane
+tántalo	Tantal
+canadá	Kanada
+haití	Haiti
+méxico	Meksyk
+perú	Peru
+bielorrusia	Białoruś
+eslovaquia	Słowacja
+eslovenia	Słowenia
+rumanía	Rumunia
+suiza	Szwajcaria
+turquía	Turcja
+ucrania	Ukraina
+escocia	Szkocja
+américa	Ameryka
+zimbabue	Zimbabwe
+yibuti	Dżibuti
+macao	Makau
+afganistán	Afganistan
+bahréin	Bahrajn
+bután	Bhutan
+camboya	Kambodża
+filipinas	Filipiny
+irán	Iran
+oceanía	Oceania
+londres	Londyn
+gaza	Gaza
+támesis	Tamiza
+barcelona	Barcelona
+barcelona	klub sportowy Barcelona
+medusa	Meduza
+pakistán	Pakistan
+venecia	Wenecja
+colón	Kolumb
+luxemburgo	Luksemburg
+anunciación	Zwiastowanie
+aladino	Aladyn
+báltico	Bałtyk
+belén	Betlejem
+siria	Syria
+botsuana	Botswana
+etiopía	Etiopia
+gabón	Gabon
+breslavia	Wrocław
+estocolmo	Sztokholm
+óder	Odra
+atenas	Ateny
+cárpatos	Karpaty
+cáncer	Rak
+mediterráneo	Morze Śródziemne
+cerdeña	Sardynia
+pacífico	Pacyfik
+aristóteles	Arystoteles
+sena	Sekwana
+argelia	Algieria
+amberes	Antwerpia
+moldava	Wełtawa
+cristo	Chrystus
+valencia	Walencja
+nochevieja	sylwester
+nochebuena	Wigilia
+milán	Mediolan
+rin	Ren
+bahamas	Bahamy
+beirut	Bejrut
+stepanakert	Stepanakert
+longyearbyen	Longyearbyen
+honolulu	Honolulu
+pamir	Pamir
+estambul	Stambuł
+bósforo	Bosfor
+antártida	Antarktyda
+jesucristo	Jezus Chrystus
+ereván	Erywań
+tiflis	Tbilisi
+anguila	Anguilla
+azerbaiyán	Azerbejdżan
+bangladés	Bangladesz
+bermudas	Bermudy
+ptah	Ptah
+brunéi	Brunei
+camerún	Kamerun
+horus	Horus
+chequia	Czechy
+comoras	Komory
+dominicana	Dominikana
+fiyi	Fidżi
+granada	Grenada
+guadalupe	Gwadelupa
+cádiz	Kadyks
+líbano	Liban
+kirguistán	Kirgistan
+lesoto	Lesotho
+jerusalén	Jerozolima
+pekín	Pekin
+malasia	Malezja
+malaui	Malawi
+maldivas	Malediwy
+malí	Mali
+marruecos	Maroko
+méjico	Meksyk
+martinica	Martynika
+mónaco	Monako
+níger	Niger
+cuaternario	czwartorzęd
+guadiana	Gwadiana
+túnez	Tunezja
+rocosas	Góry Skaliste
+lázaro	Łazarz
+zeus	Zeus
+corán	Koran
+carlos	Karol
+sol	Słońce
+amón	Amon
+géminis	Bliźnięta
+katmandú	Katmandu
+adviento	adwent
+cuasimodo	Domingo de Cuasimodo
+argel	Algier
+orán	Oran
+sebastián	Sebastian
+carnívoros	Carnivora
+sur	południe
+barroco	barok
+esdras	Ezdrasz
+isis	Izyda
+tauro	Byk
+judas	Judasz
+oeste	zachód
+judea	Judea
+gante	Gandawa
+lucerna	Lucerna
+anatolio	Anatol
+bruselas	Bruksela
+sevilla	Sewilla
+salamanca	Salamanka
+texas	Teksas
+tenerife	Teneryfa
+trento	Trydent
+paquistán	Pakistan
+sudán	Sudan
+atlántico	Atlantyk
+kirguisia	Kirgistan
+pirineos	Pireneje
+pirineo	Pireneje
+demetrio	Demetriusz
+aquiles	Achilles
+ezra	Ezdrasz
+aland	Wyspy Alandzkie
+cagliari	Cagliari
+tránsito	Wniebowzięcie
+tíber	Tyber
+atlántida	Atlantyda
+jordán	Jordan
+baviera	Bawaria
+guayana	Gujana
+alicante	Alicante
+kazajistán	Kazachstan
+neandertal	Neandertal
+diego	Diego
+yolanda	Jolanta
+laponia	Laponia
+ruanda	Rwanda
+tayikistán	Tadżykistan
+ígor	Igor
+éufrates	Eufrat
+adriático	Adriatyk
+constantinopla	Konstantynopol
+belgrado	Belgrad
+abruzos	Abruzja
+florencia	Florencja
+marsella	Marsylia
+múnich	Monachium
+mediodía	południe
+mediodía	południe
+ibiza	Ibiza
+ibiza	samochód marki SEAT
+timor	Timor
+sofía	Sofia
+sudáfrica	Republika Południowej Afryki
+leiden	Lejda
+siracusa	Syrakuzy
+mallorca	Majorka
+archipiélago	Morze Egejskie
+egeo	Morze Egejskie
+vulgata	Wulgata
+hestia	Hestia
+altái	Ałtaj
+haarlem	Haarlem
+cremona	Cremona
+basilea	Bazylea
+berna	Berno
+birmania	Birma
+verona	Werona
+volinia	Wołyń
+udine	Udine
+dresde	Drezno
+mamíferos	Mammalia
+aves	Aves
+veda	Weda
+piscis	Ryby
+narciso	Narcyz
+aries	Baran
+aries	Baran
+olimpo	Olimp
+olimpia	Olimpia
+norteamérica	Ameryka Północna
+iberoamérica	Iberoameryka
+norte	północ
+babilonia	Babilonia
+cantabria	Kantabria
+comores	Komory
+córdoba	Kordoba
+escandinavia	Skandynawia
+balcanes	Bałkany
+marcelo	Marceli
+benevento	Benewent
+kilimanjaro	Kilimandżaro
+extremadura	Estremadura
+lucía	Łucja
+dioniso	Dionizos
+anatolia	Anatolia
+gales	Walia
+fenicia	Fenicja
+menorca	Minorka
+latinoamérica	Ameryka Łacińska
+península	półwysep
+centroamérica	Ameryka Centralna
+atlanta	Atlanta
+vulcano	Wulkan
+eratóstenes	Eratostenes
+tesalia	Tesalia
+boyero	Wolarz
+vesubio	Wezuwiusz
+checoslovaquia	Czechosłowacja
+bosnia-herzegovina	Bośnia i Hercegowina
+gobierno	rząd
+pegaso	Pegaz
+orión	Orion
+castilla	Kastylia
+iglesia	Kościół
+suazilandia	Suazi
+tallin	Tallinn
+trípoli	Trypolis
+everest	Mount Everest
+éverest	Mount Everest
+catar	Katar
+yeniséi	Jenisej
+morfeo	Morfeusz
+turín	Turyn
+seúl	Seul
+nazaret	Nazaret
+peloponeso	Peloponez
+sólon	Solon
+romanticismo	romantyzm
+romanticismo	romantyzm
+poseidón	Posejdon
+laconia	Lakonia
+málaga	Malaga
+murcia	Murcja
+tadeo	Tadeusz
+tales	Tales
+ártico	Arktyka
+medioevo	średniowiecze
+palaos	Palau
+blas	Błażej
+su	od Susana
+fidel	Fidel
+raimundo	Rajmund
+cartago	Kartagina
+godzilla	Godzilla
+mostar	Mostar
+etolia	Etolia
+sajonia	Saksonia
+báltica	Bałtyka
+tasmania	Tasmania
+termópilas	Termopile
+gargantúa	Gargantua
+yuba	Dżuba
+ío	Io
+ío	Io
+índico	Indyk
+mowgli	Mowgli
+carbonífero	karbon
+járkov	Charków
+marisol	Marisol
+jura	Jura
+visnú	Wisznu
+sísifo	Syzyf
+prometeo	Prometeusz
+viracocha	Wirakocza
+ostia	Ostia
+misuri	Missouri
+paleolítico	paleolit
+pittsburgh	Pittsburgh
+belice	Belize
+namur	Namur
+gioconda	Gioconda
+congreso	Kongres
+ugarit	Ugarit
+cafarnaúm	Kafarnaum
+normandía	Normandia
+noé	Noe
+saná	Sana
+samarcanda	Samarkanda
+shekhiná	Szechina
+capua	Kapua
+toledo	Toledo
+kurdistán	Kurdystan
+demóstenes	Demostenes
+vasconia	Baskonia
+loreto	Loreto
+oseas	Ozeasz
+galápagos	Galapagos
+wikcionario	Wikisłownik
+alsacia	Alzacja
+daguestán	Dagestan
+reikiavik	Reykjavík
+navarra	Nawarra
+hubal	Hubal
+carniola	Kraina
+estrasburgo	Strasburg
+tajo	Tag
+turbo	Turbo
+josué	Jozue
+piamonte	Piemont
+ratisbona	Ratyzbona
+abrahán	Abraham
+habacuc	Habakuk
+cenicienta	Kopciuszek
+mesías	chrześcijaństwo Mesjasz
+buriatia	Buriacja
+troya	Troja
+ai	Aj
+ovidio	Owidiusz
+tutankamón	Tutanchamon
+guyarat	Gudźarat
+baréin	Bahrajn
+somalilandia	Somaliland
+alejandra	Aleksandra
+keiko	Keiko
+cosme	Kosma
+chernóbil	Czarnobyl
+zúrich	Zurych
+resurrección	Zmartwychwstanie Chrystusa
+cirenaica	Cyrenajka
+salerno	Salerno
+salomón	Salomon
+corinto	Korynt
+armagedón	Armagedon
+hipona	Hippona
+mantua	Mantua
+tobías	Tobiasz
+cesarea	Cezarea
+rávena	Rawenna
+ravena	Rawenna
+macabeo	Machabeusz
+sirac	Syrach
+sirácides	Syracydes
+sirácida	Syracydes
+shanghái	Szanghaj
+zabulón	Zabulon
+moisés	Mojżesz
+alejandría	Aleksandria
+ricardín	Rysio
+ricardito	Rysio
+bajchisarái	Bakczysaraj
+álvarez	Alwarez
+rojava	Rożawa
+cachemira	Kaszmir
+septuaginta	Septuaginta
+ferrara	Ferrara
+cirene	Cyrena
+ermentrudis	Ermentruda
+seat	seat
+otón	Otton
+acrópolis	Akropol
+homs	Hims
+maximino	Maksymin
+albión	Albion
+mesina	Mesyna
+mileto	Milet
+matatías	Matatiasz
+zacarías	Zachariasz
+komi	Komi
+cefas	Kefas
+baskortostán	Baszkortostan
+basilea-campiña	Bazylea-Okręg
+basilea-campaña	Bazylea-Okręg
+segovia	Segowia
+basilea-ciudad	Bazylea-Miasto
+chuvasia	Czuwaszja
+prípiat	Prypeć
+ingusetia	Inguszetia
+amalfi	Amalfi
+lausana	Lozanna
+gesur	Geszur
+livorno	Livorno
+oviedo	Oviedo
+inocencio	Innocenty
+ginebra	Genewa
+kabardia-balkaria	Kabardo-Bałkaria
+kabardino-balkaria	Kabardyno-Bałkaria
+titán	Tytan
+kalmukia	Kałmucja
+encélado	Enceladus
+glaris	Glarus
+alepo	Aleppo
+brescia	Brescia
+arezzo	Arezzo
+asís	Asyż
+karacháyevo-cherkesia	Karaczajo-Czerkiesja
+pavía	Pawia
+nápoles	Neapol
+liorna	Livorno
+grisones	Gryzonia
+fauno	Faun
+módena	Modena
+aquilea	Akwileja
+tívoli	Tivoli
+rímini	Rimini
+pompeya	Pompeje
+agrigento	Agrigento
+orvieto	Orvieto
+jakasia	Chakasja
+bérgamo	Bergamo
+honolulú	Honolulu
+padre	Ojciec
+baruc	Baruch
+nabucodonosor	Nabuchodonozor
+véneto	Wenecja Euganejska
+lombardía	Lombardia
+esuatini	Eswatini
+casubia	Kaszuby
+marburgo	Marburg
+mecklemburgo	Meklemburgia
+groninga	Groningen
+güeldres	Geldria
+bolduque	's-Hertogenbosch
+flesinga	Vlissingen
+aviñón	Awinion
+augsburgo	Augsburg
+coblenza	Koblencja
+coburgo	Coburg
+tubinga	Tybinga
+sajonia-anhalt	Saksonia-Anhalt
+ekaterimburgo	Jekaterynburg
+sídney	Sydney
+lusacia	Łużyce
+maguncia	Moguncja
+constanza	Konstancja
+cornualles	Kornwalia
+omnipotente	Wszechmogący
+micenas	Mykeny
+cenozoico	kenozoik
+mecklemburgo-antepomerania	Meklemburgia-Pomorze Przednie
+génova	Genua
+abdías	Abdiasz
+johannesburgo	Johannesburg
+eoceno	eocen
+hispanoamérica	Hispanoameryka
+ebisu	Ebisu
+orcus	Orkus
+génesis	Genesis
+andrómaca	Andromacha
+cochabamba	Cochabamba
+eclesiastés	Eklezjastes
+nacianzo	Nazjanz
+jesé	Jesse
+melusina	Meluzyna
+holofernes	Holofernes
+odiseo	Odyseusz
+morelia	Morelia
+precámbrico	prekambr
+cilicia	Cylicja
+éfeso	Efez
+nínive	Niniwa
+oriente	Wschód
+curazao	Curaçao
+laramidia	Laramidia
+ítaca	Itaka
+gagauzia	Gagauzja
+ébola	ebola
+ébola	ebola
+pachamama	Pachamama
+kaliningrado	Królewiec
+khankendi	Chankendi
+lárnaca	Larnaka
+tepito	Tepito
+niágara	Niagara
+occidente	Zachód
+bretaña	Bretania
+tebas	Teby
+inquisición	inkwizycja
+đ	de → z
+prusia	Prusy
+sahel	Sahel
+arquímedes	Archimedes
+camberra	Canberra
+areópago	najwyższa rada w starożytnych Atenach
+pentecostés	Zielone Świątki
+stávropol	Stawropol
+vizcaya	Biskaja

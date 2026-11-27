@@ -40,6 +40,8 @@ FORM_OF = re.compile(r"(?:od:?|zaimka osobowego)\s+(\w+)\s*$")
 KEEP_ALL = {"być", "byt", "biti", "byť", "быть", "бути", "быць", "съм", "sein", "werden", "be"}
 # English, kept to the entries its keyboard list ranks highest (size).
 EN_MAX_ENTRIES = 20000
+# A gloss saying the headword is an abbreviation's expansion or a name.
+NAMEISH = re.compile(r"→|^(imię|od imion|od imienia|nazwisko)")
 
 
 # Plain errors in the source, fixed here until the per-language review keeps
@@ -79,6 +81,8 @@ def main():
     gloss = {l: [] for l in LANGS}   # (keys, gloss) per entry
     trans = []                        # (keys, {lang: word}) per Polish entry
     form_of = {}                      # Polish form -> the lemmas it is a form of
+    names = {l: set() for l in LANGS}        # (head, gloss) kept out of the X -> Polish table
+    capital = {l: set() for l in LANGS}      # (head, gloss) of capitalised headwords
     with gzip.open(SRC, "rt", encoding="utf-8") as f:
         for line in f:
             d = json.loads(line)
@@ -102,6 +106,19 @@ def main():
                 if not g:
                     continue
                 gloss[lc].append((keys if lc == "de" else [k.lower() for k in keys], g))
+                # A name or abbreviation, lowercased, posed as a word: "IS"
+                # (information system) and "Is" (Isaiah) answered English
+                # "is" (261127). Kept for filling Polish -> X, left out of the
+                # X -> Polish table: an abbreviation in capitals, or a
+                # capitalised headword glossed as an expansion ("Book of
+                # Isaiah → Iz") or a name ("imię męskie"). `Russia` -> `Rosja`
+                # stays: the keyboard lists are lowercase, so frequency cannot
+                # tell a name from a word.
+                if lc != "de" and len(word) > 1 and word[:1].isupper() and (
+                        word.isupper() or NAMEISH.search(g)):
+                    names[lc].add((word.lower(), g))
+                if lc != "de" and word[:1].isupper():
+                    capital[lc].add((word.lower(), g))
             elif lc == "pl":
                 tr = {}
                 for t in d.get("translations", []):
@@ -204,6 +221,10 @@ def main():
                                                 key=lambda t: t[0])[:EN_MAX_ENTRIES]]
     for l, rows in gloss.items():
         with open(os.path.join(OUT, f"gloss_{l}.tsv"), "w", encoding="utf-8", newline="\n") as f:
+            rows = [(keys, g) for keys, g in rows if (keys[0], g) not in names[l]]
+            # The word before the name: the first line wins, so `May` (maj)
+            # went before `may` (móc). Capitalised headwords go last.
+            rows = sorted(rows, key=lambda r: (r[0][0], r[1]) in capital[l])
             for keys, g in rows:
                 f.write(" ".join(dict.fromkeys(keys)) + "\t" + g + "\n")
         print(f"gloss_{l}.tsv: {len(rows):,} entries")

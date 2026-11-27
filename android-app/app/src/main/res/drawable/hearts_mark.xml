@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The four hearts of brand/src/icon_b_hearts.svg without its navy field,
+     for a tile of the app's own colour (the header). SVG: translate(256 256)
+     scale(1.25), each heart rotate(r) translate(0 -86): a group rotates, a
+     group inside it translates. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+    <group android:translateX="256" android:translateY="256" android:scaleX="1.25" android:scaleY="1.25">
+        <group android:rotation="180">
+            <group android:translateY="-86">
+                <path android:fillColor="#3A66D9"
+                    android:pathData="M0,-24 C-44,-70 -104,-22 -58,26 L0,86 L58,26 C104,-22 44,-70 0,-24 Z" />
+            </group>
+        </group>
+        <group android:rotation="270">
+            <group android:translateY="-86">
+                <path android:fillColor="#F5C400"
+                    android:pathData="M0,-24 C-44,-70 -104,-22 -58,26 L0,86 L58,26 C104,-22 44,-70 0,-24 Z" />
+            </group>
+        </group>
+        <group android:rotation="0">
+            <group android:translateY="-86">
+                <path android:fillColor="#D5262C"
+                    android:pathData="M0,-24 C-44,-70 -104,-22 -58,26 L0,86 L58,26 C104,-22 44,-70 0,-24 Z" />
+            </group>
+        </group>
+        <group android:rotation="90">
+            <group android:translateY="-86">
+                <path android:fillColor="#FFFFFF"
+                    android:pathData="M0,-24 C-44,-70 -104,-22 -58,26 L0,86 L58,26 C104,-22 44,-70 0,-24 Z" />
+            </group>
+        </group>
+    </group>
+</vector>
