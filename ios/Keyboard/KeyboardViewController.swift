@@ -112,6 +112,14 @@ final class KeyboardViewController: UIInputViewController {
         applyTheme()
         view.backgroundColor = UIColor.secondarySystemBackground
         buildSuggestionBar()
+        touchWatcher.onAllUp = { [weak self] in
+            DispatchQueue.main.async {
+                guard let self, self.buildPending, !self.touchWatcher.fingerDown else { return }
+                self.buildKeyboard()
+                self.refreshCompletions()
+            }
+        }
+        view.addGestureRecognizer(touchWatcher)
         buildKeyboard()
         swipeInput = SwipeInput(host: self)
         swipeInput.attach()
@@ -259,7 +267,22 @@ final class KeyboardViewController: UIInputViewController {
 
     // MARK: - Building
 
+    /// A rebuild asked for while a finger is on the glass (script or language
+    /// from the app, a page change) waits for the lift (owner 261127, Android
+    /// 3.11.20). What a key does on its own lift rebuilds at once: by then
+    /// the watcher has seen the touch end.
+    private let touchWatcher = TouchWatcher()
+    private var buildPending = false
+    /// The last `strip` line of the test-round log (`logStrip`).
+    private var lastStripLog = ""
+
     private func buildKeyboard() {
+        if touchWatcher.fingerDown {
+            buildPending = true
+            swipeLog.notice("isv-touch: build deferred: finger down")
+            return
+        }
+        buildPending = false
         builtLanguage = Layout.language
         builtChoice = Script.choice
         // ⚙ keeps its place while something in it is ticked: every tick
@@ -731,7 +754,8 @@ final class KeyboardViewController: UIInputViewController {
             return
         }
         if let num = numberAtCaret, let n = Int(num.digits), Titlo.numeral(n) != nil {
-            // Opened with · (first tap): close it with · ; else titlo over it.
+            // A number is marked with dots, never with a titlo (owner
+            // 261124): digits -> ·ⰓⰋⰂ·, ·digits -> ⰓⰋⰂ· (Android 3.11.21).
             let before = contextBefore ?? ""
             let opened = !num.selected && before.dropLast(num.digits.count).last == "·"
             if opened {
@@ -739,7 +763,7 @@ final class KeyboardViewController: UIInputViewController {
                 put(Titlo.numeral(n)! + "·")
                 afterTitlo()
             } else {
-                writeNumber(dots: false)
+                writeNumber(dots: true)
             }
             return
         }
@@ -1074,8 +1098,10 @@ final class KeyboardViewController: UIInputViewController {
     @objc private func tapNextKeyboard() {
         let on = Layout.enabled
         if let i = on.firstIndex(of: Layout.language), i + 1 < on.count {
+            logEvent("globe", "next")
             switchLanguage(to: on[i + 1])
         } else {
+            logEvent("globe", "picker")
             if on.count > 1 { switchLanguage(to: on[0], rebuild: false) }
             advanceToNextInputMode()
         }
@@ -1167,6 +1193,7 @@ final class KeyboardViewController: UIInputViewController {
     private static let settingsRow = "⚙"
 
     private func openSettings() {
+        logEvent("settings", "panel")
         showingSettings = true
         settingsOffset = 0
         settingsScroll = nil
@@ -1401,18 +1428,21 @@ final class KeyboardViewController: UIInputViewController {
 
     /// Puts LATIN text in, written in the chosen script. One key's worth: a
     /// letter, a held letter or digraph (`dž`), a mark, space or return.
-    private func insert(_ latin: String) {
+    /// `shown`: what goes into the field when it is not `Script.out(latin)`.
+    private func insert(_ latin: String, shown: String? = nil) {
         // Interslavic Glagolitic: the soft yer after l or n is the j of lj/nj,
-        // so the wordlist and the glide see plain Interslavic.
+        // so the wordlist and the glide see plain Interslavic - but the field
+        // keeps ⱐ (konj = ⰽⱁⱀⱐ): a lone j would be written ⰹ. ⱐ reads back
+        // as j (Android 3.11.18).
         if Layout.isvGlagShift, latin == Script.softYerMark,
            let prev = Script.toLatin(contextBefore ?? "").last, "lnLN".contains(prev) {
-            insert("j"); return
+            insert("j", shown: Script.out(Script.softYerMark)); return
         }
         guard let ch = latin.first else { return }
         recased = nil
         caretByHand = false
         ownEditAt = Date()
-        if decoding > 0 { queuedKeys.append { [weak self] in self?.insert(latin) }; return }
+        if decoding > 0 { queuedKeys.append { [weak self] in self?.insert(latin, shown: shown) }; return }
         // A letter right after a glide EXTENDS the glided word only if the two
         // together can still grow into a word. The window is now just a
         // ceiling: time alone glued the start of the next word onto the last
@@ -1503,7 +1533,7 @@ final class KeyboardViewController: UIInputViewController {
                 doc.deleteBackward()
                 put(d == "Ⰴ" ? "Ⰷ" : "ⰷ")
             } else {
-                put(Script.out(latin))
+                put(shown ?? Script.out(latin))
             }
             isvSplitD = latin == "ḍ" || latin == "Ḍ"
         }
@@ -2029,6 +2059,7 @@ extension KeyboardViewController: SwipeHost {
         undo.addAction(UIAction { [weak self] _ in
             guard let self else { return }
             self.ownEditAt = Date()
+            self.logEvent("undo")
             let done = self.doc.undo()
             swipeLog.notice("isv-undo: \(done, privacy: .public) left \(Doc.journal.count, privacy: .public)")
             self.glagWord = nil
@@ -2048,6 +2079,7 @@ extension KeyboardViewController: SwipeHost {
         redo.addAction(UIAction { [weak self] _ in
             guard let self else { return }
             self.ownEditAt = Date()
+            self.logEvent("redo")
             let done = self.doc.redo()
             swipeLog.notice("isv-redo: \(done, privacy: .public) left \(Doc.redoStack.count, privacy: .public)")
             self.glagWord = nil
@@ -2070,7 +2102,7 @@ extension KeyboardViewController: SwipeHost {
         titlo.tintColor = .label
         titlo.accessibilityLabel = "Titlo"
         titlo.translatesAutoresizingMaskIntoConstraints = false
-        titlo.addAction(UIAction { [weak self] _ in self?.titloOnWord() }, for: .touchUpInside)
+        titlo.addAction(UIAction { [weak self] _ in self?.logEvent("titlo"); self?.titloOnWord() }, for: .touchUpInside)
         titloButton = titlo
         view.addSubview(titlo)
         // Hide the keyboard, at the right end of the bar as
@@ -2125,6 +2157,35 @@ extension KeyboardViewController: SwipeHost {
             b.setTitleColor(i == current ? .label : .secondaryLabel, for: .normal)
             b.titleLabel?.font = .systemFont(ofSize: 17, weight: i == current ? .semibold : .regular)
         }
+        logStrip()
+    }
+
+    // MARK: Test-round log (Android `GestureLog.event`, 3.11.25): what is not
+    // a glide - `strip` (the word being typed and what the bar shows for it,
+    // the evidence for "the bar was empty"), `titlo`, `undo`, `redo`, `globe`,
+    // `settings`, `slot`. File only, only while the gesture log is on, and
+    // never in a password field: there the word being typed IS the secret.
+
+    private func logEvent(_ kind: String, _ word: String = "", strip: [String]? = nil) {
+        guard Shared.gestureLogOn, textDocumentProxy.isSecureTextEntry != true else { return }
+        var row: [String: Any] = [
+            "kind": kind, "t": Date().timeIntervalSince1970,
+            "lang": Layout.language, "script": Script.choice, "word": word,
+        ]
+        if let strip { row["strip"] = strip }
+        Shared.appendGesture(row)
+    }
+
+    /// What the bar shows right now for the word at the caret - logged only
+    /// when it changed, so a refresh does not repeat the same line.
+    private func logStrip() {
+        guard Shared.gestureLogOn else { return }
+        let word = Script.toLatin(trailingWord(contextBefore ?? ""))
+        let shown = suggestionButtons.compactMap { $0.title(for: .normal) }.filter { !$0.isEmpty }
+        let key = word + "\u{0}" + shown.joined(separator: "\u{0}")
+        if key == lastStripLog { return }
+        lastStripLog = key
+        logEvent("strip", word, strip: shown)
     }
 
     @objc fileprivate func tapSuggestion(_ sender: UIButton) {
@@ -2132,6 +2193,7 @@ extension KeyboardViewController: SwipeHost {
         ownEditAt = Date()
         guard let i = suggestionButtons.firstIndex(of: sender),
               let word = slotWords[i], !word.isEmpty else { return }
+        logEvent("slot", word)
         if word.hasPrefix(Self.savePrefix) {
             // Saves; the text stays exactly as typed.
             let saved = String(word.dropFirst(Self.savePrefix.count))

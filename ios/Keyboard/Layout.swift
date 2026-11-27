@@ -535,7 +535,11 @@ enum Layout {
             let extra = isvGlagShift ? (isvGlagHolds[lower] ?? []) : []
             // ḍ: a d that stays apart from a following z (pod-zemny as ⰴⰸ)
             let tail = isvGlagShift && lower == "d" ? ["ḍ"] : []
-            let g = (extra + own + tail).map { cased($0, uppercase) } + titloItems(key, uppercase)
+            // lj/nj stand both in `extra` and among the letter's own holds:
+            // once is enough, first place kept (Android 3.11.20).
+            var seen = Set<String>()
+            let g = (extra + own + tail).filter { seen.insert($0).inserted }.map { cased($0, uppercase) }
+                + titloItems(key, uppercase)
             return g.isEmpty ? nil : g
         }
         if latin {

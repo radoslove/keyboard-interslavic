@@ -68,7 +68,7 @@ enum Script {
     }
     static func setMorse() { Shared.store.set("morse", forKey: key) }
 
-    /// Runes (Norwegian only, 261118), chosen like Morse: two rows.
+    /// Runes (Norwegian only, 261118), chosen like Morse: three rows, oldest first.
     static var runes: Runes.Row? {
         guard Runes.has(Layout.language) else { return nil }
         return Runes.Row(rawValue: Shared.store.string(forKey: key) ?? "")

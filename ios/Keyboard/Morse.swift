@@ -328,6 +328,9 @@ struct Doc {
     }
 
     private func rawInsert(_ s: String) {
+        // Typing over a selection replaces it: ↶ gives the old text back
+        // (Android 3.11.20).
+        if let sel = proxy.selectedText, !sel.isEmpty { record(.delete(sel)) }
         record(.insert(s)); proxy.insertText(s); noteTail()
     }
 
@@ -346,7 +349,9 @@ struct Doc {
 
     func insertText(_ s: String) {
         if let r = runes {
-            Runes.wrote(s, after: proxy.documentContextBeforeInput ?? "", r)
+            let raw = proxy.documentContextBeforeInput ?? ""
+            Runes.wrote(s, after: raw, r)
+            Runes.willEdit(raw)
             rawInsert(Runes.encode(s, r))
             return
         }
@@ -357,8 +362,20 @@ struct Doc {
 
     /// One LETTER back: its code and the gap before it.
     func deleteBackward() {
-        if runes != nil {
-            rawDelete()      // one rune = one letter
+        if let r = runes {
+            // A letter of the elder row may be two runes (ᚲᛊ is one `x`).
+            let raw = proxy.documentContextBeforeInput ?? ""
+            let n = (proxy.selectedText ?? "").isEmpty ? Runes.runesOfLastLetter(raw, r) : 1
+            Runes.willEdit(raw)
+            if n > 1, raw.count >= n {
+                // Recorded as one piece: after the first rune is gone the
+                // field may still hand back the old text.
+                record(.delete(String(raw.suffix(n))))
+                for _ in 0..<n { proxy.deleteBackward() }
+                noteTail()
+            } else {
+                rawDelete()
+            }
             if !Runes.tail.isEmpty { Runes.tail.removeLast() }
             return
         }

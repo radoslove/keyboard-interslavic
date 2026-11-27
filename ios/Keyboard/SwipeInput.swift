@@ -116,6 +116,54 @@ final class SwipeGestureRecognizer: UIGestureRecognizer {
     }
 }
 
+/// Knows whether a finger is on the keyboard, and recognises nothing: the
+/// view is not rebuilt under a finger (Android 3.11.20 - a rebuild mid-touch
+/// took the keys away from under a glide and cut it without a trace in the
+/// log). It prevents no other recognizer and none prevents it.
+final class TouchWatcher: UIGestureRecognizer, UIGestureRecognizerDelegate {
+
+    private var down = 0
+    private var since = Date.distantPast
+    /// Every finger is up again.
+    var onAllUp: (() -> Void)?
+
+    /// A touch whose end never arrived must not hold the keyboard for good:
+    /// after 8 s it no longer counts.
+    var fingerDown: Bool { down > 0 && Date().timeIntervalSince(since) < 8 }
+
+    init() {
+        super.init(target: nil, action: nil)
+        cancelsTouchesInView = false
+        delaysTouchesBegan = false
+        delaysTouchesEnded = false
+        delegate = self
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        if down == 0 { since = Date() }
+        down += touches.count
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) { lifted(touches.count) }
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) { lifted(touches.count) }
+
+    private func lifted(_ n: Int) {
+        down = max(0, down - n)
+        if down == 0 { state = .failed; onAllUp?() }
+    }
+
+    override func reset() {
+        super.reset()
+        if down > 0 { down = 0; onAllUp?() }
+    }
+
+    override func canPrevent(_ other: UIGestureRecognizer) -> Bool { false }
+    override func canBePrevented(by other: UIGestureRecognizer) -> Bool { false }
+
+    func gestureRecognizer(_ g: UIGestureRecognizer,
+                           shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
+}
+
 /// Owns the gesture, the trail and the decoding.
 final class SwipeInput: NSObject, UIGestureRecognizerDelegate {
 
