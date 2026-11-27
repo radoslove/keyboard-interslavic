@@ -130,8 +130,18 @@ object Alphabets {
         val letters = LETTERS[lang]?.split(' ') ?: return emptyList()
         if (from == to) return emptyList()
         val by = LinkedHashMap<String, MutableList<String>>()
+        // A letter with an accent that only borrows its base letter's sign
+        // (runes: ą = ᛆ as a) is left out: "ᛆ a", not "ᛆ a / ą" (owner 261127:
+        // no Polish diacritics). One with a sign of its own (Morse ą, the
+        // Glagolitic ć) stays.
+        fun base(l: String) = when (l) {
+            "ł" -> "l"; "đ" -> "d"
+            else -> java.text.Normalizer.normalize(l, java.text.Normalizer.Form.NFD).take(1)
+        }
         for (l in letters) {
             val f = render(l, to, lang) ?: continue
+            val bl = base(l)
+            if (bl != l && bl in letters && render(bl, to, lang) == f) continue
             val b = render(l, from, lang) ?: continue
             if (f == b) continue
             val list = by.getOrPut(f) { ArrayList() }

@@ -392,6 +392,32 @@ class SetupActivity : Activity() {
         if (f != null) f(now) else { tryKeptText = tryText(); recreate() }
     }
 
+    /** While a learning pass runs, Back ends the pass, not the app. With
+     *  targetSdk 36 the system calls no onBackPressed on API 33+, so a
+     *  callback is registered for the pass only. */
+    private var backCb: Any? = null
+    internal fun learnPassing(on: Boolean) {
+        if (android.os.Build.VERSION.SDK_INT < 33) return
+        if (on && backCb == null) {
+            val cb = android.window.OnBackInvokedCallback {
+                if (learnBack?.invoke() != true) { learnPassing(false); moveTaskToBack(true) }
+            }
+            onBackInvokedDispatcher.registerOnBackInvokedCallback(
+                android.window.OnBackInvokedDispatcher.PRIORITY_DEFAULT, cb)
+            backCb = cb
+        } else if (!on && backCb != null) {
+            onBackInvokedDispatcher.unregisterOnBackInvokedCallback(backCb as android.window.OnBackInvokedCallback)
+            backCb = null
+        }
+    }
+
+    /** Back ends a learning pass first; only then does it leave the app. */
+    @Deprecated("Activity, not ComponentActivity: no dispatcher here")
+    override fun onBackPressed() {
+        if (learnBack?.invoke() == true) return
+        @Suppress("DEPRECATION") super.onBackPressed()
+    }
+
     override fun onPause() {
         super.onPause()
         getSharedPreferences("isv_collector", MODE_PRIVATE).unregisterOnSharedPreferenceChangeListener(langListener)
