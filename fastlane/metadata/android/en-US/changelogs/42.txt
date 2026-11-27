@@ -1,0 +1,9 @@
+Glagolitic with a titlo, three sets of runes, a new learning tab.
+
+- Polish and Interslavic share one Glagolitic layout, with a titlo,
+  numerals and undo/redo on the suggestion bar.
+- Runes for Norwegian: elder futhark, younger futhark and medieval runes.
+- Learning tab: two wheels to pick a language pair or an alphabet pair,
+  a cheat sheet of the whole alphabet, full-screen practice.
+- Writing tab: tap a language for a word-by-word translation, and
+  the script key re-spells the text.

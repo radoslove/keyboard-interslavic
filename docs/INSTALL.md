@@ -93,7 +93,7 @@ Package name: `com.radoslove.interslavic`
 
 1. Open the **Releases** link above **on the phone** and download the `.apk`
    from the newest release. From v3.5 it is named after the version
-   (`interslove-3.10.1.apk`), so the file in your Downloads folder says what it
+   (`interslove-3.11.apk`), so the file in your Downloads folder says what it
    is; v3.4 and older are called `app-release.apk`.
 2. Android will ask to allow installs from your browser — allow it once for
    this install; you can turn it off again afterwards.
@@ -197,12 +197,12 @@ A plain XKB symbols file, installed with a copy into `/usr/share/X11/xkb/symbols
 Only needed for the **files** (Android APK, Windows DLLs, macOS keylayout).
 App-store routes (Keyman) are verified by the store.
 
-**Android APK — current release `v3.10.1`:**
+**Android APK — current release `v3.11`:**
 
 | What | Value |
 |---|---|
-| File | `interslove-3.10.1.apk` (and `app-release.apk`, the same bytes under the old name) |
-| SHA-256 | `081351190b5704f3aa1816680720d6d4bc6190067e0887b63a6ffa679b1bc3da` |
+| File | `interslove-3.11.apk` (and `app-release.apk`, the same bytes under the old name) |
+| SHA-256 | `13d94f79d5a419ba8ac501c8ee41b917340a396735afa6bda2e18df4498a7ef3` |
 | Signing-certificate SHA-256 | `5fa81cd2fd62cbdd3580076b941c1711b4ddc625609b5c80ec7c135a56e3b98a` |
 
 The signing-certificate fingerprint is the same one registered in our F-Droid
