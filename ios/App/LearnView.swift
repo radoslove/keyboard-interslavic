@@ -517,11 +517,12 @@ struct LearnView: View {
     /// What to learn: words of a language, or alphabets. First on the screen:
     /// it says what the count under it is about.
     private var modeRow: some View {
-        HStack(spacing: 8) {
+        // One under the other when the two do not fit side by side (the
+        // alphabets' button was cut to "ABC  А..." at the largest text size).
+        FitRow {
             ForEach([false, true], id: \.self) { on in
                 Button { if alphaMode != on { setMode(on) } } label: {
-                    Text(on ? "ABC  А  Ⰰ  ᚠ  ·−" : Ui.t("learn_words"))
-                        .lineLimit(1).minimumScaleFactor(0.7)
+                    Text(on ? "ABC  А  Ⰰ  ᚠ  ·−" : Ui.t("learn_words")).lineLimit(1)
                 }
                 .buttonStyle(LookStyle(kind: alphaMode == on ? .chosen : .plain))
                 .accessibilityIdentifier(on ? "learn_mode_alpha" : "learn_mode_words")
