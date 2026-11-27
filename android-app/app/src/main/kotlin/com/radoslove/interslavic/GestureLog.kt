@@ -175,6 +175,23 @@ object GestureLog {
         }
     }
 
+    /**
+     * Anything that is not a glide, for test rounds (owner 261127: the round's
+     * times and steps come from the log, never from the tester's pen): `strip`
+     * (the word being typed and what the suggestion bar shows for it - the
+     * evidence for "the bar was empty"), `titlo`, `undo`, `redo`, `globe`,
+     * `settings`, `slot`. File only, never to a sink, and never flushes the
+     * pending glide, so a gesture keeps its `kept`/`deleted` label.
+     */
+    fun event(kind: String, lang: String, script: String, word: String = "", strip: List<String>? = null) {
+        val ctx = appContext ?: return
+        if (!fileOn(ctx)) return
+        val t = System.currentTimeMillis() / 1000.0
+        val s = strip?.joinToString(",", ",\"strip\":[", "]") { quote(it) } ?: ""
+        appendLine("""{"kind":${quote(kind)},"t":$t,"lang":${quote(lang)},"script":${quote(script)},""" +
+            """"word":${quote(word)}$s}""")
+    }
+
     /** The user said what they actually wanted, or threw the guess away. */
     fun resolve(outcome: String, chosen: String?) {
         flush(outcome, chosen)

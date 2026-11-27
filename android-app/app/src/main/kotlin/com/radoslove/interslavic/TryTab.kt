@@ -327,7 +327,7 @@ internal fun SetupActivity.addScriptRow(root: LinearLayout, box: android.widget.
     val lang = Lang.current(this)
     val own = Script.choices(lang)
     val modes = listOf(Script.Mode.LATIN, Script.Mode.CYRILLIC, Script.Mode.GLAGOLITIC,
-        Script.Mode.RUNES_A, Script.Mode.RUNES_B, Script.Mode.MORSE)
+        Script.Mode.RUNES_E, Script.Mode.RUNES_B, Script.Mode.RUNES_A, Script.Mode.MORSE)
     val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
     val buttons = ArrayList<Button>()
     fun shade(m: Script.Mode, on: Script.Mode) = if (m == on) 1f else if (m in own) 0.55f else 0.3f

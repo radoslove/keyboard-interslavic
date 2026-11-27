@@ -99,9 +99,9 @@ object Alphabets {
         val letters = LETTERS[lang] ?: return emptyList()
         val out = Script.choices(lang).toMutableList()
         val latin = letters.any { it in 'a'..'z' }
-        if (latin && Script.Mode.RUNES_A !in out) {
+        if (latin && Script.Mode.RUNES_E !in out) {
             val at = out.indexOf(Script.Mode.MORSE).let { if (it < 0) out.size else it }
-            out.addAll(at, listOf(Script.Mode.RUNES_A, Script.Mode.RUNES_B))
+            out.addAll(at, Script.RUNE_MODES)
         }
         return out
     }
@@ -111,7 +111,7 @@ object Alphabets {
         val row = Script.runeRow(m)
         val f = when {
             m == Script.Mode.MORSE -> if (l.length == 1) Morse.code(l[0], lang) else null
-            row != null -> if (l.length == 1) Runes.rune(l[0], row).toString() else null
+            row != null -> if (l.length == 1) Runes.rune(l[0], row) else null
             m == Script.offered(lang).first() -> l
             else -> Script.convert(l, m, lang)
         }

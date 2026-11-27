@@ -31,15 +31,20 @@ object Script {
     /** MORSE is chosen like the others but is never what [mode] returns: in
      *  Morse the keyboard works in the language's own first script and
      *  [Morse.Conn] turns the text into dots and dashes at the editor. */
-    enum class Mode { LATIN, CYRILLIC, GLAGOLITIC, RUNES_A, RUNES_B, MORSE }
+    enum class Mode { LATIN, CYRILLIC, GLAGOLITIC, RUNES_E, RUNES_B, RUNES_A, MORSE }
 
     /** The rune row of a choice, or null. Runes (Norwegian only, 261118) work
      *  like Morse: never what [mode] returns, [Runes.Conn] writes them. */
     fun runeRow(m: Mode): Runes.Row? = when (m) {
-        Mode.RUNES_A -> Runes.Row.MEDIEVAL
+        Mode.RUNES_E -> Runes.Row.ELDER
         Mode.RUNES_B -> Runes.Row.YOUNG
+        Mode.RUNES_A -> Runes.Row.MEDIEVAL
         else -> null
     }
+
+    /** The rune rows, oldest first (owner 261127): elder futhark, younger
+     *  futhark, medieval runes. */
+    val RUNE_MODES = listOf(Mode.RUNES_E, Mode.RUNES_B, Mode.RUNES_A)
 
     /** The rune row the keyboard writes now, or null. */
     fun runes(context: Context): Runes.Row? = runeRow(chosen(context))
@@ -79,7 +84,7 @@ object Script {
      *  for every language that has a Morse table. */
     fun choices(lang: String): List<Mode> =
         offered(lang) +
-            (if (Runes.has(lang)) listOf(Mode.RUNES_A, Mode.RUNES_B) else emptyList()) +
+            (if (Runes.has(lang)) RUNE_MODES else emptyList()) +
             (if (Morse.has(lang)) listOf(Mode.MORSE) else emptyList())
 
     /** Each language remembers its own script. Interslavic keeps the old key, so
@@ -107,6 +112,7 @@ object Script {
             "cyrillic" -> Mode.CYRILLIC
             "glagolitic" -> Mode.GLAGOLITIC
             "morse" -> Mode.MORSE
+            "runes_e" -> Mode.RUNES_E
             "runes_a" -> Mode.RUNES_A
             "runes_b" -> Mode.RUNES_B
             else -> Mode.LATIN
@@ -154,8 +160,9 @@ object Script {
         Mode.LATIN -> "ABC"
         Mode.CYRILLIC -> "АБВ"
         Mode.GLAGOLITIC -> "ⰀⰁⰂ"
-        Mode.RUNES_A -> Runes.label(Runes.Row.MEDIEVAL)
+        Mode.RUNES_E -> Runes.label(Runes.Row.ELDER)
         Mode.RUNES_B -> Runes.label(Runes.Row.YOUNG)
+        Mode.RUNES_A -> Runes.label(Runes.Row.MEDIEVAL)
         Mode.MORSE -> "·−"
     }
 

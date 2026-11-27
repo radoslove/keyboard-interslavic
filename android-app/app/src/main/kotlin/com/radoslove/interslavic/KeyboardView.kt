@@ -1384,6 +1384,7 @@ class KeyboardView(
                     val dx = e.x - downX
                     when {
                         listed && pick == LANG_GEAR -> {
+                            logEvent("settings", "panel")
                             // The keyboard's own panel, as from 123's hold (iOS openSettings).
                             settingsOpen = true; symbols = false; emoji = false
                             render()
@@ -1464,9 +1465,9 @@ class KeyboardView(
                     // The system rotates the languages (subtypes) and tells the
                     // service, which rebuilds the keyboard for the new one.
                     when (closePopup()) {
-                        gear -> service.openApp()
-                        picker -> service.switchIme()
-                        else -> if (!service.nextLanguage()) service.switchIme()
+                        gear -> { logEvent("settings", "app"); service.openApp() }
+                        picker -> { logEvent("globe", "picker"); service.switchIme() }
+                        else -> { logEvent("globe", "next"); if (!service.nextLanguage()) service.switchIme() }
                     }
                     true
                 }
@@ -2010,6 +2011,7 @@ class KeyboardView(
     }
 
     private fun undoStep() {
+        logEvent("undo")
         feedback()
         val g = journal.removeLastOrNull() ?: return
         redoStack.add(g)
@@ -2017,6 +2019,7 @@ class KeyboardView(
     }
 
     private fun redoStep() {
+        logEvent("redo")
         feedback()
         val g = redoStack.removeLastOrNull() ?: return
         journal.add(g.toMutableList())
@@ -2601,7 +2604,7 @@ class KeyboardView(
             }
         val undo = barButton("Undo", { c, cx, cy, u, p -> drawUturn(c, cx, cy, u, p, false) }) { undoStep() }
         val redo = barButton("Redo", { c, cx, cy, u, p -> drawUturn(c, cx, cy, u, p, true) }) { redoStep() }
-        val titlo = barButton("Titlo", { c, cx, cy, u, p -> drawTitloIcon(c, cx, cy, u, p) }) { titloOnWord() }
+        val titlo = barButton("Titlo", { c, cx, cy, u, p -> drawTitloIcon(c, cx, cy, u, p) }) { logEvent("titlo"); titloOnWord() }
         undoBtn = undo; redoBtn = redo; titloBtn = titlo
         titlo.visibility = if (Titlo.offered(context)) VISIBLE else GONE
         showUndoButtons()
@@ -2684,6 +2687,7 @@ class KeyboardView(
                     setSlot(first, "＋ ${Script.out(context, it)}", it, save = true)
                 }
             }
+            logStrip(word)
             return
         }
 
@@ -2714,6 +2718,34 @@ class KeyboardView(
             val w = if (capital) preds[i].replaceFirstChar { it.uppercaseChar() } else preds[i]
             setSlot(off + i, Script.out(context, w), w, save = false)
         }
+        logStrip(word)
+    }
+
+    /** Test-round log (GestureLog.event). Never in a password field: there
+     *  the word being typed IS the secret. */
+    private fun logEvent(kind: String, word: String = "", strip: List<String>? = null) {
+        val v = service.currentInputEditorInfo?.inputType ?: 0
+        val cls = v and android.text.InputType.TYPE_MASK_CLASS
+        val variation = v and android.text.InputType.TYPE_MASK_VARIATION
+        val secret = (cls == android.text.InputType.TYPE_CLASS_TEXT && (
+            variation == android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD ||
+            variation == android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD ||
+            variation == android.text.InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD)) ||
+            (cls == android.text.InputType.TYPE_CLASS_NUMBER &&
+                variation == android.text.InputType.TYPE_NUMBER_VARIATION_PASSWORD)
+        if (secret) return
+        GestureLog.event(kind, Lang.current(context), Script.chosen(context).name.lowercase(), word, strip)
+    }
+
+    /** What the bar shows right now for [word] - logged only when it changed,
+     *  so a selection refresh does not repeat the same line. */
+    private var lastStripLog = ""
+    private fun logStrip(word: String) {
+        val shown = suggestionViews.map { it.text.toString() }.filter { it.isNotEmpty() }
+        val key = word + "\u0000" + shown.joinToString("\u0000")
+        if (key == lastStripLog) return
+        lastStripLog = key
+        logEvent("strip", word, shown)
     }
 
     /**
@@ -2797,6 +2829,7 @@ class KeyboardView(
 
     private fun onSlotTap(i: Int) {
         val w = slotWord[i] ?: return
+        logEvent("slot", w)
         // Taking another candidate from the strip is not a lost sample - it is a
         // LABELLED one: the gesture is the same and now the true word is known.
         // Dropping it was the deadlock behind "the swipe does not catch": while
